@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: Issuer
+  profiles:
+    active: dev
+    group:
+        dev:
+          - tas
+          - database
+          - wallet
+          - logging
+          - spring-docs
+          - issue
+        sample:
+          - tas
+          - database-sample
+          - wallet
+          - logging
+          - spring-docs
+          - issue
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      fail-on-empty-beans: false
+
+server:
+  port: 8091
