@@ -1,0 +1,50 @@
+issue:
+  did: did:omn:issuer
+  name: issuer
+  assert-sign-key-id: assert
+  domain: http://127.0.0.1:8091/issuer
+  cert-vc-ref: ${issue.domain:http://127.0.0.1:8091/issuer}/api/v1/certificate-vc
+  revoke-verify-auth-type: PIN_OR_BIO
+  profiles:
+    VCPLANID000000000001:
+      type: IssueProfile
+      title: Mobile Driver License
+      description: Mobile Driver License
+      encoding: UTF-8
+      language: ko
+      profile:
+        issuer:
+          did: did:omn:issuer
+          name: issuer
+          cert-vc-ref: ${issue.cert-vc-ref}
+        credential-schema:
+          id: ${issue.domain}/api/v1/vc/vcschema?name=mdl
+          type: OsdSchemaCredential
+        process:
+          endpoints:
+            - ${issue.domain}
+          req-e2e:
+            curve: Secp256r1
+            cipher: AES-256-CBC
+            padding: PKCS5
+    VCPLANID000000000002:
+      type: IssueProfile
+      title: National ID
+      description: National ID
+      encoding: UTF-8
+      language: ko
+      profile:
+        issuer:
+          did: did:omn:issuer
+          name: issuer
+          cert-vc-ref: ${issue.cert-vc-ref}
+        credential-schema:
+          id: ${issue.domain}/api/v1/vc/vcschema?name=national_id
+          type: OsdSchemaCredential
+        process:
+          endpoints:
+            - ${issue.domain}
+          req-e2e:
+            curve: Secp256r1
+            cipher: AES-256-CBC
+            padding: PKCS5
