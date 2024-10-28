@@ -14,7 +14,7 @@ did-issuer-server
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
-├── LICENSE-dependencies.md
+├── dependencies-license.md
 ├── MAINTAINERS.md
 ├── README.md
 ├── RELEASE-PROCESS.md
@@ -54,7 +54,7 @@ Below is a description of each folder and file in the directory:
 | CODE_OF_CONDUCT.md      | Code of conduct for contributors                |
 | CONTRIBUTING.md         | Contribution guidelines and procedures          |
 | LICENSE                 | License                                         |
-| LICENSE-dependencies.md | Licenses for the project’s dependency libraries |
+| dependencies-license.md | Licenses for the project’s dependency libraries |
 | MAINTAINERS.md          | Guidelines for project maintainers              |
 | RELEASE-PROCESS.md      | Procedures for releasing new versions           |
 | SECURITY.md             | Security policies and vulnerability reporting   |
