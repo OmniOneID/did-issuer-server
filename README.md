@@ -34,7 +34,7 @@ did-issuer-server
         ├── libs
             └── did-sdk-common-1.0.0.jar
             └── did-blockchain-sdk-server-1.0.0.jar
-            └── did-core-sdk-server-1.0.0..jar
+            └── did-core-sdk-server-1.0.0.jar
             └── did-crypto-sdk-server-1.0.0.jar
             └── did-datamodel-sdk-server-1.0.0.jar
             └── did-wallet-sdk-server-1.0.0.jar
@@ -42,6 +42,7 @@ did-issuer-server
         └── src
         └── build.gradle
         └── README.md
+        └── README_ko.md
 ```
 
 <br/>

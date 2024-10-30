@@ -42,6 +42,7 @@ did-issuer-server
         └── src
         └── build.gradle
         └── README.md
+        └── README_ko.md
 ```
 
 <br/>
