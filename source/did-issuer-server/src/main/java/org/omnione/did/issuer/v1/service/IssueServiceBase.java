@@ -97,11 +97,8 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public OfferIssueVcResDto requestOffer(OfferIssueVcReqDto request) {
         try {
-            log.debug("=== Starting Request Offer ===");
-            log.debug("\t--> Validating VC plan");
             validateVcPlanId(request.getVcPlanId());
 
-            log.debug("\t--> Generating offer payload");
             String offerId = RandomUtil.generateUUID();
             String issuer = issueProperty.getDid();
             // TODO: validUntil property
@@ -116,7 +113,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .build();
 
             // TODO Valid Until 확인, log 추가
-            log.debug("\t--> VC Offer save to DB");
             vcOfferQueryService.save(VcOffer.builder()
                     .offerId(offerId)
                     .did(issuer)
@@ -124,7 +120,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .offerType(OfferType.ISSUE_OFFER)
                     .vcPlanId(request.getVcPlanId())
                     .build());
-            log.debug("*** Finished Request Offer ***");
 
             return OfferIssueVcResDto.builder()
                     .issueOfferPayload(issueOfferPayload)
@@ -148,23 +143,19 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
         try {
-            log.debug("=== Starting Inspect Issue Propose ===");
 
-            log.debug("\t--> Validating VC plan");
             String vcPlanId = request.getVcPlanId();
             validateVcPlanId(vcPlanId);
 
             // todo 용도를 명확하게 알 수 있도록 수정
             VcOffer vcOffer = null;
             if (Strings.isNotBlank(request.getOfferId())) {
-                log.debug("\t--> Validating Offer");
                 vcOffer = validateOfferId(request.getOfferId());
             }
 
             String txId = RandomUtil.generateUUID();
             String refId = RandomUtil.generateRefId();
 
-            log.debug("\t--> Insert Transaction");
             // TODO: expired at
             Transaction transaction = transactionService.insertTransaction(Transaction.builder()
                     .txId(txId)
@@ -181,7 +172,6 @@ public abstract class IssueServiceBase implements IssueService {
                 vcOffer.setTransactionId(transaction.getId());
             }
 
-            log.debug("\t--> Insert SubTransaction");
             transactionService.insertSubTransaction(SubTransaction.builder()
                     .transactionId(transaction.getId())
                     .step(1)
@@ -189,7 +179,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .status(SubTransactionStatus.COMPLETED)
                     .build());
 
-            log.debug("=== Finished Inspect Issue Propose ===");
 
             return InspectIssueProposeResDto.builder()
                     .txId(txId)
@@ -214,23 +203,18 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
         try {
-            log.debug("=== Starting Generate Issue Profile ===");
-            log.debug("\t--> Validating Transaction");
             Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.INSPECT_ISSUE_PROPOSE);
 
             Holder holder = request.getHolder();
 
-            log.debug("\t--> Find User by Holder data");
             User user = findUserByHolder(holder);
 
-            log.debug("\t--> Generate Issue Profile");
             String vcPlanId = transaction.getVcPlanId();
             IssueProfile profile = issueProperty.getProfileByVcPlanId(vcPlanId);
             IssueProcess process = profile.getProfile().getProcess();
             ReqE2e reqE2e = process.getReqE2e();
             profile.setId(RandomUtil.generateUUID());
 
-            log.debug("\t--> Generate Key pair");
             EcKeyPair keyPair = generateEcKeyPair(reqE2e.getCurve());
 
             String nonce = BaseCryptoUtil.generateNonceWithMultibase(16);
@@ -240,7 +224,6 @@ public abstract class IssueServiceBase implements IssueService {
 
             String encodedSessionKey = encodedSessionKey((ECPrivateKey) keyPair.getPrivateKey());
 
-            log.debug("\t--> VC Profile save to DB");
             vcProfileQueryService.save(VcProfile.builder()
                     .profileId(profile.getId())
                     .transactionId(transaction.getId())
@@ -249,7 +232,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .userId(user.getId())
                     .build());
 
-            log.debug("\t--> E2E save to DB");
             e2EQueryService.save(E2E.builder()
                     .curve(reqE2e.getCurve())
                     .cipher(reqE2e.getCipher())
@@ -259,7 +241,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .transactionId(transaction.getId())
                     .build());
 
-            log.debug("\t--> SubTransaction save to DB");
             transactionService.insertSubTransaction(SubTransaction.builder()
                     .transactionId(transaction.getId())
                     .step(2)
@@ -267,7 +248,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .status(SubTransactionStatus.COMPLETED)
                     .build());
 
-            log.debug("=== Finished Generate Issue Profile ===");
             return GenerateIssueProfileResDto.builder()
                     .txId(transaction.getTxId())
                     .profile(profile)
@@ -290,61 +270,44 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public IssueVcResDto issueVc(IssueVcReqDto request) {
         try {
-            log.debug("=== Starting Issue VC ===");
-            log.debug("\t--> Validating Transaction");
             Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.GENERATE_ISSUE_PROFILE);
             AccE2e accE2e = request.getAccE2e();
 
-            log.debug("\t--> Validating AccE2E");
             validateAccE2e(accE2e);
 
-            log.debug("\t--> Get E2E");
 
             E2E e2e = e2EQueryService.findByTransactionId(transaction.getId());
 
-            log.debug("\t--> Get Issue Profile");
             VcProfile vcProfile = vcProfileQueryService.findByTransactionId(transaction.getId());
 
-            log.debug("\t--> Generate SharedSecretKey");
             byte[] sharedSecretKey = generateSharedSecretKey(e2e, accE2e);
 
-            log.debug("\t--> Generate MergeSharedSecretKey");
             byte[] mergeSharedSecretAndNonce = mergeSharedSecretAndNonce(sharedSecretKey, vcProfile.getNonce(), e2e.getCipher());
 
-            log.debug("\t--> Decrypt Request VC");
             String decryptedRequestVc = decryptRequestVc(request, mergeSharedSecretAndNonce,
                     BaseMultibaseUtil.decode(accE2e.getIv()), e2e);
 
-            log.debug("\t--> Parse Request VC");
             ReqVc reqVc = parseRequestVc(decryptedRequestVc);
             validateRequestVc(transaction, reqVc);
 
-            log.debug("\t--> Find User By VC Profile");
             User user = findUserByVcProfile(vcProfile);
             VcManager vcManager = new VcManager();
 
-            log.debug("\t--> Issuing VC");
             VerifiableCredential verifiableCredential = issueVerifiableCredential(vcManager,
                     vcProfile.getDid(), user.getData());
-            log.debug("\t--> VerifiableCredential {}", verifiableCredential.toJson());
 
-            log.debug("\t--> Registering VC to B/C");
             VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, issueProperty.getCertVcRef());
 
             storageService.registerVcMeta(vcMeta);
 
-            log.debug("\t--> Generate IV");
             byte[] iv = BaseCryptoUtil.generateInitialVector();
 
-            log.debug("\t--> Encrypt VC");
             String encVc = encryptVerifiableCredential(verifiableCredential, mergeSharedSecretAndNonce, iv, e2e);
 
             Vc vc = handleVcCreationOrUpdate(user, vcProfile.getDid(), transaction, verifiableCredential.getId());
 
-            log.debug("\t--> VC_ID, Holder info save to DB");
             vcQueryService.save(vc);
 
-            log.debug("\t--> SubTransaction save to DB");
             transactionService.insertSubTransaction(SubTransaction.builder()
                     .transactionId(transaction.getId())
                     .step(3)
@@ -352,7 +315,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .status(SubTransactionStatus.COMPLETED)
                     .build());
 
-            log.debug("=== Finished Generate Issue Profile ===");
             return IssueVcResDto.builder()
                     .txId(transaction.getTxId())
                     .e2e(E2e.builder()
@@ -379,18 +341,14 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public CompleteVcResDto completeVc(CompleteVcReqDto request) {
         try {
-            log.debug("=== Starting Complete VC ===");
-            log.debug("\t--> Validate Transaction");
             Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.ISSUE_VC);
             String txId = transaction.getTxId();
             Vc vc = vcQueryService.findByTxId(txId);
             if (!vc.getVcId().equals(request.getVcId())) {
                 throw new OpenDidException(ErrorCode.VC_ID_NOT_MATCH);
             }
-            log.debug("\t--> Update Transaction");
             transactionService.updateTransactionStatus(transaction, TransactionStatus.FINISH);
 
-            log.debug("\t--> SubTransaction save to DB");
             transactionService.insertSubTransaction(SubTransaction.builder()
                     .transactionId(transaction.getId())
                     .step(4)
@@ -398,7 +356,6 @@ public abstract class IssueServiceBase implements IssueService {
                     .status(SubTransactionStatus.COMPLETED)
                     .build());
 
-            log.debug("=== Finished Complete VC ===");
             return CompleteVcResDto.builder()
                     .txId(transaction.getTxId())
                     .build();
@@ -420,7 +377,6 @@ public abstract class IssueServiceBase implements IssueService {
     @Override
     public IssueVcResultResDto issueVcResult(String offerId) {
         try {
-            log.debug("=== Starting Issue VC Result ===");
             VcOffer vcOffer = vcOfferQueryService.findByOfferId(offerId);
 
             Transaction transaction = transactionService.findById(vcOffer.getTransactionId());
@@ -433,7 +389,6 @@ public abstract class IssueServiceBase implements IssueService {
             SubTransaction subTransaction = transactionService
                     .findByTransactionIdOrderByStepDesc(transaction.getId());
 
-            log.debug("=== Finished Issue VC Result ===");
             return IssueVcResultResDto.builder()
                     .txId(transaction.getTxId())
                     .offerId(offerId)
@@ -688,7 +643,6 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
     private VerifiableCredential issueVerifiableCredential(VcManager vcManager, String holderDid, String data) {
-        log.debug("\t--> Issue Verifiable Credential");
         try {
             IssueVcParam issueVcParam = new IssueVcParam();
 
