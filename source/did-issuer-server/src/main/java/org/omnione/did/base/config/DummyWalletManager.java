@@ -16,6 +16,7 @@
 
 package org.omnione.did.base.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.wallet.enums.WalletEncryptType;
 import org.omnione.did.wallet.exception.WalletException;
 import org.omnione.did.wallet.key.WalletManagerInterface;
@@ -23,6 +24,7 @@ import org.omnione.did.wallet.key.data.CryptoKeyPairInfo;
 import org.omnione.did.wallet.key.data.CryptoKeyPairInfo.KeyAlgorithmType;
 import org.omnione.did.wallet.key.data.KeyElement;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -41,84 +43,95 @@ import java.util.List;
  * no real wallet operations should be performed.</p>
  *
  */
+@Slf4j
 public class DummyWalletManager implements WalletManagerInterface {
+
     @Override
     public void create(String s, char[] chars, WalletEncryptType walletEncryptType) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: create() method called. No operation performed.");
     }
 
     @Override
     public void connect(String s, char[] chars) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: connect() method called. No operation performed.");
     }
 
     @Override
     public void changePassword(char[] chars, char[] chars1) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: changePassword() method called. No operation performed.");
     }
 
     @Override
     public boolean disConnect() {
-        return false; // Always return false
+        log.warn("DummyWalletManager: disConnect() method called. Always returning false.");
+        return false;
     }
 
     @Override
     public boolean isConnect() {
-        return false; // Always return false
+        log.warn("DummyWalletManager: isConnect() method called. Always returning false.");
+        return false;
     }
 
     @Override
     public void addKey(CryptoKeyPairInfo cryptoKeyPairInfo) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: addKey() method called. No operation performed.");
     }
 
     @Override
     public void generateRandomKey(String s, KeyAlgorithmType keyAlgorithmType) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: generateRandomKey() method called. No operation performed.");
     }
 
     @Override
     public boolean isExistKey(String s) throws WalletException {
-        return false; // Always return false
+        log.warn("DummyWalletManager: isExistKey() method called. Always returning false.");
+        return false;
     }
 
     @Override
     public String getPublicKey(String s) throws WalletException {
-        return null; // Always return null
+        log.warn("DummyWalletManager: getPublicKey() method called. Always returning null.");
+        return null;
     }
 
     @Override
     public String getKeyAlgorithm(String s) throws WalletException {
-        return null; // Always return null
+        log.warn("DummyWalletManager: getKeyAlgorithm() method called. Always returning null.");
+        return null;
     }
 
     @Override
     public KeyElement getKeyElement(String s) throws WalletException {
-        return null; // Always return null
+        log.warn("DummyWalletManager: getKeyElement() method called. Always returning null.");
+        return null;
     }
 
     @Override
     public List<String> getKeyIdList() throws WalletException {
-        return null; // Always return null
+        log.warn("DummyWalletManager: getKeyIdList() method called. Always returning empty list.");
+        return Collections.emptyList();
     }
 
     @Override
     public void removeKey(String s) throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: removeKey() method called. No operation performed.");
     }
 
     @Override
     public void removeAllKeys() throws WalletException {
-        // No operation
+        log.warn("DummyWalletManager: removeAllKeys() method called. No operation performed.");
     }
 
     @Override
     public byte[] getSharedSecret(String s, String s1) throws WalletException {
-        return new byte[0]; // Always return an empty byte array
+        log.warn("DummyWalletManager: getSharedSecret() method called. Always returning empty byte array.");
+        return new byte[0];
     }
 
     @Override
     public byte[] generateCompactSignatureFromHash(String s, byte[] bytes) throws WalletException {
-        return new byte[0]; // Always return an empty byte array
+        log.warn("DummyWalletManager: generateCompactSignatureFromHash() method called. Always returning empty byte array.");
+        return new byte[0];
     }
 }

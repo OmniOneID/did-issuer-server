@@ -105,7 +105,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Generating offer payload");
             String offerId = RandomUtil.generateUUID();
             String issuer = issueProperty.getDid();
-            // TODO: validUntil property
+            // TODO: Valid Until property
             String validUntil = DateTimeUtil.addToCurrentTimeString(3, ChronoUnit.MINUTES);
 
             IssueOfferPayload issueOfferPayload = IssueOfferPayload.builder()
@@ -116,7 +116,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .validUntil(validUntil)
                     .build();
 
-            // TODO Valid Until 확인, log 추가
+            // TODO: Valid Until property, log pend
             log.debug("\t--> VC Offer save to DB");
             vcOfferQueryService.save(VcOffer.builder()
                     .offerId(offerId)
@@ -156,7 +156,7 @@ public abstract class IssueServiceBase implements IssueService {
             String vcPlanId = request.getVcPlanId();
             validateVcPlanId(vcPlanId);
 
-            // todo 용도를 명확하게 알 수 있도록 수정
+            // TODO: Needs to be modified to make it clear what it's for
             VcOffer vcOffer = null;
             if (Strings.isNotBlank(request.getOfferId())) {
                 log.debug("\t--> Validating Offer");
@@ -167,7 +167,7 @@ public abstract class IssueServiceBase implements IssueService {
             String refId = RandomUtil.generateRefId();
 
             log.debug("\t--> Insert Transaction");
-            // TODO: expired at
+            // TODO: Expired at
             Transaction transaction = transactionService.insertTransaction(Transaction.builder()
                     .txId(txId)
                     .refId(refId)
@@ -178,8 +178,8 @@ public abstract class IssueServiceBase implements IssueService {
                     .build());
 
             if (vcOffer != null) {
-                // FIXME: Offer에 횟수제한이 없으면 Transaction이 계속 생성되는 문제가 있음
-                //  5회 제한
+                // FIXME: If an offer has no limit, transactions are still being created.
+                //  5-time limit
                 vcOffer.setTransactionId(transaction.getId());
             }
 
@@ -704,7 +704,7 @@ public abstract class IssueServiceBase implements IssueService {
             BaseCoreVcUtil.setIssuer(issueVcParam, didDocument.getId(), issueProperty.getName());
             BaseCoreVcUtil.setVcTypes(issueVcParam, getVcType());
             BaseCoreVcUtil.setEvidence(issueVcParam, getEvidence());
-            // TODO Valid until
+            // TODO: Valid Until property
             BaseCoreVcUtil.setValidateUntil(issueVcParam, 1);
 
             VerifiableCredential verifiableCredential = vcManager.issueCredential(issueVcParam, holderDid);
@@ -765,7 +765,7 @@ public abstract class IssueServiceBase implements IssueService {
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
         proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
         proof.setVerificationMethod(issueProperty.getDid() + "#" + issueProperty.getAssertSignKeyId());
-        // TODO: Verification method TAS 참고
+        // TODO: Verification method(ref TAS)
         profile.setProof(proof);
 
         String source = JsonUtil.serializeAndSort(profile);
