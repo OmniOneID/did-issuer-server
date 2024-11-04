@@ -62,6 +62,7 @@ import org.omnione.did.data.model.vc.VerifiableCredential;
 import org.omnione.did.issuer.v1.dto.vc.*;
 import org.omnione.did.issuer.v1.service.query.*;
 import org.omnione.did.wallet.key.WalletManagerInterface;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.interfaces.ECPrivateKey;
 import java.time.Instant;
@@ -146,6 +147,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the inspection process.
      */
     @Override
+    @Transactional
     public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
         try {
             log.debug("=== Starting Inspect Issue Propose ===");
@@ -212,6 +214,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the profile generation process.
      */
     @Override
+    @Transactional
     public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
         try {
             log.debug("=== Starting Generate Issue Profile ===");
@@ -288,6 +291,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
     @Override
+    @Transactional
     public IssueVcResDto issueVc(IssueVcReqDto request) {
         try {
             log.debug("=== Starting Issue VC ===");
@@ -377,6 +381,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the completion process.
      */
     @Override
+    @Transactional
     public CompleteVcResDto completeVc(CompleteVcReqDto request) {
         try {
             log.debug("=== Starting Complete VC ===");
