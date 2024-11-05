@@ -62,6 +62,7 @@ import org.omnione.did.data.model.vc.VerifiableCredential;
 import org.omnione.did.issuer.v1.dto.vc.*;
 import org.omnione.did.issuer.v1.service.query.*;
 import org.omnione.did.wallet.key.WalletManagerInterface;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.interfaces.ECPrivateKey;
 import java.time.Instant;
@@ -104,7 +105,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Generating offer payload");
             String offerId = RandomUtil.generateUUID();
             String issuer = issueProperty.getDid();
-            // TODO: validUntil property
+            // TODO: Valid Until property
             String validUntil = DateTimeUtil.addToCurrentTimeString(3, ChronoUnit.MINUTES);
 
             IssueOfferPayload issueOfferPayload = IssueOfferPayload.builder()
@@ -115,7 +116,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .validUntil(validUntil)
                     .build();
 
-            // TODO Valid Until 확인, log 추가
+            // TODO: Valid Until property, log append
             log.debug("\t--> VC Offer save to DB");
             vcOfferQueryService.save(VcOffer.builder()
                     .offerId(offerId)
@@ -146,6 +147,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the inspection process.
      */
     @Override
+    @Transactional
     public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
         try {
             log.debug("=== Starting Inspect Issue Propose ===");
@@ -154,7 +156,7 @@ public abstract class IssueServiceBase implements IssueService {
             String vcPlanId = request.getVcPlanId();
             validateVcPlanId(vcPlanId);
 
-            // todo 용도를 명확하게 알 수 있도록 수정
+            // TODO: Needs to be modified to make it clear what it's for
             VcOffer vcOffer = null;
             if (Strings.isNotBlank(request.getOfferId())) {
                 log.debug("\t--> Validating Offer");
@@ -165,7 +167,7 @@ public abstract class IssueServiceBase implements IssueService {
             String refId = RandomUtil.generateRefId();
 
             log.debug("\t--> Insert Transaction");
-            // TODO: expired at
+            // TODO: Expired at
             Transaction transaction = transactionService.insertTransaction(Transaction.builder()
                     .txId(txId)
                     .refId(refId)
@@ -176,8 +178,8 @@ public abstract class IssueServiceBase implements IssueService {
                     .build());
 
             if (vcOffer != null) {
-                // FIXME: Offer에 횟수제한이 없으면 Transaction이 계속 생성되는 문제가 있음
-                //  5회 제한
+                // FIXME: If an offer has no limit, transactions are still being created.
+                //  5times limit
                 vcOffer.setTransactionId(transaction.getId());
             }
 
@@ -212,6 +214,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the profile generation process.
      */
     @Override
+    @Transactional
     public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
         try {
             log.debug("=== Starting Generate Issue Profile ===");
@@ -288,6 +291,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
     @Override
+    @Transactional
     public IssueVcResDto issueVc(IssueVcReqDto request) {
         try {
             log.debug("=== Starting Issue VC ===");
@@ -377,6 +381,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the completion process.
      */
     @Override
+    @Transactional
     public CompleteVcResDto completeVc(CompleteVcReqDto request) {
         try {
             log.debug("=== Starting Complete VC ===");
@@ -699,7 +704,7 @@ public abstract class IssueServiceBase implements IssueService {
             BaseCoreVcUtil.setIssuer(issueVcParam, didDocument.getId(), issueProperty.getName());
             BaseCoreVcUtil.setVcTypes(issueVcParam, getVcType());
             BaseCoreVcUtil.setEvidence(issueVcParam, getEvidence());
-            // TODO Valid until
+            // TODO: Valid Until property
             BaseCoreVcUtil.setValidateUntil(issueVcParam, 1);
 
             VerifiableCredential verifiableCredential = vcManager.issueCredential(issueVcParam, holderDid);
@@ -760,7 +765,7 @@ public abstract class IssueServiceBase implements IssueService {
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
         proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
         proof.setVerificationMethod(issueProperty.getDid() + "#" + issueProperty.getAssertSignKeyId());
-        // TODO: Verification method TAS 참고
+        // TODO: Verification method(refer to TAS)
         profile.setProof(proof);
 
         String source = JsonUtil.serializeAndSort(profile);

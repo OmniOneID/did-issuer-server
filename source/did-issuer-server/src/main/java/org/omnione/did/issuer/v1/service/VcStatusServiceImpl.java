@@ -134,7 +134,7 @@ public class VcStatusServiceImpl implements VcStatusService {
             RevokeVc revokeVc = revokeVcQueryService.findByTransactionId(transaction.getId());
             isValidRequest(revokeVc, request.getRequest());
             verifySign(request.getRequest());
-            // TODO: Holder DID 비교
+            // TODO: Compare Holder DID
 
             storageService.updateVcStatus(revokeVc.getVcId(), VcStatus.REVOKED);
 
