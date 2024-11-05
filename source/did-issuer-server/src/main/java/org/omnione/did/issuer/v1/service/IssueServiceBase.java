@@ -765,7 +765,7 @@ public abstract class IssueServiceBase implements IssueService {
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
         proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
         proof.setVerificationMethod(issueProperty.getDid() + "#" + issueProperty.getAssertSignKeyId());
-        // TODO: Verification method(TAS Reference)
+        // TODO: Verification method(refer to TAS)
         profile.setProof(proof);
 
         String source = JsonUtil.serializeAndSort(profile);
