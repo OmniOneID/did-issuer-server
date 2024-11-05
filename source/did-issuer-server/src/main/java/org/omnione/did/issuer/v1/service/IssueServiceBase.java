@@ -116,7 +116,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .validUntil(validUntil)
                     .build();
 
-            // TODO: Valid Until property, log pend
+            // TODO: Valid Until property, log append
             log.debug("\t--> VC Offer save to DB");
             vcOfferQueryService.save(VcOffer.builder()
                     .offerId(offerId)
@@ -179,7 +179,7 @@ public abstract class IssueServiceBase implements IssueService {
 
             if (vcOffer != null) {
                 // FIXME: If an offer has no limit, transactions are still being created.
-                //  5-time limit
+                //  5times limit
                 vcOffer.setTransactionId(transaction.getId());
             }
 
@@ -765,7 +765,7 @@ public abstract class IssueServiceBase implements IssueService {
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
         proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
         proof.setVerificationMethod(issueProperty.getDid() + "#" + issueProperty.getAssertSignKeyId());
-        // TODO: Verification method(ref TAS)
+        // TODO: Verification method(refer to TAS)
         profile.setProof(proof);
 
         String source = JsonUtil.serializeAndSort(profile);
