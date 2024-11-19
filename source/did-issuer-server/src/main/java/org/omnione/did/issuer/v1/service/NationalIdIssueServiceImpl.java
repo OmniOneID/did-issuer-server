@@ -46,9 +46,9 @@ public class NationalIdIssueServiceImpl extends IssueServiceBase {
     public NationalIdIssueServiceImpl(VcProfileQueryService vcProfileQueryService, VcOfferQueryService vcOfferQueryService,
                                       TransactionService transactionService, E2EQueryService e2EQueryService,
                                       VcQueryService vcQueryService, IssueProperty issueProperty, StorageService storageService,
-                                      WalletManagerInterface walletManagerInterface, UserQueryService userQueryService, VcSchemaService vcSchemaService) {
+                                      FileWalletService walletService, UserQueryService userQueryService, VcSchemaService vcSchemaService) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService,
-                issueProperty, storageService, walletManagerInterface);
+                issueProperty, storageService, walletService);
         this.userQueryService = userQueryService;
         this.vcSchemaService = vcSchemaService;
     }

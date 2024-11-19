@@ -55,13 +55,14 @@ public class BaseCoreVcUtil {
      * @param issueVcParam Issue VC Param
      * @param issuerDid Issuer DID
      * @param issuerName Issuer Name
+     * @param certVcRef The reference of the certificate VC.
      *
      */
-    //@TODO: it should be changed to id
-    public static void setIssuer(IssueVcParam issueVcParam, String issuerDid, String issuerName) {
+    public static void setIssuer(IssueVcParam issueVcParam, String issuerDid, String issuerName, String certVcRef) {
         ProviderDetail providerDetail = new ProviderDetail();
         providerDetail.setDid(issuerDid);
         providerDetail.setName(issuerName);
+        providerDetail.setCertVcRef(certVcRef);
         issueVcParam.setProviderDetail(providerDetail);
     }
 

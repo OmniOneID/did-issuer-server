@@ -87,7 +87,7 @@ public abstract class IssueServiceBase implements IssueService {
     private final IssueProperty issueProperty;
     private final StorageService storageService;
 
-    private final WalletManagerInterface walletManagerInterface;
+    private final FileWalletService walletService;
     /**
      * Generates an offer for issuing a Verifiable Credential.
      *
@@ -116,7 +116,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .validUntil(validUntil)
                     .build();
 
-            // TODO: Valid Until property, log append
+            // TODO: Valid Until property
             log.debug("\t--> VC Offer save to DB");
             vcOfferQueryService.save(VcOffer.builder()
                     .offerId(offerId)
@@ -701,7 +701,7 @@ public abstract class IssueServiceBase implements IssueService {
 
             BaseCoreVcUtil.setVcSchema(issueVcParam, getVcSchema());
             BaseCoreVcUtil.setClaimInfo(issueVcParam, generateClaimInfo(data));
-            BaseCoreVcUtil.setIssuer(issueVcParam, didDocument.getId(), issueProperty.getName());
+            BaseCoreVcUtil.setIssuer(issueVcParam, didDocument.getId(), issueProperty.getName(), issueProperty.getCertVcRef());
             BaseCoreVcUtil.setVcTypes(issueVcParam, getVcType());
             BaseCoreVcUtil.setEvidence(issueVcParam, getEvidence());
             // TODO: Valid Until property
@@ -769,7 +769,7 @@ public abstract class IssueServiceBase implements IssueService {
         profile.setProof(proof);
 
         String source = JsonUtil.serializeAndSort(profile);
-        byte[] bytes = BaseWalletUtil.generateCompactSignature(walletManagerInterface, keyId, source);
+        byte[] bytes = walletService.generateCompactSignature(keyId, source);
 
         proof.setProofValue(BaseMultibaseUtil.encode(bytes));
     }
@@ -820,7 +820,7 @@ public abstract class IssueServiceBase implements IssueService {
         for (SignatureParams signatureParam : signatureParams) {
             String originData = signatureParam.getOriginData();
 
-            byte[] sign = BaseWalletUtil.generateCompactSignature(walletManagerInterface, signatureParam.getKeyId(), originData);
+            byte[] sign = walletService.generateCompactSignature(signatureParam.getKeyId(), originData);
             String signatureValue = BaseMultibaseUtil.encode(sign);
 
             signatureParam.setSignatureValue(signatureValue);

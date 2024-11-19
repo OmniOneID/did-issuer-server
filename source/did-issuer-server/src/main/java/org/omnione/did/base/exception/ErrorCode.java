@@ -103,7 +103,7 @@ public enum ErrorCode {
     GET_VERIFICATION_METHOD_FAILED("00422", "Failed to retrieve verification method.", 500),
     HASH_GENERATION_FAILED("00423", "Failed to generate hash value.", 500),
 
-
+    FAILED_TO_GET_FILE_WALLET_MANAGER("00424", "Failed to get File wallet manager", 500),
 
 
     // 500~ 599 = Issuer Error
