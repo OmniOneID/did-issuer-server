@@ -60,7 +60,7 @@ import java.util.Arrays;
 @Transactional
 public class EnrollEntityServiceImpl implements EnrollEntityService {
     private final EnrollFeign enrollFeign;
-    private final WalletManagerInterface walletManagerInterface;
+    private final FileWalletService walletService;
     private final CertificateVcQueryService certificateVcQueryService;
 
     /**
@@ -288,7 +288,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     private String signData(Object source, String keyId) {
         String serializeSource = JsonUtil.serializeAndSort(source);
-        byte[] signature = BaseWalletUtil.generateCompactSignature(walletManagerInterface, keyId, serializeSource);
+        byte[] signature = walletService.generateCompactSignature(keyId, serializeSource);
 
         return BaseMultibaseUtil.encode(signature);
     }

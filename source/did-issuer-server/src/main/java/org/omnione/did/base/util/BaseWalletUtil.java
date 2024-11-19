@@ -58,6 +58,27 @@ public class BaseWalletUtil {
     }
 
     /**
+     * Retrieves an instance of a file-based wallet manager.
+     * The wallet manager is responsible for handling cryptographic operations
+     * and key management using the keys stored in a file-based wallet.
+     *
+     * This method attempts to get a wallet manager of type FILE using the
+     * WalletManagerFactory. If the wallet manager cannot be retrieved, an
+     * OpenDidException is thrown.
+     *
+     * @return WalletManagerInterface Instance of the file-based wallet manager
+     * @throws OpenDidException if the wallet manager cannot be retrieved
+     */
+    public static WalletManagerInterface getFileWalletManager() {
+        try {
+            return WalletManagerFactory.getWalletManager(WalletManagerType.FILE);
+        } catch (WalletException e) {
+            log.error("Failed to get Wallet Manager: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.FAILED_TO_GET_FILE_WALLET_MANAGER);
+        }
+    }
+
+    /**
      * Connects to an existing file-based wallet using the specified path and password.
      * The wallet manager returned can be used for cryptographic operations.
      *
