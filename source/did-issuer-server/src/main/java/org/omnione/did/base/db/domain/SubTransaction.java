@@ -22,7 +22,6 @@ import org.omnione.did.base.db.constant.SubTransactionStatus;
 import org.omnione.did.base.db.constant.SubTransactionType;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the sub_transaction table.

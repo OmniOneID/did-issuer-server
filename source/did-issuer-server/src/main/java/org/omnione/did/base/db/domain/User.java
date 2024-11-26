@@ -20,7 +20,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the user table.

@@ -19,10 +19,9 @@ package org.omnione.did.base.db.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.omnione.did.data.model.enums.vc.VcStatus;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serializable;
-import java.time.Instant;
+
 
 /**
  * Entity class for the revoke_vc table.
