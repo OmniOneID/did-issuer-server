@@ -1,7 +1,6 @@
 package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omnione.did.base.config.JpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,11 @@ class BaseEntityTest {
     void shouldSetAuditingFieldsOnPersist() {
 
         CertificateVc auditableEntity = CertificateVc.builder().vc("").build();
+        assertNull(auditableEntity.getCreatedAt());
         assertNull(auditableEntity.getUpdatedAt());
 
         entityManager.persist(auditableEntity);
+        assertNotNull(auditableEntity.getCreatedAt());
         assertNotNull(auditableEntity.getUpdatedAt());
     }
 }
