@@ -20,8 +20,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.omnione.did.base.db.constant.TransactionStatus;
 import org.omnione.did.base.db.constant.TransactionType;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -39,7 +37,6 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "transaction")
-@EntityListeners(AuditingEntityListener.class)
 public class Transaction extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)

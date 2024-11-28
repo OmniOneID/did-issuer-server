@@ -19,7 +19,6 @@ package org.omnione.did.base.db.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.omnione.did.base.datamodel.enums.OfferType;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -36,7 +35,6 @@ import java.time.Instant;
 @ToString
 @Entity
 @Table(name = "vc_offer")
-@EntityListeners(AuditingEntityListener.class)
 public class VcOffer extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

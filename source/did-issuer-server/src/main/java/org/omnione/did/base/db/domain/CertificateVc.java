@@ -18,12 +18,7 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the Certificate Verifiable Credential.
@@ -36,7 +31,6 @@ import java.time.Instant;
 @Setter
 @ToString
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "certificate_vc")
 public class CertificateVc extends BaseEntity implements Serializable {
     @Id
