@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
-
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+package org.omnione.did.issuer.v1.agent.dto.demo;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * The InsertUserResDto class is a data transfer object that represents the response to inserting a user.
+ * This is a demo class.
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+public class InsertUserResDto {
 }

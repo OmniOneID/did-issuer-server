@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
+package org.omnione.did.issuer.v1.agent.api.dto;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+import lombok.*;
+import org.omnione.did.base.datamodel.data.AccEcdh;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * Request ECDH API Response DTO
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class RequestEcdhApiResDto {
+    private String txId;
+    private AccEcdh accEcdh;
 }

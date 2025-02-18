@@ -29,7 +29,7 @@ import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
 import org.omnione.did.base.util.BaseCryptoUtil;
 import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
-import org.omnione.did.issuer.v1.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

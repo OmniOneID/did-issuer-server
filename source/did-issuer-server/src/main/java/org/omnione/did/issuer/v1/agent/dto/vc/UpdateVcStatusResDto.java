@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
+package org.omnione.did.issuer.v1.agent.dto.vc;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.omnione.did.base.datamodel.data.SignedVcStatus;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * response for updating the status of a Verifiable Credential.
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+@Getter
+@Setter
+@Builder
+@ToString
+public class UpdateVcStatusResDto {
+    private String txId;
 }

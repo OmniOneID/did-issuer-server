@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
+package org.omnione.did.issuer.v1.agent.dto.vc;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.omnione.did.base.datamodel.data.ReqRevokeVc;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * request for revoking a Verifiable Credential.
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+@Getter
+@Setter
+@Builder
+public class RevokeVcReqDto {
+    private String id;
+    private String txId;
+    private ReqRevokeVc request;
 }

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
-
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+package org.omnione.did.issuer.v1.agent.service;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * Service interface for handling certificate VCs.
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+public interface CertificateVcService {
+    /**
+     * Requests a certificate verifiable credential.
+     *
+     * @return The certificate verifiable credential.
+     */
+    String requestCertificateVc();
 }

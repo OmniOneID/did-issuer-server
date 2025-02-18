@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.config;
+package org.omnione.did.issuer.v1.agent.dto.vc;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Configuration;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 /**
- * This class configures OpenFeign to enable Feign clients for the specified API package.
+ * request offer for issuing a Verifiable Credential.
  */
-@Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
-public class OpenFeignConfig {
-
+@Getter
+@Setter
+@ToString
+public class OfferIssueVcReqDto {
+    @NotNull
+    private String vcPlanId;
 }
