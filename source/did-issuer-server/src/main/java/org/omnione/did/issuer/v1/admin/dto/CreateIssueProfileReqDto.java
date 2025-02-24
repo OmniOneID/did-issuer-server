@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 OmniOne.
+ * Copyright 2025 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.datamodel.data;
+package org.omnione.did.issuer.v1.admin.dto;
 
 import lombok.*;
 
 /**
- * Represents the Issue Profile data structure.
+ * Description...
+ *
  */
 @Getter
 @Setter
@@ -27,13 +28,13 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Builder
-public class IssueProfile {
-    private String id;
-    private String type;
+public class CreateIssueProfileReqDto {
+    private String vcPlanId;
     private String title;
     private String description;
-    private String encoding;
-    private String language;
-    private Profile profile;
-    private Proof proof;
+    private String vcSchemaId;
+    private String endpoints;
+    private String cipher;
+    private String curve;
+    private String padding;
 }

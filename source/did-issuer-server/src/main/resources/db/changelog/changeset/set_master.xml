@@ -13,5 +13,9 @@
   <include file="./set.0/project-init_e2e.xml" relativeToChangelogFile="true" />
   <include file="./set.0/project-init_certificate_vc.xml" relativeToChangelogFile="true" />
   <include file="./set.0/project-init_revoke_vc.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_vc_schema.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_namespace.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_vc_schema_namespace.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_issue_profile.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

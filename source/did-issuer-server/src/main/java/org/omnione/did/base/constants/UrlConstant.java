@@ -35,4 +35,14 @@ public class UrlConstant {
         public static final String COMPLETE_REVOKE = "/complete-revoke";
         public static final String SCHEMA = "/vcschema";
     }
+
+    public static class Admin {
+        public static final String V1 = "/issuer/admin/v1";
+        public static final String NAMESPACE = "/namespace";
+        public static final String VC_SCHEMA = "/vc-schema";
+        public static final String ISSUE_PROFILE = "/issue-profile";
+
+        public static final String LIST = "/list";
+
+    }
 }
