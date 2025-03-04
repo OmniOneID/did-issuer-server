@@ -208,3 +208,40 @@ README.html
 !**/opendid-*.jar
 /source/did-issuer-server/files/**
 !source/did-issuer-server/gradle/wrapper/gradle-wrapper.jar
+
+### react ###
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
+dist
+node_modules
+bower_components
+tsconfig.tsbuildinfo
+.vite/
+*.sublime*
+psd
+thumb
+sketch
+
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
