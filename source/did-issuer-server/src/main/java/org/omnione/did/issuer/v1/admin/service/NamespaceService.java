@@ -72,4 +72,8 @@ public class NamespaceService {
     public Namespace getNamespaceById(Long id) {
         return namespaceQueryService.findById(id);
     }
+
+    public Page<NamespaceDto> searchEntities(String searchKey, String searchValue, Pageable pageable) {
+        return namespaceQueryService.searchNamespaceList(searchKey, searchValue, pageable);
+    }
 }

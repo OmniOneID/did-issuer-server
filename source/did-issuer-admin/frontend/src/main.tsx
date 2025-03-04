@@ -7,6 +7,14 @@ import SignInPage from './pages/auth/SignIn';
 import ErrorPage from './pages/ErrorPage';
 import IssuerManagementPage from './pages/issuer/IssuerManagementPage';
 import IssuerRegistrationPage from './pages/issuer/IssuerRegistrationPage';
+import VcManagementPage from './pages/vc-management/VcManagementPage';
+import IssueProfileManagementPage from './pages/vc-management/issue-profile-management/IssueProfileManagementPage';
+import NamespaceManagementPage from './pages/vc-management/namespace-management/NamespaceManagementPage';
+import VcSchemaManagementPage from './pages/vc-management/vc-schema-management/VcSchemaManagementPage';
+import UserManagementPage from './pages/users/UserManagementPage';
+import IssuedVcManagementPage from './pages/issued-vcs/IssuedVcManagementPage';
+import AdminManagementPage from './pages/admins/AdminManagementPage';
+import ServerManagementPage from './pages/servers/ServerManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -23,6 +31,38 @@ const router = createBrowserRouter([
           {
             path: '/issuer-management',
             Component: IssuerManagementPage,
+          },
+          {
+            path: '/vc-management/namespace-management',
+            Component: NamespaceManagementPage,
+          },
+          {
+            path: '/vc-management/vc-schema-management',
+            Component: VcSchemaManagementPage,
+          },
+          {
+            path: '/vc-management/issue-profile-management',
+            Component: IssueProfileManagementPage,
+          },
+          {
+            path: '/vc-management',
+            Component: VcManagementPage,
+          },
+          {
+            path: '/users/user-management',
+            Component: UserManagementPage,
+          },
+          {
+            path: '/issued-vcs/issued-vc-management',
+            Component: IssuedVcManagementPage,
+          },
+          {
+            path: '/admin-management',
+            Component: AdminManagementPage,
+          },
+          {
+            path: '/server-management',
+            Component: ServerManagementPage,
           },
         ],
       },

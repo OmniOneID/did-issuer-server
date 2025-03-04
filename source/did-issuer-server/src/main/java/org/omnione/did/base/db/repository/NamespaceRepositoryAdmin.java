@@ -17,12 +17,9 @@
 package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.Namespace;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-/**
- * Repository interface for Namespace entity operations.
- * Provides CRUD operations for Namespace entities and custom query methods.
- */
-public interface NamespaceRepository extends JpaRepository<Namespace, Long>, QuerydslPredicateExecutor<Namespace>, NamespaceRepositoryAdmin {
+public interface NamespaceRepositoryAdmin {
+    Page<Namespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable);
 }

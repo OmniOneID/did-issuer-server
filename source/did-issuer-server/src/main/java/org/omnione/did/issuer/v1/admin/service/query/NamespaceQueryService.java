@@ -16,19 +16,20 @@
 
 package org.omnione.did.issuer.v1.admin.service.query;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.repository.NamespaceRepository;
 import org.omnione.did.base.db.repository.VcSchemaNamespaceRepository;
-import org.omnione.did.base.db.repository.VcSchemaRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.issuer.v1.admin.dto.NamespaceDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description...
@@ -63,5 +64,15 @@ public class NamespaceQueryService {
     public Namespace findById(Long id) {
         return namespaceRepository.findById(id).orElseThrow(() ->
                 new OpenDidException(ErrorCode.TODO));
+    }
+
+    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+        Page<Namespace> entityPage = namespaceRepository.searchNamespaces(searchKey, searchValue, pageable);
+
+        List<NamespaceDto> namespaceDtos = entityPage.getContent().stream()
+                .map(NamespaceDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(namespaceDtos, pageable, entityPage.getTotalElements());
     }
 }

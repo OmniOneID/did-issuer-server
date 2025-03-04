@@ -60,7 +60,7 @@ public class NamespaceAdminController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping(UrlConstant.Admin.LIST)
+//    @GetMapping(UrlConstant.Admin.LIST)
     public ResponseEntity<ResponseDto> getNamespaceList(
             @PageableDefault(sort = "id") Pageable pageable) {
 
@@ -72,7 +72,11 @@ public class NamespaceAdminController {
 
     @GetMapping
     public ResponseEntity<Namespace> getNamespace(@RequestParam(name = "id") Long id) {
-
         return ResponseEntity.ok(namespaceService.getNamespaceById(id));
+    }
+
+    @GetMapping(UrlConstant.Admin.LIST)
+    public Page<NamespaceDto> searchEntities(String searchKey, String searchValue, Pageable pageable) {
+        return namespaceService.searchEntities(searchKey, searchValue, pageable);
     }
 }
