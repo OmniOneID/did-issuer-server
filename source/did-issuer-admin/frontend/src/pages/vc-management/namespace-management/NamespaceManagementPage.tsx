@@ -1,12 +1,11 @@
 import { Link } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import { fetchNamepsaces } from '../../../apis/vc-management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
-import { useMemo } from 'react';
+import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 
 type Props = {}
 
@@ -33,7 +32,7 @@ const NamespaceManagementPage = (props: Props) => {
   const [rows, setRows] = useState<NamespaceRow[]>([]);
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 1,
+    page: 0,
     pageSize: 10,
   });
 
@@ -43,17 +42,17 @@ const NamespaceManagementPage = (props: Props) => {
   
   useEffect(() => {
     setLoading(true);
-    fetchNamepsaces(paginationModel.page - 1, paginationModel.pageSize, null, null)
-    .then((response) => {
-      setRows(response.data.content);
-      setTotalRows(response.data.totalElements);
-    })
-    .catch((error) => {
-      console.error("Failed to retrieve namespaces. ", error)
-      navigate('/error', { state: { message: `Failed to retrieve Namepsaces: ${error}` } })
-    })
-    .finally(() => setLoading(false));
-  }, []);
+    fetchNamepsaces(paginationModel.page, paginationModel.pageSize, null, null)
+      .then((response) => {
+        setRows(response.data.content);
+        setTotalRows(response.data.totalElements);
+      })
+      .catch((error) => {
+        console.error("Failed to retrieve namespaces. ", error);
+        navigate('/error', { state: { message: `Failed to retrieve Namespaces: ${error}` } });
+      })
+      .finally(() => setLoading(false));
+  }, [paginationModel]);
 
   return (
     <>

@@ -63,7 +63,11 @@ export default function CustomDataGrid({
         paginationMode={paginationMode} 
         rowCount={paginationMode === "server" ? totalRows : undefined} 
         paginationModel={paginationMode === "server" ? paginationModel : undefined} 
-        onPaginationModelChange={paginationMode === "server" ? setPaginationModel : undefined} 
+        onPaginationModelChange={(model) => {
+          if (setPaginationModel) {
+            setPaginationModel(model);
+          }
+        }}
         loading={loading} 
         slots={{
           toolbar: () => (

@@ -73,7 +73,7 @@ public class NamespaceService {
         return namespaceQueryService.findById(id);
     }
 
-    public Page<NamespaceDto> searchEntities(String searchKey, String searchValue, Pageable pageable) {
+    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return namespaceQueryService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 }

@@ -76,7 +76,7 @@ public class NamespaceAdminController {
     }
 
     @GetMapping(UrlConstant.Admin.LIST)
-    public Page<NamespaceDto> searchEntities(String searchKey, String searchValue, Pageable pageable) {
-        return namespaceService.searchEntities(searchKey, searchValue, pageable);
+    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+        return namespaceService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 }

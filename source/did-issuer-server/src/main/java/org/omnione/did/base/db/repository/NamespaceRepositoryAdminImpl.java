@@ -27,6 +27,12 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
         QNamespace namespace = QNamespace.namespace;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
+        long total = queryFactory
+                .select(namespace.count())
+                .from(namespace)
+                .where(predicate)
+                .fetchOne();
+
         List<Namespace> results = queryFactory
                 .selectFrom(namespace)
                 .where(predicate)
@@ -35,7 +41,7 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
                 .orderBy(getOrderSpecifier(pageable, namespace))
                 .fetch();
 
-        return new PageImpl<>(results, pageable, results.size());
+        return new PageImpl<>(results, pageable, total);
     }
 
     public BooleanExpression buildPredicate(String searchKey, String searchValue) {

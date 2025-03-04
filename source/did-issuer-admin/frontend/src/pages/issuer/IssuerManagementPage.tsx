@@ -26,7 +26,7 @@ export default function IssuerManagementPage() {
   };
 
   if (serverStatus !== 'ACTIVATE') {
-    return <Navigate to="/ta-registration" replace />;
+    return <Navigate to="/issuer-management" replace />;
   }
 
   return (
