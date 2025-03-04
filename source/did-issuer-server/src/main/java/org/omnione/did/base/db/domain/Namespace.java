@@ -18,9 +18,10 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.omnione.did.base.db.converter.SchemaClaimConverter;
+import org.omnione.did.data.model.schema.SchemaClaims;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the namespace table.
@@ -50,6 +51,7 @@ public class Namespace extends BaseEntity implements Serializable {
     @Column(name = "ref")
     private String ref;
 
-    @Column(name = "items")
-    private String items;
+    @Convert(converter = SchemaClaimConverter.class)
+    @Column(name = "schema_claims")
+    private SchemaClaims schemaClaims;
 }

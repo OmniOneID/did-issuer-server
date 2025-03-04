@@ -16,6 +16,7 @@
 
 package org.omnione.did.issuer.v1.admin.service.query;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.repository.IssueProfileRepository;
@@ -27,12 +28,12 @@ import org.springframework.stereotype.Service;
 
 /**
  * Description...
- *
  */
 @RequiredArgsConstructor
 @Service
 public class IssueProfileQueryService {
     private final IssueProfileRepository issueProfileRepository;
+
     public IssueProfile save(IssueProfile issueProfile) {
         return issueProfileRepository.save(issueProfile);
     }
@@ -42,8 +43,24 @@ public class IssueProfileQueryService {
     }
 
     public IssueProfile findById(Long id) {
-        // TODO Error Code
+
         return issueProfileRepository.findById(id).orElseThrow(()
-                -> new OpenDidException(ErrorCode.TODO));
+                -> new OpenDidException(ErrorCode.VC_PLAN_ID_INVALID));
+    }
+
+    public Boolean existsByVcPlanId(String vcPlanId) {
+        return issueProfileRepository.existsByVcPlanId(vcPlanId);
+    }
+
+    public IssueProfile findByVcPlanId(String vcPlanId) {
+
+        return issueProfileRepository.findByVcPlanId(vcPlanId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.VC_PLAN_ID_INVALID));
+    }
+
+    public void deleteIssueProfileById(Long id) {
+        if (!issueProfileRepository.existsByVcSchemaId(id)) {
+            issueProfileRepository.deleteById(id);
+        }
     }
 }

@@ -18,14 +18,15 @@ package org.omnione.did.issuer.v1.agent.helper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.constants.VcPlanId;
+import org.omnione.did.base.datamodel.enums.InitiateType;
 import org.omnione.did.base.db.domain.Transaction;
+import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 
-import org.omnione.did.issuer.v1.agent.service.MdlIssueServiceImpl;
+import org.omnione.did.issuer.v1.agent.service.IssueInitIssueService;
 import org.omnione.did.issuer.v1.agent.service.IssueService;
 import org.omnione.did.issuer.v1.agent.service.IssueServiceBase;
-import org.omnione.did.issuer.v1.agent.service.NationalIdIssueServiceImpl;
+import org.omnione.did.issuer.v1.agent.service.UserInitIssueService;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class IssueServiceHelper implements IssueService {
-    private final NationalIdIssueServiceImpl userInitIssueService;
-    private final MdlIssueServiceImpl issueInitIssueService;
-
+    private final UserInitIssueService userInitIssueService;
+    private final IssueInitIssueService issueInitIssueService;
+    private final IssueProfileQueryService issueProfileQueryService;
     private final TransactionService transactionService;
 
     /**
@@ -122,8 +123,9 @@ public class IssueServiceHelper implements IssueService {
      */
     private IssueServiceBase getIssueServiceByTransaction(String txId) {
         Transaction transaction = transactionService.findByTxId(txId);
+        Long issueProfileId = transaction.getIssueProfileId();
 
-        if (VcPlanId.VCPLANID000000000001.getLabel().equals(transaction.getVcPlanId())) {
+        if (InitiateType.ISSUER_INIT.equals(issueProfileQueryService.findById(issueProfileId).getInitiateType())) {
             return issueInitIssueService;
         }
         return userInitIssueService;

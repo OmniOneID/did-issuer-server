@@ -5,22 +5,25 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
 
-    <changeSet id="init-namespace" author="gwnam" >
-        <createTable tableName="namespace">
+    <changeSet id="init-issuer" author="gwnam" >
+        <createTable tableName="issuer">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="namespace_id" type="varchar(100)">
+            <column name="did" type="varchar(200)">
                 <constraints nullable="false" unique="true" />
             </column>
-            <column name="name" type="varchar(100)">
+            <column name="name" type="varchar(200)">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="ref" type="VARCHAR(200)">
+            <column name="status" type="VARCHAR(50)">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="schema_claims" type="text">
-                <constraints nullable="false" unique="false" />
+            <column name="server_url" type="varchar(2000)">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="certificate_url" type="varchar(2000)">
+                <constraints nullable="true" unique="false" />
             </column>
             <column name="created_at" type="timestamp" defaultValue="NOW()">
                 <constraints nullable="false" unique="false"/>

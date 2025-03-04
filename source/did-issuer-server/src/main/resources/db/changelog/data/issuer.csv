@@ -1,0 +1,2 @@
+id,did,name,status
+1,did:omn:issuer,Issuer,REQUIRED_ENROLL_ENTITY

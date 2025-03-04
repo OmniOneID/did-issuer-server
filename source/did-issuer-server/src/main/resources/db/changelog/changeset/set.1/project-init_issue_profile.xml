@@ -19,7 +19,10 @@
             <column name="description" type="varchar(200)">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="items" type="varchar(200)">
+            <column name="endpoints" type="varchar(200)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="language" type="varchar(10)">
                 <constraints nullable="false" unique="false" />
             </column>
             <column name="cipher" type="varchar(64)">
@@ -39,6 +42,9 @@
             </column>
             <column name="vc_schema_id" type="bigint">
                 <constraints nullable="false" unique="false" />
+            </column>
+            <column name="initiate_type" type="varchar(20)">
+                <constraints nullable="true" unique="false"/>
             </column>
         </createTable>
     </changeSet>

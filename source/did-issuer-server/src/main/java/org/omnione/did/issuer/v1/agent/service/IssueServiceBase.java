@@ -18,16 +18,14 @@ package org.omnione.did.issuer.v1.agent.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.datamodel.data.*;
-import org.omnione.did.base.datamodel.enums.EccCurveType;
-import org.omnione.did.base.datamodel.enums.OfferType;
-import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
-import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
+import org.omnione.did.base.datamodel.enums.*;
 import org.omnione.did.base.db.constant.SubTransactionStatus;
 import org.omnione.did.base.db.constant.SubTransactionType;
 import org.omnione.did.base.db.constant.TransactionStatus;
@@ -47,30 +45,39 @@ import org.omnione.did.core.exception.CoreException;
 import org.omnione.did.core.manager.VcManager;
 import org.omnione.did.crypto.keypair.EcKeyPair;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
+import org.omnione.did.data.model.did.DidDocAndStatus;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.did.ProofPurpose;
 import org.omnione.did.data.model.enums.did.ProofType;
+import org.omnione.did.data.model.enums.profile.ProfileType;
+import org.omnione.did.data.model.enums.vc.CredentialSchemaType;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.enums.vc.VcType;
 import org.omnione.did.data.model.profile.ReqE2e;
+import org.omnione.did.data.model.profile.issue.InnerIssueProfile;
 import org.omnione.did.data.model.profile.issue.IssueProcess;
 import org.omnione.did.data.model.profile.issue.IssueProfile;
-import org.omnione.did.data.model.vc.DocumentVerificationEvidence;
-import org.omnione.did.data.model.vc.VcMeta;
-import org.omnione.did.data.model.vc.VerifiableCredential;
+import org.omnione.did.data.model.provider.ProviderDetail;
+import org.omnione.did.data.model.schema.ClaimDef;
+import org.omnione.did.data.model.schema.SchemaClaims;
+import org.omnione.did.data.model.schema.VcSchema;
+import org.omnione.did.data.model.vc.*;
+import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for issuing Verifiable Credentials (VCs).
@@ -85,10 +92,12 @@ public abstract class IssueServiceBase implements IssueService {
     private final TransactionService transactionService;
     private final E2EQueryService e2EQueryService;
     private final VcQueryService vcQueryService;
-    private final IssueProperty issueProperty;
     private final StorageService storageService;
-
     private final FileWalletService walletService;
+    private final IssueProfileQueryService issueProfileQueryService;
+    private final VcSchemaService vcSchemaService;
+    private final IssuerInfoQueryService issuerInfoQueryService;
+
     /**
      * Generates an offer for issuing a Verifiable Credential.
      *
@@ -105,7 +114,7 @@ public abstract class IssueServiceBase implements IssueService {
 
             log.debug("\t--> Generating offer payload");
             String offerId = RandomUtil.generateUUID();
-            String issuer = issueProperty.getDid();
+            String issuer = issuerInfoQueryService.getIssuerInfo().getDid();
             // TODO: Valid Until property
             String validUntil = DateTimeUtil.addToCurrentTimeString(3, ChronoUnit.MINUTES);
 
@@ -155,7 +164,7 @@ public abstract class IssueServiceBase implements IssueService {
 
             log.debug("\t--> Validating VC plan");
             String vcPlanId = request.getVcPlanId();
-            validateVcPlanId(vcPlanId);
+            org.omnione.did.base.db.domain.IssueProfile issueProfile = validateVcPlanId(vcPlanId);
 
             // TODO: Needs to be modified to make it clear what it's for
             VcOffer vcOffer = null;
@@ -176,6 +185,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .expiredAt(Instant.now().plusSeconds(3600L))
                     .type(TransactionType.ISSUE_VC)
                     .status(TransactionStatus.COMPLETED)
+                    .issueProfileId(issueProfile.getId())
                     .build());
 
             if (vcOffer != null) {
@@ -229,7 +239,9 @@ public abstract class IssueServiceBase implements IssueService {
 
             log.debug("\t--> Generate Issue Profile");
             String vcPlanId = transaction.getVcPlanId();
-            IssueProfile profile = issueProperty.getProfileByVcPlanId(vcPlanId); // TODO Profile 설정 부분 추가
+
+            IssueProfile profile = getIssueProfile(vcPlanId);
+
             IssueProcess process = profile.getProfile().getProcess();
             ReqE2e reqE2e = process.getReqE2e();
             profile.setId(RandomUtil.generateUUID());
@@ -240,8 +252,8 @@ public abstract class IssueServiceBase implements IssueService {
             String nonce = BaseCryptoUtil.generateNonceWithMultibase(16);
 
             setPublicKeyAndNonce(reqE2e, process, keyPair, nonce);
-            signProfile(profile, issueProperty.getAssertSignKeyId());
-
+            // TODO: Key ID
+            signProfile(profile, "assert");
             String encodedSessionKey = encodedSessionKey((ECPrivateKey) keyPair.getPrivateKey());
 
             log.debug("\t--> VC Profile save to DB");
@@ -330,11 +342,11 @@ public abstract class IssueServiceBase implements IssueService {
 
             log.debug("\t--> Issuing VC");
             VerifiableCredential verifiableCredential = issueVerifiableCredential(vcManager,
-                    vcProfile.getDid(), user.getData());
+                    vcProfile.getDid(), user.getData(), transaction.getIssueProfileId());
             log.debug("\t--> VerifiableCredential {}", verifiableCredential.toJson());
 
             log.debug("\t--> Registering VC to B/C");
-            VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, issueProperty.getCertVcRef());
+            VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, issuerInfoQueryService.getIssuerInfo().getCertificateUrl());
 
             storageService.registerVcMeta(vcMeta);
 
@@ -473,15 +485,12 @@ public abstract class IssueServiceBase implements IssueService {
     /**
      * Validate Offer ID
      *
-     * @param planId The plan ID to validate
+     * @param vcPlanId The plan ID to validate
      * @throws OpenDidException The vcPlanId is not valid
      */
 
-    private void validateVcPlanId(String planId) {
-        VcPlanId vcPlanId = VcPlanId.valueOfLabel(planId);
-        if (!issueProperty.getPlanIds().contains(vcPlanId)) {
-            throw new OpenDidException(ErrorCode.VC_PLAN_ID_INVALID);
-        }
+    private org.omnione.did.base.db.domain.IssueProfile validateVcPlanId(String vcPlanId) {
+        return issueProfileQueryService.findByVcPlanId(vcPlanId);
     }
 
     /**
@@ -543,7 +552,7 @@ public abstract class IssueServiceBase implements IssueService {
         String txId = transaction.getTxId();
         return vcQueryService.findByUserIdAndVcPlanId(user.getId(), vcPlanId)
                 .map(existingVc -> {
-                    revokeVc(existingVc);
+//                    revokeVc(existingVc);
                     return Vc.builder()
                             .id(existingVc.getId())
                             .issuedAt(Instant.now())
@@ -693,23 +702,27 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The issued VerifiableCredential.
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
-    private VerifiableCredential issueVerifiableCredential(VcManager vcManager, String holderDid, String data) {
+    private VerifiableCredential issueVerifiableCredential(VcManager vcManager, String holderDid, String data
+            , Long issueProfileId) {
         log.debug("\t--> Issue Verifiable Credential");
         try {
+            ;
             IssueVcParam issueVcParam = new IssueVcParam();
 
             DidDocument didDocument = getDidDocument();
-
-            BaseCoreVcUtil.setVcSchema(issueVcParam, getVcSchema());
-            BaseCoreVcUtil.setClaimInfo(issueVcParam, generateClaimInfo(data));
-            BaseCoreVcUtil.setIssuer(issueVcParam, didDocument.getId(), issueProperty.getName(), issueProperty.getCertVcRef());
+            VcSchema vcSchema = getVcSchema(issueProfileId);
+            BaseCoreVcUtil.setVcSchema(issueVcParam, vcSchema.toJson());
+            BaseCoreVcUtil.setClaimInfo(issueVcParam, getClaimInfo(vcSchema.getCredentialSubject().getClaims(), data));
+            BaseCoreVcUtil.setIssuer(issueVcParam, getIssuer());
             BaseCoreVcUtil.setVcTypes(issueVcParam, getVcType());
             BaseCoreVcUtil.setEvidence(issueVcParam, getEvidence());
             // TODO: Valid Until property
             BaseCoreVcUtil.setValidateUntil(issueVcParam, 1);
 
             VerifiableCredential verifiableCredential = vcManager.issueCredential(issueVcParam, holderDid);
-            List<SignatureVcParams> signatureParams = vcManager.getOriginDataForSign(issueProperty.getAssertSignKeyId(), didDocument, verifiableCredential);
+            // TODO: Error Point DID Document 불러와야함..
+            //  SignKeyID  선택
+            List<SignatureVcParams> signatureParams = vcManager.getOriginDataForSign("assert", didDocument, verifiableCredential);
             signVc(signatureParams);
 
             verifiableCredential = vcManager.addProof(verifiableCredential, signatureParams);
@@ -730,6 +743,7 @@ public abstract class IssueServiceBase implements IssueService {
         VcMeta vcMetByVcId = storageService.getVcMetByVcId(vc.getVcId());
         if (!VcStatus.REVOKED.getRawValue().equals(vcMetByVcId.getStatus())) {
             storageService.updateVcStatus(vc.getVcId(), VcStatus.REVOKED);
+            // TODO: Revoke VC Table
         }
     }
 
@@ -765,7 +779,8 @@ public abstract class IssueServiceBase implements IssueService {
         proof.setType(ProofType.SECP256R1_SIGNATURE_2018.getRawValue());
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
         proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
-        proof.setVerificationMethod(issueProperty.getDid() + "#" + issueProperty.getAssertSignKeyId());
+        // Key ID
+        proof.setVerificationMethod(issuerInfoQueryService.getIssuerInfo().getDid() + "#" + "assert");
         // TODO: Verification method(refer to TAS)
         profile.setProof(proof);
 
@@ -784,12 +799,9 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The generated DID Document.
      */
     private DidDocument getDidDocument() {
-        DidDocument didDoc = new DidDocument();
-        didDoc.fromJson("""
-                {"@context":["https://www.w3.org/ns/did/v1"],"assertionMethod":["assert"],"authentication":["auth"],"controller":"did:omn:tas","created":"2024-07-12T08:35:16Z","deactivated":false,"id":"did:omn:issuer","keyAgreement":["keyagree"],"proofs":[{"created":"2024-07-12T08:35:17Z","proofPurpose":"assertionMethod","proofValue":"signatureValue..1","type":"Secp256r1Signature2018","verificationMethod":"did:omn:issuer?versionId=1#assert"},{"created":"2024-07-12T08:35:17Z","proofPurpose":"authentication","proofValue":"signatureValue..2","type":"Secp256r1Signature2018","verificationMethod":"did:omn:issuer?versionId=1#auth"}],"service":[{"id":"serviceID-1","serviceEndpoint":["https://did.omnione.net"],"type":"LinkedDomains"},{"id":"serviceID-2","serviceEndpoint":["https://did.omnione.net/ld/certificate/1234"],"type":"LinkedDomains"}],"updated":"2024-07-12T08:35:17Z","verificationMethod":[{"authType":1,"controller":"did:omn:issuer","id":"assert","publicKeyMultibase":"zvXsXFNahfw9Cz4KQEdLjBtoUEUiVHoMxWs23j6axNuTP","type":"Secp256r1VerificationKey2018"},{"authType":1,"controller":"did:omn:issuer","id":"auth","publicKeyMultibase":"z21Fy2h5uqmhw8xSVxBXNtBbVVjPTuKMam8ebz2FR7CD62","type":"Secp256r1VerificationKey2018"},{"authType":1,"controller":"did:omn:issuer","id":"keyagree","publicKeyMultibase":"znByKCSPznGAKc48CF7i7BhWuhEnz2U7sU4m5TxTrJVEf","type":"Secp256r1VerificationKey2018"}],"versionId":"1"}
-                """);
+        DidDocAndStatus didDocument = BaseBlockChainUtil.findDidDocument(issuerInfoQueryService.getIssuerInfo().getDid());
 
-        return didDoc;
+        return didDocument.getDocument();
     }
 
     /**
@@ -798,6 +810,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The generated DocumentVerificationEvidence object.
      */
     private DocumentVerificationEvidence getEvidence() {
+        // TODO Evidence
         DocumentVerificationEvidence evidence = new DocumentVerificationEvidence();
         evidence.fromJson("""
                 {
@@ -828,6 +841,102 @@ public abstract class IssueServiceBase implements IssueService {
         }
     }
 
+
+    /**
+     * Generates claim information for a Verifiable Credential.
+     *
+     * @param data The data to use for generating claim information.
+     * @return A HashMap containing the generated claim information.
+     */
+    private HashMap<String, ClaimInfo> getClaimInfo(List<SchemaClaims> schemaClaimList, String data) {
+        JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
+        return schemaClaimList.stream()
+                .flatMap(schemaClaim -> schemaClaim.getItems().stream()
+                        .map(item -> createClaimInfo(schemaClaim.getNamespace().getId(), item, jsonObject)))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(ClaimInfo::getCode, claimInfo -> claimInfo, (existing, replacement) -> existing, HashMap::new));
+    }
+
+    private ClaimInfo createClaimInfo(String namespace, ClaimDef item, JsonObject jsonObject) {
+        String claimCode = namespace + "." + item.getId();
+
+        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
+            return null;
+        }
+
+        ClaimInfo claimInfo = new ClaimInfo();
+        claimInfo.setCode(claimCode);
+        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
+
+        return claimInfo;
+    }
+
+
+    private IssueProfile getIssueProfile(String vcPlanId) {
+        org.omnione.did.base.db.domain.IssueProfile byVcPlanId = issueProfileQueryService.findByVcPlanId(vcPlanId);
+        org.omnione.did.data.model.profile.issue.IssueProfile issueProfile = new org.omnione.did.data.model.profile.issue.IssueProfile();
+
+        issueProfile.setType(ProfileType.ISSUE_PROFILE.getRawValue());
+        issueProfile.setEncoding(StandardCharsets.UTF_8.name());
+        issueProfile.setDescription(byVcPlanId.getDescription());
+        issueProfile.setTitle(byVcPlanId.getTitle());
+        issueProfile.setLanguage(byVcPlanId.getLanguage());
+
+        InnerIssueProfile innerIssueProfile = new InnerIssueProfile();
+        innerIssueProfile.setIssuer(getIssuer());
+        innerIssueProfile.setCredentialSchema(createCredentialSchema(byVcPlanId.getVcSchemaId()));
+        innerIssueProfile.setProcess(createIssueProcess(byVcPlanId));
+
+        issueProfile.setProfile(innerIssueProfile);
+
+        return issueProfile;
+    }
+
+    private ProviderDetail getIssuer() {
+        IssuerInfo issuerInfo = issuerInfoQueryService.getIssuerInfo();
+
+        ProviderDetail issuer = new ProviderDetail();
+        issuer.setCertVcRef(issuerInfo.getCertificateUrl());
+        issuer.setDid(issuerInfo.getDid());
+
+        return issuer;
+    }
+
+    private CredentialSchema createCredentialSchema(Long vcSchemaId) {
+        VcSchema vcSchemaById = vcSchemaService.getVcSchemaById(vcSchemaId);
+        CredentialSchema credentialSchema = new CredentialSchema();
+        credentialSchema.setId(vcSchemaById.getId());
+        credentialSchema.setType(CredentialSchemaType.OSD_SCHEMA_CREDENTIAL.getRawValue());
+
+        return credentialSchema;
+    }
+
+    private IssueProcess createIssueProcess(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        IssueProcess issueProcess = new IssueProcess();
+        issueProcess.setEndpoints(byVcPlanId.getEndpoints());
+        issueProcess.setReqE2e(createReqE2e(byVcPlanId));
+
+        return issueProcess;
+    }
+
+    private ReqE2e createReqE2e(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        ReqE2e reqE2e = new ReqE2e();
+        reqE2e.setCurve(byVcPlanId.getCurve());
+        reqE2e.setPadding(byVcPlanId.getPadding());
+        reqE2e.setCipher(byVcPlanId.getCipher());
+
+        return reqE2e;
+    }
+    /**
+     * Gets the VC schema to use for issuing Verifiable Credentials.
+     *
+     * @return The VC schema as a String.
+     */
+    private VcSchema getVcSchema(Long issueProfileId) {
+
+        return vcSchemaService.getVcSchemaById(issueProfileQueryService.findById(issueProfileId).getVcSchemaId());
+    }
+
     /**
      * Finds a user by their VcProfile.
      *
@@ -842,18 +951,6 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The found User.
      */
     protected abstract User findUserByHolder(Holder holder);
-    /**
-     * Generates claim information for a Verifiable Credential.
-     *
-     * @param data The data to use for generating claim information.
-     * @return A HashMap containing the generated claim information.
-     */
-    protected abstract HashMap<String, ClaimInfo> generateClaimInfo(String data);
-    /**
-     * Gets the VC schema to use for issuing Verifiable Credentials.
-     *
-     * @return The VC schema as a String.
-     */
-    protected abstract String getVcSchema();
+
 
 }

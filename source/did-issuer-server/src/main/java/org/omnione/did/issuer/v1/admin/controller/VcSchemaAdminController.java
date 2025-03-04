@@ -21,6 +21,7 @@ import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.dto.GetVcSchemaResDto;
 import org.omnione.did.issuer.v1.admin.dto.ResponseDto;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
 import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
@@ -39,26 +40,25 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.VC_SCHEMA)
 public class VcSchemaAdminController {
+
     private final VcSchemaManagerService vcSchemaManagerService;
-    // Create
+
     @PostMapping
     public ResponseEntity<CreateVcSchemaResDto> createVcSchema(@RequestBody CreateVcSchemaReqDto request) {
 
         return ResponseEntity.ok(vcSchemaManagerService.createVcSchema(request));
     }
 
-    // Update
     @PatchMapping
     public void updateVcSchema() {
         // TODO
     }
-    // Delete
+
     @DeleteMapping
     public void deleteVcSchema(@RequestParam("id") Long id) {
-        // TODO
+        vcSchemaManagerService.deleteVcSchemaById(id);
     }
 
-    // Get
     @GetMapping(UrlConstant.Admin.LIST)
     public ResponseEntity<ResponseDto> getVcSchemaList(
             @PageableDefault(sort = "id") Pageable pageable) {
@@ -70,7 +70,7 @@ public class VcSchemaAdminController {
     }
 
     @GetMapping
-    public ResponseEntity<VcSchema> getVcSchema(@RequestParam("id") Long id) {
+    public ResponseEntity<GetVcSchemaResDto> getVcSchema(@RequestParam("id") Long id) {
 
         return ResponseEntity.ok(vcSchemaManagerService.getVcSchemaById(id));
     }

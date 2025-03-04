@@ -42,26 +42,25 @@ public class IssueProfileAdminController {
 
     private final IssueProfileService issueProfileService;
 
-    // Create
     @PostMapping
     public ResponseEntity<CreateIssueProfileResDto> createIssueProfile(
             @RequestBody CreateIssueProfileReqDto request) {
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(issueProfileService.createIssueProfile(request));
     }
-    // Update
+
     @PatchMapping
     public void updateIssueProfile() {
-
+        // Required implementation
     }
 
-    // Delete
     @DeleteMapping
-    public void deleteIssueProfile() {
+    public ResponseEntity<String> deleteIssueProfile(@RequestParam(name = "id") Long id) {
+        issueProfileService.deleteIssueProfileById(id);
 
+        return ResponseEntity.ok(null);
     }
 
-    // get
     @GetMapping(UrlConstant.Admin.LIST)
     public ResponseEntity<ResponseDto> getIssueProfileList(
             @PageableDefault(sort = "id") Pageable pageable) {
@@ -72,7 +71,7 @@ public class IssueProfileAdminController {
     }
 
     @GetMapping
-    public ResponseEntity<IssueProfile> getVcSchema(@RequestParam("id") Long id) {
+    public ResponseEntity<IssueProfile> getIssueProfile(@RequestParam("id") Long id) {
 
         return ResponseEntity.ok(issueProfileService.getIssueProfileById(id));
     }

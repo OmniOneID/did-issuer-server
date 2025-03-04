@@ -20,9 +20,16 @@ import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.Namespace;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repository interface for IssueProfile entity operations.
  * Provides CRUD operations for IssueProfile entities and custom query methods.
  */
 public interface IssueProfileRepository extends JpaRepository<IssueProfile, Long> {
+    boolean existsByVcPlanId(String vcPlanId);
+
+    Optional<IssueProfile> findByVcPlanId(String vcPlanId);
+
+    boolean existsByVcSchemaId(Long id);
 }

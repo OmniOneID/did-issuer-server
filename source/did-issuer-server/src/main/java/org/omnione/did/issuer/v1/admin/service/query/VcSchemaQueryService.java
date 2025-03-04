@@ -16,8 +16,8 @@
 
 package org.omnione.did.issuer.v1.admin.service.query;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
 import org.omnione.did.base.db.repository.VcSchemaNamespaceRepository;
@@ -28,7 +28,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description...
@@ -59,5 +61,18 @@ public class VcSchemaQueryService {
         // TODO: Error Code
         return vcSchemaRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+    }
+
+    public List<Long> findRelationByVcSchemaId(Long vcSchemaId) {
+        List<VcSchemaNamespace> vcSchemaNamespaceList = vcSchemaNamespaceRepository.findAllByVcSchemaId(vcSchemaId);
+
+        return vcSchemaNamespaceList.stream()
+                .map(VcSchemaNamespace::getNamespaceId)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteById(Long id) {
+        vcSchemaNamespaceRepository.deleteAllByVcSchemaId(id);
+        vcSchemaRepository.deleteById(id);
     }
 }
