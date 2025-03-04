@@ -203,6 +203,8 @@ README.html
 .exercism
 /files
 
+**/*.log*
+
 **/*.log
 !**/did-*.jar
 !**/opendid-*.jar
