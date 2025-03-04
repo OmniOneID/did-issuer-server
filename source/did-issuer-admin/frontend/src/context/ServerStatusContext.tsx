@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { TaInfoResDto } from '../apis/models/IssuerInfoResDto';
+import { IssuerInfoResDto } from '../apis/models/IssuerInfoResDto';
 
-export type ServerStatus = 'DID_DOCUMENT_REQUIRED' | 'CERTIFICATE_VC_REQUIRED' | 'COMPLETED';
+export type ServerStatus = 'ACTIVATE' | 'DEACTIVATE' | 'REQUIRED_ENROLL_ENTITY';
 
 interface ServerStatusContextType {
   serverStatus: ServerStatus | null;
@@ -9,8 +9,8 @@ interface ServerStatusContextType {
   isLoading: boolean;
   setIsLoading: (loading: boolean, message?: string) => void;
   isLoadingMessage: string;
-  issuerInfo: TaInfoResDto | null;
-  setIssuerInfo: (info: TaInfoResDto | null) => void;
+  issuerInfo: IssuerInfoResDto | null;
+  setIssuerInfo: (info: IssuerInfoResDto | null) => void;
 }
 
 export const ServerStatusContext = createContext<ServerStatusContextType>({
@@ -27,7 +27,7 @@ export const ServerStatusProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
   const [isLoading, setIsLoadingState] = useState<boolean>(false);
   const [isLoadingMessage, setIsLoadingMessage] = useState<string>('');
-  const [issuerInfo, setIssuerInfo] = useState<TaInfoResDto | null>(null);
+  const [issuerInfo, setIssuerInfo] = useState<IssuerInfoResDto | null>(null);
 
   const setIsLoading = useCallback((loading: boolean, message?: string) => {
     setIsLoadingState(loading);

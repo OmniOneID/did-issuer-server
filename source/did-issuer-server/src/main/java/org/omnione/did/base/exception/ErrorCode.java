@@ -124,6 +124,8 @@ public enum ErrorCode {
     JSON_DE_SERIALIZE_FAILED("00701", "Failed to Json deserialize.", 500),
     REQUEST_BODY_UNREADABLE("00702", "Unable to process the request.", 400),
 
+    // 800~ 899 = admin
+    ADMIN_INFO_NOT_FOUND("00800", "Failed to find admin: admin is not registered.", 400),
 
     UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500),
 

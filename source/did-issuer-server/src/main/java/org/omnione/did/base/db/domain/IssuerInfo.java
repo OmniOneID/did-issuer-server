@@ -18,6 +18,7 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.omnione.did.base.db.constant.IssuerStatus;
 
 import java.io.Serializable;
 
@@ -44,8 +45,9 @@ public class IssuerInfo extends BaseEntity implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 50, columnDefinition = "VARCHAR(50)")
+    private IssuerStatus status;
 
     @Column(name = "server_url")
     private String serverUrl;

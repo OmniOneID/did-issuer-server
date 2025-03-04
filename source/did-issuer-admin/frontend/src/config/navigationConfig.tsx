@@ -3,7 +3,7 @@ import { type Navigation } from '@toolpad/core/AppProvider';
 
 
 export const getNavigationByStatus = (serverStatus: string | null): Navigation=> {
-  if (serverStatus !== 'COMPLETED') {
+  if (serverStatus !== 'ACTIVATE') {
     return [{ segment: 'issuer-registration', title: 'Issuer Registration', icon: <StorageIcon /> }];
   } 
   return [

@@ -6,7 +6,7 @@ import Layout from './layout/Layout';
 import SignInPage from './pages/auth/SignIn';
 import ErrorPage from './pages/ErrorPage';
 import IssuerManagementPage from './pages/issuer/IssuerManagementPage';
-import TrustAgentRegistrationPage from './pages/issuer/IssuerRegistrationPage';
+import IssuerRegistrationPage from './pages/issuer/IssuerRegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: '/issuer-registration',
-            Component: TrustAgentRegistrationPage,
+            Component: IssuerRegistrationPage,
           },
           {
             path: '/issuer-management',

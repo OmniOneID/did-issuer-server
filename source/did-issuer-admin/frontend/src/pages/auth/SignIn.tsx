@@ -58,7 +58,7 @@ export default function SignIn() {
         localStorage.removeItem('email');
       }
 
-      navigate(callbackUrl ?? '/ta-registration', { replace: true });
+      navigate('/issuer-management', { replace: true });
       return {};
     } catch (error) {
       return { error: 'Invalid username or password.' };

@@ -1,6 +1,6 @@
 import { TasStatus } from '../constants/IssuerStatus';
 
-export interface TaInfoResDto {
+export interface IssuerInfoResDto {
   id: number;
   did: string;
   name: string;

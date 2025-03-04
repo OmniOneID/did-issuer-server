@@ -7,6 +7,7 @@ import { SessionContext } from './context/SessionContext';
 import { ServerStatusProvider, useServerStatus } from './context/ServerStatusContext';
 import { getNavigationByStatus } from './config/navigationConfig';
 import LoadingOverlay from './components/loading/LoadingOverlay';
+import { getIssuerInfo } from './apis/issuer-api';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -39,10 +40,21 @@ function AppContent() {
     navigate('/sign-in');
   }, [navigate]);
 
-  // Fetch TA information
   useEffect(() => {
     const fetchIssuerInfo = () => {
       setIsLoading(false);
+
+      getIssuerInfo()
+      .then(({ data }) => {
+        setServerStatus(data.status);
+        setIssuerInfo(data);
+        setNavigation(getNavigationByStatus(data.status));
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        navigate('/error', { state: { message: `Failed to connect server: ${err}` } });
+        setIsLoading(false);
+      });
     };
 
     fetchIssuerInfo();

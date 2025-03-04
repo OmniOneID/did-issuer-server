@@ -4,15 +4,15 @@ import { Navigate, useNavigate } from 'react-router';
 import { useServerStatus } from '../../context/ServerStatusContext';
 
 export default function IssuerManagementPage() {
-  const { issuerInfo: taInfo } = useServerStatus();
+  const { issuerInfo } = useServerStatus();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const { setServerStatus, setIssuerInfo: setTaInfo, serverStatus } = useServerStatus();
   const navigate = useNavigate();
 
-  if (!taInfo) {
+  if (!issuerInfo) {
     return (
       <Box sx={{ textAlign: 'center', mt: 5 }}>
-        <Typography variant="h6">Failed to retrieve TA information.</Typography>
+        <Typography variant="h6">Failed to retrieve Issuer information.</Typography>
       </Box>
     );
   }
@@ -25,7 +25,7 @@ export default function IssuerManagementPage() {
     setAnchorEl(null);
   };
 
-  if (serverStatus !== 'COMPLETED') {
+  if (serverStatus !== 'ACTIVATE') {
     return <Navigate to="/ta-registration" replace />;
   }
 
@@ -37,7 +37,7 @@ export default function IssuerManagementPage() {
           label="DID" 
           variant="standard" 
           margin="normal" 
-          value={taInfo.did} 
+          value={issuerInfo.did} 
           slotProps={{ input: { readOnly: true } }} 
         />
         <Button 
@@ -63,7 +63,7 @@ export default function IssuerManagementPage() {
       >
         <Box sx={{ p: 2, maxWidth: 500 }}>
           <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(taInfo.didDocument, null, 2)}
+            {JSON.stringify(issuerInfo.didDocument, null, 2)}
           </Typography>
         </Box>
       </Popover>
@@ -73,7 +73,7 @@ export default function IssuerManagementPage() {
         label="Name" 
         variant="standard" 
         margin="normal" 
-        value={taInfo.name} 
+        value={issuerInfo.name} 
         slotProps={{ input: { readOnly: true } }} 
       />
 
@@ -82,7 +82,7 @@ export default function IssuerManagementPage() {
         label="Status" 
         variant="standard" 
         margin="normal" 
-        value={taInfo.status} 
+        value={issuerInfo.status} 
         slotProps={{ input: { readOnly: true } }} 
       />
 
@@ -91,7 +91,7 @@ export default function IssuerManagementPage() {
         label="URL" 
         variant="standard" 
         margin="normal" 
-        value={taInfo.serverUrl} 
+        value={issuerInfo.serverUrl} 
         slotProps={{ input: { readOnly: true } }} 
       />
 
@@ -100,7 +100,7 @@ export default function IssuerManagementPage() {
         label="Certificate URL" 
         variant="standard" 
         margin="normal" 
-        value={taInfo.certificateUrl} 
+        value={issuerInfo.certificateUrl} 
         slotProps={{ input: { readOnly: true } }} 
       />
 
@@ -109,7 +109,7 @@ export default function IssuerManagementPage() {
         label="Registered At" 
         variant="standard" 
         margin="normal" 
-        value={taInfo.createdAt} 
+        value={issuerInfo.createdAt} 
         slotProps={{ input: { readOnly: true } }} 
       />
     </Box>

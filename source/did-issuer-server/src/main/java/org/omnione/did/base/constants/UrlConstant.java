@@ -43,6 +43,8 @@ public class UrlConstant {
         public static final String ISSUE_PROFILE = "/issue-profile";
 
         public static final String LIST = "/list";
+        public static final String ISSUER = "/issuer";
+        public static final String ADMIN = "/admin";
 
     }
 }

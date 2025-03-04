@@ -38,7 +38,6 @@ import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.did.ProofPurpose;
 import org.omnione.did.data.model.enums.did.ProofType;
 import org.omnione.did.data.model.vc.VerifiableCredential;
-import org.omnione.did.issuer.v1.agent.api.EnrollFeignConfig;
 import org.omnione.did.issuer.v1.agent.api.dto.*;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 import org.omnione.did.issuer.v1.agent.api.EnrollFeign;
