@@ -3,8 +3,8 @@ import { Stack, Typography } from '@mui/material';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { PageContainer } from '@toolpad/core/PageContainer';
 import { Navigate, Outlet, useNavigate } from 'react-router';
-import { useSession } from '../context/SessionContext';
 import CustomAccount from '../components/account-menu/CustomAccount';
+import { useSession } from '../context/SessionContext';
 
 export default function Layout() {
   const { session } = useSession();

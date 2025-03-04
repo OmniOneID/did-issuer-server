@@ -3,18 +3,20 @@ import * as ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from './App';
 import Layout from './layout/Layout';
+import AdminManagementPage from './pages/admins/AdminManagementPage';
 import SignInPage from './pages/auth/SignIn';
 import ErrorPage from './pages/ErrorPage';
+import IssuedVcManagementPage from './pages/issued-vcs/IssuedVcManagementPage';
 import IssuerManagementPage from './pages/issuer/IssuerManagementPage';
 import IssuerRegistrationPage from './pages/issuer/IssuerRegistrationPage';
-import VcManagementPage from './pages/vc-management/VcManagementPage';
-import IssueProfileManagementPage from './pages/vc-management/issue-profile-management/IssueProfileManagementPage';
-import NamespaceManagementPage from './pages/vc-management/namespace-management/NamespaceManagementPage';
-import VcSchemaManagementPage from './pages/vc-management/vc-schema-management/VcSchemaManagementPage';
-import UserManagementPage from './pages/users/UserManagementPage';
-import IssuedVcManagementPage from './pages/issued-vcs/IssuedVcManagementPage';
-import AdminManagementPage from './pages/admins/AdminManagementPage';
 import ServerManagementPage from './pages/servers/ServerManagementPage';
+import UserManagementPage from './pages/users/UserManagementPage';
+import IssueProfileManagementPage from './pages/vc-management/issue-profile-management/IssueProfileManagementPage';
+import NamespaceDetailPage from './pages/vc-management/namespace-management/NamespaceDetailPage';
+import NamespaceManagementPage from './pages/vc-management/namespace-management/NamespaceManagementPage';
+import NamespaceRegistrationPage from './pages/vc-management/namespace-management/NamespaceRegistrationPage';
+import VcSchemaManagementPage from './pages/vc-management/vc-schema-management/VcSchemaManagementPage';
+import VcManagementPage from './pages/vc-management/VcManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +33,14 @@ const router = createBrowserRouter([
           {
             path: '/issuer-management',
             Component: IssuerManagementPage,
+          },
+          {
+            path: '/vc-management/namespace-management/namespace-registration',
+            Component: NamespaceRegistrationPage,
+          },
+          {
+            path: '/vc-management/namespace-management/:id',
+            Component: NamespaceDetailPage,
           },
           {
             path: '/vc-management/namespace-management',

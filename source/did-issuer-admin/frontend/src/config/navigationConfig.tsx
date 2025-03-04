@@ -1,12 +1,12 @@
-import StorageIcon from '@mui/icons-material/Storage';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CategoryIcon from '@mui/icons-material/Category';
-import SchemaIcon from '@mui/icons-material/Schema';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { type Navigation } from '@toolpad/core/AppProvider';
-import PeopleIcon from '@mui/icons-material/People';
-import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import CategoryIcon from '@mui/icons-material/Category';
+import DescriptionIcon from '@mui/icons-material/Description';
 import DnsIcon from '@mui/icons-material/Dns';
+import PeopleIcon from '@mui/icons-material/People';
+import SchemaIcon from '@mui/icons-material/Schema';
+import StorageIcon from '@mui/icons-material/Storage';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import { type Navigation } from '@toolpad/core/AppProvider';
 
 export const getNavigationByStatus = (serverStatus: string | null): Navigation=> {
   if (serverStatus !== 'ACTIVATE') {

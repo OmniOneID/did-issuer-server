@@ -70,7 +70,7 @@ const NamespaceManagementPage = (props: Props) => {
                 <Link 
                   component="button"
                   variant='body2'
-                  onClick={() => navigate(`/entities/entity-management/${params.row.id}`)}
+                  onClick={() => navigate(`/vc-management/namespace-management/${params.row.id}`)}
                   sx={{ cursor: 'pointer', color: 'primary.main' }}
                 >
                   {params.value}
