@@ -16,9 +16,16 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.bouncycastle.util.Strings;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.VcSchema;
+import org.omnione.did.data.model.profile.ReqE2e;
+import org.omnione.did.data.model.profile.issue.InnerIssueProfile;
+import org.omnione.did.data.model.profile.issue.IssueProcess;
+import org.omnione.did.data.model.provider.ProviderDetail;
+import org.omnione.did.data.model.vc.CredentialSchema;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
@@ -26,10 +33,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Description...
  *
  */
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class IssueProfileService {
@@ -38,13 +48,16 @@ public class IssueProfileService {
     public CreateIssueProfileResDto createIssueProfile(CreateIssueProfileReqDto request) {
 
         IssueProfile issueProfile = issueProfileQueryService.save(IssueProfile.builder()
-                .vcPlainId(request.getVcPlanId())
+                .vcPlanId(request.getVcPlanId())
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .endpoints(request.getEndpoints())
                 .cipher(request.getCipher())
                 .curve(request.getCurve())
                 .padding(request.getPadding())
+                .vcSchemaId(request.getVcSchemaId())
+                .initiateType(request.getInitiateType())
+                .language(request.getLanguage())
                 .build());
 
         return CreateIssueProfileResDto.builder()
@@ -57,5 +70,9 @@ public class IssueProfileService {
 
     public IssueProfile getIssueProfileById(Long id) {
         return issueProfileQueryService.findById(id);
+    }
+
+    public void deleteIssueProfileById(Long id) {
+        issueProfileQueryService.deleteIssueProfileById(id);
     }
 }

@@ -17,6 +17,10 @@
 package org.omnione.did.issuer.v1.admin.dto;
 
 import lombok.*;
+import org.omnione.did.base.db.domain.Namespace;
+import org.omnione.did.base.db.domain.VcSchema;
+
+import java.util.List;
 
 /**
  * Description...
@@ -25,8 +29,10 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Builder
 public class GetVcSchemaResDto {
-
+    private VcSchema vcSchema;
+    private List<Namespace> items;
 }

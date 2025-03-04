@@ -18,11 +18,8 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-import org.omnione.did.base.db.converter.StringListConverter;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Entity class for the issue_profile table.
@@ -35,41 +32,24 @@ import java.util.List;
 @Setter
 @ToString
 @Entity
-@Table(name = "issue_profile")
-public class IssueProfile extends BaseEntity implements Serializable {
+@Table(name = "issuer")
+public class IssuerInfo extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "vc_schema_id")
-    private Long vcSchemaId;
+    @Column(name = "did")
+    private String did;
 
-    @Column(name = "vc_plan_id")
-    private String vcPlanId;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "status")
+    private String status;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "server_url")
+    private String serverUrl;
 
-    @Convert(converter = StringListConverter.class)
-    @Column(name = "endpoints")
-    private List<String> endpoints;
-
-    @Column(name = "cipher")
-    private String cipher;
-
-    @Column(name = "curve")
-    private String curve;
-
-    @Column(name = "padding")
-    private String padding;
-
-    @Column(name = "language")
-    private String language;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "initiate_type")
-    private InitiateType initiateType = InitiateType.USER_INIT;
+    @Column(name = "certificate_url")
+    private String certificateUrl;
 }

@@ -13,7 +13,7 @@
             <column name="namespace_id" type="bigint">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="vc_schema_kid" type="bigint">
+            <column name="vc_schema_id" type="bigint">
                 <constraints nullable="false" unique="false" />
             </column>
         </createTable>

@@ -16,9 +16,10 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.common.util.JsonUtil;
+import org.omnione.did.data.model.schema.SchemaClaims;
 import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.springframework.data.domain.Page;
@@ -29,25 +30,29 @@ import org.springframework.stereotype.Service;
  * Description...
  *
  */
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class NamespaceService {
 
-    private NamespaceQueryService namespaceQueryService;
-    public CreateNamespaceResDto createNamespaceReqDto(CreateNamespaceReqDto request) {
+    private final NamespaceQueryService namespaceQueryService;
+    public CreateNamespaceResDto createNamespaceReqDto(SchemaClaims request) {
         Namespace namespace = namespaceQueryService.save(Namespace.builder()
-                .namespaceId(request.getNamespaceId())
-                .name(request.getName())
-                .ref(request.getRef())
-                .items(JsonUtil.serializeToJson(request.getClaims()))
+                .namespaceId(request.getNamespace().getId())
+                .name(request.getNamespace().getName())
+                .ref(request.getNamespace().getRef())
+                .schemaClaims(request)
                 .build());
 
         return CreateNamespaceResDto.builder()
                 .build();
     }
 
-    public Page<Namespace> getNamespaces(Pageable pageable) {
-
+    public Page<Namespace> getNamespacesByPageable(Pageable pageable) {
+        Page<Namespace> namespaceList = namespaceQueryService.findAll(pageable);
+        for (Namespace namespace : namespaceList.getContent()) {
+            namespace.setSchemaClaims(null);
+        }
         return namespaceQueryService.findAll(pageable);
     }
 
@@ -62,5 +67,9 @@ public class NamespaceService {
     public void deleteNamespaceById(Long id) {
 
         namespaceQueryService.deleteById(id);
+    }
+
+    public Namespace getNamespaceById(Long id) {
+        return namespaceQueryService.findById(id);
     }
 }

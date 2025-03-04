@@ -19,10 +19,16 @@ package org.omnione.did.base.db.repository;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * Repository interface for VcSchemaNamespace entity operations.
  * Provides CRUD operations for VcSchemaNamespace entities and custom query methods.
  */
 public interface VcSchemaNamespaceRepository extends JpaRepository<VcSchemaNamespace, Long> {
+    List<VcSchemaNamespace> findAllByVcSchemaId(Long vcSchemaId);
 
+    void deleteAllByVcSchemaId(Long vcSchemaId);
+
+    boolean existsByNamespaceId(Long namespaceId);
 }

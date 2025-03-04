@@ -16,28 +16,34 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
 import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.dto.GetVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description...
- *
  */
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class VcSchemaManagerService {
 
     private final VcSchemaQueryService vcSchemaQueryService;
+
+    private final NamespaceQueryService namespaceQueryService;
 
     public CreateVcSchemaResDto createVcSchema(CreateVcSchemaReqDto request) {
 
@@ -49,15 +55,14 @@ public class VcSchemaManagerService {
                 .version(request.getVersion())
                 .build());
 
-        List<VcSchemaNamespace> vcSchemaNamespaceList = new ArrayList<>();
+        // TODO: check Namespace exists
+        List<VcSchemaNamespace> vcSchemaNamespaceList = request.getNamespaces().stream()
+                .map(namespace -> VcSchemaNamespace.builder()
+                        .vcSchemaId(vcSchema.getId())
+                        .namespaceId(namespace)
+                        .build())
+                .collect(Collectors.toList());
 
-        request.getNamespaces().forEach(namespace -> {
-            VcSchemaNamespace vcSchemaNamespace = VcSchemaNamespace.builder()
-                    .vcSchemaId(vcSchema.getId())
-                    .namespaceId(namespace)
-                    .build();
-            vcSchemaNamespaceList.add(vcSchemaNamespace);
-        });
         vcSchemaQueryService.saveVcSchemaNamespace(vcSchemaNamespaceList);
 
         return CreateVcSchemaResDto.builder()
@@ -69,8 +74,18 @@ public class VcSchemaManagerService {
         return vcSchemaQueryService.findAll(pageable);
     }
 
-    public VcSchema getVcSchemaById(Long id) {
+    public GetVcSchemaResDto getVcSchemaById(Long id) {
+        VcSchema vcSchema = vcSchemaQueryService.findById(id);
+        List<Long> relationByVcSchemaId = vcSchemaQueryService.findRelationByVcSchemaId(id);
+        List<Namespace> items = namespaceQueryService.findAllById(relationByVcSchemaId);
 
-        return vcSchemaQueryService.findById(id);
+        return GetVcSchemaResDto.builder()
+                .vcSchema(vcSchema)
+                .items(items)
+                .build();
+    }
+
+    public void deleteVcSchemaById(Long id) {
+        vcSchemaQueryService.deleteById(id);
     }
 }

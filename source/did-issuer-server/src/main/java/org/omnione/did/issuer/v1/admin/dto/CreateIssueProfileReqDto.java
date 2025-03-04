@@ -17,6 +17,9 @@
 package org.omnione.did.issuer.v1.admin.dto;
 
 import lombok.*;
+import org.omnione.did.base.datamodel.enums.InitiateType;
+
+import java.util.List;
 
 /**
  * Description...
@@ -32,9 +35,11 @@ public class CreateIssueProfileReqDto {
     private String vcPlanId;
     private String title;
     private String description;
-    private String vcSchemaId;
-    private String endpoints;
+    private Long vcSchemaId;
+    private String language;
+    private List<String> endpoints;
     private String cipher;
     private String curve;
     private String padding;
+    private InitiateType initiateType;
 }

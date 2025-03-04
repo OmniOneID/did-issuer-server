@@ -16,9 +16,14 @@
 
 package org.omnione.did.issuer.v1.admin.service.query;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.repository.NamespaceRepository;
+import org.omnione.did.base.db.repository.VcSchemaNamespaceRepository;
+import org.omnione.did.base.db.repository.VcSchemaRepository;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ import java.util.List;
 @Service
 public class NamespaceQueryService {
     private final NamespaceRepository namespaceRepository;
+    private final VcSchemaNamespaceRepository vcSchemaNamespaceRepository;
 
     public Namespace save(Namespace namespace) {
         return namespaceRepository.save(namespace);
@@ -43,7 +49,19 @@ public class NamespaceQueryService {
         return namespaceRepository.findAll(pageable);
     }
 
+    public List<Namespace> findAllById(List<Long> id) {
+        return namespaceRepository.findAllById(id);
+    }
+
     public void deleteById(Long id) {
+        if (vcSchemaNamespaceRepository.existsByNamespaceId(id)) {
+            throw new OpenDidException(ErrorCode.TODO);
+        }
         namespaceRepository.deleteById(id);
+    }
+
+    public Namespace findById(Long id) {
+        return namespaceRepository.findById(id).orElseThrow(() ->
+                new OpenDidException(ErrorCode.TODO));
     }
 }

@@ -19,6 +19,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.Namespace;
+import org.omnione.did.data.model.schema.SchemaClaims;
 import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.NamespaceService;
 import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
@@ -27,8 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Description...
@@ -39,21 +38,21 @@ import java.util.List;
 @RestController
 @RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.NAMESPACE)
 public class NamespaceAdminController {
+
     private final NamespaceService namespaceService;
 
-    // Create
     @PostMapping
-    public ResponseEntity<CreateNamespaceResDto> createNamespaceResDto(@RequestBody CreateNamespaceReqDto request) {
+    public ResponseEntity<CreateNamespaceResDto> createNamespaceResDto(@RequestBody SchemaClaims request) {
 
         return ResponseEntity.ok(namespaceService.createNamespaceReqDto(request));
     }
-    // Update
+
     @PatchMapping
     public ResponseEntity<UpdateNamespaceResDto> updateNamespace(UpdateNamespaceReqDto request) {
 
         return ResponseEntity.ok(namespaceService.updateNamespace(request));
     }
-    // Delete
+
     @DeleteMapping
     public ResponseEntity<DeleteNamespaceResDto> deleteNamespace(@RequestParam(name = "id") Long id) {
 
@@ -61,14 +60,19 @@ public class NamespaceAdminController {
         return ResponseEntity.ok(null);
     }
 
-    // get Namespace ID List
     @GetMapping(UrlConstant.Admin.LIST)
     public ResponseEntity<ResponseDto> getNamespaceList(
             @PageableDefault(sort = "id") Pageable pageable) {
 
-        Page<Namespace> page = namespaceService.getNamespaces(pageable);
+        Page<Namespace> page = namespaceService.getNamespacesByPageable(pageable);
         ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Namespace> getNamespace(@RequestParam(name = "id") Long id) {
+
+        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
     }
 }

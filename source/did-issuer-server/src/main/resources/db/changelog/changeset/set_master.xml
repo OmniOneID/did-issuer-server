@@ -17,5 +17,8 @@
   <include file="./set.1/project-init_namespace.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-init_vc_schema_namespace.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-init_issue_profile.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_issuer.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-add_column_transaction.xml" relativeToChangelogFile="true" />
+
 
 </databaseChangeLog>

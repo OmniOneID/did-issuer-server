@@ -60,7 +60,7 @@ class IssueServiceTest {
     @Order(1)
     void offerVc() {
         OfferIssueVcReqDto request = new OfferIssueVcReqDto();
-        request.setVcPlanId(VcPlanId.VCPLANID000000000001.getLabel());
+        request.setVcPlanId("VC_PLAN_ID_2");
         System.out.println("request = " + request);
 
         OfferIssueVcResDto response = issueService.requestOffer(request);
@@ -72,7 +72,7 @@ class IssueServiceTest {
     void inspectIssuePropose() {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
-        request.setVcPlanId(VcPlanId.VCPLANID000000000002.getLabel());
+        request.setVcPlanId("VC_PLAN_ID_1");
         request.setId(RandomUtil.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);
@@ -90,8 +90,8 @@ class IssueServiceTest {
         GenerateIssueProfileReqDto request = new GenerateIssueProfileReqDto();
         request.setTxId(txId);
         request.setHolder(Holder.builder()
-                .did("did:omn:user1")
-                .pii("f6043e73f3bf4c54864bde2418d1a4fcc617a9319e06d483d57f670c0089fd4d")
+                .did("test2")
+                .pii("test")
                 .build());
         System.out.println("request = " + request);
         GenerateIssueProfileResDto response = issueService.generateIssueProfile(request);

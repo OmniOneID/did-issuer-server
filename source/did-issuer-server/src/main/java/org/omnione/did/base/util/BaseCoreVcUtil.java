@@ -53,16 +53,14 @@ public class BaseCoreVcUtil {
     /**
      * Set Issuer
      * @param issueVcParam Issue VC Param
-     * @param issuerDid Issuer DID
-     * @param issuerName Issuer Name
-     * @param certVcRef The reference of the certificate VC.
+     * @param issuer Issuer Info
      *
      */
-    public static void setIssuer(IssueVcParam issueVcParam, String issuerDid, String issuerName, String certVcRef) {
+    public static void setIssuer(IssueVcParam issueVcParam, ProviderDetail issuer) {
         ProviderDetail providerDetail = new ProviderDetail();
-        providerDetail.setDid(issuerDid);
-        providerDetail.setName(issuerName);
-        providerDetail.setCertVcRef(certVcRef);
+        providerDetail.setDid(issuer.getDid());
+        providerDetail.setName(issuer.getName());
+        providerDetail.setCertVcRef(issuer.getCertVcRef());
         issueVcParam.setProviderDetail(providerDetail);
     }
 

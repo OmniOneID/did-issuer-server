@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.dto;
 
 import lombok.*;
 import org.omnione.did.data.model.schema.ClaimDef;
+import org.omnione.did.data.model.schema.Namespace;
 
 import java.util.List;
 
@@ -32,8 +33,6 @@ import java.util.List;
 @ToString
 @Builder
 public class CreateNamespaceReqDto {
-    private String namespaceId;
-    private String name;
-    private String ref;
-    private List<ClaimDef> claims;
+    private Namespace namespace;
+    private List<ClaimDef> items;
 }
