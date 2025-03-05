@@ -1,4 +1,4 @@
-import { getData } from "../utils/api";
+import { getData, postData } from "../utils/api";
 
 const API_BASE_URL = "/issuer/admin/v1";
 
@@ -14,4 +14,8 @@ export const fetchNamepsaces = async (page: number, size: number, searchKey: str
     }
 
     return getData(API_BASE_URL, `namespace/list?${params.toString()}`);
+};
+
+export const postNamespace = async (data: any) => {
+    return postData(API_BASE_URL, `namespace`, data);
 };

@@ -43,7 +43,6 @@ public class NamespaceAdminController {
 
     @PostMapping
     public ResponseEntity<CreateNamespaceResDto> createNamespaceResDto(@RequestBody SchemaClaims request) {
-
         return ResponseEntity.ok(namespaceService.createNamespaceReqDto(request));
     }
 

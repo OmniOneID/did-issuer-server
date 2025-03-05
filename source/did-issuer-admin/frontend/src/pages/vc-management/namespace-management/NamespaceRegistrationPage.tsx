@@ -4,6 +4,10 @@ import { Box, Button, IconButton, MenuItem, Paper, Select, SelectChangeEvent, Ta
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
+import { postNamespace } from "../../../apis/vc-management-api";
+import { useDialogs } from "@toolpad/core";
+import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
+import CustomDialog from "../../../components/dialog/CustomDialog";
 
 type Props = {}
 
@@ -26,12 +30,14 @@ interface ErrorState {
   name?: string;
   ref?: string;
   items?: { id?: string; type?: string; format?: string; caption?: string }[];
+  errorItemsMessage?: string;
 }
 
 
 const NamespaceRegistrationPage = (props: Props) => {
     const navigate = useNavigate();
-    const theme = useTheme(); // 다크 모드 지원
+    const dialogs = useDialogs();
+    const theme = useTheme(); 
 
     const [formData, setFormData] = useState<NamespaceFormData>({
       namespaceId: '',
@@ -63,16 +69,27 @@ const NamespaceRegistrationPage = (props: Props) => {
 
     const validate = () => {
       let tempErrors: ErrorState = {};
-
+    
       tempErrors.namespaceId = validateNamespaceId(formData.namespaceId);
       tempErrors.name = validateName(formData.name);
       tempErrors.ref = validateRef(formData.ref);
-      tempErrors.items = formData.items.map(validateItem);
-
+      
+      if (formData.items.length === 0) {
+        tempErrors.errorItemsMessage = "At least one item is required.";
+      } else {
+        tempErrors.items = formData.items.map(validateItem);
+      }
+    
       setErrors(tempErrors);
+
       return (
-        Object.values(tempErrors).every((error) => !error) &&
-        tempErrors.items.every((itemErrors) => Object.values(itemErrors ?? {}).every((e) => !e))
+        formData.items.length > 0 &&
+        Object.entries(tempErrors)
+          .filter(([key]) => key !== "items" && key !== "errorItemsMessage")
+          .every(([, error]) => !error) &&
+          (tempErrors.items ?? []).every((itemErrors) => 
+            Object.values(itemErrors).every((e) => !e)
+          )
       );
     };
 
@@ -107,8 +124,50 @@ const NamespaceRegistrationPage = (props: Props) => {
 
     const handleSubmit = async () => {
       if (!validate()) return;
-      console.log("Submitted Data:", formData);
-    };
+      
+      const requestBody = {
+        namespace: {
+          id: formData.namespaceId,
+          name: formData.name,
+          ref: formData.ref,
+        },
+        items: formData.items.map(item => ({
+          id: item.id,
+          caption: item.caption,
+          type: item.type,
+          format: item.format
+        }))
+      };
+
+      const result = await dialogs.open(CustomConfirmDialog, {
+        title: 'Confirmation',
+        message: 'Are you sure you want to register Namespace?',
+        isModal: true,
+      });
+
+      if (result) {
+        setIsLoading(true);
+        try {
+          await postNamespace(requestBody);
+          setIsLoading(false);
+          await dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: 'Completed entity namespace.',
+              isModal: true,
+          },{
+              onClose: async (result) =>  navigate('/vc-management/namespace-management'),
+          });
+        } catch (error) {
+            await dialogs.open(CustomDialog, {
+                title: 'Notification',
+                message: `Failed to register namespace: ${error}`,
+                isModal: true,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+      };
+    }
 
     const handleReset = () => {
       setErrors({});
@@ -141,7 +200,6 @@ const NamespaceRegistrationPage = (props: Props) => {
           <Typography variant="h4">Namespace Registration</Typography>
     
           <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
-            {/* 테이블 상단 TextField 길이 조정 */}
             <TextField label="Namespace ID" variant="outlined" margin="normal" size="small"
               sx={{ width: '60%' }} 
               value={formData.namespaceId} onChange={handleChange('namespaceId')} 
@@ -161,6 +219,11 @@ const NamespaceRegistrationPage = (props: Props) => {
             />
     
             <Typography variant="h6" sx={{ mt: 3 }}>Items</Typography>
+
+            {errors.errorItemsMessage && (
+              <Typography color="error" variant="caption"  sx={{ mt: 1, display: "block" }}>{errors.errorItemsMessage}</Typography>
+            )}
+
             <Button variant="contained" startIcon={<AddCircleOutlineIcon />} sx={{ mt: 2, mb: 2 }} onClick={handleAddItem}>
               Add Item
             </Button>
