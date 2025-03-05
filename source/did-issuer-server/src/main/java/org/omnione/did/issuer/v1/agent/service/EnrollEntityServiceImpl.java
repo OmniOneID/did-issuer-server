@@ -16,9 +16,11 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.datamodel.data.AccEcdh;
 import org.omnione.did.base.datamodel.data.Candidate;
 import org.omnione.did.base.datamodel.data.DidAuth;
@@ -31,6 +33,7 @@ import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.util.BaseCryptoUtil;
 import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.crypto.exception.CryptoException;
 import org.omnione.did.crypto.keypair.EcKeyPair;
@@ -38,12 +41,11 @@ import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.did.ProofPurpose;
 import org.omnione.did.data.model.enums.did.ProofType;
 import org.omnione.did.data.model.vc.VerifiableCredential;
+import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.agent.api.dto.*;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
-import org.omnione.did.issuer.v1.agent.api.EnrollFeign;
 
 import org.omnione.did.issuer.v1.agent.dto.EnrollEntityResDto;
-import org.springframework.cloud.openfeign.FeignClientFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.interfaces.ECPrivateKey;
@@ -58,9 +60,14 @@ import java.util.Arrays;
 @Service
 @Transactional
 public class EnrollEntityServiceImpl implements EnrollEntityService {
-    private final EnrollFeign enrollFeign;
     private final FileWalletService walletService;
     private final CertificateVcQueryService certificateVcQueryService;
+    private final ApplicationConfigQueryService applicationConfigQueryService;
+    private String TAS_URL;
+    @PostConstruct
+    public void loadData() {
+        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl();
+    }
 
     /**
      * Enroll entity.
@@ -128,7 +135,9 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         ProposeEnrollEntityApiReqDto request = ProposeEnrollEntityApiReqDto.builder()
                 .id(RandomUtil.generateMessageId())
                 .build();
-        return enrollFeign.proposeEnrollEntityApi(request);
+
+        String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.PROPOSE_ENROLL_ENTITY;
+        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ProposeEnrollEntityApiResDto.class);
     }
 
     /**
@@ -145,7 +154,10 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 .txId(txId)
                 .reqEcdh(reqEcdh)
                 .build();
-        return enrollFeign.requestEcdh(request);
+
+
+        String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.REQUEST_ECDH;
+        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEcdhApiResDto.class);
     }
     /**
      * Generate request data.
@@ -162,7 +174,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             Candidate candidate = Candidate.builder()
                     .ciphers(Arrays.asList(SymmetricCipherType.values()))
                     .build();
-
+            // TODO : SetIssuer
             String verificationMethod = "did:omn:issuer?versionId=1#keyagree";
             Proof proof = BaseCryptoUtil.generateProof(ProofType.SECP256R1_SIGNATURE_2018,
                     ProofPurpose.KEY_AGREEMENT, verificationMethod);
@@ -199,7 +211,8 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 .didAuth(didAuth)
                 .build();
 
-        return enrollFeign.requestEnrollEntityApi(request);
+        String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.REQUEST_ENROLL_ENTITY;
+        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEnrollEntityApiResDto.class);
     }
 
     /**
@@ -274,7 +287,9 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 .vcId(vcId)
                 .build();
 
-        return enrollFeign.confirmEnrollEntityApi(request);
+
+        String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.CONFIRM_ENROLL_ENTITY;
+        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ConfirmEnrollEntityApiResDto.class);
     }
 
     /**

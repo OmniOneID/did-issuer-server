@@ -16,6 +16,7 @@
 
 package org.omnione.did.issuer.v1.agent.service.query;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.db.domain.Namespace;
@@ -43,9 +44,12 @@ public class VcSchemaService {
 
     private final NamespaceQueryService namespaceQueryService;
     private final VcSchemaQueryService vcSchemaQueryService;
-
-    @Value("${issue.domain}")
     private String ISSUER_DOMAIN;
+
+    @PostConstruct
+    private void loadValue() {
+        this.ISSUER_DOMAIN = ""; // TODO
+    }
     /**
      * Returns the schema for the specified VC.
      *

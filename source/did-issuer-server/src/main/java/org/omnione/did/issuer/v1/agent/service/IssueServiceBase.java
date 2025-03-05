@@ -33,7 +33,6 @@ import org.omnione.did.base.db.constant.TransactionType;
 import org.omnione.did.base.db.domain.*;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.property.IssueProperty;
 import org.omnione.did.base.util.*;
 import org.omnione.did.common.util.DateTimeUtil;
 import org.omnione.did.common.util.JsonUtil;

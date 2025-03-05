@@ -41,10 +41,17 @@ public class UrlConstant {
         public static final String NAMESPACE = "/namespace";
         public static final String VC_SCHEMA = "/vc-schema";
         public static final String ISSUE_PROFILE = "/issue-profile";
-
         public static final String LIST = "/list";
         public static final String ISSUER = "/issuer";
         public static final String ADMIN = "/admin";
 
+    }
+
+    public static class Tas {
+        public static final String V1 = "/api/v1";
+        public static final String PROPOSE_ENROLL_ENTITY = "/propose-enroll-entity";
+        public static final String REQUEST_ECDH = "/request-ecdh";
+        public static final String REQUEST_ENROLL_ENTITY = "/request-enroll-entity";
+        public static final String CONFIRM_ENROLL_ENTITY = "/confirm-enroll-entity";
     }
 }

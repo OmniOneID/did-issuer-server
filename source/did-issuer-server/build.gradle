@@ -73,6 +73,10 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
     implementation fileTree(dir: "libs", includes: ["*"])
 
+    implementation 'com.google.code.gson:gson'
+
+
+
 }
 
 dependencyManagement {
@@ -83,7 +87,7 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform {
-        exclude("org/**/service/*.class")
+//        exclude("org/**/service/*.class")
     }
 }
 

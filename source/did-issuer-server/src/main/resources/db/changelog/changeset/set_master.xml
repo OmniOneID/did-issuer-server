@@ -20,5 +20,6 @@
   <include file="./set.1/project-init_issuer.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-add_column_transaction.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-init_admin.xml" relativeToChangelogFile="true" />
+  <include file="./set.1/project-init_application_config.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

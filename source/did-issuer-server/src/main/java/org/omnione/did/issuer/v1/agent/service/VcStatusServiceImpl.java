@@ -16,6 +16,7 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.datamodel.data.ReqRevokeVc;
 import org.omnione.did.base.datamodel.data.RequestProof;
@@ -24,12 +25,9 @@ import org.omnione.did.base.db.constant.SubTransactionStatus;
 import org.omnione.did.base.db.constant.SubTransactionType;
 import org.omnione.did.base.db.constant.TransactionStatus;
 import org.omnione.did.base.db.constant.TransactionType;
-import org.omnione.did.base.db.domain.RevokeVc;
-import org.omnione.did.base.db.domain.SubTransaction;
-import org.omnione.did.base.db.domain.Transaction;
+import org.omnione.did.base.db.domain.*;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.property.IssueProperty;
 import org.omnione.did.base.util.BaseCryptoUtil;
 import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
@@ -38,7 +36,9 @@ import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.vc.VcMeta;
+import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 
 import org.omnione.did.issuer.v1.agent.service.query.RevokeVcQueryService;
@@ -60,8 +60,15 @@ import java.util.Objects;
 public class VcStatusServiceImpl implements VcStatusService {
     private final StorageService storageService;
     private final TransactionService transactionService;
-    private final IssueProperty issueProperty;
     private final RevokeVcQueryService revokeVcQueryService;
+    private final ApplicationConfigQueryService applicationConfigQueryService;
+
+    private ApplicationConfig applicationConfig;
+    @PostConstruct
+    private void loadData() {
+        this.applicationConfig = applicationConfigQueryService.getApplicationConfig();
+    }
+
     /**
      * Inspects a propose revoke request for a Verifiable Credential.
      *
@@ -84,7 +91,7 @@ public class VcStatusServiceImpl implements VcStatusService {
 
             String txId = RandomUtil.generateUUID();
             String issuerNonce = BaseCryptoUtil.generateNonceWithMultibase(16);
-            VerifyAuthType verifyAuthType = issueProperty.getRevokeVerifyAuthType();
+            VerifyAuthType verifyAuthType = applicationConfig.getRevokeAuthType();
 
             Transaction transaction = transactionService.insertTransaction(Transaction.builder()
                     .txId(txId)

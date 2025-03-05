@@ -6,6 +6,7 @@
 
     <changeSet id="load-data" author="gwnam">
         <loadData tableName="issuer" file="issuer.csv" relativeToChangelogFile="true"/>
+        <loadData tableName="application_config" file="application_config.csv" relativeToChangelogFile="true"/>
     </changeSet>
 
 </databaseChangeLog>
