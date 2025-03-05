@@ -57,11 +57,16 @@ public class NamespaceService {
     }
 
 
-    public UpdateNamespaceResDto updateNamespace(UpdateNamespaceReqDto request) {
-        Namespace namespace = namespaceQueryService.save(request.getNamespace());
+    public NamespaceDto updateNamespace(UpdateNamespaceReqDto request) {
+        Namespace namespace = namespaceQueryService.findById(request.getId());
+        namespace.setNamespaceId(request.getSchemaClaims().getNamespace().getId());
+        namespace.setName(request.getSchemaClaims().getNamespace().getName());
+        namespace.setRef(request.getSchemaClaims().getNamespace().getRef());
 
-        return UpdateNamespaceResDto.builder()
-                .build();
+        namespace.setSchemaClaims(request.getSchemaClaims());
+        namespaceQueryService.save(namespace);
+
+        return NamespaceDto.fromEntity(namespace);
     }
 
     public void deleteNamespaceById(Long id) {
@@ -69,8 +74,8 @@ public class NamespaceService {
         namespaceQueryService.deleteById(id);
     }
 
-    public Namespace getNamespaceById(Long id) {
-        return namespaceQueryService.findById(id);
+    public NamespaceDto getNamespaceById(Long id) {
+        return NamespaceDto.fromEntity(namespaceQueryService.findById(id));
     }
 
     public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {

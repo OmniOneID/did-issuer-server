@@ -47,8 +47,8 @@ public class NamespaceAdminController {
     }
 
     @PatchMapping
-    public ResponseEntity<UpdateNamespaceResDto> updateNamespace(UpdateNamespaceReqDto request) {
-
+    @ResponseBody
+    public ResponseEntity<NamespaceDto> updateNamespace(@RequestBody UpdateNamespaceReqDto request) {
         return ResponseEntity.ok(namespaceService.updateNamespace(request));
     }
 
@@ -60,22 +60,27 @@ public class NamespaceAdminController {
     }
 
 //    @GetMapping(UrlConstant.Admin.LIST)
-    public ResponseEntity<ResponseDto> getNamespaceList(
-            @PageableDefault(sort = "id") Pageable pageable) {
+//    public ResponseEntity<ResponseDto> getNamespaceList(
+//            @PageableDefault(sort = "id") Pageable pageable) {
+//
+//        Page<Namespace> page = namespaceService.getNamespacesByPageable(pageable);
+//        ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
+//
+//        return ResponseEntity.ok(response);
+//    }
 
-        Page<Namespace> page = namespaceService.getNamespacesByPageable(pageable);
-        ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping
-    public ResponseEntity<Namespace> getNamespace(@RequestParam(name = "id") Long id) {
-        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
-    }
+//    @GetMapping
+//    public ResponseEntity<Namespace> getNamespace(@RequestParam(name = "id") Long id) {
+//        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
+//    }
 
     @GetMapping(UrlConstant.Admin.LIST)
     public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return namespaceService.searchNamespaceList(searchKey, searchValue, pageable);
+    }
+
+    @GetMapping
+    public ResponseEntity<NamespaceDto> getNamespaceInfo(@RequestParam(name = "id") Long id) {
+        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
     }
 }

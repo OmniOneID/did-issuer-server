@@ -17,6 +17,7 @@ import NamespaceManagementPage from './pages/vc-management/namespace-management/
 import NamespaceRegistrationPage from './pages/vc-management/namespace-management/NamespaceRegistrationPage';
 import VcSchemaManagementPage from './pages/vc-management/vc-schema-management/VcSchemaManagementPage';
 import VcManagementPage from './pages/vc-management/VcManagementPage';
+import NamespaceEditPage from './pages/vc-management/namespace-management/NamespaceEditPage';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
           {
             path: '/vc-management/namespace-management/namespace-registration',
             Component: NamespaceRegistrationPage,
+          },
+          {
+            path: '/vc-management/namespace-management/namespace-edit/:id',
+            Component: NamespaceEditPage,
           },
           {
             path: '/vc-management/namespace-management/:id',

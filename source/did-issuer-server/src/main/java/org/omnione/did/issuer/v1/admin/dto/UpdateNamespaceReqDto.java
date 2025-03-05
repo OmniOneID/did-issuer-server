@@ -18,18 +18,16 @@ package org.omnione.did.issuer.v1.admin.dto;
 
 import lombok.*;
 import org.omnione.did.base.db.domain.Namespace;
+import org.omnione.did.data.model.schema.SchemaClaims;
 
 /**
  * Description...
  *
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@ToString
 @Builder
 public class UpdateNamespaceReqDto {
-    public Namespace getNamespace() {
-        return null;
-    }
+    private final Long id;
+    private final SchemaClaims schemaClaims;
+
 }

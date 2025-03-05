@@ -152,20 +152,19 @@ const NamespaceRegistrationPage = (props: Props) => {
           setIsLoading(false);
           await dialogs.open(CustomDialog, {
               title: 'Notification',
-              message: 'Completed entity namespace.',
+              message: 'Completed register namespace.',
               isModal: true,
           },{
               onClose: async (result) =>  navigate('/vc-management/namespace-management'),
           });
         } catch (error) {
+            setIsLoading(false);
             await dialogs.open(CustomDialog, {
                 title: 'Notification',
                 message: `Failed to register namespace: ${error}`,
                 isModal: true,
             });
-        } finally {
-            setIsLoading(false);
-        }
+        } 
       };
     }
 
@@ -200,22 +199,40 @@ const NamespaceRegistrationPage = (props: Props) => {
           <Typography variant="h4">Namespace Registration</Typography>
     
           <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
-            <TextField label="Namespace ID" variant="outlined" margin="normal" size="small"
+            <TextField 
+              label="Namespace ID" 
+              variant="outlined"
+              margin="normal" 
+              size="small"
               sx={{ width: '60%' }} 
-              value={formData.namespaceId} onChange={handleChange('namespaceId')} 
-              error={!!errors.namespaceId} helperText={errors.namespaceId} 
+              value={formData.namespaceId} 
+              onChange={handleChange('namespaceId')} 
+              error={!!errors.namespaceId} 
+              helperText={errors.namespaceId} 
             />
     
-            <TextField label="Name" variant="outlined" margin="normal" size="small"
+            <TextField 
+              label="Name" 
+              variant="outlined" 
+              margin="normal" 
+              size="small"
               sx={{ width: '60%' }} 
-              value={formData.name} onChange={handleChange('name')} 
-              error={!!errors.name} helperText={errors.name} 
+              value={formData.name} 
+              onChange={handleChange('name')} 
+              error={!!errors.name} 
+              helperText={errors.name} 
             />
     
-            <TextField label="Ref" variant="outlined" margin="normal" size="small"
+            <TextField 
+              label="Ref" 
+              variant="outlined" 
+              margin="normal" 
+              size="small"
               sx={{ width: '60%' }} 
-              value={formData.ref} onChange={handleChange('ref')} 
-              error={!!errors.ref} helperText={errors.ref} 
+              value={formData.ref} 
+              onChange={handleChange('ref')} 
+              error={!!errors.ref} 
+              helperText={errors.ref} 
             />
     
             <Typography variant="h6" sx={{ mt: 3 }}>Items</Typography>
@@ -243,9 +260,15 @@ const NamespaceRegistrationPage = (props: Props) => {
                   {formData.items.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>
-                        <TextField fullWidth size="small" value={item.id} onChange={handleTextChange(index, "id")}
-                          error={!!errors.items?.[index]?.id} helperText={errors.items?.[index]?.id}
-                          sx={{ width: 150 }} />
+                        <TextField 
+                          fullWidth 
+                          size="small" 
+                          value={item.id} 
+                          onChange={handleTextChange(index, "id")}
+                          error={!!errors.items?.[index]?.id} 
+                          helperText={errors.items?.[index]?.id}
+                          sx={{ width: 150 }} 
+                        />
                       </TableCell>
                       <TableCell>
                         <Select fullWidth size="small" value={item.type} onChange={handleSelectChange(index, "type")}
@@ -264,9 +287,15 @@ const NamespaceRegistrationPage = (props: Props) => {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <TextField fullWidth size="small" value={item.caption} onChange={handleTextChange(index, "caption")}
-                          error={!!errors.items?.[index]?.caption} helperText={errors.items?.[index]?.caption}
-                          sx={{ width: 200 }} />
+                        <TextField 
+                          fullWidth 
+                          size="small" 
+                          value={item.caption} 
+                          onChange={handleTextChange(index, "caption")}
+                          error={!!errors.items?.[index]?.caption} 
+                          helperText={errors.items?.[index]?.caption}
+                          sx={{ width: 200 }} 
+                        />
                       </TableCell>
                       <TableCell sx={{width: 50}}>
                         <IconButton onClick={() => handleRemoveItem(index)} color="error">
@@ -280,6 +309,9 @@ const NamespaceRegistrationPage = (props: Props) => {
             </TableContainer>
     
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+              <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/namespace-management')}>
+                Back
+              </Button>
               <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
               <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
             </Box>
