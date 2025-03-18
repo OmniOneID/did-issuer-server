@@ -107,10 +107,6 @@ const router = createBrowserRouter([
             Component: UserRegistrationPage
           },
           {
-            path: '/users/users-management/',
-            Component: UserManagementPage
-          },
-          {
             path: '/users/user-management',
             Component: UserManagementPage,
           },
@@ -126,8 +122,6 @@ const router = createBrowserRouter([
             path: '/server-management',
             Component: ServerManagementPage,
           },
-
-
         ],
       },
       {

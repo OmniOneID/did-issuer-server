@@ -52,7 +52,7 @@ export default function CustomDataGrid({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <DataGrid
-        checkboxSelection
+        checkboxSelection={!!onEdit || !!onDelete}
         disableMultipleRowSelection
         disableRowSelectionOnClick
         rows={rows}
@@ -92,13 +92,7 @@ export default function CustomDataGrid({
           const selectedId = selectedIds.length > 0 ? selectedIds[0] : null;
           setSelectedRow(selectedId as string | number | null);
         }}
-        getRowHeight={() => 'auto'}
-        sx={{
-          "& .MuiDataGrid-columnHeaderCheckbox svg": {
-            visibility: "hidden", 
-            pointerEvents: "none",
-          },
-        }}
+        getRowHeight={() => 45}
       />
     </div>
   );

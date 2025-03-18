@@ -1,7 +1,7 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, IconButton, MenuItem, Paper, Select, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Button, IconButton, MenuItem, Paper, Select, SelectChangeEvent, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { postNamespace } from "../../../apis/vc-management-api";
@@ -192,13 +192,34 @@ const NamespaceRegistrationPage = (props: Props) => {
     setIsButtonDisabled(!isModified);
   }, [formData]);
 
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+      width: 800,
+      margin: 'auto',
+      marginTop: theme.spacing(1),
+      padding: theme.spacing(3),
+      border: 'none',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: '#ffffff',
+      boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+      marginTop: theme.spacing(2),
+  })), []);
+
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Namespace Registration</Typography>
-
-        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
+      <Typography variant="h4">Namespace Management</Typography>
+      <StyledContainer>
+        <StyledTitle>Namespace Registration</StyledTitle>
+        <StyledInputArea>
           <TextField
             label="Namespace ID"
             variant="outlined"
@@ -259,7 +280,7 @@ const NamespaceRegistrationPage = (props: Props) => {
               <TableBody>
                 {formData.items.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell>
+                    <TableCell sx={{verticalAlign: 'top'}}>
                       <TextField
                         fullWidth
                         size="small"
@@ -270,7 +291,7 @@ const NamespaceRegistrationPage = (props: Props) => {
                         sx={{ width: 150 }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{verticalAlign: 'top'}}>
                       <Select fullWidth size="small" value={item.type} onChange={handleSelectChange(index, "type")}
                         error={!!errors.items?.[index]?.type} sx={{ width: 100 }}>
                         <MenuItem value="text">Text</MenuItem>
@@ -278,7 +299,7 @@ const NamespaceRegistrationPage = (props: Props) => {
                         <MenuItem value="document">Document</MenuItem>
                       </Select>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{verticalAlign: 'top'}}>
                       <Select fullWidth size="small" value={item.format} onChange={handleSelectChange(index, "format")}
                         error={!!errors.items?.[index]?.format} sx={{ width: 150 }}>
                         {["plain", "html", "xml", "csv", "png", "jpg", "gif", "txt", "pdf", "word"].map((format) => (
@@ -286,7 +307,7 @@ const NamespaceRegistrationPage = (props: Props) => {
                         ))}
                       </Select>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{verticalAlign: 'top'}}>
                       <TextField
                         fullWidth
                         size="small"
@@ -297,9 +318,9 @@ const NamespaceRegistrationPage = (props: Props) => {
                         sx={{ width: 200 }}
                       />
                     </TableCell>
-                    <TableCell sx={{ width: 50 }}>
+                    <TableCell sx={{ width: 50, verticalAlign: 'top' }}>
                       <IconButton onClick={() => handleRemoveItem(index)} color="error">
-                        <DeleteIcon />
+                        <DeleteIcon sx={{ color: '#FF8400' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -309,14 +330,12 @@ const NamespaceRegistrationPage = (props: Props) => {
           </TableContainer>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/namespace-management')}>
-              Back
-            </Button>
-            <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
             <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
+            <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
+            <Button variant="outlined" color="secondary" onClick={() => navigate('/vc-management/namespace-management')}>Cancel</Button>
           </Box>
-        </Box>
-      </Box>
+        </StyledInputArea>
+      </StyledContainer>
     </>
   );
 

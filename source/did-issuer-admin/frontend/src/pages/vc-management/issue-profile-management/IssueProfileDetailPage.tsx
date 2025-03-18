@@ -1,10 +1,10 @@
 import { useDialogs } from "@toolpad/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { getIssueProfile } from "../../../apis/vc-management-api";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
-import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
 
 type Props = {}
 
@@ -76,38 +76,61 @@ const IssueProfileDetailPage = (props: Props) => {
 
     fetchData();
   }, [numericIssueProfileId]);
+  
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+      width: 600,
+      margin: 'auto',
+      marginTop: theme.spacing(1),
+      padding: theme.spacing(3),
+      border: 'none',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: '#ffffff',
+      boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+      marginTop: theme.spacing(2),
+  })), []);
 
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Issue Profile Detail Information</Typography>
+      <Typography variant="h4">Issue Profile Management</Typography>
+      <StyledContainer>
+        <StyledTitle>Issue Profile Detail Information</StyledTitle>
 
-        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
-          <TextField label="VC Plan ID" value={issueProfileData?.vcSchemaId || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-          <TextField label="Title" value={issueProfileData?.title || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-          <TextField label="Description" value={issueProfileData?.description || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
+        <StyledInputArea>
+          <TextField label="VC Plan ID" value={issueProfileData?.vcSchemaId || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          <TextField label="Title" value={issueProfileData?.title || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          <TextField label="Description" value={issueProfileData?.description || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <Box onClick={handleOpenVcSchemaDetail}>
-            <TextField label="VC Schema ID" value={issueProfileData?.vcSchemaId || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%', input: {color: "blue", textDecoration: "underline", cursor: "pointer"  } }} slotProps={{ input: { readOnly: true } }} />
+            <TextField label="VC Schema ID" value={issueProfileData?.vcSchemaId || ''} fullWidth variant="standard" margin="normal" sx={{ input: {color: "blue", textDecoration: "underline", cursor: "pointer"  } }} slotProps={{ input: { readOnly: true } }} />
           </Box>
           
-          
-
           <TextField
             label="Initiate Type"
             value={getInitiateTypeKey(issueProfileData?.initiateType)}
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
-          <TextField label="Language" value={issueProfileData?.language || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-
+          <TextField label="Language" value={issueProfileData?.language || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
 
           <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 400, width: '60%', overflow: "auto", mt: 2 }}>
+          <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>
             <Table>
+              <TableHead>
+                  <TableRow sx={{ backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.paper : "#f5f5f5" }}>
+                      <TableCell>EndPoint</TableCell> 
+                  </TableRow>
+              </TableHead>
               <TableBody>
                 {issueProfileData?.endpoints?.length > 0 ? (
                   issueProfileData.endpoints.map((item: any, index: number) => (
@@ -125,10 +148,9 @@ const IssueProfileDetailPage = (props: Props) => {
           </TableContainer>
 
           <Typography variant="h6" sx={{ mt: 3 }}>E2E</Typography>
-          <TextField label="Cipher" value={issueProfileData?.cipher || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-          <TextField label="Curve" value={issueProfileData?.curve || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-          <TextField label="Padding" value={issueProfileData?.padding || ''} fullWidth variant="standard" margin="normal" sx={{ width: '60%' }} slotProps={{ input: { readOnly: true } }} />
-
+          <TextField label="Cipher" value={issueProfileData?.cipher || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          <TextField label="Curve" value={issueProfileData?.curve || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          <TextField label="Padding" value={issueProfileData?.padding || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
 
           <Typography variant="h6" sx={{ mt: 3 }}></Typography>
 
@@ -137,13 +159,13 @@ const IssueProfileDetailPage = (props: Props) => {
               <Button variant="contained" sx={{ mt: 3 }} onClick={() => window.close()}>Close</Button>
             ) : (
               <>
-                <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/issue-profile-management')}>Back</Button>
-                <Button variant="contained" color="primary" onClick={() => navigate(`/vc-management/issue-profile-management/issue-profile-edit/${numericIssueProfileId}`)}>Edit</Button>
+                <Button variant="outlined" color="secondary" onClick={() => navigate('/vc-management/issue-profile-management')}>Back</Button>
+                <Button variant="outlined" color="secondary" onClick={() => navigate(`/vc-management/issue-profile-management/issue-profile-edit/${numericIssueProfileId}`)}>Go to Edit</Button>
               </>
             )}
           </Box>
-        </Box>
-      </Box>
+        </StyledInputArea>
+      </StyledContainer>
     </>
   );
 }

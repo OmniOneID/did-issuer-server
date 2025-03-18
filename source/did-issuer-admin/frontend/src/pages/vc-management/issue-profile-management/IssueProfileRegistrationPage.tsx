@@ -1,8 +1,8 @@
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import { useState } from "react";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel, styled } from "@mui/material";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { fetchNamespaces, fetchVcSchema, postIssueProfile } from "../../../apis/vc-management-api";
@@ -10,6 +10,7 @@ import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog"
 import { useDialogs } from "@toolpad/core/useDialogs";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import { Language } from "@mui/icons-material";
+import VcSchemaSelectionDialog from "./VcSchemaSelectionDialog";
 
 type Props = {}
 
@@ -196,13 +197,35 @@ const IssueProfileRegistrationPage = (props: Props) => {
     }));
   };
 
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+      width: 600,
+      margin: 'auto',
+      marginTop: theme.spacing(1),
+      padding: theme.spacing(3),
+      border: 'none',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: '#ffffff',
+      boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+      marginTop: theme.spacing(2),
+  })), []);
+
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Issue Profile Registration</Typography>
+      <Typography variant="h4">Issue Profile Management</Typography>
+      <StyledContainer>
+        <StyledTitle>Issue Profile Registration</StyledTitle>
 
-        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
+        <StyledInputArea>
           <TextField label="VC Plan ID" fullWidth margin="normal" size="small" value={formData.vcPlanId} onChange={(e) => setFormData({ ...formData, vcPlanId: e.target.value })} />
           <TextField label="Title" fullWidth margin="normal" size="small" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
           <TextField label="Description" fullWidth margin="normal" size="small" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
@@ -225,7 +248,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
           {formData.endpoints.map((endpoint, index) => (
             <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
               <TextField fullWidth size="small" value={endpoint} onChange={(e) => handleChangeEndpoint(index, e.target.value)} />
-              <IconButton color="error" onClick={() => handleRemoveEndpoint(index)}><RemoveCircleOutlineIcon /></IconButton>
+              <IconButton color="error" onClick={() => handleRemoveEndpoint(index)}><RemoveCircleOutlineIcon sx={{ color: '#FF8400' }}/></IconButton>
             </Box>
           ))}
           <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddEndpoint}>Add Endpoint</Button>
@@ -252,52 +275,22 @@ const IssueProfileRegistrationPage = (props: Props) => {
             </Select>
           </FormControl>
 
+          <VcSchemaSelectionDialog
+            open={openDialog}
+            onClose={handleCloseDialog}
+            availableItems={availableItems}
+            selectedItemId={selectedItemId}
+            onSelectItem={handleSelectItem}
+            onConfirmSelection={handleAddSelectedItem}
+          />
 
-
-
-          {/* 다이얼로그 - VC Schema 선택 */}
-          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
-            <DialogTitle>Select VC Schema</DialogTitle>
-            <DialogContent>
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Select</TableCell>
-                      <TableCell>ID</TableCell>
-                      <TableCell>VC Schema ID</TableCell>
-                      <TableCell>Title</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {availableItems.map((item) => (
-                      <TableRow key={item.id} hover onClick={() => handleSelectItem(item)} sx={{ cursor: "pointer" }}>
-                        <TableCell>
-                          <Radio checked={selectedItemId === item.id} />
-                        </TableCell>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell 
-                          sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenVcSchemaDetail(item.id)}}>{item.vcSchemaId}</TableCell>
-                        <TableCell>{item.title}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </DialogContent>
-
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleAddSelectedItem} variant="contained">Select</Button>
-            </DialogActions>
-          </Dialog>
-
-          <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>Register</Button>
-        </Box>
-      </Box >
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>Register</Button>
+            <Button variant="contained" color="secondary">Reset</Button>
+            <Button variant="outlined" color="secondary" onClick={() => navigate('/vc-management/issue-profile-management')}>Cancel</Button>
+          </Box>
+        </StyledInputArea>
+      </StyledContainer>
     </>
   );
 }

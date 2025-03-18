@@ -39,7 +39,7 @@ export default function CustomToolbar({
   additionalButtons = [],
 }: CustomToolbarProps) {
   return (
-    <GridToolbarContainer sx={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+    <GridToolbarContainer sx={{ display: 'flex', alignItems: 'center', p:0, pb: '8px', pt: '8px' }}>
       {enableSearch && (
         <Box sx={{ flex: 1 }}>
           <CustomSearchBar
@@ -53,29 +53,30 @@ export default function CustomToolbar({
         </Box>
       )}
 
-      <Box sx={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', flex: enableSearch ? 1 : 'auto', width: '100%' }}>
+      <Box sx={{ display: 'flex', gap: '4px', justifyContent: 'flex-start', flex: enableSearch ? 1 : 'auto', width: '100%', mb: 1 }}>
         {onRegister && (
-          <Button variant="contained" color="primary" onClick={onRegister}>
+          <Button variant="contained" color="primary" onClick={onRegister} size='small'>
             Register
           </Button>
         )}
         {onEdit && (
-          <Button variant="contained" color="primary" onClick={onEdit} disabled={disableEdit}>
+          <Button variant="contained" color="primary" onClick={onEdit} disabled={disableEdit} size='medium'>
             Update
           </Button>
         )}
         {onDelete && (
-          <Button variant="contained" color="error" onClick={onDelete} disabled={disableDelete}>
+          <Button variant="contained" color="error" onClick={onDelete} disabled={disableDelete} size='small'>
             Delete
           </Button>
         )}
         {additionalButtons.map((btn, index) => (
           <Button
             key={index}
-            variant="contained"
+            variant="outlined"
             color={btn.color || 'primary'}
             onClick={btn.onClick}
             disabled={btn.disabled}
+            size='small'
           >
             {btn.label}
           </Button>

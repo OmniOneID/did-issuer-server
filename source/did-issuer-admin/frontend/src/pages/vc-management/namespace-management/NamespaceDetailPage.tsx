@@ -1,10 +1,10 @@
 import { useDialogs } from "@toolpad/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { getNamespace } from "../../../apis/vc-management-api";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
-import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
 
 type Props = {}
 
@@ -53,13 +53,35 @@ const NamespaceDetailPage = (props: Props) => {
     fetchData();
   }, [numericNamespaceId]);
 
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+      width: 800,
+      margin: 'auto',
+      marginTop: theme.spacing(1),
+      padding: theme.spacing(3),
+      border: 'none',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: '#ffffff',
+      boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+      marginTop: theme.spacing(2),
+  })), []);
+
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Namespace Detail Information</Typography>
+      <Typography variant="h4">Namespace Management</Typography>
+      <StyledContainer>
+        <StyledTitle>Namespace Detail Information</StyledTitle>
 
-        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
+        <StyledInputArea>
           <TextField
             label="Namespace ID"
             value={namespaceData?.namespaceId || ''}
@@ -134,17 +156,13 @@ const NamespaceDetailPage = (props: Props) => {
               </Button>
             ) :
               <>
-                <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/namespace-management')}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={() => navigate('/vc-management/namespace-management/namespace-edit/' + numericNamespaceId)}>
-                  Edit
-                </Button>
+                <Button variant="contained" color="primary" onClick={() => navigate('/vc-management/namespace-management')}>Back</Button>
+                <Button variant="outlined" color="primary" onClick={() => navigate('/vc-management/namespace-management/namespace-edit/' + numericNamespaceId)}>Go to Edit</Button>
               </>
             }
           </Box>
-        </Box>
-      </Box>
+        </StyledInputArea>
+      </StyledContainer>
     </>
   );
 }

@@ -1,13 +1,14 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, FormControl, FormHelperText, IconButton, MenuItem, Paper, Select, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Button, FormControl, FormHelperText, IconButton, MenuItem, Paper, Select, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox, styled } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { fetchNamespaces, getVcSchema, patchVcSchema } from "../../../apis/vc-management-api";
 import { useDialogs } from "@toolpad/core";
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../../components/dialog/CustomDialog";
+import SchemaItemSelectDialog from "./SchemaItemSelectDialog";
 
 type Props = {};
 
@@ -82,6 +83,12 @@ const VcSchemaEditPage = (props: Props) => {
         tempErrors.title = validateTitle(formData.title);
         tempErrors.description = validateDescription(formData.description);
         
+        if (formData.items.length === 0) {
+            tempErrors.errorItemsMessage = "At least one item is required.";
+        } else {
+            tempErrors.items = formData.items.map(validateItem);
+        }
+
         setErrors(tempErrors);
 
         return (
@@ -111,6 +118,24 @@ const VcSchemaEditPage = (props: Props) => {
         if (!description) return 'Please enter a Ref.';
         if (description.length < 4 || description.length > 2000) return 'Ref must be between 4 and 64 characters.';
         return undefined;
+    };
+
+    const validateItem = (item: ItemFormData): { id?: string; namespaceId?: string; name?: string } => {
+        let itemErrors: { id?: string; namespaceId?: string; name?: string } = {};
+
+        const idStr = typeof item.id === "number" ? String(item.id) : item.id;
+        
+        if (!idStr || typeof idStr !== "string" || idStr.trim() === "") {
+            itemErrors.id = "ID is required.";
+        }
+        if (!item.namespaceId || typeof item.namespaceId !== "string" || item.namespaceId.trim() === "") {
+            itemErrors.namespaceId = "Namespace ID is required.";
+        }
+        if (!item.name || typeof item.name !== "string" || item.name.trim() === "") {
+            itemErrors.name = "Name is required.";
+        }
+        
+        return itemErrors;
     };
 
     const handleSubmit = async () => {
@@ -272,17 +297,41 @@ const VcSchemaEditPage = (props: Props) => {
 
     useEffect(() => {
         if (!initialData) return;
+        console.log(formData);
+        console.log(initialData);
         const isModified = JSON.stringify(formData) !== JSON.stringify(initialData);
         setIsButtonDisabled(!isModified);
     }, [formData, initialData]);
 
+    const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+        width: 800,
+        margin: 'auto',
+        marginTop: theme.spacing(1),
+        padding: theme.spacing(3),
+        border: 'none',
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: '#ffffff',
+        boxShadow: '0px 4px 8px 0px #0000001A',
+    })), []);
+  
+    const StyledTitle = useMemo(() => styled(Typography)({
+        textAlign: 'left',
+        fontSize: '24px',
+        fontWeight: 700,
+    }), []);
+  
+    const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+        marginTop: theme.spacing(2),
+    })), []);
+
     return (
         <>
             <FullscreenLoader open={isLoading} />
-            <Box sx={{ p: 3 }}>
-                <Typography variant="h4">Edit VC Schema</Typography>
+            <Typography variant="h4">VC Schema Management</Typography>
+            <StyledContainer>
+                <StyledTitle>VC Schema Update</StyledTitle>
 
-                <Box sx={{ maxWidth: 800, margin: "auto", mt: 2, p: 3, border: "1px solid #ccc", borderRadius: 2 }}>
+                <StyledInputArea>
                     <TextField
                         label="VC Schema ID"
                         variant="outlined"
@@ -350,7 +399,7 @@ const VcSchemaEditPage = (props: Props) => {
                         <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>{errors.errorItemsMessage}</Typography>
                     )}
 
-                    <Button variant="contained" startIcon={<AddCircleOutlineIcon />} sx={{ mt: 2, mb: 2 }} onClick={handleOpenDialog}>
+                    <Button variant="contained" startIcon={<AddCircleOutlineIcon />} sx={{ mt: 2, mb: 1 }} onClick={handleOpenDialog}>
                         Add Item
                     </Button>
 
@@ -377,9 +426,9 @@ const VcSchemaEditPage = (props: Props) => {
                                             {item.namespaceId}
                                         </TableCell>
                                         <TableCell>{item.name}</TableCell>
-                                        <TableCell sx={{ width: 50 }}>
+                                        <TableCell sx={{ width: 50}}>
                                             <IconButton onClick={() => handleRemoveItem(index)} color="error">
-                                                <DeleteIcon />
+                                                <DeleteIcon sx={{ color: '#FF8400' }}/>
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -389,65 +438,21 @@ const VcSchemaEditPage = (props: Props) => {
                     </TableContainer>
 
                     <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>
-                        <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/vc-schema-management')}>
-                            Back
-                        </Button>
-                        <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
                         <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
+                        <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/vc-schema-management')}>Back</Button>
+                        <Button variant="outlined" color="secondary" onClick={handleReset}>Reset</Button>
                     </Box>
-                </Box>
-            </Box>
-            {/* 다이얼로그 - 아이템 선택 */}
-            <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
-                <DialogTitle>Select Items</DialogTitle>
-                <DialogContent>
-                    {/* 테이블로 데이터 표시 */}
-                    <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell width={50}>Select</TableCell>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Namespace ID</TableCell>
-                                    <TableCell>Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {availableItems.map((item) => (
-                                    <TableRow
-                                        key={item.id}
-                                        hover
-                                        onClick={() => handleSelectItem(item.id)}
-                                        sx={{ cursor: "pointer" }}
-                                    >
-                                        <TableCell>
-                                            <Checkbox checked={selectedItems.includes(item.id)} />
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.id}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // 체크박스 클릭과 충돌 방지
-                                                handleOpenNamespaceDetail(item.id);
-                                            }}
-                                        >
-                                            {item.namespaceId}
-                                        </TableCell>
-                                        <TableCell>{item.name}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancel</Button>
-                    <Button onClick={handleAddSelectedItems} variant="contained">Add Selected</Button>
-                </DialogActions>
-            </Dialog>
+                </StyledInputArea>
+            </StyledContainer>
+            
+            <SchemaItemSelectDialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                availableItems={availableItems}
+                selectedItems={selectedItems}
+                onSelectItem={handleSelectItem}
+                onConfirmSelection={handleAddSelectedItems}
+            />
         </>
     );
 };

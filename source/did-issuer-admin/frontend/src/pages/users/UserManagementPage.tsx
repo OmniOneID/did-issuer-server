@@ -1,4 +1,4 @@
-import { Link } from '@mui/material';
+import { Box, Link, styled, Typography } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useEffect, useMemo, useState } from 'react';
@@ -49,10 +49,28 @@ const UserManagementPage = (props: Props) => {
       .finally(() => setLoading(false));
   }, [paginationModel]);
 
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+    margin: 'auto',
+    marginTop: theme.spacing(1),
+    padding: theme.spacing(3),
+    border: 'none',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: '#ffffff',
+    boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledSubTitle = useMemo(() => styled(Typography)({
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 700,
+  }), []);
+
   return (
     <>
       <FullscreenLoader open={loading} />
 
+      <StyledContainer>
+      <StyledSubTitle>User Management</StyledSubTitle>
       <CustomDataGrid 
           rows={rows} 
           columns={[
@@ -90,6 +108,7 @@ const UserManagementPage = (props: Props) => {
           paginationModel={paginationModel} 
           setPaginationModel={setPaginationModel} 
         />
+        </StyledContainer>
     </>
   )
 }

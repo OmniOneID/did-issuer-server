@@ -4,23 +4,23 @@ import React, { useEffect, useState } from "react";
 interface PasswordResetDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (newPassword: string) => void;
+  onSubmit: (oldPassword: string, newPassword: string) => void;
 }
 
 interface ErrorState {
+  oldPassword?: string;
   newPassword?: string;
-  confirmPassword?: string;
 }
 
-const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose, onSubmit }) => {
+const PasswordChangeDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose, onSubmit }) => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<ErrorState>({});
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   const handleConfirm = () => {
     if (!validate()) return;
-    onSubmit(newPassword);
+    onSubmit(oldPassword, newPassword);
     onClose();
   };
 
@@ -30,14 +30,14 @@ const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose
   const validate = () => {
     let tempErrors: ErrorState = {};
 
+    if (!oldPassword.trim()) {
+      tempErrors.oldPassword = "Please enter a current password.";
+    } 
+    
     if (!newPassword.trim()) {
       tempErrors.newPassword = "Please enter a new password.";
     } else if (newPassword.length < 8 || newPassword.length > 64) {
       tempErrors.newPassword = "Password must be between 8 and 64 characters.";
-    }
-
-    if (confirmPassword !== newPassword) {
-      tempErrors.confirmPassword = "Passwords do not match.";
     }
 
     setErrors(tempErrors);
@@ -45,13 +45,13 @@ const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose
   };
 
   useEffect(() => {
-    setIsButtonDisabled(!newPassword.trim() || !confirmPassword.trim());
-  }, [newPassword, confirmPassword]);
+    setIsButtonDisabled(!oldPassword.trim() || !newPassword.trim());
+  }, [oldPassword, newPassword]);
 
   useEffect(() => {
     if (open) {
+      setOldPassword("");
       setNewPassword("");
-      setConfirmPassword("");
       setErrors({});
       setIsButtonDisabled(true);
     }
@@ -63,6 +63,17 @@ const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose
       <DialogContent>
         <TextField
           fullWidth
+          label="Current Password"
+          type="password"
+          variant="outlined"
+          margin="normal"
+          value={oldPassword}
+          onChange={handleChange(setOldPassword)}
+          error={!!errors.oldPassword}
+          helperText={errors.oldPassword}
+        />
+        <TextField
+          fullWidth
           label="New Password"
           type="password"
           variant="outlined"
@@ -71,17 +82,6 @@ const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose
           onChange={handleChange(setNewPassword)}
           error={!!errors.newPassword}
           helperText={errors.newPassword}
-        />
-        <TextField
-          fullWidth
-          label="Confirm Password"
-          type="password"
-          variant="outlined"
-          margin="normal"
-          value={confirmPassword}
-          onChange={handleChange(setConfirmPassword)}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword}
         />
       </DialogContent>
       <DialogActions>
@@ -96,4 +96,4 @@ const PasswordResetDialog: React.FC<PasswordResetDialogProps> = ({ open, onClose
   );
 };
 
-export default PasswordResetDialog;
+export default PasswordChangeDialog;
