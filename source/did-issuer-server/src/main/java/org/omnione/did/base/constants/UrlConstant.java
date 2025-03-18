@@ -48,6 +48,8 @@ public class UrlConstant {
 
         public static final String USER = "/users";
 
+        public static final String ISSUED_VCS = "/issued-vcs";
+
     }
 
     public static class Tas {
@@ -56,6 +58,13 @@ public class UrlConstant {
         public static final String REQUEST_ECDH = "/request-ecdh";
         public static final String REQUEST_ENROLL_ENTITY = "/request-enroll-entity";
         public static final String CONFIRM_ENROLL_ENTITY = "/confirm-enroll-entity";
+
+    }
+
+    public static class List {
+        public static final String V1 = "/list/admin/v1";
+        public static final String VC_SCHEMA_PUBLIC = "/vc-schemas/public";
+        public static final String VC_PLAN_PUBLIC = "/vc-plans/public";
     }
 
 }

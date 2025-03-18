@@ -16,6 +16,7 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bouncycastle.util.Strings;
@@ -26,12 +27,14 @@ import org.omnione.did.data.model.profile.issue.InnerIssueProfile;
 import org.omnione.did.data.model.profile.issue.IssueProcess;
 import org.omnione.did.data.model.provider.ProviderDetail;
 import org.omnione.did.data.model.vc.CredentialSchema;
+import org.omnione.did.issuer.v1.admin.api.dto.PostIssuePlanIdReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.GetIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,7 +51,14 @@ import java.util.List;
 public class IssueProfileService {
     private final IssueProfileQueryService issueProfileQueryService;
     private final VcSchemaQueryService vcSchemaQueryService;
+    private final ListCommunityService listCommunityService;
+    private final IssuerInfoQueryService issuerInfoQueryService;
+    private String issuerDid;
 
+    @PostConstruct
+    private void init() {
+        this.issuerDid = issuerInfoQueryService.getIssuerInfo().getDid();
+    }
     public CreateIssueProfileResDto createIssueProfile(CreateIssueProfileReqDto request) {
 
         IssueProfile issueProfile = issueProfileQueryService.save(IssueProfile.builder()
@@ -62,6 +72,11 @@ public class IssueProfileService {
                 .vcSchemaId(request.getVcSchemaId())
                 .initiateType(request.getInitiateType())
                 .language(request.getLanguage())
+                .build());
+
+        listCommunityService.postVcPlan(PostIssuePlanIdReqDto.builder()
+                .vcPlan(issueProfile.getVcPlanId())
+                .issuerDid(issuerDid)
                 .build());
 
         return CreateIssueProfileResDto.builder()

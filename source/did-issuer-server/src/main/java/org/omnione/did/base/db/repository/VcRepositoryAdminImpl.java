@@ -6,10 +6,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.domain.IssueProfile;
-import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.base.db.domain.QIssueProfile;
-import org.omnione.did.base.db.domain.QNamespace;
+import org.omnione.did.base.db.domain.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,51 +19,57 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class IssueProfileRepositoryAdminImpl implements IssueProfileRepositoryAdmin {
+public class VcRepositoryAdminImpl implements VcRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<IssueProfile> searchIssueProfiles(String searchKey, String searchValue, Pageable pageable) {
-        QIssueProfile issueProfile = QIssueProfile.issueProfile;
+    public Page<Vc> searchIssuedVc(String searchKey, String searchValue, Pageable pageable) {
+        QVc vc = QVc.vc;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
         long total = Optional.ofNullable(queryFactory
-                .select(issueProfile.count())
-                .from(issueProfile)
+                .select(vc.count())
+                .from(vc)
                 .where(predicate)
                 .fetchOne())
                 .orElse(0L);
 
-        List<IssueProfile> results = queryFactory
-                .selectFrom(issueProfile)
+        List<Vc> results = queryFactory
+                .selectFrom(vc)
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderSpecifier(pageable, issueProfile))
+                .orderBy(getOrderSpecifier(pageable, vc))
                 .fetch();
 
         return new PageImpl<>(results, pageable, total);
     }
 
     public BooleanExpression buildPredicate(String searchKey, String searchValue) {
-        QIssueProfile issueProfile = QIssueProfile.issueProfile;
+        QVc vc = QVc.vc;
         BooleanExpression predicate = Expressions.asBoolean(true).isTrue();
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
-            predicate = switch (searchKey) {
-                case "title" -> predicate.and(issueProfile.title.eq(searchValue));
-                default -> predicate.and(Expressions.FALSE);
-            };
+            switch (searchKey) {
+                case "did":
+                    predicate = predicate.and(vc.did.eq(searchValue));
+                    break;
+                case "vcId":
+                    predicate = predicate.and(vc.vcId.eq(searchValue));
+                    break;
+                default:
+                    predicate = predicate.and(Expressions.FALSE);
+            }
         }
 
         return predicate;
     }
 
-    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QIssueProfile issueProfile) {
+    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QVc vc) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, issueProfile.createdAt));
+            orders.add(new OrderSpecifier<>(Order.ASC, vc.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {
@@ -74,13 +77,13 @@ public class IssueProfileRepositoryAdminImpl implements IssueProfileRepositoryAd
 
             switch (order.getProperty()) {
                 case "vcPlanId":
-                    orders.add(new OrderSpecifier<>(direction, issueProfile.vcPlanId));
+                    orders.add(new OrderSpecifier<>(direction, vc.vcPlanId));
                     break;
-                case "title":
-                    orders.add(new OrderSpecifier<>(direction, issueProfile.title));
+                case "vcId":
+                    orders.add(new OrderSpecifier<>(direction, vc.vcId));
                     break;
                 default:
-                    orders.add(new OrderSpecifier<>(Order.ASC, issueProfile.createdAt));
+                    orders.add(new OrderSpecifier<>(Order.ASC, vc.createdAt));
                     break;
             }
         }

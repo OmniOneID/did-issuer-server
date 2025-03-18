@@ -25,7 +25,7 @@ import java.util.Optional;
  * Repository interface for Vc entity operations.
  * Provides CRUD operations for Vc entities and custom query methods.
  */
-public interface VcRepository extends JpaRepository<Vc, Long> {
+public interface VcRepository extends JpaRepository<Vc, Long>, VcRepositoryAdmin {
     /**
      * Finds a Vc entity by its associated VC ID.
      *

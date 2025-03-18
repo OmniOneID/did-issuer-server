@@ -798,9 +798,8 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The generated DID Document.
      */
     private DidDocument getDidDocument() {
-        DidDocAndStatus didDocument = BaseBlockChainUtil.findDidDocument(issuerInfoQueryService.getIssuerInfo().getDid());
 
-        return didDocument.getDocument();
+        return storageService.findDidDoc(issuerInfoQueryService.getIssuerInfo().getDid());
     }
 
     /**

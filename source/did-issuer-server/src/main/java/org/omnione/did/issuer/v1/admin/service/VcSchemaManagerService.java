@@ -16,14 +16,18 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
+import org.omnione.did.issuer.v1.admin.api.dto.PostVcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.dto.*;
+import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,14 @@ public class VcSchemaManagerService {
     private final VcSchemaQueryService vcSchemaQueryService;
 
     private final NamespaceQueryService namespaceQueryService;
+    private final ListCommunityService listCommunityService;
+    private final IssuerInfoQueryService issuerInfoQueryService;
+    private String issuerDid;
+
+    @PostConstruct
+    private void init() {
+        this.issuerDid = issuerInfoQueryService.getIssuerInfo().getDid();
+    }
 
     public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
 
@@ -62,6 +74,11 @@ public class VcSchemaManagerService {
                 .collect(Collectors.toList());
 
         vcSchemaQueryService.saveVcSchemaNamespace(vcSchemaNamespaceList);
+
+        listCommunityService.postVcSchema(PostVcSchemaReqDto.builder()
+                .issuerDid(issuerDid)
+                .vcSchema(vcSchema.getVcSchemaId())
+                .build());
 
         return CreateVcSchemaResDto.builder()
                 .build();

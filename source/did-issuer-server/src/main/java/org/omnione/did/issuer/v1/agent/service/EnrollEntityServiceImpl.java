@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +32,11 @@ import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.db.domain.CertificateVc;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.response.ErrorResponse;
 import org.omnione.did.base.util.BaseCryptoUtil;
 import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.exception.HttpClientException;
 import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.crypto.exception.CryptoException;
@@ -137,7 +141,13 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 .build();
 
         String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.PROPOSE_ENROLL_ENTITY;
-        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ProposeEnrollEntityApiResDto.class);
+        try {
+            return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ProposeEnrollEntityApiResDto.class);
+        } catch (HttpClientException e) {
+            log.error("HttpClientException occurred while sending generate-profile request: {}", e.getResponseBody(), e);
+            ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
+            throw new OpenDidException(errorResponse);
+        }
     }
 
     /**
@@ -157,7 +167,13 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
 
 
         String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.REQUEST_ECDH;
-        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEcdhApiResDto.class);
+        try {
+            return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEcdhApiResDto.class);
+        } catch (HttpClientException e) {
+            log.error("HttpClientException occurred while sending generate-profile request: {}", e.getResponseBody(), e);
+            ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
+            throw new OpenDidException(errorResponse);
+        }
     }
     /**
      * Generate request data.
@@ -212,7 +228,13 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 .build();
 
         String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.REQUEST_ENROLL_ENTITY;
-        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEnrollEntityApiResDto.class);
+        try {
+            return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), RequestEnrollEntityApiResDto.class);
+        } catch (HttpClientException e) {
+            log.error("HttpClientException occurred while sending generate-profile request: {}", e.getResponseBody(), e);
+            ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
+            throw new OpenDidException(errorResponse);
+        }
     }
 
     /**
@@ -289,7 +311,13 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
 
 
         String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.CONFIRM_ENROLL_ENTITY;
-        return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ConfirmEnrollEntityApiResDto.class);
+        try {
+            return HttpClientUtil.postData(url, JsonUtil.serializeToJson(request), ConfirmEnrollEntityApiResDto.class);
+        } catch (HttpClientException e) {
+            log.error("HttpClientException occurred while sending generate-profile request: {}", e.getResponseBody(), e);
+            ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
+            throw new OpenDidException(errorResponse);
+        }
     }
 
     /**
@@ -305,5 +333,23 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         byte[] signature = walletService.generateCompactSignature(keyId, serializeSource);
 
         return BaseMultibaseUtil.encode(signature);
+    }
+
+    /**
+     * Converts an external error response string to an ErrorResponse object.
+     * This method attempts to parse the given JSON string into an ErrorResponse instance.
+     *
+     * @param resBody The JSON string representing the external error response
+     * @return An ErrorResponse object parsed from the input string
+     * @throws OpenDidException with ErrorCode.ISSUER_UNKNOWN_RESPONSE if parsing fails
+     */
+    private ErrorResponse convertExternalErrorResponse(String resBody) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(resBody, ErrorResponse.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse external error response: {}", resBody, e);
+            throw new OpenDidException(ErrorCode.TAS_UNKNOWN_RESPONSE);
+        }
     }
 }

@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.ISSUER)
-public class IssuerManagementController {
+public class IssuerAdminController {
     private final IssuerManagementService issuerManagementService;
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)

@@ -127,10 +127,11 @@ public enum ErrorCode {
     // 800~ 899 = admin
     ADMIN_INFO_NOT_FOUND("00800", "Failed to find admin: admin is not registered.", 400),
 
-    UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500),
+    TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the issuer.", 500),
+
+    UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500);
 
 
-    ;
     private final String code;
     private final String message;
     private final int httpStatus;
