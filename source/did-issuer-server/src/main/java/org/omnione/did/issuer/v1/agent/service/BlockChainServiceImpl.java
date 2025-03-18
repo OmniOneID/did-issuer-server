@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 OmniOne.
+ * Copyright 2025 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,26 @@ package org.omnione.did.issuer.v1.agent.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.ContractApi;
+import org.omnione.did.ContractFactory;
+import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.BaseBlockChainUtil;
+import org.omnione.did.base.property.BlockchainProperty;
 import org.omnione.did.data.model.did.DidDocAndStatus;
 import org.omnione.did.data.model.did.DidDocument;
+import org.omnione.did.data.model.did.InvokedDidDoc;
 import org.omnione.did.data.model.enums.did.DidDocStatus;
+import org.omnione.did.data.model.enums.vc.RoleType;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.vc.VcMeta;
+import org.omnione.did.fabric.FabricContractApi;
+import org.omnione.exception.BlockChainException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.omnione.did.base.exception.ErrorCode;
 
 /**
- * The BlockChainServiceImpl class provides methods for registering and retrieving DID Documents.
- * It is designed to facilitate the storage and retrieval of DID Documents, ensuring that the data is accurate and up-to-date.
+ * Service for managing DID Document operations, including registration and retrieval.
+ * This service interacts with the blockchain to register and retrieve DID Documents.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,22 +45,51 @@ import org.omnione.did.base.exception.ErrorCode;
 @Profile("!repository")
 public class BlockChainServiceImpl implements StorageService {
 
+    private ContractApi contractApiInstance = null;
+
+    private final BlockchainProperty blockchainProperty;
+
     /**
-     * Register the given DID Document to blockchain.
+     * Initializes the blockchain connection.
      *
-     * @param didKeyUrl the DID key URL
-     * @return the retrieved DID Document
-     * @throws OpenDidException if the DID Document cannot be retrieved
+     * @return a ContractApi instance.
+     */
+    public ContractApi initBlockChain() {
+        return ContractFactory.FABRIC.create(blockchainProperty.getFilePath());
+    }
+
+    /**
+     * Resets the ContractApi instance.
+     * Use this method to reinitialize the blockchain connection.
+     */
+    public ContractApi getContractApiInstance() {
+        if (contractApiInstance == null) {
+            synchronized (BlockChainServiceImpl.class) {
+                if (contractApiInstance == null) {
+                    contractApiInstance = initBlockChain();
+                }
+            }
+        }
+        return contractApiInstance;
+    }
+
+    /**
+     * Retrieves a DID document and its status from the blockchain.
+     *
+     * @param didKeyUrl the DID key URL to search for.
+     * @return the DID document and its status.
+     * @throws OpenDidException if the DID document cannot be found.
      */
     @Override
     public DidDocument findDidDoc(String didKeyUrl) {
         try {
-            DidDocAndStatus didDocAndStatus = BaseBlockChainUtil.findDidDocument(didKeyUrl);
-            isActiveDidDoc(didDocAndStatus.getStatus());
+            ContractApi contractApi = getContractApiInstance();
+            DidDocAndStatus didDocAndStatus = (DidDocAndStatus) contractApi.getDidDoc(didKeyUrl);
+
             return didDocAndStatus.getDocument();
-        } catch (OpenDidException e) {
-            log.error("Failed to find DID Document: " + e.getMessage());
-            throw e;
+        } catch (BlockChainException e) {
+            log.error("Failed to get DID Document: " + e.getMessage());
+            throw new OpenDidException(ErrorCode.BLOCKCHAIN_GET_DID_DOC_FAILED);
         } catch (Exception e) {
             log.error("Failed to find DID Document: " + e.getMessage());
             throw new OpenDidException(ErrorCode.DID_DOC_FIND_FAILURE);
@@ -62,46 +97,50 @@ public class BlockChainServiceImpl implements StorageService {
     }
 
     /**
-     * Register Verifiable Credential Metadata to blockchain.
+     * Registers VC metadata on the blockchain.
      *
-     * @param vcMeta Verifiable Credential Metadata
+     * @param vcMeta the VC metadata to register.
+     * @throws OpenDidException if the VC metadata cannot be registered.
      */
     @Override
     public void registerVcMeta(VcMeta vcMeta) {
-        BaseBlockChainUtil.registerVcMeta(vcMeta);
-    }
-
-    /**
-     * Update the status of the Verifiable Credential.
-     *
-     * @param vcId      the Verifiable Credential ID
-     * @param vcStatus  the Verifiable Credential status
-     */
-    @Override
-    public void updateVcStatus(String vcId, VcStatus vcStatus) {
-        BaseBlockChainUtil.updateVcStatus(vcId, vcStatus);
-    }
-
-    /**
-     * Retrieve the Verifiable Credential Metadata by VC ID.
-     *
-     * @param vcId the Verifiable Credential ID
-     * @return the Verifiable Credential Metadata
-     */
-    @Override
-    public VcMeta getVcMetByVcId(String vcId) {
-        return BaseBlockChainUtil.findVcMeta(vcId);
-    }
-
-    /**
-     * Did Document status check
-     *
-     * @param didDocStatus the status of the DID Document
-     * @throws OpenDidException Invalid DID Document version
-     */
-    private void isActiveDidDoc(DidDocStatus didDocStatus) {
-        if (!DidDocStatus.ACTIVATED.equals(didDocStatus)) {
-            throw new OpenDidException(ErrorCode.DID_DOC_VERSION_INVALID);
+        try {
+            ContractApi contractApi = getContractApiInstance();
+            contractApi.registVcMetadata(vcMeta);
+        } catch (Exception e) {
+            log.error("Failed to register VC Meta: " + e.getMessage());
+            throw new OpenDidException(ErrorCode.BLOCKCHAIN_VC_META_REGISTRATION_FAILED);
         }
     }
+
+
+    /**
+     * Updates the status of a VC on the blockchain.
+     *
+     * @param vcId the VC ID.
+     * @param vcStatus the new status for the VC.
+     * @throws OpenDidException if the VC status cannot be updated.
+     */
+    public void updateVcStatus(String vcId, VcStatus vcStatus) {
+        try {
+            ContractApi contractApi = getContractApiInstance();
+            contractApi.updateVcStatus(vcId, vcStatus);
+        } catch (BlockChainException e) {
+            log.error("Failed to update VC Status: " + e.getMessage());
+            throw new OpenDidException(ErrorCode.BLOCKCHAIN_VC_STATUS_UPDATE_FAILED);
+        }
+    }
+
+    @Override
+    public VcMeta getVcMetByVcId(String vcId) {
+        ContractApi contractApi = getContractApiInstance();
+        try {
+            return (VcMeta) contractApi.getVcMetadata(vcId);
+        } catch (BlockChainException e) {
+            log.error("Failed to find VC Meta: " + e.getMessage());
+            throw new OpenDidException(ErrorCode.BLOCKCHAIN_VC_META_RETRIEVAL_FAILED);
+        }
+    }
+
+
 }
