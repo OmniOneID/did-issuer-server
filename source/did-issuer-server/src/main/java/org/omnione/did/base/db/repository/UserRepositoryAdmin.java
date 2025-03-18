@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.base.db.repository;
 
-import lombok.*;
+import org.omnione.did.base.db.domain.User;
+import org.omnione.did.base.db.domain.VcSchema;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
-/**
- * Description...
- *
- */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@Builder
-public class CreateVcSchemaReqDto {
-    private List<Long> namespaces;
-    private String vcSchemaId;
-    private String title;
-    private String description;
-    private String language;
-    private String version;
+public interface UserRepositoryAdmin {
+    Page<User> searchUser(String searchKey, String searchValue, Pageable pageable);
 }

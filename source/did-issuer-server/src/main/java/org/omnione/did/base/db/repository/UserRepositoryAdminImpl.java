@@ -6,8 +6,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.base.db.domain.QNamespace;
+import org.omnione.did.base.db.domain.QUser;
+import org.omnione.did.base.db.domain.QVcSchema;
+import org.omnione.did.base.db.domain.User;
+import org.omnione.did.base.db.domain.VcSchema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,72 +22,61 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
+public class UserRepositoryAdminImpl implements UserRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Namespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable) {
-        QNamespace namespace = QNamespace.namespace;
+    public Page<User> searchUser(String searchKey, String searchValue, Pageable pageable) {
+        QUser qUser = QUser.user;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
         long total = Optional.ofNullable(queryFactory
-                .select(namespace.count())
-                .from(namespace)
+                .select(qUser.count())
+                .from(qUser)
                 .where(predicate)
                 .fetchOne())
                 .orElse(0L);
 
-        List<Namespace> results = queryFactory
-                .selectFrom(namespace)
+        List<User> results = queryFactory
+                .selectFrom(qUser)
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderSpecifier(pageable, namespace))
+                .orderBy(getOrderSpecifier(pageable, qUser))
                 .fetch();
 
         return new PageImpl<>(results, pageable, total);
     }
 
     public BooleanExpression buildPredicate(String searchKey, String searchValue) {
-        QNamespace namespace = QNamespace.namespace;
+        QVcSchema vcSchema = QVcSchema.vcSchema;
         BooleanExpression predicate = Expressions.asBoolean(true).isTrue();
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
-            switch (searchKey) {
-                case "namespaceId":
-                    predicate = predicate.and(namespace.namespaceId.eq(searchValue));
-                    break;
-                case "name":
-                    predicate = predicate.and(namespace.name.eq(searchValue));
-                    break;
-                default:
-                    predicate = predicate.and(Expressions.FALSE);
-            }
+            predicate = switch (searchKey) {
+                case "vcSchemaId" -> predicate.and(vcSchema.vcSchemaId.contains(searchValue));
+                case "title" -> predicate.and(vcSchema.title.contains(searchValue));
+                default -> predicate.and(Expressions.FALSE);
+            };
         }
 
         return predicate;
     }
 
-    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QNamespace namespace) {
+    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QUser qUser) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+            orders.add(new OrderSpecifier<>(Order.ASC, qUser.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {
             Order direction = order.isAscending() ? Order.ASC : Order.DESC;
 
             switch (order.getProperty()) {
-                case "namespaceId":
-                    orders.add(new OrderSpecifier<>(direction, namespace.namespaceId));
-                    break;
-                case "name":
-                    orders.add(new OrderSpecifier<>(direction, namespace.name));
-                    break;
-                default:
-                    orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
-                    break;
+                case "did" -> orders.add(new OrderSpecifier<>(direction, qUser.did));
+                case "pii" -> orders.add(new OrderSpecifier<>(direction, qUser.pii));
+                default -> orders.add(new OrderSpecifier<>(Order.ASC, qUser.createdAt));
             }
         }
         return orders.toArray(new OrderSpecifier[0]);

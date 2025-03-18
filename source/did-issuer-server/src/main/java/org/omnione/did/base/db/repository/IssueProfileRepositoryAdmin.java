@@ -17,20 +17,9 @@
 package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.IssueProfile;
-import org.omnione.did.base.db.domain.Namespace;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
-
-/**
- * Repository interface for IssueProfile entity operations.
- * Provides CRUD operations for IssueProfile entities and custom query methods.
- */
-public interface IssueProfileRepository extends JpaRepository<IssueProfile, Long>, QuerydslPredicateExecutor<IssueProfile>, IssueProfileRepositoryAdmin {
-    boolean existsByVcPlanId(String vcPlanId);
-
-    Optional<IssueProfile> findByVcPlanId(String vcPlanId);
-
-    boolean existsByVcSchemaId(Long id);
+public interface IssueProfileRepositoryAdmin {
+    Page<IssueProfile> searchIssueProfiles(String searchKey, String searchValue, Pageable pageable);
 }

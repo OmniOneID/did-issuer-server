@@ -19,9 +19,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.IssueProfile;
-import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileReqDto;
-import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileResDto;
-import org.omnione.did.issuer.v1.admin.dto.ResponseDto;
+import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.IssueProfileService;
 import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
 import org.springframework.data.domain.Page;
@@ -50,8 +48,9 @@ public class IssueProfileAdminController {
     }
 
     @PatchMapping
-    public void updateIssueProfile() {
-        // Required implementation
+    public void updateIssueProfile(@RequestBody CreateIssueProfileReqDto request) {
+
+        issueProfileService.updateIssueProfile(request);
     }
 
     @DeleteMapping
@@ -61,17 +60,14 @@ public class IssueProfileAdminController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping(UrlConstant.Admin.LIST)
-    public ResponseEntity<ResponseDto> getIssueProfileList(
-            @PageableDefault(sort = "id") Pageable pageable) {
-        Page<IssueProfile> page = issueProfileService.getIssueProfileList(pageable);
-        ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
+    @GetMapping
+    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable){
 
-        return ResponseEntity.ok(response);
+        return issueProfileService.searchIssueProfileList(searchKey, searchValue, pageable);
     }
 
-    @GetMapping
-    public ResponseEntity<IssueProfile> getIssueProfile(@RequestParam("id") Long id) {
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<GetIssueProfileResDto> getIssueProfile(@PathVariable("id") Long id) {
 
         return ResponseEntity.ok(issueProfileService.getIssueProfileById(id));
     }

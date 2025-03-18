@@ -16,15 +16,21 @@
 
 package org.omnione.did.issuer.v1.admin.service.query;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.IssueProfile;
+import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.repository.IssueProfileRepository;
+import org.omnione.did.base.db.repository.VcSchemaRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.issuer.v1.admin.dto.IssueProfileDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Description...
@@ -33,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class IssueProfileQueryService {
     private final IssueProfileRepository issueProfileRepository;
-
+    private final VcSchemaRepository vcSchemaRepository;
     public IssueProfile save(IssueProfile issueProfile) {
         return issueProfileRepository.save(issueProfile);
     }
@@ -62,5 +68,19 @@ public class IssueProfileQueryService {
         if (!issueProfileRepository.existsByVcSchemaId(id)) {
             issueProfileRepository.deleteById(id);
         }
+    }
+
+    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+        Page<IssueProfile> entityPage = issueProfileRepository.searchIssueProfiles(searchKey, searchValue, pageable);
+
+        List<IssueProfileDto> issueProfileDtos = entityPage.getContent().stream()
+                .map(issueProfile -> {
+                    VcSchema vcSchema = vcSchemaRepository.findById(issueProfile.getVcSchemaId())
+                            .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                    return IssueProfileDto.fromEntity(issueProfile, vcSchema.getVcSchemaId());
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(issueProfileDtos, pageable, entityPage.getTotalElements());
     }
 }

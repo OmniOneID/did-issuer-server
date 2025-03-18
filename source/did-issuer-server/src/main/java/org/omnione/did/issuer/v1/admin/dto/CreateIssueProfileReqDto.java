@@ -32,6 +32,7 @@ import java.util.List;
 @ToString
 @Builder
 public class CreateIssueProfileReqDto {
+    private Long id;
     private String vcPlanId;
     private String title;
     private String description;

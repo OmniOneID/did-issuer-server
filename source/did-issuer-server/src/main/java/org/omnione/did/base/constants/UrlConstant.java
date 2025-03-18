@@ -37,13 +37,16 @@ public class UrlConstant {
     }
 
     public static class Admin {
+        public static final String PATH_VARIABLE_ID = "/{id}";
         public static final String V1 = "/issuer/admin/v1";
-        public static final String NAMESPACE = "/namespace";
-        public static final String VC_SCHEMA = "/vc-schema";
-        public static final String ISSUE_PROFILE = "/issue-profile";
+        public static final String NAMESPACE = "/namespaces";
+        public static final String VC_SCHEMA = "/vc-schemas";
+        public static final String ISSUE_PROFILE = "/issue-profiles";
         public static final String LIST = "/list";
         public static final String ISSUER = "/issuer";
         public static final String ADMIN = "/admin";
+
+        public static final String USER = "/users";
 
     }
 
@@ -54,4 +57,5 @@ public class UrlConstant {
         public static final String REQUEST_ENROLL_ENTITY = "/request-enroll-entity";
         public static final String CONFIRM_ENROLL_ENTITY = "/confirm-enroll-entity";
     }
+
 }

@@ -8,6 +8,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.QNamespace;
+import org.omnione.did.base.db.domain.QVcSchema;
+import org.omnione.did.base.db.domain.VcSchema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,43 +22,43 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
+public class VcSchemaRepositoryAdminImpl implements VcSchemaRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Namespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable) {
-        QNamespace namespace = QNamespace.namespace;
+    public Page<VcSchema> searchVcSchema(String searchKey, String searchValue, Pageable pageable) {
+        QVcSchema vcSchema = QVcSchema.vcSchema;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
         long total = Optional.ofNullable(queryFactory
-                .select(namespace.count())
-                .from(namespace)
+                .select(vcSchema.count())
+                .from(vcSchema)
                 .where(predicate)
                 .fetchOne())
                 .orElse(0L);
 
-        List<Namespace> results = queryFactory
-                .selectFrom(namespace)
+        List<VcSchema> results = queryFactory
+                .selectFrom(vcSchema)
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderSpecifier(pageable, namespace))
+                .orderBy(getOrderSpecifier(pageable, vcSchema))
                 .fetch();
 
         return new PageImpl<>(results, pageable, total);
     }
 
     public BooleanExpression buildPredicate(String searchKey, String searchValue) {
-        QNamespace namespace = QNamespace.namespace;
+        QVcSchema vcSchema = QVcSchema.vcSchema;
         BooleanExpression predicate = Expressions.asBoolean(true).isTrue();
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
-                case "namespaceId":
-                    predicate = predicate.and(namespace.namespaceId.eq(searchValue));
+                case "vcSchemaId":
+                    predicate = predicate.and(vcSchema.vcSchemaId.contains(searchValue));
                     break;
-                case "name":
-                    predicate = predicate.and(namespace.name.eq(searchValue));
+                case "title":
+                    predicate = predicate.and(vcSchema.title.contains(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);
@@ -66,25 +68,25 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
         return predicate;
     }
 
-    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QNamespace namespace) {
+    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QVcSchema vcSchema) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+            orders.add(new OrderSpecifier<>(Order.ASC, vcSchema.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {
             Order direction = order.isAscending() ? Order.ASC : Order.DESC;
 
             switch (order.getProperty()) {
-                case "namespaceId":
-                    orders.add(new OrderSpecifier<>(direction, namespace.namespaceId));
+                case "vcSchemaId":
+                    orders.add(new OrderSpecifier<>(direction, vcSchema.vcSchemaId));
                     break;
-                case "name":
-                    orders.add(new OrderSpecifier<>(direction, namespace.name));
+                case "title":
+                    orders.add(new OrderSpecifier<>(direction, vcSchema.title));
                     break;
                 default:
-                    orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+                    orders.add(new OrderSpecifier<>(Order.ASC, vcSchema.createdAt));
                     break;
             }
         }

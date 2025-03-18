@@ -28,7 +28,10 @@ import org.omnione.did.data.model.provider.ProviderDetail;
 import org.omnione.did.data.model.vc.CredentialSchema;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileResDto;
+import org.omnione.did.issuer.v1.admin.dto.GetIssueProfileResDto;
+import org.omnione.did.issuer.v1.admin.dto.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,7 @@ import java.util.List;
 @Service
 public class IssueProfileService {
     private final IssueProfileQueryService issueProfileQueryService;
+    private final VcSchemaQueryService vcSchemaQueryService;
 
     public CreateIssueProfileResDto createIssueProfile(CreateIssueProfileReqDto request) {
 
@@ -68,11 +72,36 @@ public class IssueProfileService {
         return issueProfileQueryService.findAll(pageable);
     }
 
-    public IssueProfile getIssueProfileById(Long id) {
-        return issueProfileQueryService.findById(id);
+    public GetIssueProfileResDto getIssueProfileById(Long id) {
+        IssueProfile issueProfile = issueProfileQueryService.findById(id);
+        VcSchema vcSchema = vcSchemaQueryService.findById(issueProfile.getVcSchemaId());
+
+        return GetIssueProfileResDto.builder().issueProfile(issueProfile)
+                .vcSchemaName(vcSchema.getVcSchemaId())
+                .build();
     }
 
     public void deleteIssueProfileById(Long id) {
         issueProfileQueryService.deleteIssueProfileById(id);
+    }
+
+    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+        return issueProfileQueryService.searchIssueProfileList(searchKey, searchValue, pageable);
+    }
+
+    public void updateIssueProfile(CreateIssueProfileReqDto request) {
+        IssueProfile issueProfile = issueProfileQueryService.findById(request.getId());
+
+        issueProfile.setDescription(request.getDescription());
+        issueProfile.setTitle(request.getTitle());
+        issueProfile.setCipher(request.getCipher());
+        issueProfile.setCurve(request.getCurve());
+        issueProfile.setPadding(request.getPadding());
+        issueProfile.setInitiateType(request.getInitiateType());
+        issueProfile.setLanguage(request.getLanguage());
+        issueProfile.setEndpoints(request.getEndpoints());
+        issueProfile.setVcSchemaId(request.getVcSchemaId());
+
+
     }
 }

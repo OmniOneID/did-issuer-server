@@ -59,7 +59,7 @@ public class NamespaceService {
 
     public NamespaceDto updateNamespace(UpdateNamespaceReqDto request) {
         Namespace namespace = namespaceQueryService.findById(request.getId());
-        namespace.setNamespaceId(request.getSchemaClaims().getNamespace().getId());
+//        namespace.setNamespaceId(request.getSchemaClaims().getNamespace().getId());
         namespace.setName(request.getSchemaClaims().getNamespace().getName());
         namespace.setRef(request.getSchemaClaims().getNamespace().getRef());
 

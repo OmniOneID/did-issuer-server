@@ -18,18 +18,23 @@ package org.omnione.did.issuer.v1.admin.service.query;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
 import org.omnione.did.base.db.repository.VcSchemaNamespaceRepository;
 import org.omnione.did.base.db.repository.VcSchemaRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.issuer.v1.admin.dto.NamespaceDto;
+import org.omnione.did.issuer.v1.admin.dto.VcSchemaDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -74,5 +79,24 @@ public class VcSchemaQueryService {
     public void deleteById(Long id) {
         vcSchemaNamespaceRepository.deleteAllByVcSchemaId(id);
         vcSchemaRepository.deleteById(id);
+    }
+
+    public Page<VcSchemaDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+        Page<VcSchema> entityPage = vcSchemaRepository.searchVcSchema(searchKey, searchValue, pageable);
+
+        List<VcSchemaDto> VcSchemaDtos = entityPage.getContent().stream()
+                .map(VcSchemaDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(VcSchemaDtos, pageable, entityPage.getTotalElements());
+    }
+
+    public void deleteByVcSchemaId(Long id) {
+        vcSchemaNamespaceRepository.deleteAllByVcSchemaId(id);
+    }
+
+    public VcSchema findByVcSchemaId(String name) {
+        return vcSchemaRepository.findByVcSchemaId(name)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
     }
 }

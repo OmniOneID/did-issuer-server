@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.db.repository;
+package org.omnione.did.issuer.v1.admin.dto;
 
+import lombok.*;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.Namespace;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.omnione.did.base.db.domain.VcSchema;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
- * Repository interface for IssueProfile entity operations.
- * Provides CRUD operations for IssueProfile entities and custom query methods.
+ * Description...
+ *
  */
-public interface IssueProfileRepository extends JpaRepository<IssueProfile, Long>, QuerydslPredicateExecutor<IssueProfile>, IssueProfileRepositoryAdmin {
-    boolean existsByVcPlanId(String vcPlanId);
-
-    Optional<IssueProfile> findByVcPlanId(String vcPlanId);
-
-    boolean existsByVcSchemaId(Long id);
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class GetIssueProfileResDto {
+    private String vcSchemaName;
+    private IssueProfile issueProfile;
 }

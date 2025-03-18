@@ -58,13 +58,15 @@ public class VcSchemaService {
      * @throws OpenDidException if the VC schema name is invalid
      */
     public String getVcSchemaByName(String name) {
-        if (VcPlanId.VCPLANID000000000001.getName().equals(name)) {
-            return getMdlVcSchema();
-        } else if (VcPlanId.VCPLANID000000000002.getName().equals(name)) {
-            return getNationalIdSchema();
-        }
+        VcSchema vcSchemaEntity = vcSchemaQueryService.findByVcSchemaId(name);
 
-        throw new OpenDidException(ErrorCode.VC_SCHEMA_NAME_INVALID);
+        MetaData metaData = createMetaData(vcSchemaEntity);
+        List<SchemaClaims> schemaClaimsList = createSchemaClaimsList(vcSchemaEntity.getId());
+
+        SchemaCredentialSubject credentialSubject = new SchemaCredentialSubject();
+        credentialSubject.setClaims(schemaClaimsList);
+
+        return createVcSchema(vcSchemaEntity, metaData, credentialSubject).toJson();
     }
 
     public org.omnione.did.data.model.schema.VcSchema getVcSchemaById(Long id) {

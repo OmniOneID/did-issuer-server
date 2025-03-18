@@ -6,7 +6,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.Namespace;
+import org.omnione.did.base.db.domain.QIssueProfile;
 import org.omnione.did.base.db.domain.QNamespace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,27 +22,27 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
+public class IssueProfileRepositoryAdminImpl implements IssueProfileRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Namespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable) {
-        QNamespace namespace = QNamespace.namespace;
+    public Page<IssueProfile> searchIssueProfiles(String searchKey, String searchValue, Pageable pageable) {
+        QIssueProfile issueProfile = QIssueProfile.issueProfile;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
         long total = Optional.ofNullable(queryFactory
-                .select(namespace.count())
-                .from(namespace)
+                .select(issueProfile.count())
+                .from(issueProfile)
                 .where(predicate)
                 .fetchOne())
                 .orElse(0L);
 
-        List<Namespace> results = queryFactory
-                .selectFrom(namespace)
+        List<IssueProfile> results = queryFactory
+                .selectFrom(issueProfile)
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderSpecifier(pageable, namespace))
+                .orderBy(getOrderSpecifier(pageable, issueProfile))
                 .fetch();
 
         return new PageImpl<>(results, pageable, total);
@@ -66,25 +68,25 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
         return predicate;
     }
 
-    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QNamespace namespace) {
+    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QIssueProfile issueProfile) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+            orders.add(new OrderSpecifier<>(Order.ASC, issueProfile.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {
             Order direction = order.isAscending() ? Order.ASC : Order.DESC;
 
             switch (order.getProperty()) {
-                case "namespaceId":
-                    orders.add(new OrderSpecifier<>(direction, namespace.namespaceId));
+                case "vcPlanId":
+                    orders.add(new OrderSpecifier<>(direction, issueProfile.vcPlanId));
                     break;
-                case "name":
-                    orders.add(new OrderSpecifier<>(direction, namespace.name));
+                case "title":
+                    orders.add(new OrderSpecifier<>(direction, issueProfile.title));
                     break;
                 default:
-                    orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+                    orders.add(new OrderSpecifier<>(Order.ASC, issueProfile.createdAt));
                     break;
             }
         }

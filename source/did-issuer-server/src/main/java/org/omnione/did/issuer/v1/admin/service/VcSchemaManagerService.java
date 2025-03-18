@@ -21,9 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
-import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaReqDto;
-import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaResDto;
-import org.omnione.did.issuer.v1.admin.dto.GetVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.data.domain.Page;
@@ -45,7 +43,7 @@ public class VcSchemaManagerService {
 
     private final NamespaceQueryService namespaceQueryService;
 
-    public CreateVcSchemaResDto createVcSchema(CreateVcSchemaReqDto request) {
+    public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
 
         VcSchema vcSchema = vcSchemaQueryService.save(VcSchema.builder()
                 .vcSchemaId(request.getVcSchemaId())
@@ -87,5 +85,30 @@ public class VcSchemaManagerService {
 
     public void deleteVcSchemaById(Long id) {
         vcSchemaQueryService.deleteById(id);
+    }
+
+    public Page<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
+        return vcSchemaQueryService.searchNamespaceList(searchKey, searchValue, pageable);
+    }
+
+    public VcSchemaDto updateVcSchema(VcSchemaReqDto request) {
+        VcSchema vcSchema = vcSchemaQueryService.findById(request.getId());
+        vcSchema.setTitle(request.getTitle());
+        vcSchema.setDescription(request.getDescription());
+
+        vcSchemaQueryService.deleteByVcSchemaId(request.getId());
+
+        // TODO: check Namespace exists
+        List<VcSchemaNamespace> vcSchemaNamespaceList = request.getNamespaces().stream()
+                .map(namespace -> VcSchemaNamespace.builder()
+                        .vcSchemaId(vcSchema.getId())
+                        .namespaceId(namespace)
+                        .build())
+                .collect(Collectors.toList());
+
+        vcSchemaQueryService.save(vcSchema);
+        vcSchemaQueryService.saveVcSchemaNamespace(vcSchemaNamespaceList);
+
+        return VcSchemaDto.fromEntity(vcSchema);
     }
 }

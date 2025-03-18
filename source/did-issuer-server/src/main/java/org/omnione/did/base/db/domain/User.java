@@ -45,6 +45,9 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "did")
     private String did;
 
+    @Column(name = "vc_schema_id")
+    private Long vcSchemaId;
+
     @Column(name = "data")
     private String data;
 }

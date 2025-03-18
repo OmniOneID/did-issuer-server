@@ -52,8 +52,8 @@ public class NamespaceAdminController {
         return ResponseEntity.ok(namespaceService.updateNamespace(request));
     }
 
-    @DeleteMapping
-    public ResponseEntity<DeleteNamespaceResDto> deleteNamespace(@RequestParam(name = "id") Long id) {
+    @DeleteMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<DeleteNamespaceResDto> deleteNamespace(@PathVariable(name = "id") Long id) {
 
         namespaceService.deleteNamespaceById(id);
         return ResponseEntity.ok(null);
@@ -74,13 +74,13 @@ public class NamespaceAdminController {
 //        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
 //    }
 
-    @GetMapping(UrlConstant.Admin.LIST)
+    @GetMapping
     public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return namespaceService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 
-    @GetMapping
-    public ResponseEntity<NamespaceDto> getNamespaceInfo(@RequestParam(name = "id") Long id) {
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<NamespaceDto> getNamespaceInfo(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(namespaceService.getNamespaceById(id));
     }
 }

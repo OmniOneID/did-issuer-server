@@ -25,7 +25,7 @@ import java.util.Optional;
  * Repository interface for User entity operations.
  * Provides CRUD operations for User entities and custom query methods.
  */
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryAdmin {
     /**
      * Finds a User entity by its associated PII.
      *

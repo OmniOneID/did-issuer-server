@@ -18,16 +18,10 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.base.db.domain.VcSchema;
-import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaReqDto;
-import org.omnione.did.issuer.v1.admin.dto.CreateVcSchemaResDto;
-import org.omnione.did.issuer.v1.admin.dto.GetVcSchemaResDto;
-import org.omnione.did.issuer.v1.admin.dto.ResponseDto;
+import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
-import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,14 +38,14 @@ public class VcSchemaAdminController {
     private final VcSchemaManagerService vcSchemaManagerService;
 
     @PostMapping
-    public ResponseEntity<CreateVcSchemaResDto> createVcSchema(@RequestBody CreateVcSchemaReqDto request) {
+    public ResponseEntity<CreateVcSchemaResDto> createVcSchema(@RequestBody VcSchemaReqDto request) {
 
         return ResponseEntity.ok(vcSchemaManagerService.createVcSchema(request));
     }
 
     @PatchMapping
-    public void updateVcSchema() {
-        // TODO
+    public ResponseEntity<VcSchemaDto> updateVcSchema(@RequestBody VcSchemaReqDto request) {
+        return ResponseEntity.ok(vcSchemaManagerService.updateVcSchema(request));
     }
 
     @DeleteMapping
@@ -59,18 +53,15 @@ public class VcSchemaAdminController {
         vcSchemaManagerService.deleteVcSchemaById(id);
     }
 
-    @GetMapping(UrlConstant.Admin.LIST)
-    public ResponseEntity<ResponseDto> getVcSchemaList(
-            @PageableDefault(sort = "id") Pageable pageable) {
+    @GetMapping
+    public Page<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
+        return vcSchemaManagerService.searchVcSchemaList(searchKey, searchValue, pageable);
 
-        Page<VcSchema> page = vcSchemaManagerService.getVcSchemaList(pageable);
-        ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
-
-        return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<GetVcSchemaResDto> getVcSchema(@RequestParam("id") Long id) {
+
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<GetVcSchemaResDto> getVcSchema(@PathVariable("id") Long id) {
 
         return ResponseEntity.ok(vcSchemaManagerService.getVcSchemaById(id));
     }

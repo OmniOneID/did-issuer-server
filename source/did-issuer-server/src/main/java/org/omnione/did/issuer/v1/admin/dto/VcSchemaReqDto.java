@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.db.repository;
+package org.omnione.did.issuer.v1.admin.dto;
 
-import org.omnione.did.base.db.domain.VcSchema;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import lombok.*;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
- * Repository interface for VcSchema entity operations.
- * Provides CRUD operations for VcSchema entities and custom query methods.
+ * Description...
+ *
  */
-public interface VcSchemaRepository extends JpaRepository<VcSchema, Long>, QuerydslPredicateExecutor<VcSchema>, VcSchemaRepositoryAdmin {
-
-    Optional<VcSchema> findByVcSchemaId(String name);
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class VcSchemaReqDto {
+    private Long id;
+    private List<Long> namespaces;
+    private String vcSchemaId;
+    private String title;
+    private String description;
+    private String language;
+    private String version;
 }
