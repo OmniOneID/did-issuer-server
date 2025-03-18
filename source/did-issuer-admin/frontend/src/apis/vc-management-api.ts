@@ -2,7 +2,7 @@ import { getData, postData, patchData } from "../utils/api";
 
 const API_BASE_URL = "/issuer/admin/v1";
 
-export const fetchNamepsaces = async (page: number, size: number, searchKey: string|null, searchValue: string|null) => {
+export const fetchNamespaces = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
     const params = new URLSearchParams({
         page: page.toString(),
         size: size.toString(),
@@ -13,17 +13,70 @@ export const fetchNamepsaces = async (page: number, size: number, searchKey: str
         params.append("searchValue", searchValue);
     }
 
-    return getData(API_BASE_URL, `namespace/list?${params.toString()}`);
+    return getData(API_BASE_URL, `namespaces?${params.toString()}`);
 };
 
 export const postNamespace = async (data: any) => {
-    return postData(API_BASE_URL, `namespace`, data);
+    return postData(API_BASE_URL, `namespaces`, data);
 };
 
 export const getNamespace = async (id: number) => {
-    return getData(API_BASE_URL, `namespace?id=${id}`);
+    return getData(API_BASE_URL, `namespaces/${id}`);
 }
 
 export const patchNamespace = async (data: any) => {
-    return patchData(API_BASE_URL, `namespace`, data);
+    return patchData(API_BASE_URL, `namespaces`, data);
+}
+
+
+export const fetchVcSchema = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    });
+
+    if (searchKey && searchValue) {
+        params.append("searchKey", searchKey);
+        params.append("searchValue", searchValue);
+    }
+
+    return getData(API_BASE_URL, `vc-schemas?${params.toString()}`);
+};
+
+export const postVcSchema = async (data: any) => {
+    return postData(API_BASE_URL, `vc-schemas`, data);
+};
+
+export const getVcSchema = async (id: number) => {
+    return getData(API_BASE_URL, `vc-schemas/${id}`);
+}
+
+export const patchVcSchema = async (data: any) => {
+    return patchData(API_BASE_URL, `vc-schemas`, data);
+}
+
+export const fetchIssueProfile = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    });
+
+    if (searchKey && searchValue) {
+        params.append("searchKey", searchKey);
+        params.append("searchValue", searchValue);
+    }
+
+    return getData(API_BASE_URL, `issue-profiles?${params.toString()}`);
+};
+
+export const postIssueProfile = async (data: any) => {
+    return postData(API_BASE_URL, `issue-profiles`, data);
+};
+
+export const getIssueProfile = async (id: number) => {
+    return getData(API_BASE_URL, `issue-profiles/${id}`);
+}
+
+export const patchIssueProfile = async (data: any) => {
+    return patchData(API_BASE_URL, `issue-profiles`, data);
 }

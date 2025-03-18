@@ -3,17 +3,11 @@ import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { fetchNamepsaces } from '../../../apis/vc-management-api';
+import { fetchNamespaces } from '../../../apis/vc-management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 
 type Props = {}
-
-const statusMapping: { [key: string]: string } = {
-  ACTIVATE: "ACTIVATE",
-  DEACTIVATE: "DEACTIVATE",
-  REQUIRED_ENROLL_ENTITY: "REQUIRED_ENROLL_ENTITY",
-};
 
 type NamespaceRow = {
   id: string | number;
@@ -42,7 +36,7 @@ const NamespaceManagementPage = (props: Props) => {
   
   useEffect(() => {
     setLoading(true);
-    fetchNamepsaces(paginationModel.page, paginationModel.pageSize, null, null)
+    fetchNamespaces(paginationModel.page, paginationModel.pageSize, null, null)
       .then((response) => {
         setRows(response.data.content);
         setTotalRows(response.data.totalElements);

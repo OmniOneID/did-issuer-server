@@ -16,8 +16,15 @@ import NamespaceDetailPage from './pages/vc-management/namespace-management/Name
 import NamespaceManagementPage from './pages/vc-management/namespace-management/NamespaceManagementPage';
 import NamespaceRegistrationPage from './pages/vc-management/namespace-management/NamespaceRegistrationPage';
 import VcSchemaManagementPage from './pages/vc-management/vc-schema-management/VcSchemaManagementPage';
+import VcSchemaRegistrationPage from './pages/vc-management/vc-schema-management/VcSchemaRegistrationPage';
 import VcManagementPage from './pages/vc-management/VcManagementPage';
 import NamespaceEditPage from './pages/vc-management/namespace-management/NamespaceEditPage';
+import VcSchemaDetailPage from './pages/vc-management/vc-schema-management/VcSchemaDetailPage';
+import VcSchemaEditPage from './pages/vc-management/vc-schema-management/VcSchemaEditPage';
+import IssueProfileEditPage from './pages/vc-management/issue-profile-management/IssueProfileEditPage';
+import IssueProfileDetailPage from './pages/vc-management/issue-profile-management/IssueProfileDetailPage';
+import IssueProfileRegistrationPage from './pages/vc-management/issue-profile-management/IssueProfileRegistrationPage';
+import UserRegistrationPage from './pages/users/UserRegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +42,7 @@ const router = createBrowserRouter([
             path: '/issuer-management',
             Component: IssuerManagementPage,
           },
+          // Namespace
           {
             path: '/vc-management/namespace-management/namespace-registration',
             Component: NamespaceRegistrationPage,
@@ -51,17 +59,56 @@ const router = createBrowserRouter([
             path: '/vc-management/namespace-management',
             Component: NamespaceManagementPage,
           },
+          // VC Schema
+          {
+            path: '/vc-management/vc-schema-management/vc-schema-registration',
+            Component: VcSchemaRegistrationPage,
+          },
+          {
+            path: '/vc-management/vc-schema-management/vc-schema-edit/:id',
+            Component: VcSchemaEditPage,
+          },
+          {
+            path: '/vc-management/vc-schema-management/:id',
+            Component: VcSchemaDetailPage,
+          },
           {
             path: '/vc-management/vc-schema-management',
             Component: VcSchemaManagementPage,
+          },
+          // Issue Profile
+          {
+            path: '/vc-management/issue-profile-management/issue-profile-registration',
+            Component: IssueProfileRegistrationPage,
+          },
+          {
+            path: '/vc-management/issue-profile-management/issue-profile-edit/:id',
+            Component: IssueProfileEditPage,
+          },
+          {
+            path: '/vc-management/issue-profile-management/:id',
+            Component: IssueProfileDetailPage,
           },
           {
             path: '/vc-management/issue-profile-management',
             Component: IssueProfileManagementPage,
           },
+
+
+          // vc management
           {
             path: '/vc-management',
             Component: VcManagementPage,
+          },
+
+          // user management
+          {
+            path: '/users/user-management/user-registration',
+            Component: UserRegistrationPage
+          },
+          {
+            path: '/users/users-management/',
+            Component: UserManagementPage
           },
           {
             path: '/users/user-management',
@@ -79,7 +126,17 @@ const router = createBrowserRouter([
             path: '/server-management',
             Component: ServerManagementPage,
           },
+
+
         ],
+      },
+      {
+        path: '/vc-management/namespace-management-popup/:id',
+        Component: NamespaceDetailPage,
+      },
+      {
+        path: '/vc-management/vc-schema-management-popup/:id',
+        Component: VcSchemaDetailPage,
       },
       {
         path: '/sign-in',
