@@ -31,6 +31,11 @@ interface VcSchemaSelectionDialogProps {
   onConfirmSelection: () => void;
 }
 
+const handleOpenVcSchemaDetail = (vcSchemaId: string) => {
+
+  window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
+};
+
 const VcSchemaSelectionDialog: React.FC<VcSchemaSelectionDialogProps> = ({
   open,
   onClose,
@@ -62,16 +67,19 @@ const VcSchemaSelectionDialog: React.FC<VcSchemaSelectionDialogProps> = ({
                 <TableRow
                   key={item.id}
                   hover
-                  onClick={() => onSelectItem(item)} // ✅ 전체 객체 전달
+                  onClick={() => onSelectItem(item)}
                   sx={{ cursor: "pointer" }}
                 >
                   <TableCell>
                     <Radio checked={selectedItemId === item.id} />
                   </TableCell>
                   <TableCell>{item.id}</TableCell>
-                  <TableCell sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}>
-                    {item.vcSchemaId}
-                  </TableCell>
+                  <TableCell
+                    sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenVcSchemaDetail(item.id)
+                    }}>{item.vcSchemaId}</TableCell>
                   <TableCell>{item.title}</TableCell>
                 </TableRow>
               ))}

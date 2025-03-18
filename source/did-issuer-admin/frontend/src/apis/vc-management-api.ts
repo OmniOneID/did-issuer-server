@@ -80,3 +80,17 @@ export const getIssueProfile = async (id: number) => {
 export const patchIssueProfile = async (data: any) => {
     return patchData(API_BASE_URL, `issue-profiles`, data);
 }
+
+export const fetchIssuedVc = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    });
+
+    if (searchKey && searchValue) {
+        params.append("searchKey", searchKey);
+        params.append("searchValue", searchValue);
+    }
+
+    return getData(API_BASE_URL, `issued-vcs?${params.toString()}`);
+};

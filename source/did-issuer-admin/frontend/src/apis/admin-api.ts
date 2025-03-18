@@ -28,3 +28,11 @@ export const fetchUserInfos = async (page: number, size: number, searchKey: stri
 export const postUserInfo = async (data: any) => {
     return postData(API_BASE_URL, `users`, data);
 };
+
+export const getUserInfo = async (id: number) => {
+    return getData(API_BASE_URL, `users/${id}`);
+}
+export const patchUserInfo = async (data: any) => {
+    return patchData(API_BASE_URL, `users`, data);
+}
+

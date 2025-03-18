@@ -420,6 +420,7 @@ const VcSchemaEditPage = (props: Props) => {
                                         <TableCell
                                             sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
                                             onClick={(e) => {
+                                                e.stopPropagation();
                                                 handleOpenNamespaceDetail(item.id);
                                             }}
                                         >

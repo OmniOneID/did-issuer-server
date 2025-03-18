@@ -1,6 +1,6 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Paper, Radio, Select, SelectChangeEvent, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Paper, Radio, Select, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import FullscreenLoader from "../../components/loading/FullscreenLoader";
 import { postUserInfo } from "../../apis/admin-api";
@@ -8,6 +8,7 @@ import { useDialogs } from "@toolpad/core";
 import CustomConfirmDialog from "../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../components/dialog/CustomDialog";
 import { fetchVcSchema } from "../../apis/vc-management-api";
+import VcSchemaSelectionDialog from "../vc-management/issue-profile-management/VcSchemaSelectionDialog";
 
 type Props = {}
 
@@ -213,35 +214,13 @@ const UserRegistrationPage = (props: Props) => {
     setIsButtonDisabled(!isModified);
   }, [formData]);
 
-  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
-        width: 500,
-        margin: 'auto',
-        marginTop: theme.spacing(1),
-        padding: theme.spacing(3),
-        border: 'none',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: '#ffffff',
-        boxShadow: '0px 4px 8px 0px #0000001A',
-    })), []);
-
-    const StyledTitle = useMemo(() => styled(Typography)({
-        textAlign: 'left',
-        fontSize: '24px',
-        fontWeight: 700,
-    }), []);
-
-    const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
-        marginTop: theme.spacing(2),
-    })), []);
-
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Typography variant="h4">User Management</Typography>
-      <StyledContainer>
-        <StyledTitle>User Registration</StyledTitle>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4">Namespace Registration</Typography>
 
-        <StyledInputArea>
+        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
           <TextField
             label="DID"
             variant="outlined"
@@ -307,53 +286,26 @@ const UserRegistrationPage = (props: Props) => {
 
 
           {/* 다이얼로그 - VC Schema 선택 */}
-          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
-            <DialogTitle>Select VC Schema</DialogTitle>
-            <DialogContent>
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Select</TableCell>
-                      <TableCell>ID</TableCell>
-                      <TableCell>VC Schema ID</TableCell>
-                      <TableCell>Title</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {availableItems.map((item) => (
-                      <TableRow key={item.id} hover onClick={() => handleSelectItem(item)} sx={{ cursor: "pointer" }}>
-                        <TableCell>
-                          <Radio checked={selectedItemId === item.id} />
-                        </TableCell>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell 
-                          sx={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenVcSchemaDetail(item.id)}}>{item.vcSchemaId}</TableCell>
-                        <TableCell>{item.title}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </DialogContent>
-
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleAddSelectedItem} variant="contained">Select</Button>
-            </DialogActions>
-          </Dialog>
+               {/* VC Schema 선택 다이얼로그 */}
+          <VcSchemaSelectionDialog
+            open={openDialog}
+            onClose={handleCloseDialog}
+            availableItems={availableItems}
+            selectedItemId={selectedItemId}
+            onSelectItem={handleSelectItem}
+            onConfirmSelection={handleAddSelectedItem}
+          />
 
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
+            <Button variant="contained" color="secondary" onClick={() => navigate('/user-management')}>
+              Back
+            </Button>
             <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
-            <Button variant="outlined" color="secondary" onClick={() => navigate('/users/user-management')}>Back</Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
           </Box>
-        </StyledInputArea>
-      </StyledContainer>
+        </Box>
+      </Box>
     </>
   );
 

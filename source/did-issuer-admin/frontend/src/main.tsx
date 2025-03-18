@@ -25,6 +25,8 @@ import IssueProfileEditPage from './pages/vc-management/issue-profile-management
 import IssueProfileDetailPage from './pages/vc-management/issue-profile-management/IssueProfileDetailPage';
 import IssueProfileRegistrationPage from './pages/vc-management/issue-profile-management/IssueProfileRegistrationPage';
 import UserRegistrationPage from './pages/users/UserRegistrationPage';
+import UserDetailPage from './pages/users/UserDetailPage';
+import UserEditPage from './pages/users/UserEditPage';
 
 const router = createBrowserRouter([
   {
@@ -105,6 +107,14 @@ const router = createBrowserRouter([
           {
             path: '/users/user-management/user-registration',
             Component: UserRegistrationPage
+          },
+          {
+            path: '/users/user-management/user-edit/:id',
+            Component: UserEditPage
+          },
+          {
+            path: '/users/user-management/:id',
+            Component: UserDetailPage
           },
           {
             path: '/users/user-management',
