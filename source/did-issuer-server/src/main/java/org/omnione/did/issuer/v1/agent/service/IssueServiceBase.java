@@ -44,7 +44,6 @@ import org.omnione.did.core.exception.CoreException;
 import org.omnione.did.core.manager.VcManager;
 import org.omnione.did.crypto.keypair.EcKeyPair;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
-import org.omnione.did.data.model.did.DidDocAndStatus;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.did.ProofPurpose;
@@ -739,7 +738,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @param vc The VC to revoke.
      */
     private void revokeVc(Vc vc) {
-        VcMeta vcMetByVcId = storageService.getVcMetByVcId(vc.getVcId());
+        VcMeta vcMetByVcId = storageService.getVcMetaByVcId(vc.getVcId());
         if (!VcStatus.REVOKED.getRawValue().equals(vcMetByVcId.getStatus())) {
             storageService.updateVcStatus(vc.getVcId(), VcStatus.REVOKED);
             // TODO: Revoke VC Table

@@ -110,7 +110,7 @@ public class RepositoryServiceImpl implements StorageService {
      * @return The found VC metadata.
      */
     @Override
-    public VcMeta getVcMetByVcId(String vcId) {
+    public VcMeta getVcMetaByVcId(String vcId) {
         String encodedVcMeta = repositoryFeign.getVcMetaData(vcId).getVcMeta();
         byte[] decodedVcMeta = BaseMultibaseUtil.decode(encodedVcMeta);
         String jsonVcMeta = new String(decodedVcMeta, StandardCharsets.UTF_8);

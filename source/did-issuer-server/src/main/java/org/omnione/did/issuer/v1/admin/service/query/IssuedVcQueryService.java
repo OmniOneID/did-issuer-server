@@ -3,6 +3,8 @@ package org.omnione.did.issuer.v1.admin.service.query;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Vc;
 import org.omnione.did.base.db.repository.VcRepository;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.IssuedVcDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,5 +28,10 @@ public class IssuedVcQueryService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(vcs, pageable, entityPage.getTotalElements());
+    }
+
+    public Vc findById(Long id) {
+        return vcRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
     }
 }

@@ -20,8 +20,9 @@ public class IssuedVcDto {
     private String vcId;
     private String did;
     private String vcSchemaName;
-    private VcStatus status;
+    private String status;
     private String createdAt;
+    private String updatedAt;
 
     public static IssuedVcDto fromEntity(Vc vc) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -32,6 +33,19 @@ public class IssuedVcDto {
                 .did(vc.getDid())
 //                .vcSchemaName(vcSchemaName)
                 .createdAt(formatInstant(vc.getCreatedAt(), formatter))
+                .build();
+    }
+    public static IssuedVcDto fromEntity(Vc vc, String vcSchemaName, String status) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return IssuedVcDto.builder()
+                .id(vc.getId())
+                .vcId(vc.getVcId())
+                .did(vc.getDid())
+                .vcSchemaName(vcSchemaName)
+                .status(status)
+                .createdAt(formatInstant(vc.getCreatedAt(), formatter))
+                .updatedAt(formatInstant(vc.getUpdatedAt(), formatter))
                 .build();
     }
 

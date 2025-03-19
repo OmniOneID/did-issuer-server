@@ -38,7 +38,6 @@ import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.vc.VcMeta;
 import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
-import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 
 import org.omnione.did.issuer.v1.agent.service.query.RevokeVcQueryService;
@@ -81,7 +80,7 @@ public class VcStatusServiceImpl implements VcStatusService {
     @Override
     public InspectProposeRevokeResDto inspectProposeRevoke(InspectProposeRevokeReqDto request) {
         try {
-            VcMeta vcMeta = storageService.getVcMetByVcId(request.getVcId());
+            VcMeta vcMeta = storageService.getVcMetaByVcId(request.getVcId());
             if (Objects.isNull(vcMeta)) {
                 throw new OpenDidException(ErrorCode.VC_NOT_FOUND);
             }
@@ -175,7 +174,7 @@ public class VcStatusServiceImpl implements VcStatusService {
     @Override
     public UpdateVcStatusResDto updateVcStatus(UpdateVcStatusReqDto request) {
         try {
-            VcMeta vcMeta = storageService.getVcMetByVcId(request.getVcId());
+            VcMeta vcMeta = storageService.getVcMetaByVcId(request.getVcId());
             if (Objects.isNull(vcMeta)) {
                 throw new OpenDidException(ErrorCode.VC_NOT_FOUND);
             }

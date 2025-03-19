@@ -132,7 +132,7 @@ public class BlockChainServiceImpl implements StorageService {
     }
 
     @Override
-    public VcMeta getVcMetByVcId(String vcId) {
+    public VcMeta getVcMetaByVcId(String vcId) {
         ContractApi contractApi = getContractApiInstance();
         try {
             return (VcMeta) contractApi.getVcMetadata(vcId);

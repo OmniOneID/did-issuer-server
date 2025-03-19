@@ -50,5 +50,5 @@ public interface StorageService {
      * @param vcId Identifier of the VC.
      * @return Found VC metadata.
      */
-    VcMeta getVcMetByVcId(String vcId);
+    VcMeta getVcMetaByVcId(String vcId);
 }
