@@ -18,8 +18,12 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.GetIssuerInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.SendCertificateVcReqDto;
+import org.omnione.did.issuer.v1.admin.dto.SendEntityInfoReqDto;
 import org.omnione.did.issuer.v1.admin.service.IssuerManagementService;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;

@@ -31,4 +31,13 @@ public class IssuerInfoQueryService {
         return issuerInfo;
     }
 
+    public IssuerInfo getIssuerInfoOrNull() {
+        return issuerInfoRepository.findFirstBy().orElse(null);
+    }
+
+    public void save(IssuerInfo issuerInfo) {
+        IssuerInfo savedIssuerInfo = issuerInfoRepository.save(issuerInfo);
+        this.issuerInfo = savedIssuerInfo;
+    }
+
 }
