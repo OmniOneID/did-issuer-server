@@ -94,3 +94,7 @@ export const fetchIssuedVc = async (page: number, size: number, searchKey: strin
 
     return getData(API_BASE_URL, `issued-vcs?${params.toString()}`);
 };
+
+export const getIssuedVc = async (id: number) => {
+    return getData(API_BASE_URL, `issued-vcs/${id}`);
+}

@@ -27,6 +27,7 @@ import IssueProfileRegistrationPage from './pages/vc-management/issue-profile-ma
 import UserRegistrationPage from './pages/users/UserRegistrationPage';
 import UserDetailPage from './pages/users/UserDetailPage';
 import UserEditPage from './pages/users/UserEditPage';
+import IssuedVcDetailPage from './pages/issued-vcs/IssuedVcDetailPage';
 
 const router = createBrowserRouter([
   {
@@ -119,6 +120,10 @@ const router = createBrowserRouter([
           {
             path: '/users/user-management',
             Component: UserManagementPage,
+          },
+          {
+            path: '/issued-vcs/issued-vc-management/:id',
+            Component: IssuedVcDetailPage,
           },
           {
             path: '/issued-vcs/issued-vc-management',
