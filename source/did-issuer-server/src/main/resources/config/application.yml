@@ -2,7 +2,7 @@ spring:
   application:
     name: Issuer
   profiles:
-    active: dev
+    active: sample
     group:
         dev:
           - tas
@@ -27,3 +27,16 @@ spring:
 
 server:
   port: 8091
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "health"
+          - "shutdown"
+  endpoint:
+    health:
+      show-details: "never"
+    shutdown:
+      enabled: true
