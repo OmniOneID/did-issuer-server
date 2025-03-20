@@ -89,19 +89,19 @@ const IssuedVcManagementPage = (props: Props) => {
                 </Link>),
             },
             { field: 'did', headerName: "DID", width: 150},
-            { field: 'vcSchemaName', headerName: "VC Schema", width: 200},
-            { field: 'status', headerName: "Status", width: 100},
+            // { field: 'vcSchemaName', headerName: "VC Schema", width: 200},
+            // { field: 'status', headerName: "Status", width: 100},
             { field: 'createdAt', headerName: "Registered At", width: 150},
             
           ]} 
           selectedRow={selectedRow} 
           setSelectedRow={setSelectedRow}
-          onEdit={() => {
-            if (selectedRowData) {
-              navigate(`/users/user-management/user-edit/${selectedRowData.id}`);
-            }
-          }}
-          onRegister={() => navigate('/users/user-management/user-registration')}
+          // onEdit={() => {
+          //   if (selectedRowData) {
+          //     navigate(`/users/user-management/user-edit/${selectedRowData.id}`);
+          //   }
+          // }}
+          // onRegister={() => navigate('/users/user-management/user-registration')}
           additionalButtons={[
            
           ]}

@@ -1,6 +1,6 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Paper, Radio, Select, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Paper, Radio, Select, SelectChangeEvent, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import FullscreenLoader from "../../components/loading/FullscreenLoader";
 import { postUserInfo } from "../../apis/admin-api";
@@ -40,13 +40,13 @@ const UserRegistrationPage = (props: Props) => {
   const theme = useTheme();
 
   const [formData, setFormData] = useState<UserFormData>({
-      did: '',
-      vcSchemaId: '',
-      firstName: '',
-      lastName: '',
-      userInfo: '',
+    did: '',
+    vcSchemaId: '',
+    firstName: '',
+    lastName: '',
+    userInfo: '',
   });
-  
+
 
   const [errors, setErrors] = useState<ErrorState>({});
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -64,7 +64,7 @@ const UserRegistrationPage = (props: Props) => {
     let tempErrors: ErrorState = {};
 
     tempErrors.did = validateDid(formData.did);
-    tempErrors.vcSchemaId = validateVcSchemaName(formData.vcSchemaId);
+    tempErrors.vcSchemaId = validateVcSchemaId(formData.vcSchemaId);
     tempErrors.firstName = validateFirstName(formData.firstName);
     tempErrors.lastName = validateLastName(formData.lastName);
     tempErrors.userInfo = validateUserInfo(formData.userInfo);
@@ -84,20 +84,22 @@ const UserRegistrationPage = (props: Props) => {
     return undefined;
   };
 
-  const validateVcSchemaName = (name?: string): string | undefined => {
-    if (!name) return 'Please enter a VC Schema Name.';
-    if (name.length < 4 || name.length > 64) return 'VC Schema Name must be between 4 and 64 characters.';
+
+  const validateVcSchemaId = (vcSchemaId?: string): string | undefined => {
+    if (!vcSchemaId) return 'Please choose a VC Schema.';
     return undefined;
-  };
+};
+
+
 
   const validateFirstName = (ref?: string): string | undefined => {
     if (!ref) return 'Please enter a First Name.';
-    if (ref.length < 4 || ref.length > 64) return 'First Name must be between 4 and 64 characters.';
+    if (ref.length < 2 || ref.length > 64) return 'First Name must be between 2 and 64 characters.';
     return undefined;
   };
   const validateLastName = (ref?: string): string | undefined => {
     if (!ref) return 'Please enter a Last Name.';
-    if (ref.length < 4 || ref.length > 64) return 'Last Name must be between 4 and 64 characters.';
+    if (ref.length < 2 || ref.length > 64) return 'Last Name must be between 2 and 64 characters.';
     return undefined;
   };
   const validateUserInfo = (ref?: string): string | undefined => {
@@ -173,21 +175,21 @@ const UserRegistrationPage = (props: Props) => {
   const handleSelectItem = (formData: ItemFormData) => {
     setSelectedItemId(formData.id);
   };
-    // 서버에서 데이터 가져오기
-    const fetchItems = async () => {
-      try {
-        fetchVcSchema(0, 10, null, null)
-          .then((response) => {
-            setAvailableItems(response.data.content || []);
-          })
-          .catch((error) => {
-            console.error("Failed to retrieve VC Schemas. ", error);
-            navigate('/error', { state: { message: `Failed to retrieve VC Schemas: ${error}` } });
-          });
-      } catch (error) {
-        console.error("Failed to fetch VC Schemas", error);
-      }
-    };
+  // 서버에서 데이터 가져오기
+  const fetchItems = async () => {
+    try {
+      fetchVcSchema(0, 10, null, null)
+        .then((response) => {
+          setAvailableItems(response.data.content || []);
+        })
+        .catch((error) => {
+          console.error("Failed to retrieve VC Schemas. ", error);
+          navigate('/error', { state: { message: `Failed to retrieve VC Schemas: ${error}` } });
+        });
+    } catch (error) {
+      console.error("Failed to fetch VC Schemas", error);
+    }
+  };
 
   // 선택한 항목을 VC Schema ID에 설정
   const handleAddSelectedItem = () => {
@@ -203,9 +205,9 @@ const UserRegistrationPage = (props: Props) => {
 
     handleCloseDialog();
   };
-  
+
   const handleOpenVcSchemaDetail = (vcSchemaId: string) => {
-    
+
     window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
   };
 
@@ -214,13 +216,35 @@ const UserRegistrationPage = (props: Props) => {
     setIsButtonDisabled(!isModified);
   }, [formData]);
 
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+    width: 600,
+    margin: 'auto',
+    marginTop: theme.spacing(1),
+    padding: theme.spacing(3),
+    border: 'none',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: '#ffffff',
+    boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+    textAlign: 'left',
+    fontSize: '24px',
+    fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(2),
+  })), []);
+
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Namespace Registration</Typography>
+      <Typography variant="h4">User Management</Typography>
+      <StyledContainer>
+        <StyledTitle>User Register</StyledTitle>
 
-        <Box sx={{ maxWidth: 800, margin: 'auto', mt: 2, p: 3, border: '1px solid #ccc', borderRadius: 2 }}>
+        <StyledInputArea>
           <TextField
             label="DID"
             variant="outlined"
@@ -235,13 +259,13 @@ const UserRegistrationPage = (props: Props) => {
 
           {/* VC Schema ID 입력 필드 + 찾기 버튼 */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <TextField 
-              label="VC Schema ID" 
-              fullWidth 
-              margin="normal" 
-              size="small" 
-              value={formData.vcSchemaId} 
-              disabled 
+            <TextField
+              label="VC Schema ID"
+              fullWidth
+              margin="normal"
+              size="small"
+              value={formData.vcSchemaId}
+              disabled
             />
             <IconButton color="primary" onClick={handleOpenDialog}><SearchIcon /></IconButton>
           </Box>
@@ -286,7 +310,7 @@ const UserRegistrationPage = (props: Props) => {
 
 
           {/* 다이얼로그 - VC Schema 선택 */}
-               {/* VC Schema 선택 다이얼로그 */}
+          {/* VC Schema 선택 다이얼로그 */}
           <VcSchemaSelectionDialog
             open={openDialog}
             onClose={handleCloseDialog}
@@ -304,8 +328,8 @@ const UserRegistrationPage = (props: Props) => {
             <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
             <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
           </Box>
-        </Box>
-      </Box>
+        </StyledInputArea>
+      </StyledContainer>
     </>
   );
 

@@ -221,7 +221,7 @@ const NamespaceRegistrationPage = (props: Props) => {
         <StyledTitle>Namespace Registration</StyledTitle>
         <StyledInputArea>
           <TextField
-            label="Namespace ID"
+            label="Namespace ID *"
             variant="outlined"
             margin="normal"
             size="small"
@@ -233,7 +233,7 @@ const NamespaceRegistrationPage = (props: Props) => {
           />
 
           <TextField
-            label="Name"
+            label="Name *"
             variant="outlined"
             margin="normal"
             size="small"
@@ -245,7 +245,7 @@ const NamespaceRegistrationPage = (props: Props) => {
           />
 
           <TextField
-            label="Ref"
+            label="Ref *"
             variant="outlined"
             margin="normal"
             size="small"
@@ -270,10 +270,10 @@ const NamespaceRegistrationPage = (props: Props) => {
             <Table sx={{ tableLayout: "fixed", width: "100%" }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.paper : "#f5f5f5" }}>
-                  <TableCell sx={{ width: 150 }}>ID</TableCell>
-                  <TableCell sx={{ width: 100 }}>Type</TableCell>
-                  <TableCell sx={{ width: 150 }}>Format</TableCell>
-                  <TableCell sx={{ width: 200 }}>Caption</TableCell>
+                  <TableCell sx={{ width: 150 }}>ID *</TableCell>
+                  <TableCell sx={{ width: 100 }}>Type *</TableCell>
+                  <TableCell sx={{ width: 150 }}>Format *</TableCell>
+                  <TableCell sx={{ width: 200 }}>Caption *</TableCell>
                   <TableCell sx={{ width: 100 }}>Delete</TableCell>
                 </TableRow>
               </TableHead>

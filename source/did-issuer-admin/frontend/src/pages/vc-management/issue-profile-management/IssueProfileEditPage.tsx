@@ -1,7 +1,7 @@
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel, styled } from "@mui/material";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel, styled, FormHelperText } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
@@ -27,13 +27,27 @@ interface IssueProfileFormData {
     language: string;
 }
 
+interface ErrorState {
+    vcPlanId?: string;
+    title?: string;
+    description?: string;
+    vcSchemaId?: string;
+    endpoints?: string[] | undefined;
+    endpointsErrorMessage?: string;
+    cipher?: string;
+    curve?: string;
+    padding?: string;
+    initiateType?: string;
+    language?: string;
+}
+
 interface ItemFormData {
     id: string;
     vcSchemaId: string;
     title: string;
 }
 
-const cipherOptions = ["AES"];
+const cipherOptions = ["AES-128-CBC", "AES-128-ECB", "AES-256-CBC", "AES-256-ECB"];
 const curveOptions = ["secp256r1"];
 const paddingOptions = ["PKCS5", "OAEP"];
 const initiateTypeOptions = [{ key: "User Initiate", value: "user_init" },
@@ -67,11 +81,14 @@ const IssueProfileRegistrationPage = (props: Props) => {
     const { id } = useParams();
     const numericIssueProfileId = id ? parseInt(id, 10) : null;
 
+    const [errors, setErrors] = useState<ErrorState>({});
     const [isButtonDisabled, setIsButtonDisabled] = useState(true);
     const [initialData, setInitialData] = useState<IssueProfileFormData | null>(null);
 
     // 서버로 데이터 전송
     const handleSubmit = async () => {
+        if (!validate()) return;
+
         const requestBody = {
             id: numericIssueProfileId,
             vcPlanId: formData.vcPlanId,
@@ -114,6 +131,92 @@ const IssueProfileRegistrationPage = (props: Props) => {
         };
         console.log("Submitting Data:", requestBody);
         // API 호출 로직 추가 가능 (예: await postIssueProfile(requestBody))
+    };
+
+
+    const validate = () => {
+        let tempErrors: ErrorState = {};
+
+        tempErrors.vcPlanId = validateVcPlanId(formData.vcPlanId);
+        tempErrors.title = validateTitle(formData.title);
+        tempErrors.description = validateDescription(formData.description);
+        tempErrors.vcSchemaId = validateVcSchemaId(formData.vcSchemaId);
+        tempErrors.cipher = validateCipher(formData.cipher);
+        tempErrors.curve = validateCurve(formData.curve);
+        tempErrors.padding = validatePadding(formData.padding);
+        tempErrors.initiateType = validateInitiateType(formData.initiateType);
+        tempErrors.language = validateLanguage(formData.language)
+
+        if (formData.endpoints.length === 0) {
+            tempErrors.endpointsErrorMessage = "At least one Endpoint is required."
+        } else {
+            tempErrors.endpoints = formData.endpoints.map(validateEndpoint).filter(endpoint => endpoint?.length !== 0);
+        }
+
+        setErrors(tempErrors);
+
+        return (
+            Object.entries(tempErrors)
+                .filter(([key]) => key !== "endpoints" && key !== "endpointsErrorMessage")
+                .every(([, error]) => !error) &&
+            (tempErrors.endpoints ?? []).every((endpoint) =>
+                Object.values(endpoint).every((e) => !e))
+        );
+    };
+
+    const validateVcPlanId = (vcPlanId?: string): string | undefined => {
+        if (!vcPlanId) return 'Please enter a VC Plan ID.';
+        if (vcPlanId.length < 4 || vcPlanId.length > 64) return 'VC Plan ID must be between 4 and 64 characters.';
+        return undefined;
+    };
+
+    const validateTitle = (title?: string): string | undefined => {
+        if (!title) return 'Please enter a Title.';
+        if (title.length < 4 || title.length > 64) return 'Title must be between 4 and 64 characters.';
+        return undefined;
+    };
+
+    const validateDescription = (description?: string): string | undefined => {
+        if (!description) return;
+        if (description.length > 2000) return 'Description must be 2000 characters or less.';
+        return undefined;
+    };
+
+    const validateVcSchemaId = (vcSchemaId?: string): string | undefined => {
+        if (!vcSchemaId) return 'Please choose a VC Schema.';
+        return undefined;
+    };
+
+    const validateCipher = (cipher?: string): string | undefined => {
+        if (!cipher) return 'Please choose a Cipher.';
+        return undefined;
+    };
+
+    const validateCurve = (curve?: string): string | undefined => {
+        if (!curve) return 'Please choose a Curve.';
+        return undefined;
+    };
+
+    const validatePadding = (padding?: string): string | undefined => {
+        if (!padding) return 'Please choose a Padding.';
+        return undefined;
+    };
+
+    const validateInitiateType = (initiateType?: string): string | undefined => {
+        if (!initiateType) return 'Please choose a Iinitiate Type.';
+        return undefined;
+    };
+
+    const validateLanguage = (language?: string): string | undefined => {
+        if (!language) return 'Please enter a Language.';
+        if (language.length < 2 || language.length > 64) return 'Language must be between 2 and 64 characters.';
+        return undefined;
+    };
+
+    const validateEndpoint = (endpoint?: string): string => {
+        if (!endpoint) return 'Please enter a Endpoint.';
+        if (endpoint.length < 2 || endpoint.length > 2000) return 'Endpoint must be between 2 and 2000 characters.';
+        return '';
     };
 
     // `endpoints` 입력 필드 추가
@@ -264,25 +367,25 @@ const IssueProfileRegistrationPage = (props: Props) => {
     }, [formData, initialData]);
 
     const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
-          width: 600,
-          margin: 'auto',
-          marginTop: theme.spacing(1),
-          padding: theme.spacing(3),
-          border: 'none',
-          borderRadius: theme.shape.borderRadius,
-          backgroundColor: '#ffffff',
-          boxShadow: '0px 4px 8px 0px #0000001A',
-      })), []);
-    
-      const StyledTitle = useMemo(() => styled(Typography)({
-          textAlign: 'left',
-          fontSize: '24px',
-          fontWeight: 700,
-      }), []);
-    
-      const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
-          marginTop: theme.spacing(2),
-      })), []);
+        width: 600,
+        margin: 'auto',
+        marginTop: theme.spacing(1),
+        padding: theme.spacing(3),
+        border: 'none',
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: '#ffffff',
+        boxShadow: '0px 4px 8px 0px #0000001A',
+    })), []);
+
+    const StyledTitle = useMemo(() => styled(Typography)({
+        textAlign: 'left',
+        fontSize: '24px',
+        fontWeight: 700,
+    }), []);
+
+    const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+        marginTop: theme.spacing(2),
+    })), []);
 
     return (
         <>
@@ -292,61 +395,73 @@ const IssueProfileRegistrationPage = (props: Props) => {
                 <StyledTitle>Issue Profile Update</StyledTitle>
 
                 <StyledInputArea>
-                    <TextField label="VC Plan ID" disabled fullWidth margin="normal" size="small" value={formData.vcPlanId} onChange={(e) => setFormData({ ...formData, vcPlanId: e.target.value })} />
-                    <TextField label="Title" fullWidth margin="normal" size="small" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-                    <TextField label="Description" fullWidth margin="normal" size="small" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                    <TextField label="VC Plan ID *" fullWidth margin="normal" size="small" value={formData.vcPlanId} error={!!errors.vcPlanId} helperText={errors.vcPlanId} onChange={(e) => setFormData({ ...formData, vcPlanId: e.target.value })} />
+                    <TextField label="Title *" fullWidth margin="normal" size="small" value={formData.title} error={!!errors.title} helperText={errors.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                    <TextField label="Description" fullWidth margin="normal" size="small" value={formData.description} error={!!errors.description} helperText={errors.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
 
                     {/* VC Schema ID 입력 필드 + 찾기 버튼 */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <TextField label="VC Schema ID" fullWidth margin="normal" size="small" value={formData.vcSchemaId} disabled />
+                        <TextField label="VC Schema ID *" fullWidth margin="normal" size="small" value={formData.vcSchemaId} error={!!errors.vcSchemaId} helperText={errors.vcSchemaId} disabled />
                         <IconButton color="primary" onClick={handleOpenDialog}><SearchIcon /></IconButton>
                     </Box>
-                    
-                    <FormControl fullWidth size="small" sx={{  margin: 'auto', mt: 2, }}>
-                        <InputLabel>Initiate Type</InputLabel>
-                        <Select label="Initiate Type" value={formData.initiateType} onChange={handleSelectChange("initiateType")}>
+
+                    <FormControl fullWidth size="small" sx={{ maxWidth: 800, margin: 'auto', mt: 2, }}>
+                        <InputLabel>Initiate Type *</InputLabel>
+                        <Select label="Initiate Type *" value={formData.initiateType} error={!!errors.initiateType} onChange={handleSelectChange("initiateType")}>
                             {initiateTypeOptions.map((option) => <MenuItem key={option.key} value={option.value}> {option.key}</MenuItem>)}
                         </Select>
+                        <FormHelperText error>{errors.initiateType}</FormHelperText>
                     </FormControl>
-                    <TextField label="Language" fullWidth margin="normal" size="small" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} />
-
+                    <TextField label="Language *" fullWidth margin="normal" size="small" error={!!errors.language} helperText={errors.language} value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} />
                     {/* Endpoints 입력 필드 */}
-                    <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
+                    <Typography variant="h6" sx={{ mt: 3 }}>Endpoints *</Typography>
+                    {errors.endpointsErrorMessage && (
+                        <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>{errors.endpointsErrorMessage}</Typography>
+                    )}
+
                     {formData.endpoints.map((endpoint, index) => (
                         <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                            <TextField fullWidth size="small" value={endpoint} onChange={(e) => handleChangeEndpoint(index, e.target.value)} />
-                            <IconButton color="error" onClick={() => handleRemoveEndpoint(index)}><RemoveCircleOutlineIcon sx={{ color: '#FF8400' }}/></IconButton>
+                            <TextField fullWidth
+                                size="small"
+                                value={endpoint}
+                                onChange={(e) => handleChangeEndpoint(index, e.target.value)}
+                                error={!!errors.endpoints?.[index]}
+                                helperText={errors.endpoints?.[index]}
+                            />
+                            <IconButton color="error" onClick={() => handleRemoveEndpoint(index)}><RemoveCircleOutlineIcon sx={{ color: '#FF8400' }} /></IconButton>
                         </Box>
                     ))}
                     <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddEndpoint}>Add Endpoint</Button>
 
-
                     {/* Select Box 추가 (각 항목 사이에 여백 추가) */}
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
 
-       
+
                         <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
                         <FormControl fullWidth size="small">
                             <InputLabel>Cipher</InputLabel>
-                            <Select label="Cipher" value={formData.cipher} onChange={handleSelectChange("cipher")}>
+                            <Select label="Cipher" value={formData.cipher} error={!!errors.cipher} onChange={handleSelectChange("cipher")}>
                                 {cipherOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
                             </Select>
+                            <FormHelperText error>{errors.cipher}</FormHelperText>
                         </FormControl>
 
                         <FormControl fullWidth size="small">
                             <InputLabel>Curve</InputLabel>
-                            <Select label="Curve" value={formData.curve} onChange={handleSelectChange("curve")}>
+                            <Select label="Curve" value={formData.curve} error={!!errors.curve} onChange={handleSelectChange("curve")}>
                                 {curveOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
                             </Select>
+                            <FormHelperText error>{errors.curve}</FormHelperText>
                         </FormControl>
 
                         <FormControl fullWidth size="small">
                             <InputLabel>Padding</InputLabel>
-                            <Select label="Padding" value={formData.padding} onChange={handleSelectChange("padding")}>
+                            <Select label="Padding" value={formData.padding} error={!!errors.padding} onChange={handleSelectChange("padding")}>
                                 {paddingOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
                             </Select>
+                            <FormHelperText error>{errors.padding}</FormHelperText>
                         </FormControl>
-                        
+
                     </Box>
 
                     <VcSchemaSelectionDialog

@@ -1,6 +1,6 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Radio, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Radio, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import FullscreenLoader from "../../components/loading/FullscreenLoader";
 import { getUserInfo, patchUserInfo } from "../../apis/admin-api"; // 수정용 API 추가
@@ -111,7 +111,7 @@ const UserEditPage = () => {
       setFormData({ ...formData, [field]: event.target.value });
     }
   };
-  
+
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -163,7 +163,7 @@ const UserEditPage = () => {
   const handleSelectItem = (item: ItemFormData) => {
     setSelectedItemId(item.id);
   };
-  
+
   const handleAddSelectedItem = () => {
     if (!selectedItemId) return;
     const selectedItem = availableItems.find((item) => item.id === selectedItemId);
@@ -214,44 +214,67 @@ const UserEditPage = () => {
     console.log(initialData);
     const isModified = JSON.stringify(formData) !== JSON.stringify(initialData);
     setIsButtonDisabled(!isModified);
-}, [formData, initialData]);
+  }, [formData, initialData]);
+
+  const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+    width: 600,
+    margin: 'auto',
+    marginTop: theme.spacing(1),
+    padding: theme.spacing(3),
+    border: 'none',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: '#ffffff',
+    boxShadow: '0px 4px 8px 0px #0000001A',
+  })), []);
+
+  const StyledTitle = useMemo(() => styled(Typography)({
+    textAlign: 'left',
+    fontSize: '24px',
+    fontWeight: 700,
+  }), []);
+
+  const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(2),
+  })), []);
 
   if (isLoading) return <FullscreenLoader open={true} />;
 
   return formData ? (
     <>
-      <Typography variant="h4">Edit User</Typography>
+      <Typography variant="h4">User Management</Typography>
+      <StyledContainer>
+        <StyledTitle>User Edit</StyledTitle>
+        <StyledInputArea>
 
-      <Box sx={{ width: 500, margin: 'auto', mt: 3, p: 3, boxShadow: '0px 4px 8px 0px #0000001A', backgroundColor: '#fff' }}>
-        <TextField label="DID" fullWidth size="small" value={formData.did} onChange={handleChange('did')} />
+          <TextField label="DID" fullWidth size="small" value={formData.did} onChange={handleChange('did')} />
 
-        {/* VC Schema 선택 필드 */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
-          <TextField label="VC Schema ID" fullWidth size="small" value={formData.vcSchemaId} disabled />
-          <IconButton color="primary" onClick={handleOpenDialog}><SearchIcon /></IconButton>
-        </Box>
+          {/* VC Schema 선택 필드 */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
+            <TextField label="VC Schema ID" fullWidth size="small" value={formData.vcSchemaId} disabled />
+            <IconButton color="primary" onClick={handleOpenDialog}><SearchIcon /></IconButton>
+          </Box>
 
-        <Typography variant="h6" sx={{ mt: 3 }}>User VC Info</Typography>
-        <TextField
-          size="medium"
-          multiline
-          fullWidth
-          value={formData.userInfo}
-          onChange={handleChange('userInfo')}
-          error={!!errors.userInfo}
-          helperText={errors.userInfo}
-          placeholder="User Info"
-        />
+          <Typography variant="h6" sx={{ mt: 3 }}>User VC Info</Typography>
+          <TextField
+            size="medium"
+            multiline
+            fullWidth
+            value={formData.userInfo}
+            onChange={handleChange('userInfo')}
+            error={!!errors.userInfo}
+            helperText={errors.userInfo}
+            placeholder="User Info"
+          />
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-          <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
-          <Button variant="contained" color="secondary" onClick={() => navigate('/users/user-management')}>Back</Button>
-          <Button variant="outlined" color="secondary" onClick={handleReset}>Reset</Button>
-        </Box>
-      </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+            <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
+            <Button variant="contained" color="secondary" onClick={() => navigate('/users/user-management')}>Back</Button>
+            <Button variant="outlined" color="secondary" onClick={handleReset}>Reset</Button>
+          </Box>
 
-      {/* VC Schema 선택 다이얼로그 */}
-      <VcSchemaSelectionDialog
+
+          {/* VC Schema 선택 다이얼로그 */}
+          <VcSchemaSelectionDialog
             open={openDialog}
             onClose={handleCloseDialog}
             availableItems={availableItems}
@@ -259,7 +282,8 @@ const UserEditPage = () => {
             onSelectItem={handleSelectItem}
             onConfirmSelection={handleAddSelectedItem}
           />
-
+        </StyledInputArea>
+      </StyledContainer >
     </>
   ) : null;
 };

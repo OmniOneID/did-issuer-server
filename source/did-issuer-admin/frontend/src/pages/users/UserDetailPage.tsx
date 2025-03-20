@@ -88,9 +88,9 @@ const UserDetailPage = (props: Props) => {
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Typography variant="h4">Issue Profile Management</Typography>
+      <Typography variant="h4">User Management</Typography>
       <StyledContainer>
-        <StyledTitle>Issue Profile Detail Information</StyledTitle>
+        <StyledTitle>User Detail Information</StyledTitle>
 
         <StyledInputArea>
           <TextField label="DID" value={userInfo?.did || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />

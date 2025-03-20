@@ -112,16 +112,6 @@ const VcSchemaDetailPage = (props: Props) => {
           />
 
           <TextField
-            label="Description"
-            value={vcSchemaData?.description || ''}
-            fullWidth
-            variant="standard"
-            margin="normal"
-            sx={{ width: '60%' }}
-            slotProps={{ input: { readOnly: true } }}
-          />
-
-          <TextField
             label="Language"
             value={vcSchemaData?.language || ''}
             fullWidth
@@ -135,6 +125,17 @@ const VcSchemaDetailPage = (props: Props) => {
             label="Version"
             value={vcSchemaData?.version || ''}
             fullWidth
+            variant="standard"
+            margin="normal"
+            sx={{ width: '60%' }}
+            slotProps={{ input: { readOnly: true } }}
+          />
+
+          <TextField
+            label="Description"
+            value={vcSchemaData?.description || ''}
+            fullWidth
+            multiline
             variant="standard"
             margin="normal"
             sx={{ width: '60%' }}

@@ -76,13 +76,13 @@ const VcSchemaEditPage = (props: Props) => {
     };
 
     const validate = () => {
-        
+
         let tempErrors: ErrorState = {};
 
         tempErrors.vcSchemaId = validateVcSchemaId(formData.vcSchemaId);
         tempErrors.title = validateTitle(formData.title);
         tempErrors.description = validateDescription(formData.description);
-        
+
         if (formData.items.length === 0) {
             tempErrors.errorItemsMessage = "At least one item is required.";
         } else {
@@ -103,20 +103,20 @@ const VcSchemaEditPage = (props: Props) => {
     };
 
     const validateVcSchemaId = (vcSchemaId?: string): string | undefined => {
-        if (!vcSchemaId) return 'Please enter a Namespace ID.';
-        if (vcSchemaId.length < 4 || vcSchemaId.length > 64) return 'VC Schema ID ID must be between 4 and 64 characters.';
+        if (!vcSchemaId) return 'Please enter a VC Schema ID.';
+        if (vcSchemaId.length < 2 || vcSchemaId.length > 1000) return 'VC Schema ID ID must be between 2 and 1000 characters.';
         return undefined;
     };
 
     const validateTitle = (title?: string): string | undefined => {
-        if (!title) return 'Please enter a Name.';
-        if (title.length < 4 || title.length > 64) return 'Name must be between 4 and 64 characters.';
+        if (!title) return 'Please enter a Title.';
+        if (title.length < 4 || title.length > 64) return 'Title must be between 4 and 64 characters.';
         return undefined;
     };
 
     const validateDescription = (description?: string): string | undefined => {
-        if (!description) return 'Please enter a Ref.';
-        if (description.length < 4 || description.length > 2000) return 'Ref must be between 4 and 64 characters.';
+        if (!description) return;
+        if (description.length > 2000) return 'Description must be 2000 characters or less.';
         return undefined;
     };
 
@@ -124,7 +124,7 @@ const VcSchemaEditPage = (props: Props) => {
         let itemErrors: { id?: string; namespaceId?: string; name?: string } = {};
 
         const idStr = typeof item.id === "number" ? String(item.id) : item.id;
-        
+
         if (!idStr || typeof idStr !== "string" || idStr.trim() === "") {
             itemErrors.id = "ID is required.";
         }
@@ -134,7 +134,7 @@ const VcSchemaEditPage = (props: Props) => {
         if (!item.name || typeof item.name !== "string" || item.name.trim() === "") {
             itemErrors.name = "Name is required.";
         }
-        
+
         return itemErrors;
     };
 
@@ -146,7 +146,9 @@ const VcSchemaEditPage = (props: Props) => {
             vcSchemaId: formData.vcSchemaId,
             title: formData.title,
             description: formData.description,
-            namespaces: formData.items.map(item => (item.id))
+            namespaces: formData.items.map(item => (item.id)),
+            language: formData.language,
+            version: formData.version,
         };
 
         const result = await dialogs.open(CustomConfirmDialog, {
@@ -313,13 +315,13 @@ const VcSchemaEditPage = (props: Props) => {
         backgroundColor: '#ffffff',
         boxShadow: '0px 4px 8px 0px #0000001A',
     })), []);
-  
+
     const StyledTitle = useMemo(() => styled(Typography)({
         textAlign: 'left',
         fontSize: '24px',
         fontWeight: 700,
     }), []);
-  
+
     const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
         marginTop: theme.spacing(2),
     })), []);
@@ -333,7 +335,7 @@ const VcSchemaEditPage = (props: Props) => {
 
                 <StyledInputArea>
                     <TextField
-                        label="VC Schema ID"
+                        label="VC Schema ID *"
                         variant="outlined"
                         margin="normal"
                         size="small"
@@ -346,7 +348,7 @@ const VcSchemaEditPage = (props: Props) => {
                     />
 
                     <TextField
-                        label="Title"
+                        label="Title *"
                         variant="outlined"
                         margin="normal"
                         size="small"
@@ -358,19 +360,7 @@ const VcSchemaEditPage = (props: Props) => {
                     />
 
                     <TextField
-                        label="Description"
-                        variant="outlined"
-                        margin="normal"
-                        size="small"
-                        sx={{ width: '60%' }}
-                        value={formData.description}
-                        onChange={handleChange('description')}
-                        error={!!errors.description}
-                        helperText={errors.description}
-                    />
-
-                    <TextField
-                        label="Language"
+                        label="Language *"
                         variant="outlined"
                         margin="normal"
                         size="small"
@@ -383,7 +373,7 @@ const VcSchemaEditPage = (props: Props) => {
 
 
                     <TextField
-                        label="Version"
+                        label="Version *"
                         variant="outlined"
                         margin="normal"
                         size="small"
@@ -392,6 +382,19 @@ const VcSchemaEditPage = (props: Props) => {
                         onChange={handleChange('version')}
                         error={!!errors.version}
                         helperText={errors.version}
+                    />
+
+                    <TextField
+                        label="Description"
+                        variant="outlined"
+                        margin="normal"
+                        size="small"
+                        multiline
+                        sx={{ width: '60%' }}
+                        value={formData.description}
+                        onChange={handleChange('description')}
+                        error={!!errors.description}
+                        helperText={errors.description}
                     />
 
                     <Typography variant="h6" sx={{ mt: 3 }}>Items</Typography>
@@ -427,9 +430,9 @@ const VcSchemaEditPage = (props: Props) => {
                                             {item.namespaceId}
                                         </TableCell>
                                         <TableCell>{item.name}</TableCell>
-                                        <TableCell sx={{ width: 50}}>
+                                        <TableCell sx={{ width: 50 }}>
                                             <IconButton onClick={() => handleRemoveItem(index)} color="error">
-                                                <DeleteIcon sx={{ color: '#FF8400' }}/>
+                                                <DeleteIcon sx={{ color: '#FF8400' }} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -445,7 +448,7 @@ const VcSchemaEditPage = (props: Props) => {
                     </Box>
                 </StyledInputArea>
             </StyledContainer>
-            
+
             <SchemaItemSelectDialog
                 open={openDialog}
                 onClose={handleCloseDialog}
