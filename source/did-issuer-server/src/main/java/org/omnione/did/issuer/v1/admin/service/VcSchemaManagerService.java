@@ -112,6 +112,8 @@ public class VcSchemaManagerService {
         VcSchema vcSchema = vcSchemaQueryService.findById(request.getId());
         vcSchema.setTitle(request.getTitle());
         vcSchema.setDescription(request.getDescription());
+        vcSchema.setLanguage(request.getLanguage());
+        vcSchema.setVersion(request.getVersion());
 
         vcSchemaQueryService.deleteByVcSchemaId(request.getId());
 
