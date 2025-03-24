@@ -86,6 +86,7 @@ const NamespaceEditPage = (props: Props) => {
         if (formData.items.length === 0) {
             tempErrors.errorItemsMessage = "At least one item is required.";
         } else {
+            tempErrors.errorItemsMessage = undefined;
             tempErrors.items = formData.items.map(validateItem);
         }
 
@@ -94,7 +95,7 @@ const NamespaceEditPage = (props: Props) => {
         return (
             formData.items.length > 0 &&
             Object.entries(tempErrors)
-                .filter(([key]) => key !== "items" && key !== "errorItemsMessage")
+                .filter(([key]) => key !== "items")
                 .every(([, error]) => !error) &&
             (tempErrors.items ?? []).every((itemErrors) =>
                 Object.values(itemErrors).every((e) => !e)

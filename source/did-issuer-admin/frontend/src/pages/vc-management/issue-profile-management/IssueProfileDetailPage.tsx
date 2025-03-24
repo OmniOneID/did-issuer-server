@@ -63,7 +63,8 @@ const IssueProfileDetailPage = (props: Props) => {
           curve: data.issueProfile.curve,
           padding: data.issueProfile.padding,
           language: data.issueProfile.language,
-          initiateType: data.issueProfile.initiateType
+          initiateType: data.issueProfile.initiateType,
+          tags: data.issueProfile.tags,
         });
         setNumericVcSchemaId(data.issueProfile.vcSchemaId);
       } catch (err) {
@@ -126,11 +127,7 @@ const IssueProfileDetailPage = (props: Props) => {
           <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
           <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>
             <Table>
-              <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.paper : "#f5f5f5" }}>
-                      <TableCell>EndPoint</TableCell> 
-                  </TableRow>
-              </TableHead>
+
               <TableBody>
                 {issueProfileData?.endpoints?.length > 0 ? (
                   issueProfileData.endpoints.map((item: any, index: number) => (
@@ -151,6 +148,25 @@ const IssueProfileDetailPage = (props: Props) => {
           <TextField label="Cipher" value={issueProfileData?.cipher || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Curve" value={issueProfileData?.curve || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Padding" value={issueProfileData?.padding || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+
+          <Typography variant="h6" sx={{ mt: 3 }}>Tags</Typography>
+          <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>
+            <Table>
+              <TableBody>
+                {issueProfileData?.tags?.length > 0 ? (
+                  issueProfileData.tags.map((item: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{item}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell align="center">No items available.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
           <Typography variant="h6" sx={{ mt: 3 }}></Typography>
 

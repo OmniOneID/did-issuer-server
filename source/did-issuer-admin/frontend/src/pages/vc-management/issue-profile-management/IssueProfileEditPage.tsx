@@ -25,6 +25,7 @@ interface IssueProfileFormData {
     padding: string;
     initiateType: string;
     language: string;
+    tags: string[];
 }
 
 interface ErrorState {
@@ -39,6 +40,8 @@ interface ErrorState {
     padding?: string;
     initiateType?: string;
     language?: string;
+    tagsErrorMessage?: string;
+    tags?: string[] | undefined;
 }
 
 interface ItemFormData {
@@ -71,6 +74,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
         padding: '',
         initiateType: '',
         language: '',
+        tags: [''],
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -101,6 +105,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
             padding: formData.padding,
             initiateType: formData.initiateType,
             language: formData.language,
+            tags: formData.tags,
         };
 
         const result = await dialogs.open(CustomConfirmDialog, {
@@ -148,19 +153,29 @@ const IssueProfileRegistrationPage = (props: Props) => {
         tempErrors.language = validateLanguage(formData.language)
 
         if (formData.endpoints.length === 0) {
-            tempErrors.endpointsErrorMessage = "At least one Endpoint is required."
+            tempErrors.endpointsErrorMessage = "At least one Endpoint is required.";
         } else {
+            tempErrors.endpointsErrorMessage = undefined;
             tempErrors.endpoints = formData.endpoints.map(validateEndpoint).filter(endpoint => endpoint?.length !== 0);
         }
 
+        if (formData.tags.length === 0) {
+            tempErrors.tagsErrorMessage = "At least one Tag is required.";
+        } else {
+            tempErrors.tagsErrorMessage = undefined;
+            tempErrors.tags = formData.tags.map(validateTag).filter(tag => tag?.length !== 0);
+        }
+        
         setErrors(tempErrors);
 
         return (
             Object.entries(tempErrors)
-                .filter(([key]) => key !== "endpoints" && key !== "endpointsErrorMessage")
+                .filter(([key]) => key !== "endpoints" && key !== "tags")
                 .every(([, error]) => !error) &&
             (tempErrors.endpoints ?? []).every((endpoint) =>
-                Object.values(endpoint).every((e) => !e))
+                Object.values(endpoint).every((e) => !e)) &&
+            (tempErrors.tags ?? []).every((tag) =>
+                Object.values(tag).every((e) => !e))
         );
     };
 
@@ -218,7 +233,11 @@ const IssueProfileRegistrationPage = (props: Props) => {
         if (endpoint.length < 2 || endpoint.length > 2000) return 'Endpoint must be between 2 and 2000 characters.';
         return '';
     };
-
+    const validateTag = (tag?: string): string => {
+        if (!tag) return 'Please enter a Tag.';
+        if (tag.length < 2 || tag.length > 200) return 'Tag must be between 2 and 200 characters.';
+        return '';
+    };
     // `endpoints` 입력 필드 추가
     const handleAddEndpoint = () => {
         setFormData((prev) => ({
@@ -241,6 +260,31 @@ const IssueProfileRegistrationPage = (props: Props) => {
             const newEndpoints = [...prev.endpoints];
             newEndpoints[index] = value;
             return { ...prev, endpoints: newEndpoints };
+        });
+    };
+
+    // `tags` 입력 필드 추가
+    const handleAddTag = () => {
+        setFormData((prev) => ({
+            ...prev,
+            tags: [...prev.tags, ''],
+        }));
+    };
+
+    // `tags` 입력 필드 제거
+    const handleRemoveTag = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            tags: prev.tags.filter((_, i) => i !== index),
+        }));
+    };
+
+    // `tags` 입력 값 변경
+    const handleChangeTag = (index: number, value: string) => {
+        setFormData((prev) => {
+            const newTags = [...prev.endpoints];
+            newTags[index] = value;
+            return { ...prev, tags: newTags };
         });
     };
 
@@ -343,6 +387,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     padding: data.issueProfile.padding,
                     initiateType: data.issueProfile.initiateType,
                     language: data.issueProfile.language,
+                    tags: data.issueProfile.tags,
                 });
 
                 setSelectedItemId(data.issueProfile.vcSchemaId);
@@ -433,36 +478,49 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     ))}
                     <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddEndpoint}>Add Endpoint</Button>
 
-                    {/* Select Box 추가 (각 항목 사이에 여백 추가) */}
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+                    <Typography variant="h6" sx={{ mt: 3 }}>E2E</Typography>
+                    <FormControl fullWidth size="small" sx={{ margin: 'auto', mt: 2, }}>
+                        <InputLabel>Cipher *</InputLabel>
+                        <Select label="Cipher *" value={formData.cipher} error={!!errors.cipher} onChange={handleSelectChange("cipher")}>
+                            {cipherOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
+                        </Select>
+                        <FormHelperText error>{errors.cipher}</FormHelperText>
+                    </FormControl>
 
+                    <FormControl fullWidth size="small" sx={{ margin: 'auto', mt: 2, }}>
+                        <InputLabel>Curve *</InputLabel>
+                        <Select label="Curv *" value={formData.curve} error={!!errors.curve} onChange={handleSelectChange("curve")}>
+                            {curveOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
+                        </Select>
+                        <FormHelperText error>{errors.curve}</FormHelperText>
+                    </FormControl>
 
-                        <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
-                        <FormControl fullWidth size="small">
-                            <InputLabel>Cipher</InputLabel>
-                            <Select label="Cipher" value={formData.cipher} error={!!errors.cipher} onChange={handleSelectChange("cipher")}>
-                                {cipherOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
-                            </Select>
-                            <FormHelperText error>{errors.cipher}</FormHelperText>
-                        </FormControl>
+                    <FormControl fullWidth size="small" sx={{ margin: 'auto', mt: 2, }}>
+                        <InputLabel>Padding *</InputLabel>
+                        <Select label="Padding *" value={formData.padding} error={!!errors.padding} onChange={handleSelectChange("padding")}>
+                            {paddingOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
+                        </Select>
+                        <FormHelperText error>{errors.padding}</FormHelperText>
+                    </FormControl>
 
-                        <FormControl fullWidth size="small">
-                            <InputLabel>Curve</InputLabel>
-                            <Select label="Curve" value={formData.curve} error={!!errors.curve} onChange={handleSelectChange("curve")}>
-                                {curveOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
-                            </Select>
-                            <FormHelperText error>{errors.curve}</FormHelperText>
-                        </FormControl>
+                    <Typography variant="h6" sx={{ mt: 3 }}>Tags *</Typography>
+                    {errors.tagsErrorMessage && (
+                        <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>{errors.tagsErrorMessage}</Typography>
+                    )}
 
-                        <FormControl fullWidth size="small">
-                            <InputLabel>Padding</InputLabel>
-                            <Select label="Padding" value={formData.padding} error={!!errors.padding} onChange={handleSelectChange("padding")}>
-                                {paddingOptions.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
-                            </Select>
-                            <FormHelperText error>{errors.padding}</FormHelperText>
-                        </FormControl>
-
-                    </Box>
+                    {formData.tags.map((tag, index) => (
+                        <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                            <TextField fullWidth
+                                size="small"
+                                value={tag}
+                                onChange={(e) => handleChangeTag(index, e.target.value)}
+                                error={!!errors.tags?.[index]}
+                                helperText={errors.tags?.[index]}
+                            />
+                            <IconButton color="error" onClick={() => handleRemoveTag(index)}><RemoveCircleOutlineIcon sx={{ color: '#FF8400' }} /></IconButton>
+                        </Box>
+                    ))}
+                    <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddTag}>Add Tag</Button>
 
                     <VcSchemaSelectionDialog
                         open={openDialog}
@@ -476,7 +534,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>
                         <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
                         <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
-                        <Button variant="outlined" color="primary" onClick={() => navigate('/vc-management/vc-schema-management')}>Back</Button>
+                        <Button variant="outlined" color="primary" onClick={() => navigate('/vc-management/issue-profile-management')}>Back</Button>
                     </Box>
                 </StyledInputArea>
             </StyledContainer>

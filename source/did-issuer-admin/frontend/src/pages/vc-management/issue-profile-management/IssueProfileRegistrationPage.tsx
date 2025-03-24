@@ -25,6 +25,7 @@ interface IssueProfileFormData {
   padding: string;
   initiateType: string;
   language: string;
+  tags: string[];
 }
 
 interface ItemFormData {
@@ -45,6 +46,8 @@ interface ErrorState {
   padding?: string;
   initiateType?: string;
   language?: string;
+  tagsErrorMessage?: string;
+  tags?: string[] | undefined;
 }
 
 const cipherOptions = ["AES-128-CBC", "AES-128-ECB", "AES-256-CBC", "AES-256-ECB"];
@@ -70,6 +73,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
     padding: '',
     initiateType: '',
     language: '',
+    tags: [''],
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +98,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
       padding: formData.padding,
       initiateType: formData.initiateType,
       language: formData.language,
+      tags: formData.tags,
     };
 
     const result = await dialogs.open(CustomConfirmDialog, {
@@ -141,19 +146,29 @@ const IssueProfileRegistrationPage = (props: Props) => {
     tempErrors.language = validateLanguage(formData.language)
 
     if (formData.endpoints.length === 0) {
-      tempErrors.endpointsErrorMessage = "At least one Endpoint is required."
+      tempErrors.endpointsErrorMessage = "At least one Endpoint is required.";
     } else {
+      tempErrors.endpointsErrorMessage = undefined;
       tempErrors.endpoints = formData.endpoints.map(validateEndpoint).filter(endpoint => endpoint?.length !== 0);
+    }
+   
+    if (formData.tags.length === 0) {
+      tempErrors.tagsErrorMessage = "At least one Tag is required.";
+    } else {
+      tempErrors.tagsErrorMessage = undefined;
+      tempErrors.tags = formData.tags.map(validateTag).filter(tag => tag?.length !== 0);
     }
    
     setErrors(tempErrors);
 
     return (
       Object.entries(tempErrors)
-        .filter(([key]) => key !== "endpoints" && key !== "endpointsErrorMessage")
+        .filter(([key]) => key !== "endpoints" && key !== "tags")
         .every(([, error]) => !error) &&
         (tempErrors.endpoints ?? []).every((endpoint) => 
-        Object.values(endpoint).every((e) => !e))
+        Object.values(endpoint).every((e) => !e)) &&
+        (tempErrors.tags ?? []).every((tag) => 
+        Object.values(tag).every((e) => !e))
     );
   };
 
@@ -212,6 +227,12 @@ const IssueProfileRegistrationPage = (props: Props) => {
     return '';
   };
 
+  const validateTag  = (tag?: string): string => {
+    if (!tag) return 'Please enter a Tag.';
+    if (tag.length < 2 || tag.length > 200) return 'Tag must be between 2 and 200 characters.';
+    return '';
+  };
+
   // `endpoints` 입력 필드 추가
   const handleAddEndpoint = () => {
     setFormData((prev) => ({
@@ -240,6 +261,32 @@ const IssueProfileRegistrationPage = (props: Props) => {
 
     window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
   };
+
+    // `tags` 입력 필드 추가
+    const handleAddTag = () => {
+      setFormData((prev) => ({
+        ...prev,
+        tags: [...prev.tags, ''],
+      }));
+    };
+  
+    // `tags` 입력 필드 제거
+    const handleRemoveTag = (index: number) => {
+      setFormData((prev) => ({
+        ...prev,
+        tags: prev.tags.filter((_, i) => i !== index),
+      }));
+    };
+  
+    // `tags` 입력 값 변경
+    const handleChangeTag = (index: number, value: string) => {
+      setFormData((prev) => {
+        const newTags = [...prev.endpoints];
+        newTags[index] = value;
+        return { ...prev, tags: newTags };
+      });
+    };
+
   // 서버에서 데이터 가져오기
   const fetchItems = async () => {
     try {
@@ -390,6 +437,26 @@ const IssueProfileRegistrationPage = (props: Props) => {
             </Select>
             <FormHelperText error>{errors.padding}</FormHelperText>
           </FormControl>
+
+          <Typography variant="h6" sx={{ mt: 3 }}>Tags *</Typography>
+          {errors.tagsErrorMessage && (
+            <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>{errors.tagsErrorMessage}</Typography>
+          )}
+
+          {formData.tags.map((tag, index) => (
+            <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <TextField fullWidth 
+              size="small" 
+              value={tag}  
+              onChange={(e) => handleChangeTag(index, e.target.value)} 
+              error={!!errors.tags?.[index]} 
+              helperText={errors.tags?.[index]}
+              />
+              <IconButton color="error" onClick={() => handleRemoveTag(index)}><RemoveCircleOutlineIcon sx={{ color: '#FF8400' }} /></IconButton>
+            </Box>
+          ))}
+          <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddTag}>Add Tag</Button>
+
 
           <VcSchemaSelectionDialog
             open={openDialog}
