@@ -19,15 +19,8 @@ package org.omnione.did.issuer.v1.admin.service;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.bouncycastle.util.Strings;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.VcSchema;
-import org.omnione.did.data.model.profile.ReqE2e;
-import org.omnione.did.data.model.profile.issue.InnerIssueProfile;
-import org.omnione.did.data.model.profile.issue.IssueProcess;
-import org.omnione.did.data.model.provider.ProviderDetail;
-import org.omnione.did.data.model.vc.CredentialSchema;
-import org.omnione.did.issuer.v1.admin.api.dto.PostIssuePlanIdReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.CreateIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.GetIssueProfileResDto;
@@ -38,8 +31,6 @@ import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Description...
@@ -72,12 +63,10 @@ public class IssueProfileService {
                 .vcSchemaId(request.getVcSchemaId())
                 .initiateType(request.getInitiateType())
                 .language(request.getLanguage())
+                .tags(request.getTags())
                 .build());
 
-        listCommunityService.postVcPlan(PostIssuePlanIdReqDto.builder()
-                .vcPlan(issueProfile.getVcPlanId())
-                .issuerDid(issuerDid)
-                .build());
+        listCommunityService.registerVcPlan(issueProfile);
 
         return CreateIssueProfileResDto.builder()
                 .build();
@@ -116,6 +105,7 @@ public class IssueProfileService {
         issueProfile.setLanguage(request.getLanguage());
         issueProfile.setEndpoints(request.getEndpoints());
         issueProfile.setVcSchemaId(request.getVcSchemaId());
+        issueProfile.setTags(request.getTags());
 
 
     }

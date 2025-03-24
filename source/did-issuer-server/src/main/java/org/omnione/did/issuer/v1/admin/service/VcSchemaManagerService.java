@@ -22,9 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
-import org.omnione.did.issuer.v1.admin.api.dto.PostVcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.dto.*;
-import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
@@ -46,8 +44,8 @@ public class VcSchemaManagerService {
     private final VcSchemaQueryService vcSchemaQueryService;
 
     private final NamespaceQueryService namespaceQueryService;
-    private final ListCommunityService listCommunityService;
     private final IssuerInfoQueryService issuerInfoQueryService;
+    private final ListCommunityService listCommunityService;
     private String issuerDid;
 
     @PostConstruct
@@ -75,12 +73,10 @@ public class VcSchemaManagerService {
 
         vcSchemaQueryService.saveVcSchemaNamespace(vcSchemaNamespaceList);
 
-        listCommunityService.postVcSchema(PostVcSchemaReqDto.builder()
-                .issuerDid(issuerDid)
-                .vcSchema(vcSchema.getVcSchemaId())
-                .build());
+        listCommunityService.registerVcSchema(vcSchema.getId());
 
         return CreateVcSchemaResDto.builder()
+                .vcSchemaId(vcSchema.getId())
                 .build();
     }
 

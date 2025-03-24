@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.base.datamodel.data;
 
 import lombok.*;
+import org.omnione.did.data.model.vc.CredentialSchema;
+
+import java.util.List;
 
 /**
- * Description...
- *
+ * This class represents the VcPlan structure.
  */
 @Getter
 @Setter
@@ -28,6 +30,18 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateVcSchemaResDto {
-    private Long vcSchemaId;
+public class VcPlan {
+    private String vcPlanId;
+    private String name;
+    private String description;
+    private String ref;
+    private LogoImage logo;
+    private String validFrom;
+    private String validUntil;
+    private List<String> tags;
+    private CredentialSchema credentialSchema;
+    private Option option;
+    private String delegator;
+    private List<String> allowedIssuers;
+    private String manager;
 }

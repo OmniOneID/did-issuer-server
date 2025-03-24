@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Builder
-public class PostVcSchemaReqDto {
+public class RegisterVcSchemaReqDto {
     private String vcSchema;
     private String issuerDid;
 }

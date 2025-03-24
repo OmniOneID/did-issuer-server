@@ -43,4 +43,5 @@ public class CreateIssueProfileReqDto {
     private String curve;
     private String padding;
     private InitiateType initiateType;
+    private List<String> tags;
 }

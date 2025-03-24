@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.base.datamodel.data;
 
 import lombok.*;
 
 /**
- * Description...
- *
+ * This class represents the Option structure.
  */
 @Getter
 @Setter
@@ -28,6 +27,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateVcSchemaResDto {
-    private Long vcSchemaId;
+public class Option {
+    private Boolean allowUserInit;
+    private Boolean allowIssuerInit;
+    private Boolean delegatedIssuance;
 }

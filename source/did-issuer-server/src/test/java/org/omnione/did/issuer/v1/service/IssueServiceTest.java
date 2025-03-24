@@ -34,6 +34,7 @@ import org.omnione.did.issuer.v1.agent.helper.IssueServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
@@ -42,6 +43,7 @@ import java.security.interfaces.ECPublicKey;
 //@Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
+@ActiveProfiles("dev")
 @SpringBootTest
 class IssueServiceTest {
 
@@ -60,7 +62,7 @@ class IssueServiceTest {
     @Order(1)
     void offerVc() {
         OfferIssueVcReqDto request = new OfferIssueVcReqDto();
-        request.setVcPlanId("VC_PLAN_ID_2");
+        request.setVcPlanId("VCPID000001");
         System.out.println("request = " + request);
 
         OfferIssueVcResDto response = issueService.requestOffer(request);
@@ -72,7 +74,7 @@ class IssueServiceTest {
     void inspectIssuePropose() {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
-        request.setVcPlanId("VC_PLAN_ID_1");
+        request.setVcPlanId("VCPID000001");
         request.setId(RandomUtil.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);
@@ -90,8 +92,8 @@ class IssueServiceTest {
         GenerateIssueProfileReqDto request = new GenerateIssueProfileReqDto();
         request.setTxId(txId);
         request.setHolder(Holder.builder()
-                .did("test2")
-                .pii("test")
+                .did("did:omn:issuer")
+                .pii("raonkim")
                 .build());
         System.out.println("request = " + request);
         GenerateIssueProfileResDto response = issueService.generateIssueProfile(request);

@@ -19,6 +19,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.IssueProfile;
+import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.IssueProfileService;
 import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Description...
- *
  */
 
 @RequiredArgsConstructor
@@ -41,27 +41,29 @@ public class IssueProfileAdminController {
     private final IssueProfileService issueProfileService;
 
     @PostMapping
-    public ResponseEntity<CreateIssueProfileResDto> createIssueProfile(
+    public ResponseEntity<EmptyResDto> createIssueProfile(
             @RequestBody CreateIssueProfileReqDto request) {
+        issueProfileService.createIssueProfile(request);
 
-        return ResponseEntity.ok(issueProfileService.createIssueProfile(request));
+        return ResponseEntity.ok(EmptyResDto.builder().build());
     }
 
     @PatchMapping
-    public void updateIssueProfile(@RequestBody CreateIssueProfileReqDto request) {
-
+    public ResponseEntity<EmptyResDto> updateIssueProfile(@RequestBody CreateIssueProfileReqDto request) {
         issueProfileService.updateIssueProfile(request);
+
+        return ResponseEntity.ok(EmptyResDto.builder().build());
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteIssueProfile(@RequestParam(name = "id") Long id) {
+    public ResponseEntity<EmptyResDto> deleteIssueProfile(@RequestParam(name = "id") Long id) {
         issueProfileService.deleteIssueProfileById(id);
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(EmptyResDto.builder().build());
     }
 
     @GetMapping
-    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable){
+    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
 
         return issueProfileService.searchIssueProfileList(searchKey, searchValue, pageable);
     }

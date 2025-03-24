@@ -19,7 +19,7 @@
             <column name="description" type="varchar(200)">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="endpoints" type="varchar(200)">
+            <column name="endpoints" type="varchar(2000)">
                 <constraints nullable="false" unique="false" />
             </column>
             <column name="language" type="varchar(10)">
@@ -45,6 +45,9 @@
             </column>
             <column name="initiate_type" type="varchar(20)">
                 <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="tags" type="varchar(200)">
+                <constraints nullable="false" unique="false" />
             </column>
         </createTable>
     </changeSet>

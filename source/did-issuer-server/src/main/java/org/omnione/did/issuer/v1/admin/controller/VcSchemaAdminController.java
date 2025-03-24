@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
 import org.springframework.data.domain.Page;
@@ -38,9 +39,9 @@ public class VcSchemaAdminController {
     private final VcSchemaManagerService vcSchemaManagerService;
 
     @PostMapping
-    public ResponseEntity<CreateVcSchemaResDto> createVcSchema(@RequestBody VcSchemaReqDto request) {
-
-        return ResponseEntity.ok(vcSchemaManagerService.createVcSchema(request));
+    public ResponseEntity<EmptyResDto> createVcSchema(@RequestBody VcSchemaReqDto request) {
+        vcSchemaManagerService.createVcSchema(request);
+        return ResponseEntity.ok(EmptyResDto.builder().build());
     }
 
     @PatchMapping

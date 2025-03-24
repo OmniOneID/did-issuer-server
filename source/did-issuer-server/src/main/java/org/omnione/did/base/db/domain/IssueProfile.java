@@ -72,4 +72,9 @@ public class IssueProfile extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "initiate_type")
     private InitiateType initiateType = InitiateType.USER_INIT;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "tags")
+    private List<String> tags;
+
 }
