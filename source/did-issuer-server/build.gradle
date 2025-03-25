@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'com.github.jk1.dependency-license-report' version '2.0'
+    id("com.github.node-gradle.node") version "5.0.0"
 }
 
 group = 'org.omnione.did'
@@ -24,6 +25,9 @@ configurations {
 
 ext {
     set('springCloudVersion', "2023.0.1")
+    set("skipFrontendBuild", System.getProperty("skipFrontendBuild"))
+    set("frontendResourceDir", "${project.projectDir}/../did-issuer-admin/frontend")
+    set("backendResourceDir", "${projectDir}/src/main/resources/static")
 }
 
 springBoot {
@@ -86,7 +90,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform {
-//        exclude("org/**/service/*.class")
+        exclude("org/**/service/*.class")
+//        exclude("org/**/*.class")
     }
 }
 
@@ -100,3 +105,47 @@ licenseReport {
     filters = [new LicenseBundleNormalizer(), new ExcludeTransitiveDependenciesFilter()]
 }
 
+
+node {
+    version = "22.9.0"
+    download = false
+    nodeProjectDir = file("${frontendResourceDir}")
+    workDir = file("${projectDir}/.gradle/nodejs")
+    npmWorkDir = file("${projectDir}/.gradle/npm")
+}
+
+tasks.register('deleteFrontResources', Delete) {
+    delete "${backendResourceDir}/**"
+    delete "${backendResourceDir}"
+    delete "${frontendResourceDir}/dist/**"
+    delete "${frontendResourceDir}/dist"
+}
+
+tasks.register('npm_install', Exec) {
+    workingDir = file("${frontendResourceDir}")
+    commandLine = ["npm", "install"]
+}
+
+tasks.register('npm_build', Exec) {
+    dependsOn 'deleteFrontResources'
+    dependsOn 'npm_install'
+    workingDir = file("${frontendResourceDir}")
+    commandLine = ["npm", "run", "build"]
+}
+
+tasks.register('copyFrontResources', Copy) {
+    dependsOn 'npm_build'
+    from "${frontendResourceDir}/dist"
+    into "${backendResourceDir}"
+}
+
+tasks.named('copyFrontResources') {
+    mustRunAfter('npm_build')
+}
+
+tasks.named('processResources') {
+    println "## skipFrontendBuild : ${skipFrontendBuild}"
+    if (!Boolean.valueOf(skipFrontendBuild)) {
+        dependsOn('npm_build', 'copyFrontResources')
+    }
+}
