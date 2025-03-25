@@ -21,7 +21,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 public interface AdminRepository extends JpaRepository<Admin, Long> {
     Optional<Admin> findByLoginIdAndLoginPassword(String loginId, String loginPassword);
 }
