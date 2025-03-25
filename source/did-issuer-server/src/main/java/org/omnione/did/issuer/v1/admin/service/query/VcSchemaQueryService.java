@@ -63,9 +63,9 @@ public class VcSchemaQueryService {
     }
 
     public VcSchema findById(Long id) {
-        // TODO: Error Code
+
         return vcSchemaRepository.findById(id)
-                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                .orElseThrow(() -> new OpenDidException(ErrorCode.VC_SCHEMA_NOT_FOUND));
     }
 
     public List<Long> findRelationByVcSchemaId(Long vcSchemaId) {
@@ -97,6 +97,6 @@ public class VcSchemaQueryService {
 
     public VcSchema findByVcSchemaId(String name) {
         return vcSchemaRepository.findByVcSchemaId(name)
-                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                .orElseThrow(() -> new OpenDidException(ErrorCode.VC_NOT_FOUND));
     }
 }

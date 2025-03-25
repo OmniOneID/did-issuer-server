@@ -69,6 +69,8 @@ public enum ErrorCode {
     VC_SCHEMA_NAME_INVALID("00211", "VC Schema name is not valid", 400),
     VC_GENERATION_FAILED("00212", "Failed to generate VC", 500),
     VC_SCHEMA_PARSE_FAILED("00213", "Failed to parse VC Schema", 500),
+    VC_SCHEMA_NOT_FOUND("00214", "VC Schema not found for given ID.", 400),
+
 
 
     // 300~ 399 = Holder
@@ -123,9 +125,15 @@ public enum ErrorCode {
     JSON_SERIALIZE_FAILED("00700", "Failed to Json serialize.", 500),
     JSON_DE_SERIALIZE_FAILED("00701", "Failed to Json deserialize.", 500),
     REQUEST_BODY_UNREADABLE("00702", "Unable to process the request.", 400),
+    JSON_SCHEMA_CLAIMS_SERIALIZE_FAILED("00703", "Failed to serialize SchemaClaims object to JSON.", 500),
+    JSON_SCHEMA_CLAIMS_DESERIALIZE_FAILED("00704", "Failed to deserialize JSON string to SchemaClaims object.", 500),
 
     // 800~ 899 = admin
     ADMIN_INFO_NOT_FOUND("00800", "Failed to find admin: admin is not registered.", 400),
+    APPLICATION_CONFIG_NOT_FOUND("00801", "Application config not found.", 400),
+    NAMESPACE_DELETE_CONFLICT("00802", "Cannot delete namespace: it is referenced by a VC schema.", 400),
+    NAMESPACE_NOT_FOUND("00803", "Namespace not found for the given ID.", 400),
+    ISSUER_INFO_NOT_FOUND("00804", "Issuer info not found during initialization.", 400),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

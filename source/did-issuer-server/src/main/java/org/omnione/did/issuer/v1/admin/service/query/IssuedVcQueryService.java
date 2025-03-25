@@ -32,6 +32,6 @@ public class IssuedVcQueryService {
 
     public Vc findById(Long id) {
         return vcRepository.findById(id)
-                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                .orElseThrow(() -> new OpenDidException(ErrorCode.VC_NOT_FOUND));
     }
 }

@@ -56,14 +56,14 @@ public class NamespaceQueryService {
 
     public void deleteById(Long id) {
         if (vcSchemaNamespaceRepository.existsByNamespaceId(id)) {
-            throw new OpenDidException(ErrorCode.TODO);
+            throw new OpenDidException(ErrorCode.NAMESPACE_DELETE_CONFLICT);
         }
         namespaceRepository.deleteById(id);
     }
 
     public Namespace findById(Long id) {
         return namespaceRepository.findById(id).orElseThrow(() ->
-                new OpenDidException(ErrorCode.TODO));
+                new OpenDidException(ErrorCode.NAMESPACE_NOT_FOUND));
     }
 
     public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {

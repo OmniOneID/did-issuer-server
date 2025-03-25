@@ -17,6 +17,6 @@ public class ApplicationConfigQueryService {
 
     public ApplicationConfig getApplicationConfig() {
         return applicationConfigRepository.findFirstBy().orElseThrow(()
-                -> new OpenDidException(ErrorCode.TODO));
+                -> new OpenDidException(ErrorCode.APPLICATION_CONFIG_NOT_FOUND));
     }
 }

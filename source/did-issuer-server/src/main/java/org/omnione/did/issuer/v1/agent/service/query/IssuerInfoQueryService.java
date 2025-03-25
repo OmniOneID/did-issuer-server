@@ -22,7 +22,7 @@ public class IssuerInfoQueryService {
     @PostConstruct
     public void loadData() {
         issuerInfo = issuerInfoRepository.findFirstBy().orElseThrow(()
-                -> new OpenDidException(ErrorCode.TODO));
+                -> new OpenDidException(ErrorCode.ISSUER_INFO_NOT_FOUND));
     }
     public IssuerInfo getIssuerInfo() {
         if (issuerInfo == null) {
@@ -36,8 +36,7 @@ public class IssuerInfoQueryService {
     }
 
     public void save(IssuerInfo issuerInfo) {
-        IssuerInfo savedIssuerInfo = issuerInfoRepository.save(issuerInfo);
-        this.issuerInfo = savedIssuerInfo;
+        IssuerInfoQueryService.issuerInfo = issuerInfoRepository.save(issuerInfo);
     }
 
 }

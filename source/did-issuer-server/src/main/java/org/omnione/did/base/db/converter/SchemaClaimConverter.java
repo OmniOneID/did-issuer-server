@@ -18,7 +18,7 @@ public class SchemaClaimConverter implements AttributeConverter<SchemaClaims, St
         try {
             return objectMapper.writeValueAsString(schemaClaims);
         } catch (Exception e) {
-            throw new OpenDidException(ErrorCode.TODO);
+            throw new OpenDidException(ErrorCode.JSON_SCHEMA_CLAIMS_SERIALIZE_FAILED);
         }
     }
 
@@ -27,7 +27,7 @@ public class SchemaClaimConverter implements AttributeConverter<SchemaClaims, St
         try {
             return objectMapper.readValue(jsonString, SchemaClaims.class);
         } catch (JsonProcessingException e) {
-            throw new OpenDidException(ErrorCode.TODO);
+            throw new OpenDidException(ErrorCode.JSON_SCHEMA_CLAIMS_DESERIALIZE_FAILED);
         }
     }
 }

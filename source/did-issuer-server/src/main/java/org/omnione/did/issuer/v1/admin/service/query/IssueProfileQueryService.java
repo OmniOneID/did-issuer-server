@@ -76,7 +76,7 @@ public class IssueProfileQueryService {
         List<IssueProfileDto> issueProfileDtos = entityPage.getContent().stream()
                 .map(issueProfile -> {
                     VcSchema vcSchema = vcSchemaRepository.findById(issueProfile.getVcSchemaId())
-                            .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                            .orElseThrow(() -> new OpenDidException(ErrorCode.VC_SCHEMA_NOT_FOUND));
                     return IssueProfileDto.fromEntity(issueProfile, vcSchema.getVcSchemaId());
                 })
                 .collect(Collectors.toList());

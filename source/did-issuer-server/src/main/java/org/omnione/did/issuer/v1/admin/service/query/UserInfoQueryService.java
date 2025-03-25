@@ -34,7 +34,7 @@ public class UserInfoQueryService {
         List<UserDto> namespaceDtos = entityPage.getContent().stream()
                 .map(user -> {
                     VcSchema vcSchema = vcSchemaRepository.findById(user.getVcSchemaId())
-                            .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                            .orElseThrow(() -> new OpenDidException(ErrorCode.VC_SCHEMA_NOT_FOUND));
                     return UserDto.fromEntity(user, vcSchema.getVcSchemaId());
                 })
                 .collect(Collectors.toList());
@@ -48,6 +48,6 @@ public class UserInfoQueryService {
 
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new OpenDidException(ErrorCode.TODO));
+                .orElseThrow(() -> new OpenDidException(ErrorCode.USER_NOT_FOUND));
     }
 }
