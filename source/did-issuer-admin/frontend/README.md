@@ -21,7 +21,6 @@ did-issuer-admin/frontend
 │   │   └── Layout.tsx
 │   ├── pages
 │   │   ├── ErrorPage.tsx
-│   │   ├── admins
 │   │   ├── auth
 │   │   ├── issued-vcs
 │   │   ├── issuer
@@ -52,7 +51,6 @@ Below is a description of each folder and file in the `src` directory:
 | ┖ Layout.tsx           | Main layout component                             |
 | src/pages              | Page-level components mapped to route segments    |
 | ┖ ErrorPage.tsx        | Error fallback page                               |
-| ┖ admins               | Pages related to the Admin Management menu        |
 | ┖ auth                 | Pages related to login and authentication         |
 | ┖ issued-vcs           | Pages related to the VC Management menu           |
 | ┖ issuer               | Pages related to the Issuer Management menu       |
