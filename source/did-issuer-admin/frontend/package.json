@@ -1,12 +1,17 @@
 {
-  "name": "core-vite-auth",
-  "version": "0.1.0",
+  "name": "opendid-issuer-admin",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OmniOneID/did-issuer-server"
+  },
+  "homepage": "https://github.com/OmniOneID/did-issuer-server", 
   "dependencies": {
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
