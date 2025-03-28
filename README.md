@@ -66,7 +66,7 @@ Below is a description of each folder and file in the directory:
 ## Installation And Operation Guide
 
 For detailed instructions on installing the Issuer Server, please refer to the guide below:
-- [OpenDID Issuer Server Installation and Operation Guide](docs/installation/OpenDID_IssuerServer_Installation_Guide.md)  
+- [OpenDID Issuer Server Installation Guide](docs/installation/OpenDID_IssuerServer_Installation_Guide.md)  
 
 For detailed instructions on operating the Issuer Admin Console, please refer to the guide below:  
 - [OpenDID Issuer Admin Console Operation Guide](docs/admin/OpenDID_IssuerAdmin_Operation_Guide_ko.md)
