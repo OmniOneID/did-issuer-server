@@ -20,6 +20,8 @@ did-issuer-server
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
 ├── docs
+│   └── admin
+│       └── OpenDID_IssuerAdmin_Operation_Guide_ko.md
 │   └── api
 │       └── Issuer_API_ko.md
 │   └── db
@@ -27,7 +29,7 @@ did-issuer-server
 │   └── errorCode
 │       └── Issuer_ErrorCode.md
 │   └── installation
-│       └── OpenDID_IssuerServer_InstallationAndOperation_Guide.md
+│       └── OpenDID_IssuerServer_Installation_Guide.md
 └── source
     └── did-issuer-admin
         ├── frontend
@@ -49,6 +51,7 @@ Below is a description of each folder and file in the directory:
 | RELEASE-PROCESS.md           | Procedures for releasing new versions           |
 | SECURITY.md                  | Security policies and vulnerability reporting   |
 | docs                         | Documentation                                   |
+| ┖ admin                      | Admin Console guide documentation               |
 | ┖ api                        | API guide documentation                         |
 | ┖ db                         | Database Table Specifications                   |
 | ┖ errorCode                  | Error codes and troubleshooting guides          |
@@ -60,26 +63,13 @@ Below is a description of each folder and file in the directory:
 
 <br/>
 
-
-## Libraries
-
-Libraries used in this project are organized into two main categories:
-
-1. **Open DID Libraries**: These libraries are developed by the Open DID project and are available in the [libs folder](source/did-issuer-server/libs). They include:
-
-   - `did-sdk-common-1.0.0.jar`
-   - `did-blockchain-sdk-server-1.0.0.jar`
-   - `did-core-sdk-server-1.0.0.jar`
-   - `did-crypto-sdk-server-1.0.0.jar`
-   - `did-datamodel-sdk-server-1.0.0.jar`
-   - `did-wallet-sdk-server-1.0.0.jar`
-
-2. **Third-Party Libraries**: These libraries are open-source dependencies managed via the [build.gradle](source/did-issuer-server/build.gradle) file. For a detailed list of third-party libraries and their licenses, please refer to the [dependencies-license.md](dependencies-license.md) file.
-
 ## Installation And Operation Guide
 
-For detailed instructions on installing and configuring the Issuer Server, please refer to the guide below:
-- [OpenDID Issuer Server Installation and Operation Guide](docs/installation/OpenDID_IssuerServer_InstallationAndOperation_Guide.md)  
+For detailed instructions on installing the Issuer Server, please refer to the guide below:
+- [OpenDID Issuer Server Installation and Operation Guide](docs/installation/OpenDID_IssuerServer_Installation_Guide.md)  
+
+For detailed instructions on operating the Issuer Admin Console, please refer to the guide below:  
+- [OpenDID Issuer Admin Console Operation Guide](docs/admin/OpenDID_IssuerAdmin_Operation_Guide_ko.md)
 
 ## API Reference
 

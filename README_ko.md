@@ -20,6 +20,8 @@ did-issuer-server
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
 ├── docs
+│   └── admin
+│       └── OpenDID_IssuerAdmin_Operation_Guide_ko.md
 │   └── api
 │       └── Issuer_API_ko.md
 │   └── db
@@ -49,21 +51,25 @@ did-issuer-server
 | RELEASE-PROCESS.md           | 새 버전 릴리스 절차                      |
 | SECURITY.md                  | 보안 정책 및 취약성 보고 방법            |
 | docs                         | 문서화                                   |
+| ┖ admin                      | Admin Console 가이드 문서                |
 | ┖ api                        | API 가이드 문서                          |
 | ┖ db                         | 데이터베이스 테이블 명세서               |
 | ┖ errorCode                  | 오류 코드 및 문제 해결 가이드            |
 | ┖ installation               | 설치 및 설정 지침                        |
 | source                       | 서버 및 관리자 콘솔 소스 코드 프로젝트   |
-| ┖ did-issuer-server          | Issuer 서버 소스 코드                        |
-| ┖ did-issuer-admin           | Issuer Admin 소스 코드                       |
-| &nbsp;&nbsp;&nbsp;┖ frontend | Issuer Admin 프론트엔드 소스 코드            |
+| ┖ did-issuer-server          | Issuer 서버 소스 코드                    |
+| ┖ did-issuer-admin           | Issuer Admin 소스 코드                   |
+| &nbsp;&nbsp;&nbsp;┖ frontend | Issuer Admin 프론트엔드 소스 코드        |
 
 <br/>
 
 ## 설치 및 운영 가이드
 
-Issuer 서버의 설치 및 구성에 대한 자세한 지침은 아래 가이드를 참조하십시오:
-- [OpenDID Issuer 서버 설치 및 운영 가이드](docs/installation/OpenDID_IssuerServer_InstallationAndOperation_Guide.md)  
+Issuer 서버의 설치에 대한 자세한 지침은 아래 가이드를 참조하십시오:
+- [OpenDID Issuer 서버 설치 가이드](docs/installation/OpenDID_IssuerServer_Installation_Guide.md)  
+
+Issuer Admin Console의 운영에 대한 자세한 지침은 아래 가이드를 참조하십시오:
+- [OpenDID Issuer Admin Console 운영 가이드](docs/admin/OpenDID_IssuerAdmin_Operation_Guide_ko.md)  
 
 ## API 참고 문서
 
