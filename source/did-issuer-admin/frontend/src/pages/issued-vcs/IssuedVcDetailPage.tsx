@@ -56,7 +56,7 @@ const IssuedVcDetailPage = (props: Props) => {
   }, [numericIssuedVcId]);
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
-    width: 800,
+    width: 600,
     margin: 'auto',
     marginTop: theme.spacing(1),
     padding: theme.spacing(3),
@@ -75,7 +75,7 @@ const IssuedVcDetailPage = (props: Props) => {
   const StyledInputArea = useMemo(() => styled(Box)(({ theme }) => ({
     marginTop: theme.spacing(2),
   })), []);
-
+  
   return (
     <>
       <FullscreenLoader open={isLoading} />
@@ -90,7 +90,7 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
@@ -100,7 +100,7 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
@@ -110,7 +110,7 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
@@ -120,7 +120,7 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
@@ -130,7 +130,7 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
@@ -140,13 +140,13 @@ const IssuedVcDetailPage = (props: Props) => {
             fullWidth
             variant="standard"
             margin="normal"
-            sx={{ width: '60%' }}
+            // sx={{ width: '60%' }}
             slotProps={{ input: { readOnly: true } }}
           />
 
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="contained" color="primary" onClick={() => navigate('/issued-vcs/issued-vc-management')}>Back</Button>
+            <Button variant="contained" color="primary" onClick={() => navigate(-1)}>Back</Button>
           </Box>
         </StyledInputArea>
       </StyledContainer>

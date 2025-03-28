@@ -77,7 +77,7 @@ const IssuedVcManagementPage = (props: Props) => {
             { 
               field: 'vcId', 
               headerName: "VC ID", 
-              width: 200,
+              width: 300,
               renderCell: (params) => (
                 <Link 
                   component="button"

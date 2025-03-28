@@ -259,7 +259,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
   };
   const handleOpenVcSchemaDetail = (vcSchemaId: string) => {
 
-    window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
+    window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
     // `tags` 입력 필드 추가

@@ -132,7 +132,7 @@ const VcSchemaRegistrationPage = (props: Props) => {
 
   // namespaceId 클릭 시 상세 정보 페이지 새창 열기
   const handleOpenNamespaceDetail = (namespaceId: string) => {
-    window.open(`/vc-management/namespace-management-popup/${namespaceId}`, "namespace detail", "popup=yes, width=800, height=900");
+    window.open(`/vc-management/namespace-management-popup/${namespaceId}?isPopup=true`, "namespace detail", "popup=yes, width=850, height=800");
   };
 
   const handleChange = (field: keyof VcSchemaFormData) => (event: React.ChangeEvent<HTMLInputElement>) => {

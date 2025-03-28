@@ -17,11 +17,13 @@ const VcSchemaDetailPage = (props: Props) => {
   const numericVcSchemaId = id ? parseInt(id, 10) : null;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vcSchemaData, setVcSchemaData] = useState<any>(null);
-  const isPopup = !!window.opener;
 
+  const params = new URLSearchParams(window.location.search);
+  const isPopup = params.get('isPopup') === 'true';
+  
   // namespaceId 클릭 시 상세 정보 페이지 새창 열기
   const handleOpenNamespaceDetail = (namespaceId: string) => {
-    window.open(`/vc-management/namespace-management-popup/${namespaceId}`, "namespace detail", "popup=yes, width=800, height=900");
+    window.open(`/vc-management/namespace-management-popup/${namespaceId}?isPopup=true`, "namespace detail", "popup=yes, width=850, height=800");
   };
 
   useEffect(() => {

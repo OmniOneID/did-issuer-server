@@ -253,7 +253,7 @@ const VcSchemaEditPage = (props: Props) => {
 
     // namespaceId 클릭 시 상세 정보 페이지 새창 열기
     const handleOpenNamespaceDetail = (namespaceId: string) => {
-        window.open(`/vc-management/namespace-management-popup/${namespaceId}`, "namespace detail", "popup=yes, width=800, height=900");
+        window.open(`/vc-management/namespace-management-popup/${namespaceId}?isPopup=true`, "namespace detail", "popup=yes, width=850, height=800");
     };
 
     useEffect(() => {
@@ -443,7 +443,7 @@ const VcSchemaEditPage = (props: Props) => {
 
                     <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>
                         <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
-                        <Button variant="contained" color="secondary" onClick={() => navigate('/vc-management/vc-schema-management')}>Back</Button>
+                        <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>Back</Button>
                         <Button variant="outlined" color="secondary" onClick={handleReset}>Reset</Button>
                     </Box>
                 </StyledInputArea>

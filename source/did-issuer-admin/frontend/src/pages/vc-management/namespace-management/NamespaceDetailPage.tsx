@@ -17,7 +17,9 @@ const NamespaceDetailPage = (props: Props) => {
   const numericNamespaceId = id ? parseInt(id, 10) : null;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [namespaceData, setNamespaceData] = useState<any>(null);
-  const isPopup = !!window.opener;
+  const params = new URLSearchParams(window.location.search);
+  const isPopup = params.get('isPopup') === 'true';
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -156,7 +158,7 @@ const NamespaceDetailPage = (props: Props) => {
               </Button>
             ) :
               <>
-                <Button variant="contained" color="primary" onClick={() => navigate('/vc-management/namespace-management')}>Back</Button>
+                <Button variant="contained" color="primary" onClick={() => navigate(-1)}>Back</Button>
                 <Button variant="outlined" color="primary" onClick={() => navigate('/vc-management/namespace-management/namespace-edit/' + numericNamespaceId)}>Go to Edit</Button>
               </>
             }

@@ -28,6 +28,7 @@ import UserRegistrationPage from './pages/users/UserRegistrationPage';
 import UserDetailPage from './pages/users/UserDetailPage';
 import UserEditPage from './pages/users/UserEditPage';
 import IssuedVcDetailPage from './pages/issued-vcs/IssuedVcDetailPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
         path: '/',
         Component: Layout,
         children: [
+          {
+            path: '/',
+            Component: DashboardPage
+          },
           {
             path: '/issuer-registration',
             Component: IssuerRegistrationPage,

@@ -13,7 +13,8 @@ import VcSchemaSelectionDialog from "../vc-management/issue-profile-management/V
 interface UserFormData {
   did: string;
   vcSchemaId: string;
-  userInfo: string
+  userInfo: string;
+  pii: string;
 }
 
 interface ItemFormData {
@@ -42,7 +43,8 @@ const UserEditPage = () => {
   const [formData, setFormData] = useState<UserFormData>({
     did: '',
     vcSchemaId: '',
-    userInfo: ''
+    userInfo: '',
+    pii: '',
   });
 
   const [initialData, setInitialData] = useState<UserFormData | null>(null);
@@ -70,7 +72,8 @@ const UserEditPage = () => {
         const userInfoData = {
           did: data.did,
           vcSchemaId: data.vcSchemaName,
-          userInfo: data.data
+          userInfo: data.data,
+          pii: data.pii
         }
         setFormData(userInfoData);
         setInitialData(userInfoData);
@@ -246,14 +249,15 @@ const UserEditPage = () => {
         <StyledTitle>User Edit</StyledTitle>
         <StyledInputArea>
 
-          <TextField label="DID" fullWidth size="small" value={formData.did} onChange={handleChange('did')} />
+          <TextField label="DID" fullWidth size="small" margin="normal" value={formData.did} onChange={handleChange('did')} />
+
+          <TextField label="PII" fullWidth size="small" margin="normal" value={formData.pii} onChange={handleChange('pii')} />
 
           {/* VC Schema 선택 필드 */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
             <TextField label="VC Schema ID" fullWidth size="small" value={formData.vcSchemaId} disabled />
             <IconButton color="primary" onClick={handleOpenDialog}><SearchIcon /></IconButton>
           </Box>
-
           <Typography variant="h6" sx={{ mt: 3 }}>User VC Info</Typography>
           <TextField
             size="medium"
@@ -268,7 +272,7 @@ const UserEditPage = () => {
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
             <Button variant="contained" color="primary" disabled={isButtonDisabled} onClick={handleSubmit}>Update</Button>
-            <Button variant="contained" color="secondary" onClick={() => navigate('/users/user-management')}>Back</Button>
+            <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>Back</Button>
             <Button variant="outlined" color="secondary" onClick={handleReset}>Reset</Button>
           </Box>
 

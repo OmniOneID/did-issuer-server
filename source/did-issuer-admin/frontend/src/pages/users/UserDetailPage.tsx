@@ -19,12 +19,12 @@ const UserDetailPage = (props: Props) => {
   let [numericVcSchemaId, setNumericVcSchemaId] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<any>(null);
-  const isPopup = !!window.opener;
+
 
 
   const handleOpenVcSchemaDetail = () => {
     console.log(numericVcSchemaId)
-    window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
+    window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
   useEffect(() => {
@@ -48,6 +48,7 @@ const UserDetailPage = (props: Props) => {
           did: data.did,
           vcSchemaName: data.vcSchemaName,
           data: data.data,
+          pii: data.pii,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         });
@@ -97,11 +98,13 @@ const UserDetailPage = (props: Props) => {
           <Box onClick={handleOpenVcSchemaDetail}>
             <TextField label="VC Schema Name" value={userInfo?.vcSchemaName || ''} fullWidth variant="standard" margin="normal" sx={{ input: { color: "blue", textDecoration: "underline", cursor: "pointer" } }} slotProps={{ input: { readOnly: true } }} />
           </Box>
+          <TextField label="PII" value={userInfo?.pii || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          <TextField label="User VC Info" size="medium" multiline value={userInfo?.data|| ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Created At" value={userInfo?.createdAt || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Updated At" value={userInfo?.updatedAt || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="outlined" color="secondary" onClick={() => navigate('/users/user-management')}>Back</Button>
+            <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>Back</Button>
             <Button variant="outlined" color="secondary" onClick={() => navigate(`/users/user-management/user-edit/${numerirUserId}`)}>Go to Edit</Button>
           </Box>
         </StyledInputArea>

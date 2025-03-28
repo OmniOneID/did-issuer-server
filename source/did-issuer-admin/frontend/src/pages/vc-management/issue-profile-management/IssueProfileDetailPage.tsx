@@ -18,7 +18,9 @@ const IssueProfileDetailPage = (props: Props) => {
   let [numericVcSchemaId, setNumericVcSchemaId ]= useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [issueProfileData, setIssueProfileData] = useState<any>(null);
-  const isPopup = !!window.opener;
+  const params = new URLSearchParams(window.location.search);
+  const isPopup = params.get('isPopup') === 'true';
+
 
   // Initiate Type 옵션
   const initiateTypeOptions = [
@@ -33,7 +35,7 @@ const IssueProfileDetailPage = (props: Props) => {
 
   const handleOpenVcSchemaDetail = () => {
     console.log(numericVcSchemaId)
-    window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
+    window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
   useEffect(() => {
@@ -175,7 +177,7 @@ const IssueProfileDetailPage = (props: Props) => {
               <Button variant="contained" sx={{ mt: 3 }} onClick={() => window.close()}>Close</Button>
             ) : (
               <>
-                <Button variant="outlined" color="secondary" onClick={() => navigate('/vc-management/issue-profile-management')}>Back</Button>
+                <Button variant="outlined" color="secondary" onClick={() => navigate(-1)}>Back</Button>
                 <Button variant="outlined" color="secondary" onClick={() => navigate(`/vc-management/issue-profile-management/issue-profile-edit/${numericIssueProfileId}`)}>Go to Edit</Button>
               </>
             )}

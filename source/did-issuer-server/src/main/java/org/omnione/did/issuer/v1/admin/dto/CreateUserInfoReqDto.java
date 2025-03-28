@@ -16,6 +16,7 @@ public class CreateUserInfoReqDto {
     private String did;
     private String firstName;
     private String lastName;
+    private String pii;
     private Long vcSchemaId;
     private String userInfo;
 }

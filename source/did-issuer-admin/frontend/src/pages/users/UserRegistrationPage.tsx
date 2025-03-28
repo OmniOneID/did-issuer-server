@@ -208,7 +208,7 @@ const UserRegistrationPage = (props: Props) => {
 
   const handleOpenVcSchemaDetail = (vcSchemaId: string) => {
 
-    window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}`, "vc schema detail", "popup=yes, width=800, height=650");
+    window.open(`/vc-management/vc-schema-management-popup/${vcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
   useEffect(() => {
@@ -322,9 +322,7 @@ const UserRegistrationPage = (props: Props) => {
 
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button variant="contained" color="secondary" onClick={() => navigate('/user-management')}>
-              Back
-            </Button>
+            <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>Back</Button>
             <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
             <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>Register</Button>
           </Box>

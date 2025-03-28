@@ -45,6 +45,7 @@ public class UserManagementService {
     public void updateUserInfo(CreateUserInfoReqDto request) {
         User user = userQueryService.findById(request.getId());
         user.setDid(request.getDid());
+        user.setPii(request.getPii());
         user.setData(request.getUserInfo());
     }
 }
