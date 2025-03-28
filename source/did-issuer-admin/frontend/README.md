@@ -83,9 +83,6 @@ Refer to the following documents for more detailed information:
 - [OpenDID Issuer Admin Console Installation Guide](../../../docs/installation/OpenDID_IssuerServer_Installation_Guide.md)  
   Installation and configuration instructions for this frontend application.
 
-- [Admin API Reference](../../../docs/api/Issuer_API_ko.md)  
-  Detailed reference for APIs used by the Admin Console.
-
 ## Contributing
 
 Please read [CONTRIBUTING.md](../../../CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](../../../CODE_OF_CONDUCT.md) for details on our code of conduct and the process for submitting pull requests.
