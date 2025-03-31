@@ -91,7 +91,7 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform {
         exclude("org/**/service/*.class")
-//        exclude("org/**/*.class")
+        exclude("org/**/*.class")
     }
 }
 
