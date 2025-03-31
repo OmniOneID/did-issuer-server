@@ -34,7 +34,7 @@ This document defines the structure of the database tables used in the Issuer se
 
 ### 1.1 ERD
 
-Access the [ERD](https://www.erdcloud.com/d/BZwNAdDwyzf95GjFr) site to view the diagram, which visually represents the relationships between the tables in the Issuer server database, including key attributes, primary keys, and foreign key relationships.
+Access the [ERD](https://www.erdcloud.com/d/d6N5gSY5C4TATnxNR) site to view the diagram, which visually represents the relationships between the tables in the Issuer server database, including key attributes, primary keys, and foreign key relationships.
 
 ## 2. Table Definition
 
