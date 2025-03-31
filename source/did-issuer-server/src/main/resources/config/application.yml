@@ -5,14 +5,12 @@ spring:
     active: sample
     group:
         dev:
-          - tas
           - database
           - wallet
           - logging
           - spring-docs
           - blockchain
         sample:
-          - tas
           - database-sample
           - wallet
           - logging
