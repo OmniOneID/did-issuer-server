@@ -38,13 +38,19 @@ import java.util.stream.Collectors;
  * The VcSchemaService class provides methods for retrieving VC schemas.
  * VcSchema is a schema that defines the structure of a Verifiable Credential (VC).
  */
-@RequiredArgsConstructor
 @Service
 public class VcSchemaService {
 
     private final NamespaceQueryService namespaceQueryService;
     private final VcSchemaQueryService vcSchemaQueryService;
+    private final String ISSUER_URL;
 
+    public VcSchemaService(NamespaceQueryService namespaceQueryService, VcSchemaQueryService vcSchemaQueryService,
+                           IssuerInfoQueryService issuerInfoQueryService) {
+        this.namespaceQueryService = namespaceQueryService;
+        this.vcSchemaQueryService = vcSchemaQueryService;
+        this.ISSUER_URL = issuerInfoQueryService.getIssuerInfo().getServerUrl() + "/api/v1/vc/vcschema?name=";
+    }
     /**
      * Returns the schema for the specified VC.
      *
@@ -95,8 +101,8 @@ public class VcSchemaService {
             VcSchema vcSchemaEntity, MetaData metaData, SchemaCredentialSubject credentialSubject) {
 
         org.omnione.did.data.model.schema.VcSchema vcSchema = new org.omnione.did.data.model.schema.VcSchema();
-        vcSchema.setId(vcSchemaEntity.getVcSchemaId());
-        vcSchema.setSchema("https://opendid.org/schema/vc.osd"); // TODO: setSchema
+        vcSchema.setId(ISSUER_URL + vcSchemaEntity.getVcSchemaId()); // TODO: URL setting
+        vcSchema.setSchema("https://opendid.org/schema/vc.osd");
         vcSchema.setDescription(vcSchemaEntity.getDescription());
         vcSchema.setTitle(vcSchemaEntity.getTitle());
         vcSchema.setMetadata(metaData);

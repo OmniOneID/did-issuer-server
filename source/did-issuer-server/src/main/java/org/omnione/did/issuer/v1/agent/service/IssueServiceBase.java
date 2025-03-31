@@ -718,8 +718,6 @@ public abstract class IssueServiceBase implements IssueService {
             BaseCoreVcUtil.setValidateUntil(issueVcParam, 1);
 
             VerifiableCredential verifiableCredential = vcManager.issueCredential(issueVcParam, holderDid);
-            // TODO: Error Point DID Document 불러와야함..
-            //  SignKeyID  선택
             List<SignatureVcParams> signatureParams = vcManager.getOriginDataForSign("assert", didDocument, verifiableCredential);
             signVc(signatureParams);
 
@@ -863,7 +861,8 @@ public abstract class IssueServiceBase implements IssueService {
 
         ClaimInfo claimInfo = new ClaimInfo();
         claimInfo.setCode(claimCode);
-        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
+        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: required Modify
+//        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
 
         return claimInfo;
     }
