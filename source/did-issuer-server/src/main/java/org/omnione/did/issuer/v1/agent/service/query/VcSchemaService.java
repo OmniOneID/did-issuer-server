@@ -16,7 +16,7 @@
 
 package org.omnione.did.issuer.v1.agent.service.query;
 
-import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.db.domain.Namespace;

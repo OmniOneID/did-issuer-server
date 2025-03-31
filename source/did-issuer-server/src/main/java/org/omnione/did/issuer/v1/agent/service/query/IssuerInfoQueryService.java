@@ -1,6 +1,6 @@
 package org.omnione.did.issuer.v1.agent.service.query;
 
-import jakarta.annotation.PostConstruct;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.IssuerInfo;

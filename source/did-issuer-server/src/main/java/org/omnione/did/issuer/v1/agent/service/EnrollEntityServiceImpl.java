@@ -18,9 +18,9 @@ package org.omnione.did.issuer.v1.agent.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
+
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.datamodel.data.AccEcdh;
@@ -60,16 +60,17 @@ import java.util.Arrays;
  * This class provides methods for enrolling entity.
  */
 @Slf4j
-@RequiredArgsConstructor
 @Service
 @Transactional
 public class EnrollEntityServiceImpl implements EnrollEntityService {
     private final FileWalletService walletService;
     private final CertificateVcQueryService certificateVcQueryService;
-    private final ApplicationConfigQueryService applicationConfigQueryService;
-    private String TAS_URL;
-    @PostConstruct
-    public void loadData() {
+    private final String TAS_URL;
+
+    public EnrollEntityServiceImpl(FileWalletService walletService, CertificateVcQueryService certificateVcQueryService,
+                                   ApplicationConfigQueryService applicationConfigQueryService) {
+        this.walletService = walletService;
+        this.certificateVcQueryService = certificateVcQueryService;
         this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl();
     }
 
