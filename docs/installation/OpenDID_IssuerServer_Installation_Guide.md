@@ -23,6 +23,8 @@ Open DID Issuer Server Installation And Operation Guide
 
 Table of Contents
 ==
+- [Open DID Issuer Server Installation And Operation Guide](#open-did-issuer-server-installation-and-operation-guide)
+- [Table of Contents](#table-of-contents)
 - [1. Introduction](#1-introduction)
   - [1.1. Overview](#11-overview)
   - [1.2. Issuer Server Definition](#12-issuer-server-definition)
@@ -50,7 +52,7 @@ Table of Contents
 - [5. Configuration Guide.](#5-configuration-guide)
   - [5.1. application.yml](#51-applicationyml)
     - [5.1.1. Spring Basic Settings](#511-spring-basic-settings)
-    - [5.1.2. Server Setting](#512-server-settings)
+    - [5.1.2. Server Settings](#512-server-settings)
     - [5.1.3. TAS Settings](#513-tas-settings)
   - [5.2. application-logging.yml](#52-application-loggingyml)
     - [5.2.1. Logging Settings](#521-logging-settings)
@@ -699,4 +701,4 @@ docker-compose up -d
 This command runs the PostgreSQL container in the background. The PostgreSQL server will start based on the configured environment variables, and the database will be prepared. You can proceed with the integration settings to allow your application to use this database.
 
 <!-- References -->
-[Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/main/docs/guide/installation/OepnDID_Installation_Guide.md
+[Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V1.0.1.0/OepnDID_Installation_Guide-V1.0.1.0_ko.md

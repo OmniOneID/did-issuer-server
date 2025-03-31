@@ -213,8 +213,8 @@ Issuer Manegement 화면은 다음 항목들로 구성되어 있습니다.
 | **DID**           | Issuer를 식별하는 고유한 DID로, 시스템에서 자동 발급됩니다.     |
 | **Name**          | 등록할 Issuer의 이름입니다.                                    |
 | **Status**        | Issuer의 상태를 나타냅니다. 등록 완료 시 `ACTIVATE`로 표시됩니다. |
-| **URL**           | Issuer 서버의 접근 URL입니다.                                  |
-| **Certificate URL** | VC 발급에 필요한 인증서 정보를 제공하는 API URL입니다.          |
+| **URL**           | Issuer 서버의 기본 URL입니다.                                  |
+| **Certificate URL** | Issuer의 가입증명서를 확인할 수 있는 URL 주소입니다.          |
 | **Registered At** | Issuer의 최초 등록 일시입니다.                                 |
 
 - DID Document는 화면의 `VIEW DID DOCUMENT` 버튼을 통해 확인할 수 있습니다.
@@ -566,3 +566,5 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 | **Created At / Updated At** | 생성 및 수정 시각 |
 
 > 현재는 열람만 가능하며, 향후 상태 변경 등의 기능이 추가될 수 있습니다.
+
+[Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V1.0.1.0/OepnDID_Installation_Guide-V1.0.1.0_ko.md
