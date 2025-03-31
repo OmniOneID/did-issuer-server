@@ -5,6 +5,7 @@ import org.omnione.did.issuer.v1.admin.service.ListCommunityService;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
 import org.omnione.did.issuer.v1.agent.service.EnrollEntityServiceImpl;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.omnione.did.issuer.v1.agent.service.query.VcSchemaService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -26,5 +27,7 @@ public class TestStubConfig {
     private ListCommunityService listCommunityService;
     @MockBean
     private IssuerInfoQueryService issuerInfoQueryService;
+    @MockBean
+    private VcSchemaService vcSchemaService;
 }
 
