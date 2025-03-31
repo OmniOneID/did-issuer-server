@@ -8,5 +8,11 @@
         <loadData tableName="issuer" file="issuer.csv" relativeToChangelogFile="true"/>
         <loadData tableName="application_config" file="application_config.csv" relativeToChangelogFile="true"/>
     </changeSet>
+    <changeSet id="load-data-2" author="gwnam">
+        <loadData tableName="namespace" file="namespace.csv" relativeToChangelogFile="true"/>
+        <loadData tableName="vc_schema" file="vc_schema.csv" relativeToChangelogFile="true"/>
+        <loadData tableName="vc_schema_namespace" file="vc_schema_namespace.csv" relativeToChangelogFile="true"/>
+        <loadData tableName="issue_profile" file="issue_profile.csv" relativeToChangelogFile="true"/>
+    </changeSet>
 
 </databaseChangeLog>

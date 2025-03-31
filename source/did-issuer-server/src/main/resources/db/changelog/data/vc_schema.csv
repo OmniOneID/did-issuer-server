@@ -1,0 +1,3 @@
+id,vc_schema_id,title,description,language,version
+1,mdl,OpenDID Mobile Driver License,VC-formatted OpenDID Mobile License Driver.,ko,1.0
+2,national_id,OpenDID National ID,VC-formatted OpenDID National ID.,ko,1.0
