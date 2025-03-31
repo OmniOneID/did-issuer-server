@@ -43,13 +43,6 @@ public class IssueProfileService {
     private final IssueProfileQueryService issueProfileQueryService;
     private final VcSchemaQueryService vcSchemaQueryService;
     private final ListCommunityService listCommunityService;
-    private final IssuerInfoQueryService issuerInfoQueryService;
-    private String issuerDid;
-
-    @PostConstruct
-    private void init() {
-        this.issuerDid = issuerInfoQueryService.getIssuerInfo().getDid();
-    }
     public CreateIssueProfileResDto createIssueProfile(CreateIssueProfileReqDto request) {
 
         IssueProfile issueProfile = issueProfileQueryService.save(IssueProfile.builder()

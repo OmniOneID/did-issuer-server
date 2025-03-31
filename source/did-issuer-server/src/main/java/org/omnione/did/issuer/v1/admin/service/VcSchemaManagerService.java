@@ -44,15 +44,7 @@ public class VcSchemaManagerService {
     private final VcSchemaQueryService vcSchemaQueryService;
 
     private final NamespaceQueryService namespaceQueryService;
-    private final IssuerInfoQueryService issuerInfoQueryService;
     private final ListCommunityService listCommunityService;
-    private String issuerDid;
-
-    @PostConstruct
-    private void init() {
-        this.issuerDid = issuerInfoQueryService.getIssuerInfo().getDid();
-    }
-
     public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
 
         VcSchema vcSchema = vcSchemaQueryService.save(VcSchema.builder()
