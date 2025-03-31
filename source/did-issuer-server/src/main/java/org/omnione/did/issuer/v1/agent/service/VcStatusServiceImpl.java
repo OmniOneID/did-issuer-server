@@ -16,7 +16,7 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
-import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.datamodel.data.ReqRevokeVc;
 import org.omnione.did.base.datamodel.data.RequestProof;

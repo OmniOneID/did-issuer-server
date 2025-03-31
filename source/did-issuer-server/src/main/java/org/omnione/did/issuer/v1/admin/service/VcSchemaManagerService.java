@@ -16,7 +16,7 @@
 
 package org.omnione.did.issuer.v1.admin.service;
 
-import jakarta.annotation.PostConstruct;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
