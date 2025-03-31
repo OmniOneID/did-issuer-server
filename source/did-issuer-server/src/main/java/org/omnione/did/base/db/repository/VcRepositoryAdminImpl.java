@@ -69,7 +69,7 @@ public class VcRepositoryAdminImpl implements VcRepositoryAdmin {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, vc.createdAt));
+            orders.add(new OrderSpecifier<>(Order.DESC, vc.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {

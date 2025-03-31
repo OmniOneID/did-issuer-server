@@ -550,9 +550,8 @@ public abstract class IssueServiceBase implements IssueService {
         String txId = transaction.getTxId();
         return vcQueryService.findByUserIdAndVcPlanId(user.getId(), vcPlanId)
                 .map(existingVc -> {
-//                    revokeVc(existingVc);
+                    revokeVc(existingVc);
                     return Vc.builder()
-                            .id(existingVc.getId())
                             .issuedAt(Instant.now())
                             .expiredAt(Instant.now())
                             .did(holderDid)
@@ -855,13 +854,14 @@ public abstract class IssueServiceBase implements IssueService {
     private ClaimInfo createClaimInfo(String namespace, ClaimDef item, JsonObject jsonObject) {
         String claimCode = namespace + "." + item.getId();
 
-        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
-            return null;
-        }
+        // TODO: Uncommenting after demo development
+//        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
+//            return null;
+//        }
 
         ClaimInfo claimInfo = new ClaimInfo();
         claimInfo.setCode(claimCode);
-        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: required Modify
+        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: Uncommenting after demo development
 //        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
 
         return claimInfo;

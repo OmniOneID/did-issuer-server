@@ -19,7 +19,7 @@ public class IssuedVcService {
     private final IssuedVcQueryService issuedVcQueryService;
     private final StorageService storageService;
 
-    public Page<IssuedVcDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+    public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
         return issuedVcQueryService.searchIssueProfileList(searchKey, searchValue, pageable);
     }
 

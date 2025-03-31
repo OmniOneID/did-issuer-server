@@ -74,7 +74,7 @@ public class VcQueryService {
      * @return the VC with the given user ID and VC plan ID
      */
     public Optional<Vc> findByUserIdAndVcPlanId(Long id, String vcPlanId) {
-        return vcRepository.findByUserIdAndVcPlanId(id, vcPlanId);
+        return vcRepository.findTopByUserIdAndVcPlanIdOrderByCreatedAtDesc(id, vcPlanId);
     }
 
     public Vc findByTxId(String txId) {

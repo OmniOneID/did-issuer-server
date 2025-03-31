@@ -49,7 +49,7 @@ public interface VcRepository extends JpaRepository<Vc, Long>, VcRepositoryAdmin
      * @param vcPlanId The ID of the VC plan to search for.
      * @return An Optional containing the Vc if found, or an empty Optional if not found.
      */
-    Optional<Vc> findByUserIdAndVcPlanId(Long id, String vcPlanId);
+    Optional<Vc> findTopByUserIdAndVcPlanIdOrderByCreatedAtDesc(Long id, String vcPlanId);
 
     Optional<Vc> findByTxId(String txId);
 }

@@ -2,7 +2,6 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.issuer.v1.admin.dto.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.dto.IssuedVcDto;
 import org.omnione.did.issuer.v1.admin.service.IssuedVcService;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,7 @@ public class IssuedVcAdminController {
     @GetMapping
     public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable){
 
-        return issuedVcService.searchIssueProfileList(searchKey, searchValue, pageable);
+        return issuedVcService.searchIssuedVcList(searchKey, searchValue, pageable);
     }
 
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
