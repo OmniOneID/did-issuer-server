@@ -33,20 +33,19 @@ import java.util.List;
  */
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class ListCommunityService {
-    private final ApplicationConfigQueryService applicationConfigQueryService;
     private final VcSchemaService vcSchemaService;
-    private final IssuerInfoQueryService issuerInfoQueryService;
+    private final String TAS_URL;
+    private final String ISSUER_DID;
 
-    private String TAS_URL;
-    private String ISSUER_DID;
-    @PostConstruct
-    public void loadData() {
+    public ListCommunityService(ApplicationConfigQueryService applicationConfigQueryService,
+                                VcSchemaService vcSchemaService, IssuerInfoQueryService issuerInfoQueryService) {
+        this.vcSchemaService = vcSchemaService;
         this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.List.V1;
         this.ISSUER_DID = issuerInfoQueryService.getIssuerInfo().getDid();
     }
+
     public void registerVcSchema(Long vcSchemaId) {
         VcSchema vcSchema = vcSchemaService.getVcSchemaById(vcSchemaId);
         String vcSchemaEncode = BaseMultibaseUtil.encode(vcSchema.toJson().getBytes(StandardCharsets.UTF_8));
@@ -63,6 +62,7 @@ public class ListCommunityService {
             throw new OpenDidException(errorResponse);
         }
     }
+
     public void deleteVcSchema(DeleteVcSchemaReqDto request) {
         try {
             HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_SCHEMA_PUBLIC,
@@ -73,6 +73,7 @@ public class ListCommunityService {
             throw new OpenDidException(errorResponse);
         }
     }
+
     public void registerVcPlan(IssueProfile issueProfile) {
         VcSchema vcSchema = vcSchemaService.getVcSchemaById(issueProfile.getVcSchemaId());
         CredentialSchema credentialSchema = new CredentialSchema();
@@ -110,6 +111,7 @@ public class ListCommunityService {
             throw new OpenDidException(errorResponse);
         }
     }
+
     public void deleteVcPlan(DeleteIssuePlanIdReqDto request) {
         try {
             HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_PLAN_PUBLIC,

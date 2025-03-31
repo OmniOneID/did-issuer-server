@@ -17,7 +17,7 @@ public class SchemaClaimConverter implements AttributeConverter<SchemaClaims, St
     public String convertToDatabaseColumn(SchemaClaims schemaClaims) {
         try {
             return objectMapper.writeValueAsString(schemaClaims);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new OpenDidException(ErrorCode.JSON_SCHEMA_CLAIMS_SERIALIZE_FAILED);
         }
     }

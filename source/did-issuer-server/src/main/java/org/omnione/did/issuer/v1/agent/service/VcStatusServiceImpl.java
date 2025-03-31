@@ -53,18 +53,21 @@ import java.util.Objects;
  * This service manages the lifecycle and status of Verifiable Credentials (VCs),
  * including inspect propose revocation vc, revocation vc, and status updates.
  */
-@RequiredArgsConstructor
 @Service
 @Profile("!sample")
 public class VcStatusServiceImpl implements VcStatusService {
     private final StorageService storageService;
     private final TransactionService transactionService;
     private final RevokeVcQueryService revokeVcQueryService;
-    private final ApplicationConfigQueryService applicationConfigQueryService;
+    private final ApplicationConfig applicationConfig;
 
-    private ApplicationConfig applicationConfig;
-    @PostConstruct
-    private void loadData() {
+    public VcStatusServiceImpl(StorageService storageService,
+                               TransactionService transactionService,
+                               RevokeVcQueryService revokeVcQueryService,
+                               ApplicationConfigQueryService applicationConfigQueryService) {
+        this.storageService = storageService;
+        this.transactionService = transactionService;
+        this.revokeVcQueryService = revokeVcQueryService;
         this.applicationConfig = applicationConfigQueryService.getApplicationConfig();
     }
 

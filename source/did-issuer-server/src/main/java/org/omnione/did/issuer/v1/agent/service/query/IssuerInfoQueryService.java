@@ -1,6 +1,7 @@
 package org.omnione.did.issuer.v1.agent.service.query;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.db.repository.IssuerInfoRepository;
@@ -11,24 +12,18 @@ import org.springframework.stereotype.Service;
 /**
  * Description...
  */
-@RequiredArgsConstructor
 @Service
 public class IssuerInfoQueryService {
 
     private final IssuerInfoRepository issuerInfoRepository;
 
-    private static IssuerInfo issuerInfo;
+    @Getter
+    private final IssuerInfo issuerInfo;
 
-    @PostConstruct
-    public void loadData() {
-        issuerInfo = issuerInfoRepository.findFirstBy().orElseThrow(()
-                -> new OpenDidException(ErrorCode.ISSUER_INFO_NOT_FOUND));
-    }
-    public IssuerInfo getIssuerInfo() {
-        if (issuerInfo == null) {
-            loadData();
-        }
-        return issuerInfo;
+    public IssuerInfoQueryService(IssuerInfoRepository issuerInfoRepository) {
+        this.issuerInfoRepository = issuerInfoRepository;
+        this.issuerInfo = issuerInfoRepository.findFirstBy().orElseThrow(()
+                -> new OpenDidException(ErrorCode.ISSUER_INFO_NOT_FOUND));;
     }
 
     public IssuerInfo getIssuerInfoOrNull() {
@@ -36,7 +31,12 @@ public class IssuerInfoQueryService {
     }
 
     public void save(IssuerInfo issuerInfo) {
-        IssuerInfoQueryService.issuerInfo = issuerInfoRepository.save(issuerInfo);
+        issuerInfoRepository.save(issuerInfo);
+
+        issuerInfo.setName(issuerInfo.getName());
+        issuerInfo.setStatus(issuerInfo.getStatus());
+        issuerInfo.setServerUrl(issuerInfo.getCertificateUrl());
+        issuerInfo.setCertificateUrl(issuerInfo.getCertificateUrl());
     }
 
 }
