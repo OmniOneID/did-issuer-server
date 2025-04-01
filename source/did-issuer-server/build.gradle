@@ -64,6 +64,8 @@ dependencies {
 
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.mockito:mockito-core'
+    implementation 'org.mockito:mockito-junit-jupiter'
 
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 
@@ -104,7 +106,6 @@ licenseReport {
     renderers = [new InventoryMarkdownReportRenderer()]
     filters = [new LicenseBundleNormalizer(), new ExcludeTransitiveDependenciesFilter()]
 }
-
 
 node {
     version = "22.9.0"

@@ -26,6 +26,7 @@ import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  * Description...
  */
 @Transactional
+@Profile("!sample")
 @RequiredArgsConstructor
 @Service
 public class VcSchemaManagerService {

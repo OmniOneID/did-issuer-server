@@ -50,6 +50,7 @@ import org.omnione.did.issuer.v1.agent.api.dto.*;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 
 import org.omnione.did.issuer.v1.agent.dto.EnrollEntityResDto;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.security.interfaces.ECPrivateKey;
@@ -60,6 +61,7 @@ import java.util.Arrays;
  * This class provides methods for enrolling entity.
  */
 @Slf4j
+@Profile("!sample")
 @Service
 @Transactional
 public class EnrollEntityServiceImpl implements EnrollEntityService {

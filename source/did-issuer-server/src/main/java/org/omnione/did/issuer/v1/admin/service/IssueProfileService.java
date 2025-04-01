@@ -28,6 +28,7 @@ import org.omnione.did.issuer.v1.admin.dto.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,9 @@ import org.springframework.stereotype.Service;
  * Description...
  *
  */
-@Transactional
+@Profile("!sample")
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class IssueProfileService {
     private final IssueProfileQueryService issueProfileQueryService;

@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Revoke VC")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest(classes = {IssuerApplication.class, TestStubConfig.class})
+@SpringBootTest(classes = {IssuerApplication.class})
 @ActiveProfiles("sample")
 @AutoConfigureMockMvc
 class RevokeVCTests {

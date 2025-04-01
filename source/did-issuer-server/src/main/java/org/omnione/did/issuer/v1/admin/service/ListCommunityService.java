@@ -23,6 +23,7 @@ import org.omnione.did.issuer.v1.admin.api.dto.*;
 import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.VcSchemaService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,7 @@ import java.util.List;
  */
 
 @Slf4j
+@Profile("!sample")
 @Service
 public class ListCommunityService {
     private final VcSchemaService vcSchemaService;

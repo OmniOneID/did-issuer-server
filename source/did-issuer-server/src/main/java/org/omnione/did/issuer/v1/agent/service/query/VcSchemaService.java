@@ -29,6 +29,7 @@ import org.omnione.did.data.model.schema.SchemaCredentialSubject;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
  * The VcSchemaService class provides methods for retrieving VC schemas.
  * VcSchema is a schema that defines the structure of a Verifiable Credential (VC).
  */
+@Profile("!sample")
 @Service
 public class VcSchemaService {
 
