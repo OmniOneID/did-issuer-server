@@ -37,7 +37,7 @@ public class IssuerInfoQueryService {
 
         this.issuerInfo.setName(issuerInfo.getName());
         this.issuerInfo.setStatus(issuerInfo.getStatus());
-        this.issuerInfo.setServerUrl(issuerInfo.getCertificateUrl());
+        this.issuerInfo.setServerUrl(issuerInfo.getServerUrl());
         this.issuerInfo.setCertificateUrl(issuerInfo.getCertificateUrl());
     }
 
