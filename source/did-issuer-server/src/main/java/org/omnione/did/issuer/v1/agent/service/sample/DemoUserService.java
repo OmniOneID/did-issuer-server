@@ -54,6 +54,7 @@ public class DemoUserService {
         User user = userQueryService.findByPii(pii).orElseGet(User::new);
         user.setPii(pii);
         user.setData(userData);
+        user.setVcSchemaId(1L); // This is a demo-only configuration.
 
         userQueryService.save(user);
     }
@@ -76,6 +77,7 @@ public class DemoUserService {
         User user = userQueryService.findByDid(did).orElseGet(User::new);
         user.setDid(did);
         user.setData(userData);
+        user.setVcSchemaId(2L); // This is a demo-only configuration.
 
         userQueryService.save(user);
     }

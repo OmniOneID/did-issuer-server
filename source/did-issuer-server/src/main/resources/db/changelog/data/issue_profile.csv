@@ -1,3 +1,3 @@
 id,vc_plan_id,title,description,endpoints,language,cipher,curve,padding,vc_schema_id,initiate_type,tags
-2,VCPLANID000000000001,Mobile Driver License,Mobile Driver License,"[""http://127.0.0.1""]",ko,AES-256-CBC,secp256r1,PKCS5,1,ISSUER_INIT,"[""mdl""]"
-3,VCPLANID000000000002,National ID,National ID,"[""http://127.0.0.1""]",ko,AES-256-CBC,secp256r1,PKCS5,2,USER_INIT,"[""national_id""]"
+2,vcplanid000000000001,Mobile Driver License,Mobile Driver License,"[""http://127.0.0.1""]",ko,AES-256-CBC,secp256r1,PKCS5,1,ISSUER_INIT,"[""mdl""]"
+3,vcplanid000000000002,National ID,National ID,"[""http://127.0.0.1""]",ko,AES-256-CBC,secp256r1,PKCS5,2,USER_INIT,"[""national_id""]"
