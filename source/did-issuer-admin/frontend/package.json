@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/OmniOneID/did-issuer-server"
   },
-  "homepage": "https://github.com/OmniOneID/did-issuer-server", 
+  "homepage": "https://github.com/OmniOneID/did-issuer-server",
   "dependencies": {
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
@@ -33,6 +33,6 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.2",
     "typescript": "^5",
-    "vite": "^5.4.8"
+    "vite": "^6.2.6"
   }
 }
