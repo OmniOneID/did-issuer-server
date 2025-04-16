@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -41,11 +42,14 @@ import java.util.stream.Collectors;
 @RestControllerAdvice(basePackages = {"org.omnione.did"})
 public class GlobalControllerAdvice {
 
+    private static final String UNKNOWN_ERROR_CODE = "9999";
+
     @ExceptionHandler(OpenDidException.class)
     public ResponseEntity<ErrorResponse> handleTasException(OpenDidException ex) {
+
         if (ex.getErrorResponse() != null) {
             ex.printStackTrace();
-            return new ResponseEntity<>(ex.getErrorResponse(), HttpStatus.valueOf(400));
+            return new ResponseEntity<>(ex.getErrorResponse(), HttpStatus.BAD_REQUEST);
         }
 
         log.error("Error", ex);
@@ -56,34 +60,31 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        int httpStatus = 500;
 
         String errorMessages = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("; "));
 
         log.error("Error", ex);
-
-        ErrorResponse errorResponse = new ErrorResponse("9999", errorMessages);
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(httpStatus));
+        ErrorResponse errorResponse = new ErrorResponse(UNKNOWN_ERROR_CODE, errorMessages);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(HttpMessageNotReadableException ex) {
-        log.error("Error", ex);
 
+        log.error("Error", ex);
         ErrorResponse errorResponse = new ErrorResponse(ErrorCode.REQUEST_BODY_UNREADABLE);
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(500));
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleValidationException(Exception ex) {
-        ErrorResponse errorResponse = new ErrorResponse("500", ex.getMessage());
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(500));
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorResponse errorResponse = new ErrorResponse(String.valueOf(httpStatus.value()), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, httpStatus);
     }
-
-
 }
