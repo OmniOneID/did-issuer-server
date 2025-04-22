@@ -5,6 +5,7 @@ import { getIssueProfile } from "../../../apis/vc-management-api";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 type Props = {}
 
@@ -34,7 +35,6 @@ const IssueProfileDetailPage = (props: Props) => {
   };
 
   const handleOpenVcSchemaDetail = () => {
-    console.log(numericVcSchemaId)
     window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
@@ -71,7 +71,7 @@ const IssueProfileDetailPage = (props: Props) => {
         setNumericVcSchemaId(data.issueProfile.vcSchemaId);
       } catch (err) {
         console.error('Failed to fetch Issue Profile:', err);
-        navigate('/error', { state: { message: `Failed to fetch Issue Profile: ${err}` } });
+        navigate('/error', { state: { message: formatErrorMessage(err, "Failed to fetch Issue Profile.") } });
       } finally {
         setIsLoading(false);
       }

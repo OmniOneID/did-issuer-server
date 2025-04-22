@@ -10,6 +10,7 @@ import LoadingOverlay from './components/loading/LoadingOverlay';
 import { getIssuerInfo } from './apis/issuer-api';
 import customTheme from './theme';
 import { CssBaseline, GlobalStyles } from '@mui/material';
+import { formatErrorMessage } from './utils/error-handler';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function AppContent() {
         setIsLoading(false);
       })
       .catch((err) => {
-        navigate('/error', { state: { message: `Failed to connect server: ${err}` } });
+        navigate('/error', { state: { message: formatErrorMessage(err, "Failed to connect server.") } });
         setIsLoading(false);
       });
     };

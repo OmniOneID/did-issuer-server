@@ -9,6 +9,7 @@ import { useDialogs } from "@toolpad/core";
 import CustomConfirmDialog from "../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../components/dialog/CustomDialog";
 import VcSchemaSelectionDialog from "../vc-management/issue-profile-management/VcSchemaSelectionDialog";
+import { formatErrorMessage } from "../../utils/error-handler";
 
 interface UserFormData {
   did: string;
@@ -82,7 +83,7 @@ const UserEditPage = () => {
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch user data", error);
-        navigate('/error', { state: { message: `Failed to retrieve user data: ${error}` } });
+        navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve user data.")} });
       } finally {
         setIsLoading(false);
       }
@@ -121,6 +122,7 @@ const UserEditPage = () => {
     const requestBody = {
       id: numerirUserId,
       did: formData.did,
+      pii: formData.pii,
       vcSchemaId: selectedItemId,
       userInfo: formData.userInfo,
     };
@@ -213,8 +215,6 @@ const UserEditPage = () => {
 
   useEffect(() => {
     if (!initialData) return;
-    console.log(formData);
-    console.log(initialData);
     const isModified = JSON.stringify(formData) !== JSON.stringify(initialData);
     setIsButtonDisabled(!isModified);
   }, [formData, initialData]);

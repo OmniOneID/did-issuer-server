@@ -3,9 +3,12 @@ import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { fetchNamespaces } from '../../../apis/vc-management-api';
+import { deleteNamespace, fetchNamespaces } from '../../../apis/vc-management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
+import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
+import CustomDialog from '../../../components/dialog/CustomDialog';
+import { formatErrorMessage } from '../../../utils/error-handler';
 
 type Props = {}
 
@@ -33,6 +36,38 @@ const NamespaceManagementPage = (props: Props) => {
   const selectedRowData = useMemo(() => {
     return rows.find(row => row.id === selectedRow) || null;
   }, [rows, selectedRow]);
+
+  const handleDelete = async () => {
+    const id = selectedRowData?.id as number;
+    if (id) {
+      const result = await dialogs.open(CustomConfirmDialog, {
+        title: 'Confirmation',
+        message: 'Are you sure you want to delete Namespace?',
+        isModal: true,
+      });
+
+      if (result) {
+        setLoading(true);
+        deleteNamespace(id)
+          .then(() => {
+            dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: 'Namespace delete completed.',
+              isModal: true,
+            }, {
+              onClose: async () => {
+                setPaginationModel(prev => ({ ...prev }));
+              },
+            });
+          })
+          .catch((err) => {
+            console.error("Failed to delete Namespace. ", err);
+            navigate('/error', { state: { message: formatErrorMessage(err, "Failed to delete Namespace") } });
+          })
+          .finally(() => setLoading(false));
+      }
+    }
+};
   
   useEffect(() => {
     setLoading(true);
@@ -43,7 +78,7 @@ const NamespaceManagementPage = (props: Props) => {
       })
       .catch((error) => {
         console.error("Failed to retrieve namespaces. ", error);
-        navigate('/error', { state: { message: `Failed to retrieve Namespaces: ${error}` } });
+        navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Namespaces.") } });
       })
       .finally(() => setLoading(false));
   }, [paginationModel]);
@@ -97,6 +132,7 @@ const NamespaceManagementPage = (props: Props) => {
               }
             }}
             onRegister={() => navigate('/vc-management/namespace-management/namespace-registration')}
+            onDelete={handleDelete}
             additionalButtons={[
             
             ]}

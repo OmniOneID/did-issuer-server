@@ -10,7 +10,6 @@ export default function CustomFooterAccount() {
 
   useEffect(() => {
     if (session?.user) {
-        console.log(session.user);
       setUser({
         id: session.user.id || '',
         name: session.user.name || 'Guest',

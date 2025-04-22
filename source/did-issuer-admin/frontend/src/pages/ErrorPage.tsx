@@ -27,8 +27,8 @@ const ErrorPage: React.FC = () => {
       <Typography variant="h4" color="error" gutterBottom>
         Error
       </Typography>
-      <Typography variant="body1" gutterBottom>
-      {errorMessage}
+      <Typography variant="body1" gutterBottom 
+        dangerouslySetInnerHTML={ {__html: errorMessage} }>
       </Typography>
       <Button variant="contained" color="primary" onClick={goBackAndRefresh}>
         Go Back

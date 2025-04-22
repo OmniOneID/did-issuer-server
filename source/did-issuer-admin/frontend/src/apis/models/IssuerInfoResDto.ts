@@ -1,10 +1,10 @@
-import { TasStatus } from '../constants/IssuerStatus';
+import { IssuerStatus } from '../constants/IssuerStatus';
 
 export interface IssuerInfoResDto {
   id: number;
   did: string;
   name: string;
-  status: TasStatus;
+  status: IssuerStatus;
   serverUrl: string;
   certificateUrl: string;
   didDocument?: any;

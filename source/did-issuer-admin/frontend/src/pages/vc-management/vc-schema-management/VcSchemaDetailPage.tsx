@@ -5,6 +5,7 @@ import { getVcSchema } from "../../../apis/vc-management-api";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 type Props = {}
 
@@ -57,7 +58,7 @@ const VcSchemaDetailPage = (props: Props) => {
       } catch (err) {
         console.error('Failed to fetch Namespace information:', err);
         setIsLoading(false);
-        navigate('/error', { state: { message: `Failed to namespace information: ${err}` } });
+        navigate('/error', { state: { message: formatErrorMessage(err, "Failed to namespace information.") } });
       }
     };
 

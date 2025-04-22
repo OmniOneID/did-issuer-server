@@ -31,10 +31,10 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
       segment: 'issued-vcs/issued-vc-management',
       title: 'Issued VC Management',
     },
-    // {
-    //   segment: 'admin-management',
-    //   title: 'Admin Management', 
-    // },
+    {
+      segment: 'admin-management',
+      title: 'Admin Management', 
+    },
     // {
     //   segment: 'server-management',
     //   title: 'Server Management', 

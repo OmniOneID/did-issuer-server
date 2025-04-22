@@ -11,6 +11,7 @@ import { useDialogs } from "@toolpad/core/useDialogs";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import { Language } from "@mui/icons-material";
 import VcSchemaSelectionDialog from "./VcSchemaSelectionDialog";
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 type Props = {}
 
@@ -134,8 +135,6 @@ const IssueProfileRegistrationPage = (props: Props) => {
                 });
             }
         };
-        console.log("Submitting Data:", requestBody);
-        // API 호출 로직 추가 가능 (예: await postIssueProfile(requestBody))
     };
 
 
@@ -297,7 +296,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                 })
                 .catch((error) => {
                     console.error("Failed to retrieve VC Schemas. ", error);
-                    navigate('/error', { state: { message: `Failed to retrieve VC Schemas: ${error}` } });
+                    navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve VC Schemas.") } });
                 });
         } catch (error) {
             console.error("Failed to fetch VC Schemas", error);
@@ -375,7 +374,6 @@ const IssueProfileRegistrationPage = (props: Props) => {
 
             try {
                 const { data } = await getIssueProfile(numericIssueProfileId);
-                console.log(data)
                 const issueProfileData = ({
                     vcPlanId: data.issueProfile.vcPlanId,
                     title: data.issueProfile.title,

@@ -9,6 +9,7 @@ import CustomConfirmDialog from "../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../components/dialog/CustomDialog";
 import { fetchVcSchema } from "../../apis/vc-management-api";
 import VcSchemaSelectionDialog from "../vc-management/issue-profile-management/VcSchemaSelectionDialog";
+import { formatErrorMessage } from "../../utils/error-handler";
 
 type Props = {}
 
@@ -184,7 +185,7 @@ const UserRegistrationPage = (props: Props) => {
         })
         .catch((error) => {
           console.error("Failed to retrieve VC Schemas. ", error);
-          navigate('/error', { state: { message: `Failed to retrieve VC Schemas: ${error}` } });
+          navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve VC Schemas.") } });
         });
     } catch (error) {
       console.error("Failed to fetch VC Schemas", error);

@@ -5,6 +5,7 @@ import { getIssuedVc } from "../../apis/vc-management-api";
 import CustomDialog from "../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../components/loading/FullscreenLoader";
 import { Box, Button, styled, TextField, Typography, useTheme } from "@mui/material";
+import { formatErrorMessage } from "../../utils/error-handler";
 
 type Props = {}
 
@@ -39,7 +40,7 @@ const IssuedVcDetailPage = (props: Props) => {
         setIsuedVcData({
           vcId: data.vcId,
           did: data.did,
-          vcSchemaName: data.vcSchemaName,
+          vcSchemaId: data.vcSchemaId,
           status: data.status,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
@@ -48,7 +49,7 @@ const IssuedVcDetailPage = (props: Props) => {
       } catch (err) {
         console.error('Failed to fetch Namespace information:', err);
         setIsLoading(false);
-        navigate('/error', { state: { message: `Failed to namespace information: ${err}` } });
+        navigate('/error', { state: { message: formatErrorMessage(err, "Failed to namespace information.") } });
       }
     };
 
@@ -105,8 +106,8 @@ const IssuedVcDetailPage = (props: Props) => {
           />
 
           <TextField
-            label="VC Schema"
-            value={issuedVcData?.vcSchemaName || ''}
+            label="VC Schema ID"
+            value={issuedVcData?.vcSchemaId || ''}
             fullWidth
             variant="standard"
             margin="normal"

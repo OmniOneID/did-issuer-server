@@ -29,6 +29,8 @@ import UserDetailPage from './pages/users/UserDetailPage';
 import UserEditPage from './pages/users/UserEditPage';
 import IssuedVcDetailPage from './pages/issued-vcs/IssuedVcDetailPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import AdminRegisterPage from './pages/admins/AdminRegisterPage';
+import AdminDetailPage from './pages/admins/AdminDetailPage';
 
 const router = createBrowserRouter([
   {
@@ -133,6 +135,14 @@ const router = createBrowserRouter([
           {
             path: '/issued-vcs/issued-vc-management',
             Component: IssuedVcManagementPage,
+          },
+          {
+            path: '/admin-management/admin-registration',
+            Component: AdminRegisterPage,
+          },
+          {
+            path: '/admin-management/:id',
+            Component: AdminDetailPage,
           },
           {
             path: '/admin-management',

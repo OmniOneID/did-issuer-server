@@ -129,7 +129,6 @@ const NamespaceEditPage = (props: Props) => {
         if (!item.format) itemErrors.format = "Format is required.";
         if (!item.caption.trim()) itemErrors.caption = "Caption is required.";
 
-        console.log(item);
 
         return itemErrors;
     };

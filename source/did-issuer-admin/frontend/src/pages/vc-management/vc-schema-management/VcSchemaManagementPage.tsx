@@ -3,9 +3,12 @@ import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { fetchVcSchema } from '../../../apis/vc-management-api';
+import { deleteVcSchema, fetchVcSchema } from '../../../apis/vc-management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
+import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
+import CustomDialog from '../../../components/dialog/CustomDialog';
+import { formatErrorMessage } from '../../../utils/error-handler';
 
 type Props = {}
 
@@ -46,10 +49,44 @@ const VcSchemaManagementPage = (props: Props) => {
       })
       .catch((error) => {
         console.error("Failed to retrieve namespaces. ", error);
-        navigate('/error', { state: { message: `Failed to retrieve Namespaces: ${error}` } });
+        navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Namespaces") } });
       })
       .finally(() => setLoading(false));
   }, [paginationModel]);
+
+
+  const handleDelete = async () => {
+    const id = selectedRowData?.id as number;
+    if (id) {
+      const result = await dialogs.open(CustomConfirmDialog, {
+        title: 'Confirmation',
+        message: 'Are you sure you want to delete VC Schema?',
+        isModal: true,
+      });
+
+      if (result) {
+        setLoading(true);
+        deleteVcSchema(id)
+          .then(() => {
+            dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: 'VC Schema delete completed.',
+              isModal: true,
+            }, {
+              onClose: async () => {
+                setPaginationModel(prev => ({ ...prev }));
+              },
+            });
+          })
+          .catch((err) => {
+            console.error("Failed to delete VC Schema. ", err);
+            navigate('/error', { state: { message: formatErrorMessage(err, "Failed to delete VC Schema") } });
+          })
+          .finally(() => setLoading(false));
+      }
+    }
+};
+
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
     margin: 'auto',
@@ -101,6 +138,7 @@ const VcSchemaManagementPage = (props: Props) => {
             }
           }}
           onRegister={() => navigate('/vc-management/vc-schema-management/vc-schema-registration')}
+          onDelete={handleDelete}
           additionalButtons={[
 
           ]}

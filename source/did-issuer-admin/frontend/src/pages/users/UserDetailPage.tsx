@@ -6,6 +6,7 @@ import CustomDialog from "../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../components/loading/FullscreenLoader";
 import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
 import { getUserInfo } from "../../apis/admin-api";
+import { formatErrorMessage } from "../../utils/error-handler";
 
 type Props = {}
 
@@ -23,7 +24,6 @@ const UserDetailPage = (props: Props) => {
 
 
   const handleOpenVcSchemaDetail = () => {
-    console.log(numericVcSchemaId)
     window.open(`/vc-management/vc-schema-management-popup/${numericVcSchemaId}?isPopup=true`, "vc schema detail", "popup=yes, width=850, height=800");
   };
 
@@ -56,7 +56,7 @@ const UserDetailPage = (props: Props) => {
         setNumericVcSchemaId(data.vcSchemaId);
       } catch (err) {
         console.error('Failed to fetch User Info:', err);
-        navigate('/error', { state: { message: `Failed to fetch UserInfo: ${err}` } });
+        navigate('/error', { state: { message: formatErrorMessage(err, "Failed to fetch UserInfo.")} });
       } finally {
         setIsLoading(false);
       }

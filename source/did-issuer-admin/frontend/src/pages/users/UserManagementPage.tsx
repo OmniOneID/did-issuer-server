@@ -7,6 +7,7 @@ import { fetchNamespaces } from '../../apis/vc-management-api';
 import CustomDataGrid from '../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../components/loading/FullscreenLoader';
 import { fetchUserInfos } from '../../apis/admin-api';
+import { formatErrorMessage } from '../../utils/error-handler';
 
 type Props = {}
 
@@ -44,7 +45,7 @@ const UserManagementPage = (props: Props) => {
       })
       .catch((error) => {
         console.error("Failed to retrieve User Infos. ", error);
-        navigate('/error', { state: { message: `Failed to retrieve User Infos: ${error}` } });
+        navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve User Infos.") } });
       })
       .finally(() => setLoading(false));
   }, [paginationModel]);

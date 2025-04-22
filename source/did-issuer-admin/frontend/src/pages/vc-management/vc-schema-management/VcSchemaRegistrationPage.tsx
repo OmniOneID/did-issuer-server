@@ -10,6 +10,7 @@ import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog"
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import { fetchNamespaces } from "../../../apis/vc-management-api"; // API 변경됨
 import CustomItemSelectionDialog from "./SchemaItemSelectDialog";
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 type Props = {}
 
@@ -68,7 +69,7 @@ const VcSchemaRegistrationPage = (props: Props) => {
         })
         .catch((error) => {
           console.error("Failed to retrieve namespaces. ", error);
-          navigate('/error', { state: { message: `Failed to retrieve Namespaces: ${error}` } });
+          navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Namespaces")} });
         })
 
     } catch (error) {

@@ -9,6 +9,7 @@ import { useDialogs } from "@toolpad/core";
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import SchemaItemSelectDialog from "./SchemaItemSelectDialog";
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 type Props = {};
 
@@ -189,7 +190,7 @@ const VcSchemaEditPage = (props: Props) => {
                 })
                 .catch((error) => {
                     console.error("Failed to retrieve namespaces. ", error);
-                    navigate('/error', { state: { message: `Failed to retrieve Namespaces: ${error}` } });
+                    navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Namespaces") } });
                 })
 
         } catch (error) {
@@ -299,8 +300,7 @@ const VcSchemaEditPage = (props: Props) => {
 
     useEffect(() => {
         if (!initialData) return;
-        console.log(formData);
-        console.log(initialData);
+
         const isModified = JSON.stringify(formData) !== JSON.stringify(initialData);
         setIsButtonDisabled(!isModified);
     }, [formData, initialData]);
