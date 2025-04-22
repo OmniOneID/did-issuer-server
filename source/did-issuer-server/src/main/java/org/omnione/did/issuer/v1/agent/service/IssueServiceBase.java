@@ -74,6 +74,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -354,7 +355,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Encrypt VC");
             String encVc = encryptVerifiableCredential(verifiableCredential, mergeSharedSecretAndNonce, iv, e2e);
 
-            Vc vc = handleVcCreationOrUpdate(user, vcProfile.getDid(), transaction, verifiableCredential.getId());
+            Vc vc = handleVcCreationOrUpdate(user, vcProfile.getDid(), transaction, vcMeta);
 
             log.debug("\t--> VC_ID, Holder info save to DB");
             vcQueryService.save(vc);
@@ -541,35 +542,39 @@ public abstract class IssueServiceBase implements IssueService {
      * @param user The user
      * @param holderDid The holder DID
      * @param transaction The transaction
-     * @param vcId The VC ID
+     * @param vcMeta The VC Meta
      * @return The created or updated VC
      *
      */
-    private Vc handleVcCreationOrUpdate(User user, String holderDid, Transaction transaction, String vcId) {
+    private Vc handleVcCreationOrUpdate(User user, String holderDid, Transaction transaction, VcMeta vcMeta) {
         String vcPlanId = transaction.getVcPlanId();
         String txId = transaction.getTxId();
         return vcQueryService.findByUserIdAndVcPlanId(user.getId(), vcPlanId)
                 .map(existingVc -> {
                     revokeVc(existingVc);
                     return Vc.builder()
-                            .issuedAt(Instant.now())
-                            .expiredAt(Instant.now())
+                            .issuedAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getIssuanceDate()))
+                            .expiredAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getValidUntil()))
                             .did(holderDid)
                             .userId(user.getId())
                             .vcPlanId(vcPlanId)
                             .txId(txId)
-                            .vcId(vcId)
+                            .vcId(vcMeta.getId())
+                            .vcSchemaId(vcMeta.getCredentialSchema().getId())
+                            .status(vcMeta.getStatus())
                             .build();
                 })
                 .orElseGet(() ->
                         Vc.builder()
-                                .issuedAt(Instant.now())
-                                .expiredAt(Instant.now())
+                                .issuedAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getIssuanceDate()))
+                                .expiredAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getValidUntil()))
                                 .did(holderDid)
                                 .userId(user.getId())
                                 .vcPlanId(vcPlanId)
                                 .txId(txId)
-                                .vcId(vcId)
+                                .vcId(vcMeta.getId())
+                                .vcSchemaId(vcMeta.getCredentialSchema().getId())
+                                .status(vcMeta.getStatus())
                                 .build()
                 );
     }
@@ -738,7 +743,7 @@ public abstract class IssueServiceBase implements IssueService {
         VcMeta vcMetByVcId = storageService.getVcMetaByVcId(vc.getVcId());
         if (!VcStatus.REVOKED.getRawValue().equals(vcMetByVcId.getStatus())) {
             storageService.updateVcStatus(vc.getVcId(), VcStatus.REVOKED);
-            // TODO: Revoke VC Table
+            vc.setStatus(VcStatus.REVOKED.getRawValue());
         }
     }
 
@@ -894,6 +899,7 @@ public abstract class IssueServiceBase implements IssueService {
         ProviderDetail issuer = new ProviderDetail();
         issuer.setCertVcRef(issuerInfo.getCertificateUrl());
         issuer.setDid(issuerInfo.getDid());
+        issuer.setName(issuerInfo.getName());
 
         return issuer;
     }

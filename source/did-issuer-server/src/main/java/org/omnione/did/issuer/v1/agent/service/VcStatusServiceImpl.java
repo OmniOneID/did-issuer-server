@@ -41,8 +41,10 @@ import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 
 import org.omnione.did.issuer.v1.agent.service.query.RevokeVcQueryService;
+import org.omnione.did.issuer.v1.agent.service.query.VcQueryService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -60,15 +62,18 @@ public class VcStatusServiceImpl implements VcStatusService {
     private final TransactionService transactionService;
     private final RevokeVcQueryService revokeVcQueryService;
     private final ApplicationConfig applicationConfig;
+    private final VcQueryService vcQueryService;
 
     public VcStatusServiceImpl(StorageService storageService,
                                TransactionService transactionService,
                                RevokeVcQueryService revokeVcQueryService,
-                               ApplicationConfigQueryService applicationConfigQueryService) {
+                               ApplicationConfigQueryService applicationConfigQueryService,
+                               VcQueryService vcQueryService) {
         this.storageService = storageService;
         this.transactionService = transactionService;
         this.revokeVcQueryService = revokeVcQueryService;
         this.applicationConfig = applicationConfigQueryService.getApplicationConfig();
+        this.vcQueryService = vcQueryService;
     }
 
     /**
@@ -174,6 +179,7 @@ public class VcStatusServiceImpl implements VcStatusService {
      * @throws OpenDidException if the VC is not found or already revoked.
      * @throws OpenDidException if the VC has already been revoked.
      */
+    @Transactional
     @Override
     public UpdateVcStatusResDto updateVcStatus(UpdateVcStatusReqDto request) {
         try {
@@ -185,6 +191,7 @@ public class VcStatusServiceImpl implements VcStatusService {
                 throw new OpenDidException(ErrorCode.REVOKED_VC);
             }
 
+            vcQueryService.findByVcId(request.getVcId()).setStatus(request.getVcStatus().getRawValue());
             storageService.updateVcStatus(request.getVcId(), request.getVcStatus());
 
             return UpdateVcStatusResDto.builder()

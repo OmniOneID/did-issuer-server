@@ -42,7 +42,7 @@ public class VcQueryService {
      * @throws OpenDidException if the VC cannot be retrieved
      */
     public Vc findByVcId(String vcId) {
-        return vcRepository.findByVcId(vcRepository)
+        return vcRepository.findByVcId(vcId)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.VC_NOT_FOUND));
     }
 

@@ -20,14 +20,12 @@ public class IssuedVcService {
     private final StorageService storageService;
 
     public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
-        return issuedVcQueryService.searchIssueProfileList(searchKey, searchValue, pageable);
+        return issuedVcQueryService.searchIssuedVcList(searchKey, searchValue, pageable);
     }
 
     public IssuedVcDto findById(Long id) {
         Vc vc = issuedVcQueryService.findById(id);
 
-        VcMeta vcMetaByVcId = storageService.getVcMetaByVcId(vc.getVcId());
-
-        return IssuedVcDto.fromEntity(vc, vcMetaByVcId.getCredentialSchema().getId(), vcMetaByVcId.getStatus());
+        return IssuedVcDto.fromEntity(vc);
     }
 }

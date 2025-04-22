@@ -29,7 +29,9 @@ import org.omnione.did.base.datamodel.data.DidAuth;
 import org.omnione.did.base.datamodel.data.EcdhReqData;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
+import org.omnione.did.base.db.constant.IssuerStatus;
 import org.omnione.did.base.db.domain.CertificateVc;
+import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
@@ -41,6 +43,7 @@ import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.crypto.exception.CryptoException;
 import org.omnione.did.crypto.keypair.EcKeyPair;
+import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.enums.did.ProofPurpose;
 import org.omnione.did.data.model.enums.did.ProofType;
@@ -50,6 +53,7 @@ import org.omnione.did.issuer.v1.agent.api.dto.*;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 
 import org.omnione.did.issuer.v1.agent.dto.EnrollEntityResDto;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -67,12 +71,19 @@ import java.util.Arrays;
 public class EnrollEntityServiceImpl implements EnrollEntityService {
     private final FileWalletService walletService;
     private final CertificateVcQueryService certificateVcQueryService;
+    private final DidDocService didDocService;
+    private final IssuerInfoQueryService issuerInfoQueryService;
+    private final SignatureService signatureService;
     private final String TAS_URL;
 
     public EnrollEntityServiceImpl(FileWalletService walletService, CertificateVcQueryService certificateVcQueryService,
-                                   ApplicationConfigQueryService applicationConfigQueryService) {
+                                   IssuerInfoQueryService issuerInfoQueryService, DidDocService didDocService,
+                                   SignatureService signatureService, ApplicationConfigQueryService applicationConfigQueryService) {
         this.walletService = walletService;
         this.certificateVcQueryService = certificateVcQueryService;
+        this.issuerInfoQueryService = issuerInfoQueryService;
+        this.didDocService = didDocService;
+        this.signatureService = signatureService;
         this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl();
     }
 
@@ -87,6 +98,9 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         try {
             log.debug("*** Finished enrollEntity ***");
 
+            IssuerInfo issuerInfo = issuerInfoQueryService.findIssuerInfo();
+            DidDocument issuerDidDocument = didDocService.getDidDocument(issuerInfo.getDid());
+
             log.debug("\t--> 1. propose Enroll Entity");
             ProposeEnrollEntityApiResDto proposeResponse = proposeEnrollEntity();
             String txId = proposeResponse.getTxId();
@@ -98,13 +112,13 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             EcKeyPair ecKeyPair = (EcKeyPair) BaseCryptoUtil.generateKeyPair(eccCurveType);
             log.debug("\t\t--> generate ReqEcdh");
             String clientNonce = BaseMultibaseUtil.encode(BaseCryptoUtil.generateNonce(16));
-            EcdhReqData reqData = generateReqData(ecKeyPair, eccCurveType, clientNonce);
+            EcdhReqData reqData = generateReqData(ecKeyPair, eccCurveType, clientNonce, issuerDidDocument);
             log.debug("\t\t--> request ECDH");
             RequestEcdhApiResDto ecdhResponse = requestEcdh(txId, reqData);
 
             log.debug("\t--> 3. request Enroll Entity");
             log.debug("\t\t--> generate DID Auth");
-            DidAuth didAuth = generateDidAuth(authNonce);
+            DidAuth didAuth = generateDidAuth(authNonce, issuerDidDocument);
             log.debug("\t\t--> request Enroll Entity");
             RequestEnrollEntityApiResDto enrollEntityResponse = requestEnrollEntity(txId, didAuth);
             log.debug("\t\t--> decrypt VC");
@@ -118,6 +132,10 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             certificateVcQueryService.save(CertificateVc.builder()
                     .vc(vc.toJson())
                     .build());
+
+            log.debug("\t\t--> Update Issuer Status");
+            issuerInfo.setStatus(IssuerStatus.ACTIVATE);
+            issuerInfoQueryService.save(issuerInfo);
 
             log.debug("*** Finished enrollEntity ***");
 
@@ -185,10 +203,11 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      * @param publicKey the public key
      * @param curveType the ECC curve type
      * @param clientNonce the client nonce
+     * @param issuerDidDocument the Issuer DID document
      * @return the generated request data
      * @throws OpenDidException if the public key compression fails
      */
-    private EcdhReqData generateReqData(EcKeyPair publicKey, EccCurveType curveType, String clientNonce) {
+    private EcdhReqData generateReqData(EcKeyPair publicKey, EccCurveType curveType, String clientNonce, DidDocument issuerDidDocument) {
         try {
             Candidate candidate = Candidate.builder()
                     .ciphers(Arrays.asList(SymmetricCipherType.values()))
@@ -196,7 +215,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             // TODO : SetIssuer
             String verificationMethod = "did:omn:issuer?versionId=1#keyagree";
             Proof proof = BaseCryptoUtil.generateProof(ProofType.SECP256R1_SIGNATURE_2018,
-                    ProofPurpose.KEY_AGREEMENT, verificationMethod);
+                    ProofPurpose.KEY_AGREEMENT, signatureService.getVerificationMethod(issuerDidDocument, org.omnione.did.base.datamodel.enums.ProofPurpose.KEY_AGREEMENT));
 
             EcdhReqData reqData = EcdhReqData.builder()
                     .client("did:omn:issuer")
@@ -245,23 +264,23 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      * This method generates the DID Auth object for the request-enroll-entity request.
      *
      * @param authNonce the authentication nonce
+     * @param issuerDidDocument the Issuer DID document
      * @return the generated DID Auth object
      */
-    private DidAuth generateDidAuth(String authNonce) {
+    private DidAuth generateDidAuth(String authNonce, DidDocument issuerDidDocument) {
 
         String verificationMethod = "did:omn:issuer?versionId=1#auth";
 
         Proof proof = BaseCryptoUtil.generateProof(ProofType.SECP256R1_SIGNATURE_2018,
-                ProofPurpose.AUTHENTICATION, verificationMethod);
+                ProofPurpose.AUTHENTICATION, signatureService.getVerificationMethod(issuerDidDocument, org.omnione.did.base.datamodel.enums.ProofPurpose.AUTHENTICATION));
 
         DidAuth didAuth = DidAuth.builder()
                 .authNonce(authNonce)
-                .did("did:omn:issuer")
+                .did(issuerDidDocument.getId())
                 .proof(proof)
                 .build();
 
-        proof.setProofValue(signData(didAuth, "auth"));
-        return didAuth;
+        return signatureService.signDidAuth(issuerDidDocument, didAuth);
     }
 
     /**

@@ -21,7 +21,14 @@ import org.omnione.did.base.db.domain.Admin;
 import org.omnione.did.base.db.repository.AdminRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.issuer.v1.admin.dto.AdminDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +39,34 @@ public class AdminQueryService {
     public Admin findByLoginIdAndLoginPassword(String loginId, String loginPassword) {
         return adminRepository.findByLoginIdAndLoginPassword(loginId, loginPassword)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
+    }
+
+
+
+    public Page<AdminDto> searchAdminList(String searchKey, String searchValue, Pageable pageable) {
+        Page<Admin> adminPage = adminRepository.searchAdmins(searchKey, searchValue, pageable);
+
+        List<AdminDto> adminDtos = adminPage.getContent().stream()
+                .map(AdminDto::fromAdmin)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(adminDtos, pageable, adminPage.getTotalElements());
+    }
+
+    public Admin findById(Long id) {
+        return adminRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
+    }
+
+    public Admin findByLoginIdOrNull(String loginId) {
+        return adminRepository.findByLoginId(loginId).orElse(null);
+    }
+
+    public long countByLoginId(String loginId) {
+        return adminRepository.countByLoginId(loginId);
+    }
+
+    public Admin findByLoginId(String loginId) {
+        return adminRepository.findByLoginId(loginId).orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
     }
 }

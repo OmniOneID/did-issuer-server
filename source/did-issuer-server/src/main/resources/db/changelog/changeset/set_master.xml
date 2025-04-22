@@ -22,6 +22,8 @@
   <include file="./set.1/project-init_admin.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-init_application_config.xml" relativeToChangelogFile="true" />
   <include file="./set.1/project-modify_user.xml" relativeToChangelogFile="true" />
-
+  <include file="./set.1/project-modify_vc.xml" relativeToChangelogFile="true" />
+  <include file="./set.2/admin-2phase-did_document.xml" relativeToChangelogFile="true"/>
+  <include file="./set.2/admin-2phase-issuer.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

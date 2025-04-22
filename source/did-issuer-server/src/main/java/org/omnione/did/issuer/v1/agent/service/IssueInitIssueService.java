@@ -27,12 +27,14 @@ import org.omnione.did.issuer.v1.agent.service.query.*;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This service provides methods for issuing a Verifiable Credential (VC) for MDL(Mobile Driver License).
  */
 @Slf4j
 @Service
+@Transactional
 @Profile("!sample")
 public class IssueInitIssueService extends IssueServiceBase {
     private final UserQueryService userQueryService;

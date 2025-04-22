@@ -22,7 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.*;
+import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
@@ -46,6 +49,7 @@ public class VcSchemaManagerService {
     private final VcSchemaQueryService vcSchemaQueryService;
 
     private final NamespaceQueryService namespaceQueryService;
+    private final IssueProfileQueryService issueProfileQueryService;
     private final ListCommunityService listCommunityService;
     public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
 
@@ -91,6 +95,10 @@ public class VcSchemaManagerService {
     }
 
     public void deleteVcSchemaById(Long id) {
+        if (issueProfileQueryService.existsByVcSchemaId(id)) {
+            throw new OpenDidException(ErrorCode.VC_SCHEMA_DELETE_CONFLICT);
+        }
+
         vcSchemaQueryService.deleteById(id);
     }
 

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class IssuedVcQueryService {
     private final VcRepository vcRepository;
 
-    public Page<IssuedVcDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+    public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
         Page<Vc> entityPage = vcRepository.searchIssuedVc(searchKey, searchValue, pageable);
         List<IssuedVcDto> vcs = entityPage.stream().map(IssuedVcDto::fromEntity)
                 .collect(Collectors.toList());

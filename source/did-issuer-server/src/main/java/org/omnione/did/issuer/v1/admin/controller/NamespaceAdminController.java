@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.data.model.schema.SchemaClaims;
+import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.*;
 import org.omnione.did.issuer.v1.admin.service.NamespaceService;
 import org.omnione.did.issuer.v1.admin.utils.ResponseUtil;
@@ -52,27 +53,12 @@ public class NamespaceAdminController {
         return ResponseEntity.ok(namespaceService.updateNamespace(request));
     }
 
-    @DeleteMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
-    public ResponseEntity<DeleteNamespaceResDto> deleteNamespace(@PathVariable(name = "id") Long id) {
+    @DeleteMapping
+    public ResponseEntity<EmptyResDto> deleteNamespace(@RequestParam(name = "id") Long id) {
 
         namespaceService.deleteNamespaceById(id);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(new EmptyResDto());
     }
-
-//    @GetMapping(UrlConstant.Admin.LIST)
-//    public ResponseEntity<ResponseDto> getNamespaceList(
-//            @PageableDefault(sort = "id") Pageable pageable) {
-//
-//        Page<Namespace> page = namespaceService.getNamespacesByPageable(pageable);
-//        ResponseDto response = ResponseUtil.generateBodyWithPage(page.getContent(), page.getTotalElements());
-//
-//        return ResponseEntity.ok(response);
-//    }
-
-//    @GetMapping
-//    public ResponseEntity<Namespace> getNamespace(@RequestParam(name = "id") Long id) {
-//        return ResponseEntity.ok(namespaceService.getNamespaceById(id));
-//    }
 
     @GetMapping
     public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {

@@ -22,11 +22,14 @@ import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.GetIssuerInfoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.SendCertificateVcReqDto;
 import org.omnione.did.issuer.v1.admin.dto.SendEntityInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.issuer.IssuerInfoResDto;
+import org.omnione.did.issuer.v1.admin.dto.issuer.RegisterIssuerInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.issuer.RequestEntityStatusResDto;
+import org.omnione.did.issuer.v1.admin.dto.issuer.RequestRegisterDidReqDto;
 import org.omnione.did.issuer.v1.admin.service.IssuerManagementService;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,5 +40,39 @@ public class IssuerAdminController {
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public GetIssuerInfoReqDto getIssuerInfo() {
         return issuerManagementService.getIssuerInfo();
+    }
+    @RequestMapping(value = "/certificate-vc", method = RequestMethod.POST)
+    public EmptyResDto createCertificateVc(@RequestBody SendCertificateVcReqDto sendCertificateVcReqDto) {
+        return issuerManagementService.createCertificateVc(sendCertificateVcReqDto);
+    }
+
+    @RequestMapping(value = "/entity-info", method = RequestMethod.POST)
+    public EmptyResDto updateEntityInfo(@RequestBody SendEntityInfoReqDto sendEntityInfoReqDto) {
+        return issuerManagementService.updateEntityInfo(sendEntityInfoReqDto);
+    }
+
+    @RequestMapping(value = "/register-issuer-info", method = RequestMethod.POST)
+    public IssuerInfoResDto registerIssuerInfo(@RequestBody RegisterIssuerInfoReqDto registerCaInfoReqDto) {
+        return issuerManagementService.registerIssuerInfo(registerCaInfoReqDto);
+    }
+
+    @RequestMapping(value = "/generate-did-auto", method = RequestMethod.POST)
+    public Map<String, Object> generateIssuerDidDocumentAuto() {
+        return issuerManagementService.registerIssuerDidDocumentAuto();
+    }
+
+    @RequestMapping(value = "/register-did", method = RequestMethod.POST)
+    public EmptyResDto requestRegisterDid(@RequestBody RequestRegisterDidReqDto requestRegisterDidReqDto) {
+        return issuerManagementService.requestRegisterDid(requestRegisterDidReqDto);
+    }
+
+    @GetMapping(value = "/request-status")
+    public RequestEntityStatusResDto requestEntityStatus() {
+        return issuerManagementService.requestEntityStatus();
+    }
+
+    @PostMapping(value = "/request-enroll-entity")
+    public Map<String, Object> requestEnrollEntity() {
+        return issuerManagementService.enrollEntity();
     }
 }

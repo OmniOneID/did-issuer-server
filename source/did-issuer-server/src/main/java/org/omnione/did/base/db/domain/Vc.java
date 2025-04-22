@@ -61,4 +61,10 @@ public class Vc extends BaseEntity implements Serializable {
 
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "vc_schema_id")
+    private String vcSchemaId;
+
+    @Column(name = "status")
+    private String status;
 }

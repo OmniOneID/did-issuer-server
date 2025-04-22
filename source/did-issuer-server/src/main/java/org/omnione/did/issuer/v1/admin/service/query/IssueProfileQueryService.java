@@ -57,7 +57,9 @@ public class IssueProfileQueryService {
     public Boolean existsByVcPlanId(String vcPlanId) {
         return issueProfileRepository.existsByVcPlanId(vcPlanId);
     }
-
+    public Boolean existsByVcSchemaId(Long vcSchemaId) {
+        return issueProfileRepository.existsByVcSchemaId(vcSchemaId);
+    }
     public IssueProfile findByVcPlanId(String vcPlanId) {
 
         return issueProfileRepository.findByVcPlanId(vcPlanId)
@@ -65,9 +67,7 @@ public class IssueProfileQueryService {
     }
 
     public void deleteIssueProfileById(Long id) {
-        if (!issueProfileRepository.existsByVcSchemaId(id)) {
-            issueProfileRepository.deleteById(id);
-        }
+        issueProfileRepository.deleteById(id);
     }
 
     public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {

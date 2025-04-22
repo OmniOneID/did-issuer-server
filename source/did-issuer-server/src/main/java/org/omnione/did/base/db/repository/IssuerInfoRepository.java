@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface IssuerInfoRepository extends JpaRepository<IssuerInfo, Long> {
     Optional<IssuerInfo> findFirstBy();
 
+    Optional<IssuerInfo> findTop1ByOrderByIdAsc();
 }

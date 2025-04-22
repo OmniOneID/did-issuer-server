@@ -53,6 +53,8 @@ public enum ErrorCode {
     // 100~ 199 = DID
     DID_DOC_FIND_FAILURE("000100", "Failed to find DID Document.", 500),
     DID_DOC_VERSION_INVALID("00101", "Invalid DID Document version.", 400),
+    INVALID_DID_DOCUMENT("00102", "Invalid DID Document", 400),
+    DID_DOCUMENT_RETRIEVAL_FAILED("00103", "Failed to retrieve DID Document.", 500),
 
     // 200~ 299 = VC
     VC_OFFER_NOT_FOUND("00200", "The Offer does not exist.", 400),
@@ -92,6 +94,7 @@ public enum ErrorCode {
     CRYPTO_KEY_PAIR_GENERATION_FAILED("00410", "Failed to generate key pair.", 500),
     CRYPTO_PUBLIC_KEY_UN_COMPRESS_FAILED("00411", "Failed to uncompress public key.", 500),
     CRYPTO_PUBLIC_KEY_COMPRESS_FAILED("00412", "Failed to compress public key.", 500),
+    CRYPTO_KEY_PAIR_ALREADY_EXISTS("00413", "Failed to generate keys: key already exists.", 500),
 
     SIGNATURE_VERIFICATION_FAILED("00413", "Failed to Signature verification.", 400),
     SIGNATURE_GENERATION_FAILED("00415", "Failed to generate signature.", 500),
@@ -99,6 +102,10 @@ public enum ErrorCode {
     WALLET_INFO_NOT_FOUND("00417", "Wallet is not registered.", 400),
     WALLET_CONNECT_FAILURE("00418", "Failed to connect wallet.", 500),
     WALLET_CREATION_FAILURE("00419", "Failed to create wallet.", 500),
+    WALLET_ALREADY_EXISTS("00420", "Failed to create wallet: wallet already exists.", 500),
+    INVALID_PROOF_PURPOSE("00421", "Invalid proof purpose.", 400),
+
+
 
     GET_SIGN_KEY_IDS_FAILED("00420", "Failed to get sign key ids", 400),
     GET_SIGN_DATA_FAILED("00421", "Failed to get sign data", 400),
@@ -132,13 +139,29 @@ public enum ErrorCode {
     ADMIN_INFO_NOT_FOUND("00800", "Failed to find admin: admin is not registered.", 400),
     APPLICATION_CONFIG_NOT_FOUND("00801", "Application config not found.", 400),
     NAMESPACE_DELETE_CONFLICT("00802", "Cannot delete namespace: it is referenced by a VC schema.", 400),
-    NAMESPACE_NOT_FOUND("00803", "Namespace not found for the given ID.", 400),
-    ISSUER_INFO_NOT_FOUND("00804", "Issuer info not found during initialization.", 400),
+    VC_SCHEMA_DELETE_CONFLICT("00803", "Cannot delete vc schema: it is referenced by a Issue Profile.", 400),
+    NAMESPACE_NOT_FOUND("00804", "Namespace not found for the given ID.", 400),
+    ISSUER_INFO_NOT_FOUND("00805", "Issuer info not found during initialization.", 400),
+    ISSUER_ALREADY_REGISTERED("00806", "Issuer is already registered", 400),
+    ISSUER_DID_DOCUMENT_ALREADY_REQUESTED("00807", "Failed to register Issuer DID Document: document is already requested.", 400),
+    ISSUER_DID_DOCUMENT_ALREADY_REGISTERED("00808", "Failed to register Issuer DID Document: document is already registered.", 400),
+    FAILED_TO_GENERATE_DID_DOCUMENT("00809", "Failed to generate DID document.", 500),
+    FAILED_TO_REGISTER_ISSUER_DID_DOCUMENT("00810","Failed to register Issuer DID Document.", 500),
+    ISSUER_DID_DOCUMENT_NOT_FOUND("00811","Failed to find Issuer DID Document: o registration request has been made.", 400),
+    INVALID_CERTIFICATE_VC_JSON_FORMAT("00812", "Failed to process certificate VC: invalid JSON format.", 500),
+    FAILED_TO_REQUEST_CERTIFICATE_VC("00813","Failed to process the 'request-certificate-vc' API request.", 500),
+    FAILED_TO_LOAD_KEY_ELEMENT("00814", "Failed to load key element.", 500),
+    TAS_COMMUNICATION_ERROR("00815","Failed to communicate with tas: unknown error occurred.", 500),
+    URL_PING_ERROR("00816", "Failed to ping the URL.", 400),
+    ADMIN_ALREADY_EXISTS("00817", "Failed to register admin: admin is already registered.", 400),
+
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 
-    UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500);
+    UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500),
 
+
+    ;
 
     private final String code;
     private final String message;

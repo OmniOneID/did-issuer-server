@@ -17,10 +17,14 @@ package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface AdminRepository extends JpaRepository<Admin, Long> {
+@Repository
+public interface AdminRepository extends JpaRepository<Admin, Long>, QuerydslPredicateExecutor<Admin>, AdminRepositoryAdmin {
     Optional<Admin> findByLoginIdAndLoginPassword(String loginId, String loginPassword);
+    Optional<Admin> findByLoginId(String loginId);
+    long countByLoginId(String loginId);
 }
