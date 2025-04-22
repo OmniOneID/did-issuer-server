@@ -210,7 +210,7 @@ README.html
 !**/opendid-*.jar
 /source/did-issuer-server/files/**
 !source/did-issuer-server/gradle/wrapper/gradle-wrapper.jar
-!source/did-issuer-server/src/main/resources/static/**
+source/did-issuer-server/src/main/resources/static/**
 
 ### react ###
 .DS_*
