@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.issuer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -32,6 +32,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+/**
+ * Response DTO for retrieving issuer information in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.omnione.did.issuer.v1.admin.dto.admin;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+/**
+ * Request DTO for admin login in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +36,7 @@ import lombok.*;
 public class RequestAdminLoginReqDto {
     @NotNull(message = "loginId cannot be null")
     private String loginId;
+
     @NotNull(message = "loginPassword cannot be null")
     private String loginPassword;
 }

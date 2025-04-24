@@ -24,11 +24,13 @@ import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.VcSchemaNamespace;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.issuer.v1.admin.dto.*;
+import org.omnione.did.issuer.v1.admin.dto.vc.CreateVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.dto.vc.GetVcSchemaResDto;
+import org.omnione.did.issuer.v1.admin.dto.vc.VcSchemaDto;
+import org.omnione.did.issuer.v1.admin.dto.vc.VcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
-import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Description...
+ * Service for managing Verifiable Credential (VC) schemas in the Admin Console.
+ * <p>
+ * Provides functionality for creating, updating, deleting, retrieving, and publishing VC schemas,
+ * including their association with namespaces and integration with the List Community (TAS).
  */
 @Transactional
 @Profile("!sample")
@@ -47,12 +52,17 @@ import java.util.stream.Collectors;
 public class VcSchemaManagerService {
 
     private final VcSchemaQueryService vcSchemaQueryService;
-
     private final NamespaceQueryService namespaceQueryService;
     private final IssueProfileQueryService issueProfileQueryService;
     private final ListCommunityService listCommunityService;
-    public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
 
+    /**
+     * Creates a new VC schema and registers it to the List Community.
+     *
+     * @param request DTO containing schema creation data
+     * @return response DTO with created schema ID
+     */
+    public CreateVcSchemaResDto createVcSchema(VcSchemaReqDto request) {
         VcSchema vcSchema = vcSchemaQueryService.save(VcSchema.builder()
                 .vcSchemaId(request.getVcSchemaId())
                 .title(request.getTitle())
@@ -61,7 +71,6 @@ public class VcSchemaManagerService {
                 .version(request.getVersion())
                 .build());
 
-        // TODO: check Namespace exists
         List<VcSchemaNamespace> vcSchemaNamespaceList = request.getNamespaces().stream()
                 .map(namespace -> VcSchemaNamespace.builder()
                         .vcSchemaId(vcSchema.getId())
@@ -70,7 +79,6 @@ public class VcSchemaManagerService {
                 .collect(Collectors.toList());
 
         vcSchemaQueryService.saveVcSchemaNamespace(vcSchemaNamespaceList);
-
         listCommunityService.registerVcSchema(vcSchema.getId());
 
         return CreateVcSchemaResDto.builder()
@@ -78,11 +86,22 @@ public class VcSchemaManagerService {
                 .build();
     }
 
+    /**
+     * Retrieves a paginated list of all VC schemas.
+     *
+     * @param pageable pagination information
+     * @return page of VC schemas
+     */
     public Page<VcSchema> getVcSchemaList(Pageable pageable) {
-
         return vcSchemaQueryService.findAll(pageable);
     }
 
+    /**
+     * Retrieves a VC schema and its associated namespaces by ID.
+     *
+     * @param id the schema ID
+     * @return detailed VC schema response DTO
+     */
     public GetVcSchemaResDto getVcSchemaById(Long id) {
         VcSchema vcSchema = vcSchemaQueryService.findById(id);
         List<Long> relationByVcSchemaId = vcSchemaQueryService.findRelationByVcSchemaId(id);
@@ -94,18 +113,37 @@ public class VcSchemaManagerService {
                 .build();
     }
 
+    /**
+     * Deletes a VC schema by ID if not associated with any issue profile.
+     *
+     * @param id the schema ID
+     * @throws OpenDidException if schema is still in use
+     */
     public void deleteVcSchemaById(Long id) {
         if (issueProfileQueryService.existsByVcSchemaId(id)) {
             throw new OpenDidException(ErrorCode.VC_SCHEMA_DELETE_CONFLICT);
         }
-
         vcSchemaQueryService.deleteById(id);
     }
 
+    /**
+     * Searches VC schemas by keyword and value with pagination.
+     *
+     * @param searchKey   the key to search on
+     * @param searchValue the value to search for
+     * @param pageable    pagination information
+     * @return page of matching VC schema DTOs
+     */
     public Page<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return vcSchemaQueryService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 
+    /**
+     * Updates an existing VC schema and re-associates its namespace mappings.
+     *
+     * @param request DTO containing updated schema data
+     * @return updated schema DTO
+     */
     public VcSchemaDto updateVcSchema(VcSchemaReqDto request) {
         VcSchema vcSchema = vcSchemaQueryService.findById(request.getId());
         vcSchema.setTitle(request.getTitle());
@@ -115,7 +153,6 @@ public class VcSchemaManagerService {
 
         vcSchemaQueryService.deleteByVcSchemaId(request.getId());
 
-        // TODO: check Namespace exists
         List<VcSchemaNamespace> vcSchemaNamespaceList = request.getNamespaces().stream()
                 .map(namespace -> VcSchemaNamespace.builder()
                         .vcSchemaId(vcSchema.getId())

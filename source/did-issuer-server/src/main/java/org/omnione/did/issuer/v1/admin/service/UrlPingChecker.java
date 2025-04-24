@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.agent.service;
+package org.omnione.did.issuer.v1.admin.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

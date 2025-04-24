@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
+import lombok.*;
+import org.omnione.did.data.model.schema.ClaimDef;
+import org.omnione.did.data.model.schema.Namespace;
+
+import java.util.List;
+
+/**
+ * Request DTO for creating a namespace in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Builder
-public class SendEntityInfoReqDto {
-    private String did;
-    private String name;
-    private String serverUrl;
-    private String certificateUrl;
+public class CreateNamespaceReqDto {
+    private Namespace namespace;
+    private List<ClaimDef> items;
 }

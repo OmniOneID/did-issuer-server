@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.dto;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+package org.omnione.did.issuer.v1.admin.dto.profile;
 
+import lombok.*;
+
+/**
+ * Response DTO returned after creating an issue profile in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @Builder
-public class ResetPasswordReqDto {
-    @NotNull(message = "loginId cannot be null")
-    private String loginId;
-    @NotNull(message = "oldPassword cannot be null")
-    private String oldPassword;
-    @NotNull(message = "newPassword cannot be null")
-    private String newPassword;
+public class CreateIssueProfileResDto {
+
 }

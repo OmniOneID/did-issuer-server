@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.vc;
 
 import lombok.*;
 
 /**
- * Description...
- *
+ * Response DTO returned after creating a VC schema in the Admin Console.
  */
 @Getter
 @Setter

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 OmniOne.
+ * Copyright 2024 - 2025 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,14 @@
 package org.omnione.did.issuer.v1.agent.service.query;
 
 
-import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.db.domain.Namespace;
 import org.omnione.did.base.db.domain.VcSchema;
-import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.data.model.schema.MetaData;
 import org.omnione.did.data.model.schema.SchemaClaims;
 import org.omnione.did.data.model.schema.SchemaCredentialSubject;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -51,8 +47,10 @@ public class VcSchemaService {
                            IssuerInfoQueryService issuerInfoQueryService) {
         this.namespaceQueryService = namespaceQueryService;
         this.vcSchemaQueryService = vcSchemaQueryService;
-        this.issuerInfoQueryService = issuerInfoQueryService;;
+        this.issuerInfoQueryService = issuerInfoQueryService;
+        ;
     }
+
     /**
      * Returns the schema for the specified VC.
      *

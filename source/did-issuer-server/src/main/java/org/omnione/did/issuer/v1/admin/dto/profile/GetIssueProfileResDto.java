@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.utils;
+package org.omnione.did.issuer.v1.admin.dto.profile;
 
-import org.omnione.did.issuer.v1.admin.dto.ResponseDto;
+import lombok.*;
+import org.omnione.did.base.db.domain.IssueProfile;
+import org.omnione.did.base.db.domain.Namespace;
+import org.omnione.did.base.db.domain.VcSchema;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Description...
- *
+ * Response DTO for retrieving detailed issue profile information in the Admin Console.
  */
-public class ResponseUtil {
-    public static ResponseDto generateBodyWithPage(List<?> list, long totalCount) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("totalCount", totalCount);
-        data.put("list", list);
-        return new ResponseDto(data);
-    }
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class GetIssueProfileResDto {
+    private String vcSchemaName;
+    private IssueProfile issueProfile;
 }

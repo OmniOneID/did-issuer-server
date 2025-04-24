@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
 import lombok.*;
-import org.omnione.did.data.model.schema.ClaimDef;
-import org.omnione.did.data.model.schema.Namespace;
-
-import java.util.List;
 
 /**
- * Description...
- *
+ * Response DTO returned after deleting a namespace in the Admin Console.
  */
+
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @Builder
-public class CreateNamespaceReqDto {
-    private Namespace namespace;
-    private List<ClaimDef> items;
+public class DeleteNamespaceResDto {
 }

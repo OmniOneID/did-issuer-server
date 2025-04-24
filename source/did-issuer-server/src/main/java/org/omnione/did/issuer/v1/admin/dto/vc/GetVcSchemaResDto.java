@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.vc;
 
 import lombok.*;
 import org.omnione.did.base.db.domain.Namespace;
-import org.springframework.data.domain.Page;
+import org.omnione.did.base.db.domain.VcSchema;
+
+import java.util.List;
 
 /**
- * Description...
- *
+ * Response DTO for retrieving detailed VC schema information along with associated namespaces in the Admin Console.
  */
 @Getter
 @Setter
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Page;
 @AllArgsConstructor
 @ToString
 @Builder
-public class GetNamespacesResDto {
-    private Page<Namespace> namespaces;
+public class GetVcSchemaResDto {
+    private VcSchema vcSchema;
+    private List<Namespace> items;
 }

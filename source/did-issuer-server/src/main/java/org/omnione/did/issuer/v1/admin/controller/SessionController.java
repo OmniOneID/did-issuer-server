@@ -20,8 +20,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.issuer.v1.admin.dto.AdminDto;
-import org.omnione.did.issuer.v1.admin.dto.RequestAdminLoginReqDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.AdminDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.RequestAdminLoginReqDto;
 import org.omnione.did.issuer.v1.admin.service.SessionService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The SessionController class provides an Admin Console endpoint for handling admin login requests.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -37,6 +40,12 @@ public class SessionController {
 
     private final SessionService sessionService;
 
+    /**
+     * Handles admin login requests.
+     *
+     * @param requestAdminLoginReqDto the DTO containing login credentials
+     * @return the admin information upon successful login
+     */
     @PostMapping(value = "/login")
     @ResponseBody
     public AdminDto requestAdminLogin(@Valid @RequestBody RequestAdminLoginReqDto requestAdminLoginReqDto) {

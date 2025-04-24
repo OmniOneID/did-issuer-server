@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.dto.server.VerifyServerUrlReqDto;
 import org.omnione.did.issuer.v1.admin.dto.server.VerifyServerUrlResDto;
-import org.omnione.did.issuer.v1.agent.service.UrlPingChecker;
+import org.omnione.did.issuer.v1.admin.service.UrlPingChecker;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

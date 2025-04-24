@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.omnione.did.issuer.v1.admin.dto.vc;
 
-package org.omnione.did.issuer.v1.admin.dto;
-
-import lombok.*;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
- * Description...
- *
+ * Request DTO for sending a certificate VC in the Admin Console.
  */
 @Getter
 @Setter
@@ -31,17 +31,6 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateIssueProfileReqDto {
-    private Long id;
-    private String vcPlanId;
-    private String title;
-    private String description;
-    private Long vcSchemaId;
-    private String language;
-    private List<String> endpoints;
-    private String cipher;
-    private String curve;
-    private String padding;
-    private InitiateType initiateType;
-    private List<String> tags;
+public class SendCertificateVcReqDto {
+    private String certificateVc;
 }

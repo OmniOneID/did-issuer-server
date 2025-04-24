@@ -27,6 +27,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Admin information DTO used in the Admin Console.
+ */
 @Getter
 @Builder
 @AllArgsConstructor

@@ -23,21 +23,44 @@ import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Query service for handling issuer DID Document persistence and retrieval in the Admin Console.
+ * <p>
+ * Provides methods to fetch the latest DID Document, retrieve it optionally, and persist updates.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DidDocumentQueryService {
+
     private final DidDocumentRepository didDocumentRepository;
 
+    /**
+     * Retrieves the most recently saved DID Document.
+     *
+     * @return the latest EntityDidDocument
+     * @throws OpenDidException if no DID Document is found
+     */
     public EntityDidDocument findDidDocument() {
         return didDocumentRepository.findTop1ByOrderByIdDesc()
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ISSUER_DID_DOCUMENT_NOT_FOUND));
     }
 
+    /**
+     * Optionally retrieves the most recent DID Document or returns null if not present.
+     *
+     * @return the latest EntityDidDocument or null
+     */
     public EntityDidDocument findDidDocumentOrNull() {
         return didDocumentRepository.findTop1ByOrderByIdDesc().orElse(null);
     }
 
+    /**
+     * Persists the given DID Document to the repository.
+     *
+     * @param entityDidDocument the DID Document entity to save
+     * @return the saved DID Document entity
+     */
     public EntityDidDocument save(EntityDidDocument entityDidDocument) {
         return didDocumentRepository.save(entityDidDocument);
     }

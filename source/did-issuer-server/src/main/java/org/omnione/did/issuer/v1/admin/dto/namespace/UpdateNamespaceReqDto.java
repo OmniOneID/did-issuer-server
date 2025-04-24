@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
 import lombok.*;
-import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.base.db.domain.VcSchema;
-
-import java.util.List;
+import org.omnione.did.data.model.schema.SchemaClaims;
 
 /**
- * Description...
- *
+ * Request DTO for updating a namespace in the Admin Console.
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 @Builder
-public class GetIssueProfileResDto {
-    private String vcSchemaName;
-    private IssueProfile issueProfile;
+public class UpdateNamespaceReqDto {
+    private final Long id;
+    private final SchemaClaims schemaClaims;
 }

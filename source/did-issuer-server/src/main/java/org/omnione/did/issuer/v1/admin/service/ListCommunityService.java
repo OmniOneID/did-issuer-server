@@ -30,13 +30,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * Description...
+ * Service for interacting with the List Community endpoints in the Admin Console.
+ * <p>
+ * This service allows registration and deletion of VC Schemas and VC Plans with the Trusted Authority Service (TAS).
+ * It handles encoding, request formatting, and error handling for communication with TAS list APIs.
  */
-
 @Slf4j
 @Profile("!sample")
 @Service
 public class ListCommunityService {
+
     private final VcSchemaService vcSchemaService;
     private final String TAS_URL;
     private final String ISSUER_DID;
@@ -48,6 +51,12 @@ public class ListCommunityService {
         this.ISSUER_DID = issuerInfoQueryService.getIssuerInfo().getDid();
     }
 
+    /**
+     * Registers a VC Schema to the TAS List API.
+     *
+     * @param vcSchemaId the ID of the VC Schema to register
+     * @throws OpenDidException if the request to TAS fails
+     */
     public void registerVcSchema(Long vcSchemaId) {
         VcSchema vcSchema = vcSchemaService.getVcSchemaById(vcSchemaId);
         String vcSchemaEncode = BaseMultibaseUtil.encode(vcSchema.toJson().getBytes(StandardCharsets.UTF_8));
@@ -65,6 +74,12 @@ public class ListCommunityService {
         }
     }
 
+    /**
+     * Deletes a VC Schema from the TAS List API.
+     *
+     * @param request the request containing schema deletion data
+     * @throws OpenDidException if the request to TAS fails
+     */
     public void deleteVcSchema(DeleteVcSchemaReqDto request) {
         try {
             HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_SCHEMA_PUBLIC,
@@ -76,12 +91,20 @@ public class ListCommunityService {
         }
     }
 
+    /**
+     * Registers a VC Plan to the TAS List API.
+     *
+     * @param issueProfile the issue profile data used to create the VC Plan
+     * @throws OpenDidException if the request to TAS fails
+     */
     public void registerVcPlan(IssueProfile issueProfile) {
         VcSchema vcSchema = vcSchemaService.getVcSchemaById(issueProfile.getVcSchemaId());
         CredentialSchema credentialSchema = new CredentialSchema();
         credentialSchema.setId(vcSchema.getId());
         credentialSchema.setType("OsdSchemaCredential");
+
         boolean isIssuerInit = InitiateType.ISSUER_INIT.equals(issueProfile.getInitiateType());
+
         VcPlan vcPlan = VcPlan.builder()
                 .vcPlanId(issueProfile.getVcPlanId())
                 .name(issueProfile.getTitle())
@@ -104,6 +127,7 @@ public class ListCommunityService {
                 .vcPlan(vcPlanEncode)
                 .issuerDid(ISSUER_DID)
                 .build();
+
         try {
             HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_PLAN_PUBLIC,
                     JsonUtil.serializeToJson(request), EmptyResDto.class);
@@ -114,6 +138,12 @@ public class ListCommunityService {
         }
     }
 
+    /**
+     * Deletes a VC Plan from the TAS List API.
+     *
+     * @param request the request containing VC Plan ID to be deleted
+     * @throws OpenDidException if the request to TAS fails
+     */
     public void deleteVcPlan(DeleteIssuePlanIdReqDto request) {
         try {
             HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_PLAN_PUBLIC,

@@ -41,9 +41,9 @@ import org.omnione.did.data.model.enums.vc.RoleType;
 import org.omnione.did.data.model.vc.VerifiableCredential;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.constant.EntityStatus;
-import org.omnione.did.issuer.v1.admin.dto.GetIssuerInfoReqDto;
-import org.omnione.did.issuer.v1.admin.dto.SendCertificateVcReqDto;
-import org.omnione.did.issuer.v1.admin.dto.SendEntityInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.issuer.GetIssuerInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.vc.SendCertificateVcReqDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.SendEntityInfoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.issuer.*;
 import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.DidDocumentQueryService;
@@ -58,6 +58,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service for managing issuer registration and DID operations in the Admin Console.
+ * Handles entity registration, DID document generation and registration, certificate VC management,
+ * and communication with the Trusted Authority Service (TAS).
+ */
 @Slf4j
 @Transactional
 @Service
@@ -72,6 +77,7 @@ public class IssuerManagementService {
     private final EnrollEntityService enrollEntityService;
 
     private final String TAS_URL;
+
     public IssuerManagementService(IssuerInfoQueryService issuerInfoQueryService, StorageService storageService,
                                    CertificateVcQueryService certificateVcQueryService, FileWalletService fileWalletService,
                                    JsonParseService jsonParseService, DidDocumentQueryService didDocumentQueryService,
@@ -85,6 +91,12 @@ public class IssuerManagementService {
         this.enrollEntityService = enrollEntityService;
         this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.Tas.ADMIN_V1;
     }
+
+    /**
+     * Retrieves current issuer information and DID Document if available.
+     *
+     * @return issuer info response DTO
+     */
     public GetIssuerInfoReqDto getIssuerInfo() {
         IssuerInfo issuerInfo = issuerInfoQueryService.findIssuerOrNull();
         log.debug("\t--> Found Issuer: {}", issuerInfo);
@@ -97,6 +109,12 @@ public class IssuerManagementService {
         return GetIssuerInfoReqDto.fromEntity(issuerInfo, didDocument);
     }
 
+    /**
+     * Saves a certificate VC to the database.
+     *
+     * @param sendCertificateVcReqDto encoded certificate VC
+     * @return an empty response
+     */
     public EmptyResDto createCertificateVc(SendCertificateVcReqDto sendCertificateVcReqDto) {
         byte[] decodedVc = BaseMultibaseUtil.decode(sendCertificateVcReqDto.getCertificateVc());
         log.debug("Decoded VC: {}", new String(decodedVc));
@@ -108,6 +126,12 @@ public class IssuerManagementService {
         return new EmptyResDto();
     }
 
+    /**
+     * Updates or inserts entity information including DID and endpoint metadata.
+     *
+     * @param sendEntityInfoReqDto entity metadata
+     * @return an empty response
+     */
     public EmptyResDto updateEntityInfo(SendEntityInfoReqDto sendEntityInfoReqDto) {
         IssuerInfo existedIssuer = issuerInfoQueryService.getIssuerInfoOrNull();
 
@@ -186,7 +210,7 @@ public class IssuerManagementService {
             return IssuerInfoResDto.fromEntity(issuerInfo);
         }
 
-        log.debug("\t--> Finding TAS DID Document");
+        log.debug("\t--> Finding Issuer DID Document");
         DidDocument didDocument = storageService.findDidDoc(issuerInfo.getDid());
         return IssuerInfoResDto.fromEntity(issuerInfo, didDocument);
     }
@@ -258,6 +282,12 @@ public class IssuerManagementService {
         return signedDoc;
     }
 
+    /**
+     * Sends a request to register the issuer DID Document to the TAS.
+     *
+     * @param request request DTO containing the DID Document
+     * @return an empty response
+     */
     public EmptyResDto requestRegisterDid(RequestRegisterDidReqDto request) throws OpenDidException {
         try {
             log.debug("=== Starting requestRegisterDid ===");
@@ -308,7 +338,13 @@ public class IssuerManagementService {
         }
     }
 
-
+    /**
+     * Sends the actual HTTP request to the TAS to register a DID.
+     *
+     * @param issuerInfo               the issuer entity
+     * @param requestRegisterDidReqDto request payload
+     * @return an empty response
+     */
     private EmptyResDto sendRegisterDid(IssuerInfo issuerInfo, RequestRegisterDidReqDto requestRegisterDidReqDto) {
         String url = TAS_URL + UrlConstant.Tas.REGISTER_DID_PUBLIC;
 
@@ -392,6 +428,13 @@ public class IssuerManagementService {
         return requestEntityStatusResDto;
     }
 
+    /**
+     * Sends the request to TAS for querying the current entity status.
+     *
+     * @param did the DID to check status for
+     * @return response containing entity status
+     */
+
     private RequestEntityStatusResDto sendRequestEntityStatus(String did) {
         String url = TAS_URL + UrlConstant.Tas.REQUEST_ENTITY_STATUS + "?did=" + did;
 
@@ -406,6 +449,12 @@ public class IssuerManagementService {
             throw new OpenDidException(ErrorCode.TAS_COMMUNICATION_ERROR);
         }
     }
+
+    /**
+     * Enrolls the entity by sending both DID and certificate VC to TAS.
+     *
+     * @return a map containing the parsed certificate VC
+     */
     public Map<String, Object> enrollEntity() {
         try {
             log.debug("=== Starting enrollEntity ===");
@@ -421,7 +470,7 @@ public class IssuerManagementService {
 
             log.debug("=== Finished enrollEntity ===");
             return jsonParseService.parseCertificateVcToMap(verifiableCredential.toJson());
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("An OpenDidException occurred while sending requestCertificateVc request", e);
             throw e;
         } catch (Exception e) {

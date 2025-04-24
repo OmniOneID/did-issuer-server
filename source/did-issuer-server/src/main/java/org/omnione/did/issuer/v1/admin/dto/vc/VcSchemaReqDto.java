@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.vc;
 
 import lombok.*;
-import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.base.db.domain.VcSchema;
 
 import java.util.List;
 
 /**
- * Description...
- *
+ * Request DTO for creating or updating a VC schema in the Admin Console.
  */
 @Getter
 @Setter
@@ -32,7 +29,12 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class GetVcSchemaResDto {
-    private VcSchema vcSchema;
-    private List<Namespace> items;
+public class VcSchemaReqDto {
+    private Long id;
+    private List<Long> namespaces;
+    private String vcSchemaId;
+    private String title;
+    private String description;
+    private String language;
+    private String version;
 }

@@ -21,7 +21,7 @@ import org.omnione.did.base.db.domain.Admin;
 import org.omnione.did.base.db.repository.AdminRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.issuer.v1.admin.dto.AdminDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.AdminDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,19 +30,40 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Query service for retrieving administrator-related data in the Admin Console.
+ * <p>
+ * This service interacts with the AdminRepository to provide data access for authentication,
+ * admin detail lookups, and admin search functionalities.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AdminQueryService {
+
     private final AdminRepository adminRepository;
 
+    /**
+     * Finds an admin by login ID and password.
+     *
+     * @param loginId       admin login ID
+     * @param loginPassword admin login password
+     * @return the matched admin
+     * @throws OpenDidException if no match is found
+     */
     public Admin findByLoginIdAndLoginPassword(String loginId, String loginPassword) {
         return adminRepository.findByLoginIdAndLoginPassword(loginId, loginPassword)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
     }
 
-
-
+    /**
+     * Searches admins by given key and value with pagination.
+     *
+     * @param searchKey   the key to search by
+     * @param searchValue the value to match
+     * @param pageable    pagination information
+     * @return page of AdminDto
+     */
     public Page<AdminDto> searchAdminList(String searchKey, String searchValue, Pageable pageable) {
         Page<Admin> adminPage = adminRepository.searchAdmins(searchKey, searchValue, pageable);
 
@@ -53,20 +74,47 @@ public class AdminQueryService {
         return new PageImpl<>(adminDtos, pageable, adminPage.getTotalElements());
     }
 
+    /**
+     * Finds an admin by ID.
+     *
+     * @param id admin ID
+     * @return the matched admin
+     * @throws OpenDidException if not found
+     */
     public Admin findById(Long id) {
         return adminRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
     }
 
+    /**
+     * Finds an admin by login ID or returns null if not found.
+     *
+     * @param loginId login ID
+     * @return matched admin or null
+     */
     public Admin findByLoginIdOrNull(String loginId) {
         return adminRepository.findByLoginId(loginId).orElse(null);
     }
 
+    /**
+     * Counts the number of admins with the specified login ID.
+     *
+     * @param loginId login ID
+     * @return number of matches
+     */
     public long countByLoginId(String loginId) {
         return adminRepository.countByLoginId(loginId);
     }
 
+    /**
+     * Finds an admin by login ID.
+     *
+     * @param loginId login ID
+     * @return matched admin
+     * @throws OpenDidException if not found
+     */
     public Admin findByLoginId(String loginId) {
-        return adminRepository.findByLoginId(loginId).orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
+        return adminRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ADMIN_INFO_NOT_FOUND));
     }
 }

@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
 import lombok.*;
 
 /**
- * Description...
- *
+ * Response DTO returned after creating a namespace in the Admin Console.
  */
-
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
 @Builder
-public class DeleteNamespaceResDto {
+public class CreateNamespaceResDto {
 }

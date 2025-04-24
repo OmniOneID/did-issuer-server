@@ -56,8 +56,8 @@ public class IssuerInfoResDto {
                 .orElse(null);
     }
 
-    public static IssuerInfoResDto fromEntity(IssuerInfo cas) {
-        return Optional.ofNullable(cas)
+    public static IssuerInfoResDto fromEntity(IssuerInfo issuerInfo) {
+        return Optional.ofNullable(issuerInfo)
                 .map(t -> IssuerInfoResDto.builder()
                         .id(t.getId())
                         .did(t.getDid())
@@ -71,8 +71,8 @@ public class IssuerInfoResDto {
                 .orElse(null);
     }
 
-    public static IssuerInfoResDto fromEntity(IssuerInfo cas, DidDocument didDocument) {
-        return Optional.ofNullable(cas)
+    public static IssuerInfoResDto fromEntity(IssuerInfo issuerInfo, DidDocument didDocument) {
+        return Optional.ofNullable(issuerInfo)
                 .map(t -> IssuerInfoResDto.builder()
                         .id(t.getId())
                         .did(t.getDid())

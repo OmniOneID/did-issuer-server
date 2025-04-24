@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
 import lombok.*;
-import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.data.model.schema.SchemaClaims;
 
 /**
- * Description...
- *
+ * Response DTO returned after updating a namespace in the Admin Console.
  */
 @Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Builder
-public class UpdateNamespaceReqDto {
-    private final Long id;
-    private final SchemaClaims schemaClaims;
-
+public class UpdateNamespaceResDto {
 }

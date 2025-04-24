@@ -16,8 +16,16 @@
 package org.omnione.did.issuer.v1.admin.dto.admin;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+/**
+ * Request DTO for resetting an admin's password in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

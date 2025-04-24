@@ -13,19 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.omnione.did.issuer.v1.admin.dto.admin;
 
-package org.omnione.did.issuer.v1.admin.dto;
-
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
- * Description...
- *
+ * Request DTO for sending entity information in the Admin Console.
  */
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Builder
-public class CreateNamespaceResDto {
+public class SendEntityInfoReqDto {
+    private String did;
+    private String name;
+    private String serverUrl;
+    private String certificateUrl;
 }

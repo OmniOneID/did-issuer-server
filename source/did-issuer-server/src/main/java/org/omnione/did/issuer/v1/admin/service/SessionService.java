@@ -19,20 +19,35 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.db.domain.Admin;
-import org.omnione.did.issuer.v1.admin.dto.AdminDto;
-import org.omnione.did.issuer.v1.admin.dto.RequestAdminLoginReqDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.AdminDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.RequestAdminLoginReqDto;
 import org.omnione.did.issuer.v1.admin.service.query.AdminQueryService;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for handling admin login sessions in the Admin Console.
+ * <p>
+ * Provides functionality for verifying login credentials and returning admin account details.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class SessionService {
+
     private final AdminQueryService adminQueryService;
 
+    /**
+     * Authenticates an admin using login ID and password.
+     *
+     * @param requestAdminLoginReqDto DTO containing login credentials
+     * @return authenticated admin as AdminDto
+     */
     public AdminDto requestAdminLogin(RequestAdminLoginReqDto requestAdminLoginReqDto) {
-        Admin admin = adminQueryService.findByLoginIdAndLoginPassword(requestAdminLoginReqDto.getLoginId(), requestAdminLoginReqDto.getLoginPassword());
+        Admin admin = adminQueryService.findByLoginIdAndLoginPassword(
+                requestAdminLoginReqDto.getLoginId(),
+                requestAdminLoginReqDto.getLoginPassword()
+        );
         return AdminDto.fromAdmin(admin);
     }
 }

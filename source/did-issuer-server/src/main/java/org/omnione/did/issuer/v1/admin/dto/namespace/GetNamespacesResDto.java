@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.namespace;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.omnione.did.base.db.domain.Namespace;
+import org.springframework.data.domain.Page;
 
+/**
+ * Response DTO for retrieving a paginated list of namespaces in the Admin Console.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Builder
-public class RequestAdminLoginReqDto {
-    @NotNull(message = "loginId cannot be null")
-    private String loginId;
-    @NotNull(message = "loginPassword cannot be null")
-    private String loginPassword;
+public class GetNamespacesResDto {
+    private Page<Namespace> namespaces;
 }

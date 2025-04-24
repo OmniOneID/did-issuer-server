@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.omnione.did.issuer.v1.admin.dto;
+package org.omnione.did.issuer.v1.admin.dto.user;
 
 import lombok.*;
 
-import java.util.List;
-
 /**
- * Description...
- *
+ * Request DTO for creating or updating user information in the Admin Console.
  */
 @Getter
 @Setter
@@ -30,12 +26,12 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class VcSchemaReqDto {
+public class CreateUserInfoReqDto {
     private Long id;
-    private List<Long> namespaces;
-    private String vcSchemaId;
-    private String title;
-    private String description;
-    private String language;
-    private String version;
+    private String firstName;
+    private String lastName;
+    private String did;
+    private String pii;
+    private Long vcSchemaId;
+    private String userInfo;
 }
