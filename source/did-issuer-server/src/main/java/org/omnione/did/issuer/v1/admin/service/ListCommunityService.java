@@ -23,6 +23,7 @@ import org.omnione.did.issuer.v1.admin.api.dto.*;
 import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.VcSchemaService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -41,13 +42,14 @@ import java.util.List;
 public class ListCommunityService {
 
     private final VcSchemaService vcSchemaService;
-    private final String TAS_URL;
+    @Value(value = "${tas.url}")
+    private String TAS_URL;
     private final String ISSUER_DID;
 
     public ListCommunityService(ApplicationConfigQueryService applicationConfigQueryService,
                                 VcSchemaService vcSchemaService, IssuerInfoQueryService issuerInfoQueryService) {
         this.vcSchemaService = vcSchemaService;
-        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.List.V1;
+//        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.List.V1;
         this.ISSUER_DID = issuerInfoQueryService.getIssuerInfo().getDid();
     }
 
@@ -65,7 +67,7 @@ public class ListCommunityService {
                 .issuerDid(ISSUER_DID)
                 .build();
         try {
-            HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_SCHEMA_PUBLIC,
+            HttpClientUtil.postData(TAS_URL + UrlConstant.List.V1 + UrlConstant.List.VC_SCHEMA_PUBLIC,
                     JsonUtil.serializeToJson(request), EmptyResDto.class);
         } catch (HttpClientException e) {
             log.error("HttpClientException occurred while sending post vc schema request: {}", e.getResponseBody(), e);
@@ -82,7 +84,7 @@ public class ListCommunityService {
      */
     public void deleteVcSchema(DeleteVcSchemaReqDto request) {
         try {
-            HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_SCHEMA_PUBLIC,
+            HttpClientUtil.postData(TAS_URL + UrlConstant.List.V1 + UrlConstant.List.VC_SCHEMA_PUBLIC,
                     JsonUtil.serializeToJson(request), EmptyResDto.class);
         } catch (HttpClientException e) {
             log.error("HttpClientException occurred while sending delete vc schema request: {}", e.getResponseBody(), e);
@@ -129,7 +131,7 @@ public class ListCommunityService {
                 .build();
 
         try {
-            HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_PLAN_PUBLIC,
+            HttpClientUtil.postData(TAS_URL + UrlConstant.List.V1 + UrlConstant.List.VC_PLAN_PUBLIC,
                     JsonUtil.serializeToJson(request), EmptyResDto.class);
         } catch (HttpClientException e) {
             log.error("HttpClientException occurred while sending post vc plan request: {}", e.getResponseBody(), e);
@@ -146,7 +148,7 @@ public class ListCommunityService {
      */
     public void deleteVcPlan(DeleteIssuePlanIdReqDto request) {
         try {
-            HttpClientUtil.postData(TAS_URL + UrlConstant.List.VC_PLAN_PUBLIC,
+            HttpClientUtil.postData(TAS_URL + UrlConstant.List.V1 + UrlConstant.List.VC_PLAN_PUBLIC,
                     JsonUtil.serializeToJson(request), EmptyResDto.class);
         } catch (HttpClientException e) {
             log.error("HttpClientException occurred while sending delete vc plan request: {}", e.getResponseBody(), e);

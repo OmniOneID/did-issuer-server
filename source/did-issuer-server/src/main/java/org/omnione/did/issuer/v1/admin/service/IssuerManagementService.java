@@ -53,6 +53,7 @@ import org.omnione.did.issuer.v1.agent.service.StorageService;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.wallet.key.WalletManagerInterface;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -76,7 +77,8 @@ public class IssuerManagementService {
     private final DidDocumentQueryService didDocumentQueryService;
     private final EnrollEntityService enrollEntityService;
 
-    private final String TAS_URL;
+    @Value(value = "${tas.url}")
+    private String TAS_URL;
 
     public IssuerManagementService(IssuerInfoQueryService issuerInfoQueryService, StorageService storageService,
                                    CertificateVcQueryService certificateVcQueryService, FileWalletService fileWalletService,
@@ -89,7 +91,7 @@ public class IssuerManagementService {
         this.jsonParseService = jsonParseService;
         this.didDocumentQueryService = didDocumentQueryService;
         this.enrollEntityService = enrollEntityService;
-        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.Tas.ADMIN_V1;
+//        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.Tas.ADMIN_V1;
     }
 
     /**

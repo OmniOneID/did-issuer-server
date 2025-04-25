@@ -54,6 +54,7 @@ import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 
 import org.omnione.did.issuer.v1.agent.dto.EnrollEntityResDto;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +75,8 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
     private final DidDocService didDocService;
     private final IssuerInfoQueryService issuerInfoQueryService;
     private final SignatureService signatureService;
-    private final String TAS_URL;
+    @Value(value = "${tas.url}")
+    private String TAS_URL;
 
     public EnrollEntityServiceImpl(FileWalletService walletService, CertificateVcQueryService certificateVcQueryService,
                                    IssuerInfoQueryService issuerInfoQueryService, DidDocService didDocService,
@@ -84,7 +86,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         this.issuerInfoQueryService = issuerInfoQueryService;
         this.didDocService = didDocService;
         this.signatureService = signatureService;
-        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl();
+//        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl();
     }
 
     /**
