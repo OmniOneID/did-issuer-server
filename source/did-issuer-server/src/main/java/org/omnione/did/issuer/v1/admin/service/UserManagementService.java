@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.User;
 import org.omnione.did.base.db.domain.VcSchema;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoFromDemoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.UserDto;
 import org.omnione.did.issuer.v1.admin.service.query.UserInfoQueryService;
@@ -11,6 +14,9 @@ import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Service for managing user information in the Admin Console.
@@ -49,6 +55,40 @@ public class UserManagementService {
                 .data(request.getUserInfo())
                 .vcSchemaId(request.getVcSchemaId())
                 .build());
+    }
+
+    public void createUserInfo(CreateUserInfoFromDemoReqDto request) {
+        String vcSchemaInput = request.getVcSchemaId();
+        String vcSchemaName = extractNameOrUseAsIs(vcSchemaInput);
+
+        Long vcSchemaId = vcSchemaQueryService.findByVcSchemaId(vcSchemaName).getId();
+
+        User existedUser = userQueryService.findByPiiAndVcSchemaIdOrNew(request.getPii(), vcSchemaId);
+        userQueryService.save(User.builder()
+                .id(existedUser.getId())
+                .did(request.getDid())
+                .pii(request.getPii())
+                .data(request.getUserInfo())
+                .vcSchemaId(vcSchemaId)
+                .build());
+    }
+
+    private String extractNameOrUseAsIs(String input) {
+        try {
+            URI uri = new URI(input);
+            String query = uri.getQuery();
+            if (query != null) {
+                for (String param : query.split("&")) {
+                    String[] keyValue = param.split("=");
+                    if (keyValue.length == 2 && "name".equals(keyValue[0])) {
+                        return keyValue[1];
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new OpenDidException(ErrorCode.VC_SCHEMA_NAME_INVALID);
+        }
+        return input;
     }
 
     /**

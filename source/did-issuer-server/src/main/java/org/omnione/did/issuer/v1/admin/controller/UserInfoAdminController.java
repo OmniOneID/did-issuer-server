@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoFromDemoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.UserDto;
 import org.omnione.did.issuer.v1.admin.service.UserManagementService;
@@ -58,6 +59,16 @@ public class UserInfoAdminController {
      */
     @PostMapping
     public void createUserInfo(@RequestBody CreateUserInfoReqDto request) {
+        userManagementService.createUserInfo(request);
+    }
+
+    /**
+     * Creates a new user from Demo.
+     *
+     * @param request the DTO containing user creation details
+     */
+    @PostMapping("/demo")
+    public void createUserInfoFromDemo(@RequestBody CreateUserInfoFromDemoReqDto request) {
         userManagementService.createUserInfo(request);
     }
 
