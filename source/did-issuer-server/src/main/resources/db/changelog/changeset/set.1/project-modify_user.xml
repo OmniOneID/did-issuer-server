@@ -4,7 +4,6 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-
     <changeSet id="modify_user" author="gwnam" >
         <addColumn tableName="user">
             <column name="vc_schema_id" type="bigint" defaultValue="1">
@@ -12,6 +11,17 @@
             </column>
         </addColumn>
     </changeSet>
+
+
+    <changeSet id="modify_user_2" author="gwnam" >
+        <dropUniqueConstraint constraintName="user_pii_key"
+                              tableName="user"
+                              uniqueColumns="pii" />
+        <dropUniqueConstraint constraintName="user_did_key"
+                              tableName="user"
+                              uniqueColumns="did" />
+    </changeSet>
+
 
 
 </databaseChangeLog>

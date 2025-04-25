@@ -87,4 +87,9 @@ public class UserInfoQueryService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.USER_NOT_FOUND));
     }
+
+    public User findByPiiAndVcSchemaIdOrNew(String pii, Long vcSchemaId) {
+        return userRepository.findByPiiAndVcSchemaId(pii, vcSchemaId)
+                .orElse(User.builder().build());
+    }
 }
