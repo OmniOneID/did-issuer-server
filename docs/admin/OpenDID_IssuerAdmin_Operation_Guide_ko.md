@@ -18,13 +18,22 @@ puppeteer:
 OpenDID IssuerAdmin Operation Guide
 ==
 
-- Date: 2025-03-31
-- Version: v1.0.0
+- Date: 2025-04-25
+- Version: v1.0.1
+
+개정 이력
+==
+| 버전   | 일자       | 변경 내용                  |
+| ------ | ---------- | -------------------------- |
+| v1.0.0 | 2025-03-31 | 최초 작성                  |
+| v1.0.1 | 2025-04-25 | `3.1. Issuer Registration` 장 추가 <br> `3.5. Issued VC Management` 장 수정 |
 
 목차
 ==
 
+
 - [OpenDID IssuerAdmin Operation Guide](#opendid-issueradmin-operation-guide)
+- [개정 이력](#개정-이력)
 - [목차](#목차)
 - [1. 소개](#1-소개)
   - [1.1. 개요](#11-개요)
@@ -34,35 +43,44 @@ OpenDID IssuerAdmin Operation Guide
   - [2.2. 메인 화면 구성](#22-메인-화면-구성)
   - [2.3. 메뉴 구성](#23-메뉴-구성)
     - [2.3.1. Issuer 미등록 상태](#231-issuer-미등록-상태)
-    - [2.3.2. Issuer 등록 상태](#232-issuer-등록-상태)
+    - [2.3.3. Issuer 등록 상태](#233-issuer-등록-상태)
   - [2.4. 비밀번호 변경 관리](#24-비밀번호-변경-관리)
 - [3. 기능별 상세 메뉴얼](#3-기능별-상세-메뉴얼)
-  - [3.1. Issuer Management](#31-issuer-management)
+  - [3.1. Issuer Registration](#31-issuer-registration)
+    - [▸ Step 1 – Enter Issuer Info](#-step-1--enter-issuer-info)
+    - [▸ Step 2 – Register DID Document](#-step-2--register-did-document)
+    - [▸ Step 3 – Register Entity and Issue Certificate VC](#-step-3--register-entity-and-issue-certificate-vc)
+    - [▸ 등록 완료 화면](#-등록-완료-화면)
+  - [3.2. Issuer Management](#32-issuer-management)
     - [▸ Issuer Manegement](#-issuer-manegement)
-  - [3.2. VC Management](#32-vc-management)
-  - [3.2.1. Namespace Management](#321-namespace-management)
+  - [3.3. VC Management](#33-vc-management)
+  - [3.3.1. Namespace Management](#331-namespace-management)
     - [▸ Namespace 목록](#-namespace-목록)
     - [▸ Namespace 등록](#-namespace-등록)
     - [▸ Namespace 상세 정보](#-namespace-상세-정보)
     - [▸ Namespace 수정 (Update)](#-namespace-수정-update)
-  - [3.2.2. VC Schema Management](#322-vc-schema-management)
+  - [3.3.2. VC Schema Management](#332-vc-schema-management)
     - [▸ VC Schema 목록](#-vc-schema-목록)
     - [▸ VC Schema 등록](#-vc-schema-등록)
     - [▸ VC Schema 상세 정보](#-vc-schema-상세-정보)
     - [▸ VC Schema 수정 (Update)](#-vc-schema-수정-update)
-  - [3.2.3. Issue Profile Management](#323-issue-profile-management)
+  - [3.3.3. Issue Profile Management](#333-issue-profile-management)
     - [▸ Issue Profile 목록](#-issue-profile-목록)
     - [▸ Issue Profile 등록](#-issue-profile-등록)
     - [▸ Issue Profile 상세 정보](#-issue-profile-상세-정보)
     - [▸ Issue Profile 수정 (Update)](#-issue-profile-수정-update)
-    - [3.3. User Management](#33-user-management)
-      - [▸ 사용자 목록](#-사용자-목록)
-      - [▸ 사용자 등록 (Register)](#-사용자-등록-register)
-      - [▸ 사용자 상세 정보](#-사용자-상세-정보)
-      - [▸ 사용자 정보 수정 (Update)](#-사용자-정보-수정-update)
-    - [3.4. Issued VC Management](#34-issued-vc-management)
-      - [▸ VC 목록](#-vc-목록)
-      - [▸ VC 상세 정보](#-vc-상세-정보)
+  - [3.4. User Management](#34-user-management)
+    - [▸ 사용자 목록](#-사용자-목록)
+    - [▸ 사용자 등록 (Register)](#-사용자-등록-register)
+    - [▸ 사용자 상세 정보](#-사용자-상세-정보)
+    - [▸ 사용자 정보 수정 (Update)](#-사용자-정보-수정-update)
+  - [3.5. Issued VC Management](#35-issued-vc-management)
+    - [▸ VC 목록](#-vc-목록)
+    - [▸ VC Status 변경](#-vc-status-변경)
+    - [▸ VC 상세 정보](#-vc-상세-정보)
+  - [3.6. Admin Management](#36-admin-management)
+    - [3.6.1 Admin 목록 조회](#361-admin-목록-조회)
+    - [3.6.2. Admin 등록](#362-admin-등록)
 
 ---
 
@@ -152,7 +170,7 @@ Issuer 서버가 아직 등록되지 않은 초기 상태에서는
 > 참고: Issuer 등록이 완료되면 관련 기능들이 활성화되며, 전체 메뉴가 확장됩니다.
 등록 이후 메뉴 구성에 대한 자세한 내용은 추후 항목에서 설명합니다.
 
-### 2.3.2. Issuer 등록 상태
+### 2.3.3. Issuer 등록 상태
 
 Issuer 등록이 완료되면 전체 관리 기능이 활성화되며, 사이드바 메뉴는 다음과 같이 구성됩니다:
 
@@ -193,7 +211,84 @@ Issuer 등록이 완료되면 전체 관리 기능이 활성화되며, 사이드
 
 이 장에서는 Issuer Admin Console의 주요 기능에 대한 상세 사용 방법을 안내합니다.
 
-## 3.1. Issuer Management
+## 3.1. Issuer Registration
+
+Issuer Registration은 Issuer Admin Console을 통해 발급 주체인 Issuer를 등록하기 위한 절차입니다. 전체 등록은 총 3단계로 구성되며, 각 단계별로 입력, 요청, 승인 과정을 거쳐 등록이 완료됩니다.
+
+<br/>
+
+###  ▸ Step 1 – Enter Issuer Info
+
+<img src="./images/3-1-1.issuer-registration-step1.png" width="700"/>
+
+Issuer의 이름과 서버 URL을 입력하는 단계입니다.
+
+- **Name**: 등록할 Issuer의 이름  
+- **Issuer URL**: `http://{IP}:8091/issuer` 형식의 서버 엔드포인트  
+
+> **Note**  
+> Issuer 서버와 Admin Console은 같은 Base URL을 사용하며, 동일한 애플리케이션 내에서 패키지로 분리되어 있습니다.
+
+- 모든 항목 입력 후 **NEXT** 버튼을 클릭하여 다음 단계로 이동합니다.
+
+<br/>
+
+### ▸ Step 2 – Register DID Document
+
+Issuer의 DID Document를 생성하고, TAS(Trust Agent Service)에 등록 요청 및 승인을 받는 단계입니다. 아래 순서를 따릅니다:
+
+<br/>
+
+**1. Generate DID Document**  
+<img src="./images/3-1-1.issuer-registration-step2-1.png" width="700"/>  
+`GENERATE` 버튼을 클릭하면 DID 문서가 자동 생성되며, 화면에 JSON 형식으로 출력됩니다.  
+> 생성 완료 메시지: ✅ DID Document has been successfully created.
+
+<br/>
+
+**2. Submit Registration Request**  
+<img src="./images/3-1-1.issuer-registration-step2-2.png" width="700"/>  
+`REQUEST` 버튼 클릭 시 TAS에 DID 문서 등록 요청이 전송됩니다.  
+> 요청 완료 메시지: ✅ Registration request has been submitted.
+
+<br/>
+
+**3. Check Approval Status**  
+<img src="./images/3-1-1.issuer-registration-step2-3.png" width="700"/>  
+`CHECK` 버튼을 클릭하여 TAS 관리자의 승인을 확인합니다.  
+> 승인 완료 메시지: ✅ Approval confirmed. You can proceed.
+
+<br/>
+
+**4. 모든 과정을 완료한 화면**  
+<img src="./images/3-1-1.issuer-registration-step2-4.png" width="700"/>
+
+<br/>
+
+### ▸ Step 3 – Register Entity and Issue Certificate VC
+
+<img src="./images/3-1-1.issuer-registration-step3.png" width="700"/>
+
+Issuer를 OpenDID 네트워크의 엔터티로 등록하고, **Certificate VC(신뢰 증명용 VC)**를 발급받는 마지막 단계입니다.
+
+- `REQUEST` 버튼을 클릭하면 TAS를 통해 Entity가 등록됩니다.
+- 등록이 완료되면 `FINISH` 버튼을 클릭하여 전체 등록을 마무리합니다.
+
+> **참고**  
+> Certificate VC는 OpenDID 구성 요소 간의 신뢰 관계를 증명하는 자격 증명입니다.
+
+<br/>
+
+### ▸ 등록 완료 화면
+
+모든 단계를 성공적으로 마치면 아래와 같이 완료 화면이 표시됩니다.
+
+<img src="./images/3-1-1.issuer-registration-completed.png" width="700"/>
+
+- "Completed" 메시지가 나타나며, `GO TO HOME` 버튼을 클릭하여 Admin Console 메인 화면으로 이동할 수 있습니다.
+
+
+## 3.2. Issuer Management
 
 Issuer Management는 Issuer 서버의 기본 정보를 등록하고 관리하는 메뉴입니다. Issuer는 VC(Verifiable Credential)의 발급 주체로서 시스템 내에서 고유한 DID를 가지고 등록되어야 하며, 최초 1회만 등록이 필요합니다.  
 
@@ -206,7 +301,7 @@ Issuer가 등록되면 시스템에 활성 상태(`ACTIVATE`)로 표시되며, �
 
 Issuer Manegement 화면은 다음 항목들로 구성되어 있습니다.
 
-<img src="./images/3-1-1.issuer-management-info.png" width="700"/>
+<img src="./images/3-2-1.issuer-management-info.png" width="700"/>
 
 | 항목              | 설명                                                           |
 |-------------------|----------------------------------------------------------------|
@@ -220,7 +315,7 @@ Issuer Manegement 화면은 다음 항목들로 구성되어 있습니다.
 - DID Document는 화면의 `VIEW DID DOCUMENT` 버튼을 통해 확인할 수 있습니다.
 - 등록된 Issuer 정보는 삭제가 불가능하며, 일부 항목에 대해 제한된 범위 내에서만 수정이 가능합니다.
 
-## 3.2. VC Management
+## 3.3. VC Management
 
 VC Management는 Issuer가 발급하는 VC(Verifiable Credential)를 정의하고 관리하기 위한 메뉴입니다. VC를 발급하기 위해서는 사전에 Namespace와 VC Schema를 등록하여 VC 구조를 정의하고, 발급 정책(Issue Profile)을 설정해야 합니다.
 
@@ -232,7 +327,7 @@ VC Management는 다음 세 가지 하위 메뉴로 구성되어 있습니다.
 
 ---
 
-## 3.2.1. Namespace Management
+## 3.3.1. Namespace Management
 
 Namespace Management는 VC의 구조를 정의할 때 사용되는 네임스페이스(Namespace)를 등록하고 관리하는 메뉴입니다. 네임스페이스는 VC Schema 및 Issue Profile 설정 시에 참조됩니다.
 
@@ -240,7 +335,7 @@ Namespace Management는 VC의 구조를 정의할 때 사용되는 네임스페�
 
 Namespace 목록 화면에서는 등록된 네임스페이스들을 확인할 수 있습니다.
 
-<img src="./images/3-2-1.namespace-management.png" width="700"/>
+<img src="./images/3-3-1.namespace-management.png" width="700"/>
 
 | 항목             | 설명                             |
 |------------------|----------------------------------|
@@ -254,7 +349,7 @@ Namespace 목록 화면에서는 등록된 네임스페이스들을 확인할 �
 
 네임스페이스 등록 화면에서는 다음 정보를 입력하여 네임스페이스를 생성합니다.
 
-<img src="./images/3-2-1.namespace-registration.png" width="700"/>
+<img src="./images/3-3-1.namespace-registration.png" width="700"/>
 
 | 항목            | 설명                                              |
 |-----------------|---------------------------------------------------|
@@ -270,7 +365,7 @@ Namespace 목록 화면에서는 등록된 네임스페이스들을 확인할 �
 
 네임스페이스 목록에서 이름을 클릭하면 상세 정보를 확인할 수 있습니다.
 
-<img src="./images/3-2-1.namespace-detail.png" width="700"/>
+<img src="./images/3-3-1.namespace-detail.png" width="700"/>
 
 | 항목            | 설명                             |
 |-----------------|----------------------------------|
@@ -285,7 +380,7 @@ Namespace 목록 화면에서는 등록된 네임스페이스들을 확인할 �
 
 네임스페이스의 기존 정보를 수정할 수 있는 화면입니다.
 
-<img src="./images/3-2-1.namespace-update.png" width="700"/>
+<img src="./images/3-3-1.namespace-update.png" width="700"/>
 
 | 항목             | 설명                                   |
 |------------------|----------------------------------------|
@@ -299,7 +394,7 @@ Namespace 목록 화면에서는 등록된 네임스페이스들을 확인할 �
 
 ---
 
-## 3.2.2. VC Schema Management
+## 3.3.2. VC Schema Management
 
 VC Schema Management는 VC 발급 시 필요한 VC Schema를 등록하고 관리하는 메뉴입니다. VC Schema는 VC의 데이터 구조를 정의하며, 발급 프로파일(Issue Profile)에서 참조됩니다.
 
@@ -307,7 +402,7 @@ VC Schema Management는 VC 발급 시 필요한 VC Schema를 등록하고 관리
 
 등록된 VC Schema 목록을 확인합니다.
 
-<img src="./images/3-2-2.vc-schema-management.png" width="700"/>
+<img src="./images/3-3-2.vc-schema-management.png" width="700"/>
 
 | 항목            | 설명                             |
 |-----------------|----------------------------------|
@@ -322,7 +417,7 @@ VC Schema Management는 VC 발급 시 필요한 VC Schema를 등록하고 관리
 
 새로운 VC Schema를 등록합니다.
 
-<img src="./images/3-2-2.vc-schema-registration.png" width="700"/>
+<img src="./images/3-3-2.vc-schema-registration.png" width="700"/>
 
 | 항목            | 설명                                        |
 |-----------------|---------------------------------------------|
@@ -341,7 +436,7 @@ VC Schema Management는 VC 발급 시 필요한 VC Schema를 등록하고 관리
 
 VC Schema 목록에서 제목을 클릭하면 스키마의 상세 정보를 확인할 수 있습니다.
 
-<img src="./images/3-2-2.vc-schema-detail.png" width="700"/>
+<img src="./images/3-3-2.vc-schema-detail.png" width="700"/>
 
 | 항목                 | 설명                                                    |
 |----------------------|---------------------------------------------------------|
@@ -360,7 +455,7 @@ VC Schema 목록에서 제목을 클릭하면 스키마의 상세 정보를 확�
 
 등록된 VC Schema의 내용을 수정할 수 있습니다.
 
-<img src="./images/3-2-2.vc-schema-update.png" width="700"/>
+<img src="./images/3-3-2.vc-schema-update.png" width="700"/>
 
 | 항목              | 설명                                                     |
 |-------------------|----------------------------------------------------------|
@@ -376,7 +471,7 @@ VC Schema 목록에서 제목을 클릭하면 스키마의 상세 정보를 확�
 
 ---
 
-## 3.2.3. Issue Profile Management
+## 3.3.3. Issue Profile Management
 
 Issue Profile Management는 VC 발급 시 사용할 프로파일(Issue Profile)을 정의하고 관리하는 메뉴입니다.  
 Issue Profile은 VC Schema와 발급 정책 정보를 하나의 발급 플랜으로 구성하여, 실제 VC 발급 시 참조됩니다.
@@ -385,7 +480,7 @@ Issue Profile은 VC Schema와 발급 정책 정보를 하나의 발급 플랜으
 
 등록된 Issue Profile 목록을 확인할 수 있습니다.
 
-<img src="./images/3-2-3.issue-profile-management.png" width="700"/>
+<img src="./images/3-3-3.issue-profile-management.png" width="700"/>
 
 | 항목            | 설명                                             |
 |-----------------|--------------------------------------------------|
@@ -402,7 +497,7 @@ Issue Profile은 VC Schema와 발급 정책 정보를 하나의 발급 플랜으
 
 Issue Profile 등록 화면에서 새로운 프로파일을 정의할 수 있습니다.
 
-<img src="./images/3-2-3.issue-profile-registration.png" width="700"/>
+<img src="./images/3-3-3.issue-profile-registration.png" width="700"/>
 
 | 항목             | 설명                                                      |
 |------------------|-----------------------------------------------------------|
@@ -424,7 +519,7 @@ Issue Profile 등록 화면에서 새로운 프로파일을 정의할 수 있습
 
 목록에서 VC Plan ID를 클릭하면 상세 정보를 확인할 수 있습니다.
 
-<img src="./images/3-2-3.issue-profile-detail.png" width="700"/>
+<img src="./images/3-3-3.issue-profile-detail.png" width="700"/>
 
 | 항목              | 설명                                          |
 |-------------------|-----------------------------------------------|
@@ -446,7 +541,7 @@ Issue Profile 등록 화면에서 새로운 프로파일을 정의할 수 있습
 
 기존에 등록된 Issue Profile 정보를 수정합니다.
 
-<img src="./images/3-2-3.issue-profile-update.png" width="700"/>
+<img src="./images/3-3-3.issue-profile-update.png" width="700"/>
 
 | 항목              | 설명                                           |
 |-------------------|------------------------------------------------|
@@ -465,16 +560,16 @@ Issue Profile 등록 화면에서 새로운 프로파일을 정의할 수 있습
 
 ---
 
-### 3.3. User Management
+## 3.4. User Management
 
 User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입니다.  
 사용자는 DID 기반으로 등록되며, 하나의 VC Schema를 기준으로 사용자 VC 데이터를 저장합니다.
 
 ---
 
-#### ▸ 사용자 목록
+### ▸ 사용자 목록
 
-<img src="./images/3-3-1.user-management.png" width="700"/>
+<img src="./images/3-4-1.user-management.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -488,9 +583,9 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 
 ---
 
-#### ▸ 사용자 등록 (Register)
+### ▸ 사용자 등록 (Register)
 
-<img src="./images/3-3-2.user-register.png" width="700"/>
+<img src="./images/3-4-2.user-register.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -508,9 +603,9 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 
 ---
 
-#### ▸ 사용자 상세 정보
+### ▸ 사용자 상세 정보
 
-<img src="./images/3-3-3.user-detail.png" width="700"/>
+<img src="./images/3-4-3.user-detail.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -525,9 +620,9 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 
 ---
 
-#### ▸ 사용자 정보 수정 (Update)
+### ▸ 사용자 정보 수정 (Update)
 
-<img src="./images/3-3-4.user-edit.png" width="700"/>
+<img src="./images/3-4-4.user-edit.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -539,13 +634,14 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 > 수정이 끝나면 `UPDATE` 버튼을 클릭하여 저장할 수 있습니다.  
 > `RESET`은 입력한 내용을 초기 상태로 되돌리며, `BACK`은 상세 화면으로 돌아갑니다.
 
-### 3.4. Issued VC Management
+## 3.5. Issued VC Management
 
-발급된 VC를 조회하고 상태를 확인할 수 있는 기능입니다.
+Issued VC Management는 발급된 Verifiable Credential(VC)의 목록을 조회하고 상태를 관리할 수 있는 기능입니다.  
+해당 화면에서는 VC 상태를 변경하는 **UPDATE 기능**이 제공됩니다.
 
-#### ▸ VC 목록
+### ▸ VC 목록
 
-<img src="./images/3-4-1.issued-vc-management.png" width="700"/>
+<img src="./images/3-5-1.issued-vc-management.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -553,9 +649,31 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 | **DID** | 발급 대상 사용자 DID |
 | **Registered At** | 발급 일시 |
 
-#### ▸ VC 상세 정보
+- 목록에서 항목을 선택하면 상단의 `UPDATE` 버튼이 활성화됩니다.
 
-<img src="./images/3-4-2.issued-vc-detail.png" width="700"/>
+### ▸ VC Status 변경
+
+선택한 VC의 상태를 변경할 수 있습니다. 상태 변경은 아래 조건에 따라 가능합니다.
+
+<img src="./images/3-5-2.issued-vc-update.png" width="700"/>
+
+| 현재 상태 | 변경 가능 상태 |
+|-----------|----------------|
+| `ACTIVE` | `INACTIVE`, `REVOKED` |
+| `INACTIVE` | `ACTIVE`, `REVOKED` |
+| `REVOKED` | (변경 불가) |
+
+> **참고**  
+> `REVOKED` 상태는 불변이며, 복구 또는 상태 변경이 불가능합니다.  
+> 상태 변경은 사용자 VC의 유효성 관리와 추적을 위한 기능입니다.
+
+1. VC 목록에서 항목 선택 후 `UPDATE` 버튼 클릭  
+2. **Change VC Status** 다이얼로그에서 상태 선택  
+3. 확인 후 저장하면 VC 상태가ㄴ 변경됩니다
+
+### ▸ VC 상세 정보
+
+<img src="./images/3-5-3.issued-vc-detail.png" width="700"/>
 
 | 항목 | 설명 |
 |------|------|
@@ -566,5 +684,62 @@ User Management는 VC를 발급받을 사용자 정보를 관리하는 메뉴입
 | **Created At / Updated At** | 생성 및 수정 시각 |
 
 > 현재는 열람만 가능하며, 향후 상태 변경 등의 기능이 추가될 수 있습니다.
+
+ 
+## 3.6. Admin Management
+
+`Admin Management` 메뉴는 Issuer Admin Console에 접근할 수 있는 관리자 계정을 관리하는 기능입니다.  
+
+Issuer 서버를 설치하면 기본적으로 `admin@opendid.omnione.net` 계정이 ROOT 권한으로 자동 생성됩니다.  
+이 계정은 시스템 내 유일한 ROOT 계정이며, 삭제할 수 없습니다.
+
+관리자 계정은 **ROOT**와 **Normal Admin** 두 가지 권한 유형으로 구분됩니다.  
+ROOT 계정은 `Admin Management` 메뉴에서 모든 기능을 수행할 수 있으며, Normal Admin은 일반적인 조회 기능만 가능합니다.
+
+---
+> **참고:** 현재는 ROOT 계정과 Normal Admin 계정 간의 권한 차이는  
+> `Admin Management` 메뉴에서 표시되는 버튼의 차이(Root만 REGISTER / DELETE / CHANGE PASSWORD 가능) 외에는 없습니다.  
+> 그 외 시스템의 다른 메뉴에 대한 접근 권한이나 기능 제한은 아직 적용되어 있지 않습니다.
+---
+
+<br/>
+
+### 3.6.1 Admin 목록 조회
+
+
+`Admin Management` 메뉴에 진입하면 등록된 관리자 계정들의 목록이 테이블 형태로 표시됩니다.
+
+<img src="./images/3-6-1.admin-management.png" width="800"/>
+
+
+| 번호 | 항목                    | 설명                                                             |
+| ---- | ----------------------- | ---------------------------------------------------------------- |
+| 1    | **REGISTER 버튼**       | 새로운 관리자 계정을 등록할 수 있는 등록 페이지로 이동합니다.       |
+| 2    | **DELETE 버튼**         | 선택한 관리자 계정을 삭제합니다. (ROOT 관리자만 가능)              |
+| 3    | **CHANGE PASSWORD 버튼** | 선택한 관리자 계정의 비밀번호를 변경할 수 있습니다.                |
+| 4    | **ID**                  | 등록된 관리자 계정의 이메일 ID입니다.                              |
+| 5    | **Role**                | 해당 관리자 계정의 역할(Role)입니다. (예: ROOT, Normal Admin 등)   |
+| 6    | **Registered At**       | 해당 계정이 최초 등록된 일시입니다.                               |
+| 7    | **Updated At**          | 마지막으로 수정된 일시입니다.     
+
+<br/>
+
+### 3.6.2. Admin 등록
+
+`Admin Management` 화면에서 **REGISTER** 버튼을 클릭하면, 아래와 같은 등록 화면으로 이동합니다.
+
+<img src="./images/3-6-2.admin-registration.png" width="600"/>
+
+| 번호 | 항목                        | 설명                                                                |
+| ---- | --------------------------- | ------------------------------------------------------------------- |
+| 1    | **ID**                      | 등록할 관리자 계정의 ID입니다. 이메일 형식을 사용해야 합니다.         |
+| 2    | **Check Availability 버튼** | 입력한 ID가 중복되지 않는지 확인합니다.                             |
+| 3    | **Role**                    | 등록할 관리자 계정의 권한을 선택합니다. (예: Normal Admin)           |
+| 4    | **Password**                | 로그인 시 사용할 비밀번호를 입력합니다.                              |
+| 5    | **Re-enter Password**       | 비밀번호를 한 번 더 입력하여 일치 여부를 확인합니다.                |
+| 6    | **REGISTER 버튼**           | 입력한 정보를 바탕으로 관리자 계정을 등록합니다.                    |
+| 7    | **RESET 버튼**              | 모든 입력값을 초기화합니다.                                         |
+| 8    | **CANCEL 버튼**             | 등록을 취소하고 이전 화면으로 돌아갑니다.                           |
+
 
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V1.0.1.0/OepnDID_Installation_Guide-V1.0.1.0_ko.md
