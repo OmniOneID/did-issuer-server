@@ -5,11 +5,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
+import org.omnione.did.InMemoryDataJpaTest;
 import org.omnione.did.base.db.domain.TestSimpleAuditingEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,14 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author birariro
  */
-@TestPropertySource(properties = {
-        "spring.datasource.url = jdbc:h2:mem:test",
-        "spring.datasource.driverClassName = org.h2.Driver",
-        "spring.datasource.username = sa",
-        "spring.datasource.password = ",
-})
-@DataJpaTest
-@Import({JpaConfig.class, QuerydslConfig.class})
+@InMemoryDataJpaTest
 class QuerydslConfigTest {
 
     @Autowired

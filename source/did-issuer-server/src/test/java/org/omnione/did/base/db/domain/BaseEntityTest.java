@@ -3,11 +3,7 @@ package org.omnione.did.base.db.domain;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
-import org.omnione.did.base.config.JpaConfig;
-import org.omnione.did.base.config.QuerydslConfig;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
+import org.omnione.did.InMemoryDataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -18,14 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  * @author birariro
  */
-@TestPropertySource(properties = {
-        "spring.datasource.url = jdbc:h2:mem:test",
-        "spring.datasource.driverClassName = org.h2.Driver",
-        "spring.datasource.username = sa",
-        "spring.datasource.password = ",
-})
-@DataJpaTest
-@Import({JpaConfig.class, QuerydslConfig.class})
+@InMemoryDataJpaTest
 class BaseEntityTest {
 
     @PersistenceContext
