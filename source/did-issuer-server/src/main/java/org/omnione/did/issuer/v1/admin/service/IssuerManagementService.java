@@ -348,7 +348,7 @@ public class IssuerManagementService {
      * @return an empty response
      */
     private EmptyResDto sendRegisterDid(IssuerInfo issuerInfo, RequestRegisterDidReqDto requestRegisterDidReqDto) {
-        String url = TAS_URL + UrlConstant.Tas.REGISTER_DID_PUBLIC;
+        String url = TAS_URL + UrlConstant.Tas.ADMIN_V1 + UrlConstant.Tas.REGISTER_DID_PUBLIC;
 
         String encodedDidDocument = BaseMultibaseUtil.encode(requestRegisterDidReqDto.getDidDocument().getBytes());
         RegisterDidToTaReqDto registerDidToTaReqDto = RegisterDidToTaReqDto.builder()
@@ -438,7 +438,7 @@ public class IssuerManagementService {
      */
 
     private RequestEntityStatusResDto sendRequestEntityStatus(String did) {
-        String url = TAS_URL + UrlConstant.Tas.REQUEST_ENTITY_STATUS + "?did=" + did;
+        String url = TAS_URL + UrlConstant.Tas.ADMIN_V1 + UrlConstant.Tas.REQUEST_ENTITY_STATUS + "?did=" + did;
 
         try {
             return HttpClientUtil.getData(url, RequestEntityStatusResDto.class);
