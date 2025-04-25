@@ -214,6 +214,7 @@ Issuer 등록이 완료되면 전체 관리 기능이 활성화되며, 사이드
 ## 3.1. Issuer Registration
 
 Issuer Registration은 Issuer Admin Console을 통해 발급 주체인 Issuer를 등록하기 위한 절차입니다. 전체 등록은 총 3단계로 구성되며, 각 단계별로 입력, 요청, 승인 과정을 거쳐 등록이 완료됩니다.
+모든 단계가 완료되면 Issuer는 OpenDID 네트워크에 정식 등록됩니다.
 
 <br/>
 

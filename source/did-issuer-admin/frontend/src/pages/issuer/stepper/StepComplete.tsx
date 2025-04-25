@@ -19,7 +19,7 @@ const StepComplete: React.FC = () => {
         Completed
       </Typography>
       <Typography variant="body1" color="textSecondary" gutterBottom>
-        TA registration is complete.
+        Issuer registration is complete.
       </Typography>
       <Button variant="contained" color="primary" sx={{ mt: 4 }} onClick={handleGoHome}>
         Go to Home
