@@ -38,7 +38,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.ISSUER)
+@RequestMapping(value = UrlConstant.Admin.V1)
 public class IssuerAdminController {
 
     private final IssuerManagementService issuerManagementService;
@@ -48,7 +48,7 @@ public class IssuerAdminController {
      *
      * @return the issuer information
      */
-    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    @RequestMapping(value = UrlConstant.Admin.ISSUER + "/info", method = RequestMethod.GET)
     public GetIssuerInfoReqDto getIssuerInfo() {
         return issuerManagementService.getIssuerInfo();
     }
@@ -81,7 +81,7 @@ public class IssuerAdminController {
      * @param registerCaInfoReqDto the DTO containing issuer registration details
      * @return the registered issuer information
      */
-    @RequestMapping(value = "/register-issuer-info", method = RequestMethod.POST)
+    @RequestMapping(value = UrlConstant.Admin.ISSUER + "/register-issuer-info", method = RequestMethod.POST)
     public IssuerInfoResDto registerIssuerInfo(@RequestBody RegisterIssuerInfoReqDto registerCaInfoReqDto) {
         return issuerManagementService.registerIssuerInfo(registerCaInfoReqDto);
     }
@@ -91,7 +91,7 @@ public class IssuerAdminController {
      *
      * @return the generated DID document data
      */
-    @RequestMapping(value = "/generate-did-auto", method = RequestMethod.POST)
+    @RequestMapping(value = UrlConstant.Admin.ISSUER + "/generate-did-auto", method = RequestMethod.POST)
     public Map<String, Object> generateIssuerDidDocumentAuto() {
         return issuerManagementService.registerIssuerDidDocumentAuto();
     }
@@ -102,7 +102,7 @@ public class IssuerAdminController {
      * @param requestRegisterDidReqDto the DTO containing DID registration information
      * @return an empty response on success
      */
-    @RequestMapping(value = "/register-did", method = RequestMethod.POST)
+    @RequestMapping(value = UrlConstant.Admin.ISSUER + "/register-did", method = RequestMethod.POST)
     public EmptyResDto requestRegisterDid(@RequestBody RequestRegisterDidReqDto requestRegisterDidReqDto) {
         return issuerManagementService.requestRegisterDid(requestRegisterDidReqDto);
     }
@@ -112,7 +112,7 @@ public class IssuerAdminController {
      *
      * @return the status of the registered entity
      */
-    @GetMapping(value = "/request-status")
+    @GetMapping(value = UrlConstant.Admin.ISSUER + "/request-status")
     public RequestEntityStatusResDto requestEntityStatus() {
         return issuerManagementService.requestEntityStatus();
     }
@@ -122,7 +122,7 @@ public class IssuerAdminController {
      *
      * @return a map containing the result of the enrollment request
      */
-    @PostMapping(value = "/request-enroll-entity")
+    @PostMapping(value = UrlConstant.Admin.ISSUER + "/request-enroll-entity")
     public Map<String, Object> requestEnrollEntity() {
         return issuerManagementService.enrollEntity();
     }
