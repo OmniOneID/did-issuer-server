@@ -43,4 +43,5 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
      */
     Optional<User> findByDid(String did);
     Optional<User> findByDidAndVcSchemaId(String did, Long vcSchemaId);
+    Optional<User> findByIdAndVcSchemaId(Long id, Long vcSchemaId);
 }

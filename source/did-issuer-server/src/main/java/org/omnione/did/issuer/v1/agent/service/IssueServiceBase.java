@@ -62,6 +62,7 @@ import org.omnione.did.data.model.schema.SchemaClaims;
 import org.omnione.did.data.model.schema.VcSchema;
 import org.omnione.did.data.model.vc.*;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
@@ -74,7 +75,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -95,6 +95,7 @@ public abstract class IssueServiceBase implements IssueService {
     private final FileWalletService walletService;
     private final IssueProfileQueryService issueProfileQueryService;
     private final VcSchemaService vcSchemaService;
+    private final VcSchemaQueryService vcSchemaQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
 
     /**
@@ -233,13 +234,12 @@ public abstract class IssueServiceBase implements IssueService {
 
             Holder holder = request.getHolder();
 
-            log.debug("\t--> Find User by Holder data");
-            User user = findUserByHolder(holder);
 
             log.debug("\t--> Generate Issue Profile");
             String vcPlanId = transaction.getVcPlanId();
 
-            IssueProfile profile = getIssueProfile(vcPlanId);
+            org.omnione.did.base.db.domain.IssueProfile byVcPlanId = issueProfileQueryService.findByVcPlanId(vcPlanId);
+            IssueProfile profile = getIssueProfile(byVcPlanId);
 
             IssueProcess process = profile.getProfile().getProcess();
             ReqE2e reqE2e = process.getReqE2e();
@@ -254,6 +254,9 @@ public abstract class IssueServiceBase implements IssueService {
             // TODO: Key ID
             signProfile(profile, "assert");
             String encodedSessionKey = encodedSessionKey((ECPrivateKey) keyPair.getPrivateKey());
+
+            log.debug("\t--> Find User by Holder data");
+            User user = findUserByHolderAndVcSchemaId(holder, byVcPlanId.getVcSchemaId());
 
             log.debug("\t--> VC Profile save to DB");
             vcProfileQueryService.save(VcProfile.builder()
@@ -336,12 +339,13 @@ public abstract class IssueServiceBase implements IssueService {
             validateRequestVc(transaction, reqVc);
 
             log.debug("\t--> Find User By VC Profile");
-            User user = findUserByVcProfile(vcProfile);
+            Long vcSchemaId = issueProfileQueryService.findById(transaction.getIssueProfileId()).getVcSchemaId();
+            User user = findUserByVcProfileAndVcSchemaId(vcProfile, vcSchemaId); // @@
             VcManager vcManager = new VcManager();
 
             log.debug("\t--> Issuing VC");
             VerifiableCredential verifiableCredential = issueVerifiableCredential(vcManager,
-                    vcProfile.getDid(), user.getData(), transaction.getIssueProfileId());
+                    vcProfile.getDid(), user.getData(), vcSchemaId);
             log.debug("\t--> VerifiableCredential {}", verifiableCredential.toJson());
 
             log.debug("\t--> Registering VC to B/C");
@@ -705,14 +709,14 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
     private VerifiableCredential issueVerifiableCredential(VcManager vcManager, String holderDid, String data
-            , Long issueProfileId) {
+            , Long vcSchemaId) {
         log.debug("\t--> Issue Verifiable Credential");
         try {
-            ;
+
             IssueVcParam issueVcParam = new IssueVcParam();
 
             DidDocument didDocument = getDidDocument();
-            VcSchema vcSchema = getVcSchema(issueProfileId);
+            VcSchema vcSchema = getVcSchema(vcSchemaId);
             BaseCoreVcUtil.setVcSchema(issueVcParam, vcSchema.toJson());
             BaseCoreVcUtil.setClaimInfo(issueVcParam, getClaimInfo(vcSchema.getCredentialSubject().getClaims(), data));
             BaseCoreVcUtil.setIssuer(issueVcParam, getIssuer());
@@ -873,8 +877,7 @@ public abstract class IssueServiceBase implements IssueService {
     }
 
 
-    private IssueProfile getIssueProfile(String vcPlanId) {
-        org.omnione.did.base.db.domain.IssueProfile byVcPlanId = issueProfileQueryService.findByVcPlanId(vcPlanId);
+    private IssueProfile getIssueProfile(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
         org.omnione.did.data.model.profile.issue.IssueProfile issueProfile = new org.omnione.did.data.model.profile.issue.IssueProfile();
 
         issueProfile.setType(ProfileType.ISSUE_PROFILE.getRawValue());
@@ -934,9 +937,9 @@ public abstract class IssueServiceBase implements IssueService {
      *
      * @return The VC schema as a String.
      */
-    private VcSchema getVcSchema(Long issueProfileId) {
+    private VcSchema getVcSchema(Long vcSchemaId) {
 
-        return vcSchemaService.getVcSchemaById(issueProfileQueryService.findById(issueProfileId).getVcSchemaId());
+        return vcSchemaService.getVcSchemaById(vcSchemaId);
     }
 
     /**
@@ -947,12 +950,29 @@ public abstract class IssueServiceBase implements IssueService {
      */
     protected abstract User findUserByVcProfile(VcProfile vcProfile);
     /**
+     * Finds a user by their VcProfile.
+     *
+     * @param vcProfile The VcProfile to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId);
+
+    /**
      * Finds a user by their Holder information.
      *
      * @param holder The Holder information to use for finding the user.
      * @return The found User.
      */
     protected abstract User findUserByHolder(Holder holder);
+
+
+    /**
+     * Finds a user by their Holder information.
+     *
+     * @param holder The Holder information to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId);
 
 
 }

@@ -83,4 +83,9 @@ public class UserQueryService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.USER_NOT_FOUND));
     }
+
+    public User findByIdAndVcSchemaId(Long id, Long vcSchemaId) {
+        return userRepository.findByIdAndVcSchemaId(id, vcSchemaId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.USER_NOT_FOUND));
+    }
 }

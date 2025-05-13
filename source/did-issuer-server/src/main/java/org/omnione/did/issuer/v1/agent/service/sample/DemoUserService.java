@@ -51,7 +51,7 @@ public class DemoUserService {
         String pii = request.getPii();
         String userData = JsonUtil.serializeToJson(request);
 
-        User user = userQueryService.findByPii(pii).orElseGet(User::new);
+        User user = userQueryService.findByPiiAndVcSchemaId(pii, 1L).orElseGet(User::new);
         user.setPii(pii);
         user.setData(userData);
         user.setVcSchemaId(1L); // This is a demo-only configuration.
@@ -74,7 +74,7 @@ public class DemoUserService {
         String did = request.getDid();
         String userData = JsonUtil.serializeToJson(request);
 
-        User user = userQueryService.findByDid(did).orElseGet(User::new);
+        User user = userQueryService.findByDidAndVcSchemaId(did, 2L).orElseGet(User::new);
         user.setDid(did);
         user.setData(userData);
         user.setVcSchemaId(2L); // This is a demo-only configuration.

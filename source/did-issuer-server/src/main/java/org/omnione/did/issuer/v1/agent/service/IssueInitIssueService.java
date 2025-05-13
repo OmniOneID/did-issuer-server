@@ -23,6 +23,7 @@ import org.omnione.did.base.db.domain.VcProfile;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 import org.springframework.context.annotation.Profile;
@@ -44,9 +45,11 @@ public class IssueInitIssueService extends IssueServiceBase {
                                  TransactionService transactionService, E2EQueryService e2EQueryService,
                                  VcQueryService vcQueryService, StorageService storageService,
                                  FileWalletService walletService, UserQueryService userQueryService, VcSchemaService vcSchemaService,
-                                 IssueProfileQueryService issueProfileQueryService, IssuerInfoQueryService issuerInfoQueryService) {
+                                 VcSchemaQueryService vcSchemaQueryService, IssueProfileQueryService issueProfileQueryService,
+                                 IssuerInfoQueryService issuerInfoQueryService) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService
-                , storageService, walletService, issueProfileQueryService, vcSchemaService, issuerInfoQueryService);
+                , storageService, walletService, issueProfileQueryService, vcSchemaService
+                , vcSchemaQueryService, issuerInfoQueryService);
         this.userQueryService = userQueryService;
     }
 
@@ -59,9 +62,14 @@ public class IssueInitIssueService extends IssueServiceBase {
      */
     @Override
     protected User findUserByVcProfile(VcProfile vcProfile) {
-
         return userQueryService.findById(vcProfile.getUserId());
     }
+
+    @Override
+    protected User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId) {
+        return userQueryService.findByIdAndVcSchemaId(vcProfile.getUserId(), vcSchemaId);
+    }
+
 
     /**
      * Finds a user by a Holder.
@@ -74,6 +82,12 @@ public class IssueInitIssueService extends IssueServiceBase {
     protected User findUserByHolder(Holder holder) {
 
         return userQueryService.findByPii(holder.getPii())
+                .orElseThrow(() -> new OpenDidException(ErrorCode.HOLDER_NOT_FOUND));
+    }
+
+    @Override
+    protected User findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId) {
+        return userQueryService.findByPiiAndVcSchemaId(holder.getPii(), vcSchemaId)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.HOLDER_NOT_FOUND));
     }
 }
