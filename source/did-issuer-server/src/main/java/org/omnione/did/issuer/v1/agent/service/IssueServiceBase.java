@@ -860,14 +860,14 @@ public abstract class IssueServiceBase implements IssueService {
         String claimCode = namespace + "." + item.getId();
 
         // TODO: Uncommenting after demo development
-//        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
-//            return null;
-//        }
+        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
+            return null;
+        }
 
         ClaimInfo claimInfo = new ClaimInfo();
         claimInfo.setCode(claimCode);
-        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: Uncommenting after demo development
-//        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
+//        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: Uncommenting after demo development
+        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
 
         return claimInfo;
     }
