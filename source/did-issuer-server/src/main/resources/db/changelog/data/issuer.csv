@@ -1,2 +1,2 @@
-id,did,name,status,server_url,certificate_url
-1,did:omn:issuer,Issuer,REQUIRED_ENROLL_ENTITY,http://127.0.0.1:8091/issuer,http://127.0.0.1:8091/issuer/api/v1/certificate-vc
+did,name,status,server_url,certificate_url
+did:omn:issuer,Issuer,REQUIRED_ENROLL_ENTITY,http://127.0.0.1:8091/issuer,http://127.0.0.1:8091/issuer/api/v1/certificate-vc
