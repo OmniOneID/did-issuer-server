@@ -16,6 +16,7 @@
 
 package org.omnione.did.base.datamodel.data;
 
+import com.google.gson.annotations.Expose;
 import lombok.*;
 
 /**
@@ -28,6 +29,8 @@ import lombok.*;
 @ToString
 @Builder
 public class ProfileInfo {
+    @Expose
     private String id;
+    @Expose
     private String issuerNonce;
 }

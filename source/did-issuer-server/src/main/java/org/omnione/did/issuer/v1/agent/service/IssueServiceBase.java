@@ -16,8 +16,6 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.omnione.did.base.datamodel.data.*;
+import org.omnione.did.base.datamodel.data.zkp.CredentialInfo;
+import org.omnione.did.base.datamodel.data.zkp.ZkpInnerIssueProfile;
+import org.omnione.did.base.datamodel.data.zkp.ZkpIssueProfile;
 import org.omnione.did.base.datamodel.enums.*;
 import org.omnione.did.base.db.constant.SubTransactionStatus;
 import org.omnione.did.base.db.constant.SubTransactionType;
@@ -53,9 +54,7 @@ import org.omnione.did.data.model.enums.vc.CredentialSchemaType;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.enums.vc.VcType;
 import org.omnione.did.data.model.profile.ReqE2e;
-import org.omnione.did.data.model.profile.issue.InnerIssueProfile;
 import org.omnione.did.data.model.profile.issue.IssueProcess;
-import org.omnione.did.data.model.profile.issue.IssueProfile;
 import org.omnione.did.data.model.provider.ProviderDetail;
 import org.omnione.did.data.model.schema.ClaimDef;
 import org.omnione.did.data.model.schema.SchemaClaims;
@@ -67,6 +66,9 @@ import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 
+import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
+import org.omnione.did.zkp.datamodel.credential.Credential;
+import org.omnione.did.zkp.datamodel.credentialoffer.CredentialOffer;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -234,12 +236,11 @@ public abstract class IssueServiceBase implements IssueService {
 
             Holder holder = request.getHolder();
 
-
             log.debug("\t--> Generate Issue Profile");
             String vcPlanId = transaction.getVcPlanId();
 
             org.omnione.did.base.db.domain.IssueProfile byVcPlanId = issueProfileQueryService.findByVcPlanId(vcPlanId);
-            IssueProfile profile = getIssueProfile(byVcPlanId);
+            ZkpIssueProfile profile = getIssueProfile(byVcPlanId);
 
             IssueProcess process = profile.getProfile().getProcess();
             ReqE2e reqE2e = process.getReqE2e();
@@ -356,8 +357,11 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Generate IV");
             byte[] iv = BaseCryptoUtil.generateInitialVector();
 
+            log.debug("\t--> Issuing Credential");
+            Credential credential = ZkpSampleConstants.getCredential(reqVc.getCredentialRequest());
+
             log.debug("\t--> Encrypt VC");
-            String encVc = encryptVerifiableCredential(verifiableCredential, mergeSharedSecretAndNonce, iv, e2e);
+            String encVc = encryptVerifiableCredential(verifiableCredential, credential, mergeSharedSecretAndNonce, iv, e2e);
 
             Vc vc = handleVcCreationOrUpdate(user, vcProfile.getDid(), transaction, vcMeta);
 
@@ -594,7 +598,33 @@ public abstract class IssueServiceBase implements IssueService {
      */
     private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
         String vcJsonString = verifiableCredential.toJson();
+
         byte[] encrypt = BaseCryptoUtil.encrypt(vcJsonString,
+                sharedSecretKey,
+                iv,
+                SymmetricCipherType.fromDisplayName(e2e.getCipher()),
+                SymmetricPaddingType.fromDisplayName(e2e.getPadding()));
+
+        return BaseMultibaseUtil.encode(encrypt);
+    }
+
+    /**
+     * Encrypts a Verifiable Credential.
+     *
+     * @param verifiableCredential The Verifiable Credential to encrypt.
+     * @param sharedSecretKey The shared secret key.
+     * @param iv The initialization vector.
+     * @param e2e The end-to-end encryption information.
+     * @return The encrypted Verifiable Credential.
+     */
+    private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, Credential credential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
+        CredentialInfo credentialInfo = CredentialInfo.builder()
+                .vc(verifiableCredential)
+                .credential(credential)
+                .build();
+        String credentialJson = credentialInfo.toJson();
+
+        byte[] encrypt = BaseCryptoUtil.encrypt(credentialJson,
                 sharedSecretKey,
                 iv,
                 SymmetricCipherType.fromDisplayName(e2e.getCipher()),
@@ -663,12 +693,9 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the parsing process.
      */
     private ReqVc parseRequestVc(String requestVc) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(requestVc, ReqVc.class);
-        } catch (JsonProcessingException e) {
-            throw new OpenDidException(ErrorCode.PARSE_REQUEST_VC_FAILURE);
-        }
+            ReqVc reqVc = new ReqVc();
+            reqVc.fromJson(requestVc);
+            return reqVc;
     }
 
 
@@ -778,7 +805,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @param profile The profile to sign.
      * @param keyId The ID of the key to use for signing.
      */
-    private void signProfile(IssueProfile profile, String keyId) {
+    private void signProfile(ZkpIssueProfile profile, String keyId) {
         Proof proof = new Proof();
         proof.setType(ProofType.SECP256R1_SIGNATURE_2018.getRawValue());
         proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
@@ -877,8 +904,8 @@ public abstract class IssueServiceBase implements IssueService {
     }
 
 
-    private IssueProfile getIssueProfile(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
-        org.omnione.did.data.model.profile.issue.IssueProfile issueProfile = new org.omnione.did.data.model.profile.issue.IssueProfile();
+    private ZkpIssueProfile getIssueProfile(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        ZkpIssueProfile issueProfile = new ZkpIssueProfile();
 
         issueProfile.setType(ProfileType.ISSUE_PROFILE.getRawValue());
         issueProfile.setEncoding(StandardCharsets.UTF_8.name());
@@ -886,10 +913,13 @@ public abstract class IssueServiceBase implements IssueService {
         issueProfile.setTitle(byVcPlanId.getTitle());
         issueProfile.setLanguage(byVcPlanId.getLanguage());
 
-        InnerIssueProfile innerIssueProfile = new InnerIssueProfile();
+        CredentialOffer zkpSampleOffer = ZkpSampleConstants.getZkpSampleOffer();
+
+        ZkpInnerIssueProfile innerIssueProfile = new ZkpInnerIssueProfile();
         innerIssueProfile.setIssuer(getIssuer());
         innerIssueProfile.setCredentialSchema(createCredentialSchema(byVcPlanId.getVcSchemaId()));
         innerIssueProfile.setProcess(createIssueProcess(byVcPlanId));
+        innerIssueProfile.setCredentialOffer(zkpSampleOffer);
 
         issueProfile.setProfile(innerIssueProfile);
 
