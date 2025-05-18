@@ -77,4 +77,9 @@ public class IssueProfile extends BaseEntity implements Serializable {
     @Column(name = "tags")
     private List<String> tags;
 
+    @Column(name = "zkp_enabled", nullable = false)
+    private Boolean zkpEnabled;
+
+    @Column(name = "definition_id")
+    private String definitionId;
 }

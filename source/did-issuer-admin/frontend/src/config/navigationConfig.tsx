@@ -24,6 +24,15 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
       ],
     },
     {
+      segment: 'zkp-management',
+      title: 'ZKP Management',
+      children: [
+        { segment: 'zkp-namespace-management', title: 'ZKP Namespace Management',},
+        { segment: 'credential-schema-management', title: 'Credential Schema Management', },
+        { segment: 'credential-definition-management', title: 'Credential definition Management',},
+      ],
+    },
+    {
       segment: 'users/user-management',
       title: 'User Management',
     },

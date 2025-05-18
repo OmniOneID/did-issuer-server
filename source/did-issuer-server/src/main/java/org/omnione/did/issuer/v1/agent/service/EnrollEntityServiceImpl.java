@@ -98,7 +98,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     public EnrollEntityResDto enrollEntity() {
         try {
-            log.debug("*** Finished enrollEntity ***");
+            log.debug("*** Start enrollEntity ***");
 
             IssuerInfo issuerInfo = issuerInfoQueryService.findIssuerInfo();
             DidDocument issuerDidDocument = didDocService.getDidDocument(issuerInfo.getDid());
