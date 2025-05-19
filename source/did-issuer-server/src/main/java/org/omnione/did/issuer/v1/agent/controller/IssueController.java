@@ -18,11 +18,14 @@ package org.omnione.did.issuer.v1.agent.controller;
 
 import jakarta.validation.Valid;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.base.datamodel.data.zkp.ZkpLadgerRequestData;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.IssueService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
+import org.omnione.did.zkp.exception.ZkpException;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -102,5 +105,11 @@ public class IssueController {
     @GetMapping(UrlConstant.Issuer.ISSUE_VC + UrlConstant.Issuer.RESULT)
     public IssueVcResultResDto issueVcResult(@RequestParam("offerId") String offerId) {
         return issueServiceHelper.issueVcResult(offerId);
+    }
+
+    @RequestMapping(value = "/v1/chain/get_table_rows", method=RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String getTableRow(@RequestBody ZkpLadgerRequestData zkpLadgerRequestData) throws ZkpException {
+        return ZkpSampleConstants.getCredentialSchema(zkpLadgerRequestData);
     }
 }

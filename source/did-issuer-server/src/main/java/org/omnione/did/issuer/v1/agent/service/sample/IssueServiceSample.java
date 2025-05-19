@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.datamodel.data.E2e;
 import org.omnione.did.base.datamodel.data.IssueOfferPayload;
+import org.omnione.did.base.datamodel.data.zkp.ZkpIssueProfile;
 import org.omnione.did.base.datamodel.enums.OfferType;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
@@ -129,7 +130,7 @@ public class IssueServiceSample implements IssueService {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            IssueProfile issueProfile = mapper.readValue(stringResponse, IssueProfile.class);
+            ZkpIssueProfile issueProfile = mapper.readValue(stringResponse, ZkpIssueProfile.class);
 
             return GenerateIssueProfileResDto.builder()
                     .txId("99999999-9999-9999-9999-999999999999")
