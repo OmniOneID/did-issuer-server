@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.base.db.repository;
+package org.omnione.did.base.db.repository.projection;
 
-import org.omnione.did.base.db.domain.ZkpSchema;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-
-public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, QuerydslPredicateExecutor<ZkpSchema>, ZkpSchemaRepositoryAdmin  {
+/**
+ * Please explain the class!!
+ *
+ * @author : yklee0911
+ * @fileName : SchemaCountProjection
+ * @since : 5/19/25
+ */
+public interface SchemaCountProjection {
+    String getSchemaId();
+    Long getCount();
 }

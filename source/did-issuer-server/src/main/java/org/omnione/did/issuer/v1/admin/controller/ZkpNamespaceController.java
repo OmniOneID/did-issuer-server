@@ -44,7 +44,7 @@ public class ZkpNamespaceController {
     private final ZkpNamespaceService zkpNamespaceService;
 
     @GetMapping
-    public Page<ZkpNamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public Page<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return zkpNamespaceService.searchZkpNamespaceList(searchKey, searchValue, pageable);
     }
 

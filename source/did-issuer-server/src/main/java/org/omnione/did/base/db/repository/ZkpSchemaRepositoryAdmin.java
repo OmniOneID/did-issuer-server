@@ -16,8 +16,9 @@
 package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.ZkpSchema;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, QuerydslPredicateExecutor<ZkpSchema>, ZkpSchemaRepositoryAdmin  {
+public interface ZkpSchemaRepositoryAdmin {
+    Page<ZkpSchema> searchSchemas(String searchKey, String searchValue, Pageable pageable);
 }

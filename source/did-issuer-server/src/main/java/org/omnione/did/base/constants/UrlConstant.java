@@ -52,6 +52,7 @@ public class UrlConstant {
 
         public static final String ZKP_NAMESPACE  = "/zkp/namespaces";
         public static final String CHECK_NAMESPACE_ID = "/check-namespace-id";
+        public static final String ZKP_SCHEMA  = "/zkp/schemas";
 
     }
 

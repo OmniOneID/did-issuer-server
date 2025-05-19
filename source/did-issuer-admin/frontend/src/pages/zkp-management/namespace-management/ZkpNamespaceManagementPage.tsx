@@ -149,9 +149,9 @@ const ZkpNamespaceManagementPage = () => {
           selectedRow={selectedRow}
           setSelectedRow={setSelectedRow}
           onEdit={() => {
-            if (selectedRowData?.schemaCount === 0) {
-              navigate(`/zkp-management/zkp-namespace-management/zkp-namespace-edit/${selectedRowData.id}`);
-            }
+              if (selectedRowData) {
+                navigate(`/zkp-management/zkp-namespace-management/zkp-namespace-edit/${selectedRowData.id}`);
+              }
           }}
           onRegister={() => navigate('/zkp-management/zkp-namespace-management/namespace-registration')}
           onDelete={handleDelete}
