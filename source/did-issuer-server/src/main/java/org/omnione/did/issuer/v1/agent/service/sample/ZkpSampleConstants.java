@@ -7,8 +7,7 @@ import org.omnione.did.base.datamodel.data.zkp.ZkpLadgerResponseData;
 import org.omnione.did.base.datamodel.data.zkp.ZkpSchemaRows;
 import org.omnione.did.zkp.core.manager.ZkpCredentialManager;
 import org.omnione.did.zkp.core.manager.ZkpCredentialMetadataManager;
-import org.omnione.did.zkp.crypto.constant.ZkpCryptoConstants;
-import org.omnione.did.zkp.crypto.util.BigIntegerUtil;
+import org.omnione.did.zkp.crypto.keypair.CredentialPrimaryPublicKey;
 import org.omnione.did.zkp.datamodel.credential.*;
 import org.omnione.did.zkp.datamodel.credentialoffer.CredentialOffer;
 import org.omnione.did.zkp.datamodel.credentialoffer.KeyCorrectnessProof;
@@ -22,12 +21,10 @@ import org.omnione.did.zkp.datamodel.schema.AttributeType;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.schema.Namespace;
 import org.omnione.did.zkp.datamodel.util.GsonWrapper;
-import org.omnione.did.zkp.exception.ZkpErrorCode;
 import org.omnione.did.zkp.exception.ZkpException;
 import org.omnione.did.zkp.wallet.enums.ZkpWalletEncryptType;
 import org.omnione.did.zkp.wallet.key.ZkpWalletManagerFactory;
 import org.omnione.did.zkp.wallet.key.ZkpWalletManagerInterface;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -72,6 +69,7 @@ public class ZkpSampleConstants {
     static {
         credentialSchema();
         createZkpKeys();
+        credentialDefinition();
     }
 
     // 1번 MDL Schema attribute list
@@ -306,9 +304,9 @@ public class ZkpSampleConstants {
         Map<String, String> restriction = new HashMap<String, String>();
         Map<String, String> restriction2 = new HashMap<String, String>();
         Map<String, String> restriction3 = new HashMap<String, String>();
-        restriction.put("credDefId", "did:omn:NcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:NcYxiDXkpYi6ov5FcYDi1e:2:vl:1.0:Tag1");
-        restriction2.put("credDefId", "did:omn:NcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:NcYxiDXkpYi6ov5FcYDi1e:2:mdl:1.0:Tag1");
-        restriction3.put("credDefId", "did:omn:XcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:NcYxiDXkpYi6ov5FcYDi1e:2:vl:1.0:Tag1");
+        restriction.put("credDefId", "did:omn:issuer:3:CL:did:omn:issuer:2:vl:1.0:Tag1");
+        restriction2.put("credDefId", "did:omn:issuer:3:CL:did:omn:issuer:2:mdl:1.0:Tag1");
+        restriction3.put("credDefId", "did:omn:XcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:issuer:2:vl:1.0:Tag1");
         LinkedHashMap<String, AttributeInfo> attributeMap = new LinkedHashMap<String, AttributeInfo>();
         AttributeInfo attributeInfo1 = new AttributeInfo();
 //        attributeInfo1.setName("zkpsex");
@@ -373,7 +371,7 @@ public class ZkpSampleConstants {
 //        predicateInfo1.setName("zkpbirth");
 //        predicateInfo1.setPValue(ZkpSampleConstants.AGE_CONDITION);
 //        Map<String, String> restriction = new HashMap<String, String>();
-//        restriction.put("credDefId", "did:omn:NcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:NcYxiDXkpYi6ov5FcYDi1e:2:mdl:1.0:Tag1");
+//        restriction.put("credDefId", "did:omn:issuer:3:CL:did:omn:issuer:2:mdl:1.0:Tag1");
 //        predicateInfo1.addRestriction(restriction);
 //        predicateMap.put("predicateReferent1", predicateInfo1);
 
@@ -388,13 +386,70 @@ public class ZkpSampleConstants {
         predicateInfo1.setName("birth");
         predicateInfo1.setPValue(ZkpSampleConstants.AGE_CONDITION);
         Map<String, String> restriction = new HashMap<String, String>();
-        restriction.put("credDefId", "did:omn:NcYxiDXkpYi6ov5FcYDi1e:3:CL:did:omn:NcYxiDXkpYi6ov5FcYDi1e:2:vl:1.0:Tag1");
+        restriction.put("credDefId", "did:omn:issuer:3:CL:did:omn:issuer:2:vl:1.0:Tag1");
         predicateInfo1.addRestriction(restriction);
         predicateMap.put("predicateReferent1", predicateInfo1);
 
         return predicateMap;
     }
 
+    // Credential Definition 생성
+    public static void credentialDefinition() {
+        System.out.println("loadZKPData(ZkpSampleConstants.SCHEMA_ID_MDL) = " + loadZKPData(ZkpSampleConstants.SCHEMA_ID_MDL));
+        if (loadZKPData(ZkpSampleConstants.CRED_DEF_ID_MDL) != null) {
+            return;
+        }
+        //예시로 mdl / vl / vl2 각각 3개의 def를 생성
+        CredentialDefinition credentialDefinitionMdl = null;
+        CredentialDefinition credentialDefinitionVl = null;
+        CredentialDefinition credentialDefinitionVl2 = null;
+
+        // mdl schema 조회
+        String schemaStrMdl = loadZKPData(ZkpSampleConstants.SCHEMA_ID_MDL);
+        CredentialSchema schemaMdl = new Gson().fromJson(schemaStrMdl, CredentialSchema.class);
+
+        // vl schema 조회
+        String schemaStrVl = loadZKPData(ZkpSampleConstants.SCHEMA_ID_VL);
+        CredentialSchema schemaVl = new Gson().fromJson(schemaStrVl, CredentialSchema.class);
+
+        CredentialPrimaryPublicKey credentialPrimaryPublicKeyMdl = null;
+        CredentialPrimaryPublicKey credentialPrimaryPublicKeyVl = null;
+        CredentialPrimaryPublicKey credentialPrimaryPublicKeyVl2 = null;
+
+        try {
+            // 블록체인에 저장된 스키마 기반으로 wallet에서 공개키를 가져와서 def 생성
+            ZkpWalletManagerInterface walletManager = null;
+
+            walletManager = ZkpWalletManagerFactory.getZkpWalletManager(ZkpWalletManagerFactory.ZkpWalletManagerType.FILE);
+            walletManager.connect(ZkpSampleConstants.WALLET_FILE_PATH, ZkpSampleConstants.WALLET_PASSWORD.toCharArray());
+
+            if (walletManager.isConnect()) {
+                credentialPrimaryPublicKeyMdl = walletManager.getCredentialPrimaryPublicKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_MDL);
+                credentialPrimaryPublicKeyVl = walletManager.getCredentialPrimaryPublicKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL);
+                credentialPrimaryPublicKeyVl2 = walletManager.getCredentialPrimaryPublicKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL2);
+            } else {
+                // nothing
+            }
+
+            credentialDefinitionMdl = new ZkpCredentialMetadataManager().createDefinition(ZkpSampleConstants.ISSUER_DID, schemaMdl, credentialPrimaryPublicKeyMdl);
+            credentialDefinitionVl = new ZkpCredentialMetadataManager().createDefinition(ZkpSampleConstants.ISSUER_DID, schemaVl, credentialPrimaryPublicKeyVl);
+            credentialDefinitionVl2 = new ZkpCredentialMetadataManager().createDefinition(ZkpSampleConstants.ISSUER_DID_VL2, schemaVl, credentialPrimaryPublicKeyVl2);
+
+            System.out.println("credentialDefinition MDL: "  + getGsonPrettyPrinting().toJson(credentialDefinitionMdl));
+            System.out.println("credentialDefinition VL: "  + getGsonPrettyPrinting().toJson(credentialDefinitionVl));
+            System.out.println("credentialDefinition VL2: "  + getGsonPrettyPrinting().toJson(credentialDefinitionVl2));
+
+            // todo : 블록체인 등록으로 변경해야함
+            saveZKPData(credentialDefinitionMdl.getId(), credentialDefinitionMdl.toJson());
+            saveZKPData(credentialDefinitionVl.getId(), credentialDefinitionVl.toJson());
+            saveZKPData(credentialDefinitionVl2.getId(), credentialDefinitionVl2.toJson());
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     public static void credentialSchema() {
         //todo : 스키마아이디와 일반 VC와 매칭
         //todo : 지금은 mdl / vl 각각 두개의 schema를 생성
@@ -424,7 +479,8 @@ public class ZkpSampleConstants {
         try {
             File file = new File(ZkpSampleConstants.WALLET_FILE_PATH);
             if (file.exists()) {
-                file.delete();
+//                file.delete();
+                return;
             }
 
             walletManager = ZkpWalletManagerFactory.getZkpWalletManager(ZkpWalletManagerFactory.ZkpWalletManagerType.FILE);
@@ -432,9 +488,12 @@ public class ZkpSampleConstants {
             walletManager.connect(ZkpSampleConstants.WALLET_FILE_PATH, ZkpSampleConstants.WALLET_PASSWORD.toCharArray());
 
             if (walletManager.isConnect()) {
-                walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_MDL, schemaMdl.getAttrNames()); // mdl 키 -> MDL Schema
-                walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL, schemaVl.getAttrNames()); //VL 키 -> VL Schema
-                walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL2, schemaVl.getAttrNames()); //VL2 키 -> VL Schema
+                if (walletManager.getZkpKeyElement(WALLET_TEST_KEY_ID_MDL) == null) {
+                    walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_MDL, schemaMdl.getAttrNames()); // mdl 키 -> MDL Schema
+                    walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL, schemaVl.getAttrNames()); //VL 키 -> VL Schema
+                    walletManager.generateRandomZkpKey(ZkpSampleConstants.WALLET_TEST_KEY_ID_VL2, schemaVl.getAttrNames()); //VL2 키 -> VL Schema
+                }
+
             } else {
                 // nothing
             }
@@ -449,12 +508,13 @@ public class ZkpSampleConstants {
             ZkpWalletManagerInterface walletManager = ZkpWalletManagerFactory
                     .getZkpWalletManager(ZkpWalletManagerFactory.ZkpWalletManagerType.FILE);
             walletManager.connect(ZkpSampleConstants.WALLET_FILE_PATH, ZkpSampleConstants.WALLET_PASSWORD.toCharArray());
+            System.out.println("walletManager.getZkpKeyElement(WALLET_TEST_KEY_ID_MDL) = " + walletManager.getZkpKeyElement(WALLET_TEST_KEY_ID_MDL).getPublicKey());
 
             byte[] zkpKeyProof = walletManager.generateZkpKeyProof(ZkpSampleConstants.WALLET_TEST_KEY_ID_MDL);
             KeyCorrectnessProof keyCorrectnessProof = new Gson()
                     .fromJson(new String(zkpKeyProof), KeyCorrectnessProof.class);
 
-            BigInteger issuerNonce = new BigIntegerUtil().createRandomBigInteger(ZkpCryptoConstants.LARGE_NONCE);
+            BigInteger issuerNonce = new BigInteger("936806592654063501937960");
 
             return new ZkpCredentialManager().createCredentialOffer(keyCorrectnessProof,
                     ZkpSampleConstants.SCHEMA_ID_MDL, ZkpSampleConstants.CRED_DEF_ID_MDL, issuerNonce);
@@ -463,7 +523,7 @@ public class ZkpSampleConstants {
         }
     }
 
-    public static Credential getCredential(CredentialRequest credentialRequest) {
+    public static Credential getCredential(CredentialRequest credentialRequest, String vcId) {
         if(credentialRequest == null) {
             return null;
         }
@@ -490,14 +550,18 @@ public class ZkpSampleConstants {
             CredentialSignature credSignature = new CredentialSignature();
             credSignature.setPrimaryCredential(pCredSignature);
 
+            // TODO
+            BigInteger issuerNonce = new BigInteger("936806592654063501937960");
+
             byte[] zkpSignatureProof = walletManager.generateZkpSignatureProof(ZkpSampleConstants.WALLET_TEST_KEY_ID_MDL, credSignature, credentialRequest.getNonce());
             SignatureCorrectnessProof proof = new Gson().fromJson(new String(zkpSignatureProof), SignatureCorrectnessProof.class);
 
 
-            return new ZkpCredentialManager().createCredential(credentialDefinition, credSignature, proof, credentialValue, credentialRequest, credentialRequest.getNonce());
+            return new ZkpCredentialManager().createCredential(credentialDefinition, credSignature, proof, credentialValue, credentialRequest, issuerNonce, vcId);
 
 
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -518,35 +582,20 @@ public class ZkpSampleConstants {
         return true;
     }
 
-    public static String getTableRow(ZkpLadgerRequestData request) throws ZkpException {
+    public static String getCredentialSchema(ZkpLadgerRequestData request) throws ZkpException {
         //todo : blockchain 대신 메모리 저장값 사용
         System.out.println("getTableRow:"+ GsonWrapper.getGson().toJson(request));
-        CredentialDefinition credentialDefinition = null;
-        CredentialSchema schema = null;
-        String schemaStr = "";
-        String defStr = "";
-        if(request.getLower_bound().equals("7f6a138c36ba4debf86f49a9f353440bd45ab0fac27430217ac4913cb80a5a8a")
-                || request.getLower_bound().equals("ac92fe27bedd2df0e2c06d462ceef847a6f2383f476f2ed4d76f53325372ccb0")) {
-            schemaStr = loadZKPData(ZkpSampleConstants.SCHEMA_ID_MDL);
-            schema = new Gson().fromJson(schemaStr, CredentialSchema.class);
-            System.out.println("credentialSchema MDL : " + schema.getId());
-            //defnition
-            defStr = loadZKPData(ZkpSampleConstants.CRED_DEF_ID_MDL);
-            credentialDefinition = new Gson().fromJson(defStr, CredentialDefinition.class);
-            System.out.println("credentialDefinition MDL : " + schema.getId());
-        } else {
-            //schema
-            schemaStr = loadZKPData(ZkpSampleConstants.SCHEMA_ID_VL);
-            schema = new Gson().fromJson(schemaStr, CredentialSchema.class);
-            System.out.println("credentialSchema VL : " + schema.getId());
-            //defnition
-            if(request.getLower_bound().equals("0e82632c245adf8235ac32d3b2b6afa5e3eac5ba991c2031121c96a772e2e485"))
-                defStr = loadZKPData(ZkpSampleConstants.CRED_DEF_ID_VL);
-            else
-                defStr = loadZKPData(ZkpSampleConstants.CRED_DEF_ID_VL2);
-            credentialDefinition = new Gson().fromJson(defStr, CredentialDefinition.class);
-            System.out.println("credentialDefinition VL : " + schema.getId());
-        }
+
+
+        String schemaStr = loadZKPData(ZkpSampleConstants.SCHEMA_ID_MDL);
+        String defStr = loadZKPData(ZkpSampleConstants.CRED_DEF_ID_MDL);
+        //defnition
+        CredentialSchema schema = GsonWrapper.getGson().fromJson(schemaStr, CredentialSchema.class);
+        CredentialDefinition credentialDefinition = new Gson().fromJson(defStr, CredentialDefinition.class);
+
+        System.out.println("credentialSchema MDL : " + schema.getId());
+        System.out.println("credentialDefinition MDL : " + credentialDefinition);
+
 
 
         ZkpLadgerResponseData ladgerResponseData = new ZkpLadgerResponseData();

@@ -287,14 +287,18 @@ public abstract class IssueServiceBase implements IssueService {
                     .build());
 
             log.debug("=== Finished Generate Issue Profile ===");
+            log.debug("\t--> Profile: {}", profile.toJson());
             return GenerateIssueProfileResDto.builder()
                     .txId(transaction.getTxId())
                     .profile(profile)
                     .build();
         } catch(OpenDidException e) {
+            e.printStackTrace();
             log.error("OpenDidException occurred during generateIssueProfile: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
+
             log.error("Exception occurred during generateIssueProfile: {}", e.getMessage(), e);
             throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
         }
@@ -338,7 +342,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Parse Request VC");
             ReqVc reqVc = parseRequestVc(decryptedRequestVc);
             validateRequestVc(transaction, reqVc);
-
+            System.out.println("reqVc.toJson() = " + reqVc.toJson());
             log.debug("\t--> Find User By VC Profile");
             Long vcSchemaId = issueProfileQueryService.findById(transaction.getIssueProfileId()).getVcSchemaId();
             User user = findUserByVcProfileAndVcSchemaId(vcProfile, vcSchemaId); // @@
@@ -358,8 +362,8 @@ public abstract class IssueServiceBase implements IssueService {
             byte[] iv = BaseCryptoUtil.generateInitialVector();
 
             log.debug("\t--> Issuing Credential");
-            Credential credential = ZkpSampleConstants.getCredential(reqVc.getCredentialRequest());
-
+            Credential credential = ZkpSampleConstants.getCredential(reqVc.getCredentialRequest(), vcMeta.getId());
+            log.debug("credential : {}", credential.toJson());
             log.debug("\t--> Encrypt VC");
             String encVc = encryptVerifiableCredential(verifiableCredential, credential, mergeSharedSecretAndNonce, iv, e2e);
 
