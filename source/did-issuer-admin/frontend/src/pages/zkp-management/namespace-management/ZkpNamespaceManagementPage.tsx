@@ -3,7 +3,7 @@ import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { fetchZkpNamespaces, deleteNamespace } from '../../../apis/zkp_management-api';
+import { fetchZkpNamespaces, zkpDeleteNamespace } from '../../../apis/zkp_management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
@@ -41,6 +41,16 @@ const ZkpNamespaceManagementPage = () => {
   const handleDelete = async () => {
     if (!selectedRowData) return;
 
+    if (selectedRowData.schemaCount > 0) {
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: 'This namespace is in use by one or more schemas and cannot be deleted.',
+        isModal: true,
+      });
+      return;
+    }
+
+    const id = selectedRowData?.id as number;
     const result = await dialogs.open(CustomConfirmDialog, {
       title: 'Confirmation',
       message: 'Are you sure you want to delete this ZKP Namespace?',
@@ -49,6 +59,28 @@ const ZkpNamespaceManagementPage = () => {
 
     if (result) {
       setLoading(true);
+      zkpDeleteNamespace(id)
+          .then(() => {
+            setLoading(false);
+            dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: 'ZKP Namespace delete completed.',
+              isModal: true,
+            }, {
+              onClose: async () => {
+                setPaginationModel(prev => ({ ...prev }));
+              },
+            });
+          })
+          .catch((err) => {
+            setLoading(false);
+            console.error("Failed to delete ZKP Namespace. ", err);
+            dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: `Failed to delete ZKP namespace: ${err}`,
+              isModal: true,
+            });
+          })
       
     }
   };
@@ -97,7 +129,19 @@ const ZkpNamespaceManagementPage = () => {
           rows={rows}
           columns={[
             { field: 'namespaceId', headerName: 'ID', width: 240 },
-            { field: 'name', headerName: 'Name', width: 200 },
+            { field: 'name', headerName: 'Name', width: 200,
+              renderCell: (params) => (
+                <Link
+                  component="button"
+                  variant='body2'
+                  onClick={() => navigate(`/zkp-management/zkp-namespace-management/${params.row.id}`)}
+                  sx={{ cursor: 'pointer', color: 'primary.main' }}
+                >
+                  {params.value}
+                </Link>
+              ),
+
+             },
             { field: 'schemaCount', headerName: 'Schema Count', width: 150 },
             { field: 'createdAt', headerName: 'Registered At', width: 200 },
             { field: 'updatedAt', headerName: 'Updated At', width: 200 },
@@ -106,7 +150,7 @@ const ZkpNamespaceManagementPage = () => {
           setSelectedRow={setSelectedRow}
           onEdit={() => {
             if (selectedRowData?.schemaCount === 0) {
-              navigate(`/zkp-management/namespace-edit/${selectedRowData.id}`);
+              navigate(`/zkp-management/zkp-namespace-management/zkp-namespace-edit/${selectedRowData.id}`);
             }
           }}
           onRegister={() => navigate('/zkp-management/zkp-namespace-management/namespace-registration')}

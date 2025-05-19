@@ -30,7 +30,8 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateZkpNamespaceReqDto {
+public class ZkpNamespaceUpdateDto {
+    private long id;
     private ZkpNamespaceSaveDto namespace;
     private List<ZkpAttributeSaveDto> attributes;
 }

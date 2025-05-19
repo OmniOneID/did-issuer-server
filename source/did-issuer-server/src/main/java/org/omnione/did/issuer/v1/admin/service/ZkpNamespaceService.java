@@ -15,15 +15,19 @@
  */
 package org.omnione.did.issuer.v1.admin.service;
 
-import com.google.protobuf.Empty;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.db.domain.ZkpAttribute;
 import org.omnione.did.base.db.domain.ZkpNamespace;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.CreateZkpNamespaceReqDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceSaveDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpNamespaceQueryService;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 import org.springframework.data.domain.Page;
@@ -43,31 +47,131 @@ public class ZkpNamespaceService {
        return zkpNamespaceQueryService.searchZkpNamespaceList(searchKey, searchValue, pageable);
     }
 
-    public EmptyResDto createZkpNamespaceReqDto(CreateZkpNamespaceReqDto request) {
+    public EmptyResDto createZkpNamespace(ZkpNamespaceInfoDto request) {
 
-        // Save ZKP Namespace
-        log.debug("Saving ZKP Namespace: {}", request.getNamespace());
-        ZkpNamespace zkpNamespace = ZkpNamespace.builder()
-                .namespaceId(request.getNamespace().getNamespaceId())
-                .name(request.getNamespace().getName())
-                .ref(request.getNamespace().getRef())
-                .build();
+        try {
+            // Save ZKP Namespace
+            log.debug("Saving ZKP Namespace: {}", request.getNamespace());
+            ZkpNamespace zkpNamespace = ZkpNamespace.builder()
+                    .namespaceId(request.getNamespace()
+                            .getNamespaceId())
+                    .name(request.getNamespace()
+                            .getName())
+                    .ref(request.getNamespace()
+                            .getRef())
+                    .build();
 
-        // Save ZKP Attributes
-        log.debug("Saving ZKP Attributes: {}", request.getAttributes());
-        ZkpNamespace saveZkpNamespace = zkpNamespaceQueryService.save(zkpNamespace);
+            // Save ZKP Attributes
+            log.debug("Saving ZKP Attributes: {}", request.getAttributes());
+            ZkpNamespace saveZkpNamespace = zkpNamespaceQueryService.save(zkpNamespace);
 
-        List<ZkpAttribute> attributes = request.getAttributes().stream()
-                .map(attr -> ZkpAttribute.builder()
-                        .label(attr.getLabel())
-                        .type(AttributeDef.ATTR_TYPE.valueOf(attr.getType()))
-                        .caption(attr.getCaption())
-                        .zkpNamespaceId(saveZkpNamespace.getId())
-                        .build())
-                .toList();
+            List<ZkpAttribute> attributes = request.getAttributes()
+                    .stream()
+                    .map(attr -> ZkpAttribute.builder()
+                            .label(attr.getLabel())
+                            .type(AttributeDef.ATTR_TYPE.valueOf(attr.getType()))
+                            .caption(attr.getCaption())
+                            .zkpNamespaceId(saveZkpNamespace.getId())
+                            .build())
+                    .toList();
 
-        zkpNamespaceQueryService.saveAllAttributes(attributes);
+            zkpNamespaceQueryService.saveAllAttributes(attributes);
+        } catch(OpenDidException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error occurred while saving ZKP Namespace and Attributes", e);
+            throw new OpenDidException(ErrorCode.ZKP_NAMESPACE_SAVE_FAILED);
+        }
 
         return new EmptyResDto();
+    }
+
+    public ZkpNamespaceInfoDto getZkpNamespaceInfoById(Long id) {
+        try {
+            // Fetch ZKP Namespace
+            log.debug("Fetching ZKP Namespace by ID: {}", id);
+            ZkpNamespace zkpNamespace = zkpNamespaceQueryService.findNamespaceById(id);
+
+            // Fetch ZKP Attributes
+            log.debug("Fetching ZKP Attributes for Namespace ID: {}", zkpNamespace.getId());
+            List<ZkpAttribute> zkpAttributeList = zkpNamespaceQueryService.findAttributesByNamespaceId(zkpNamespace.getId());
+
+            ZkpNamespaceSaveDto zkpNamespaceSaveDto = ZkpNamespaceSaveDto.builder()
+                    .namespaceId(zkpNamespace.getNamespaceId())
+                    .name(zkpNamespace.getName())
+                    .ref(zkpNamespace.getRef())
+                    .build();
+
+            List<ZkpAttributeSaveDto> zkpAttributeSaveDtoList = zkpAttributeList.stream()
+                    .map(zkpAttribute -> ZkpAttributeSaveDto.builder()
+                            .label(zkpAttribute.getLabel())
+                            .type(zkpAttribute.getType()
+                                    .name())
+                            .caption(zkpAttribute.getCaption())
+                            .build())
+                    .toList();
+
+            return ZkpNamespaceInfoDto.builder()
+                    .namespace(zkpNamespaceSaveDto)
+                    .attributes(zkpAttributeSaveDtoList)
+                    .build();
+        } catch(OpenDidException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error occurred while fetching ZKP Namespace and Attributes", e);
+            throw new OpenDidException(ErrorCode.ZKP_NAMESPACE_RETRIEVAL_FAILED);
+        }
+    }
+
+    public EmptyResDto updateZkpNamespace(ZkpNamespaceUpdateDto request) {
+        try {
+            // Fetch ZKP Namespace
+            log.debug("Fetching ZKP Namespace by ID: {}", request.getId());
+            ZkpNamespace zkpNamespace = zkpNamespaceQueryService.findNamespaceById(request.getId());
+
+            // Update ZKP Namespace
+            zkpNamespace.setName(request.getNamespace()
+                    .getName());
+            zkpNamespace.setRef(request.getNamespace()
+                    .getRef());
+
+            List<ZkpAttribute> attributeList = zkpNamespaceQueryService.findAttributesByNamespaceId(request.getId());
+
+            // Delete old attributes
+            log.debug("Deleting old ZKP Attributes for Namespace ID: {}", request.getId());
+            zkpNamespaceQueryService.deleteAttributesByZkpNamespaceId(request.getId());
+
+            // Save ZKP Attributes
+            log.debug("Saving new ZKP Attributes: {}", request.getAttributes());
+            List<ZkpAttribute> attributes = request.getAttributes()
+                    .stream()
+                    .map(attr -> ZkpAttribute.builder()
+                            .label(attr.getLabel())
+                            .type(AttributeDef.ATTR_TYPE.valueOf(attr.getType()))
+                            .caption(attr.getCaption())
+                            .zkpNamespaceId(zkpNamespace.getId())
+                            .build())
+                    .toList();
+
+            zkpNamespaceQueryService.saveAllAttributes(attributes);
+
+            return new EmptyResDto();
+        } catch(OpenDidException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error occurred while updating ZKP Namespace and Attributes", e);
+            throw new OpenDidException(ErrorCode.ZKP_NAMESPACE_UPDATE_FAILED);
+        }
+    }
+
+    public void deleteZkpNamespaceById(Long id) {
+        try {
+            zkpNamespaceQueryService.deleteZkpNamespaceById(id);
+        } catch(OpenDidException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error occurred while deleting ZKP Namespace", e);
+            throw new OpenDidException(ErrorCode.ZKP_NAMESPACE_DELETE_FAILED);
+        }
     }
 }

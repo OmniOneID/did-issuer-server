@@ -18,16 +18,22 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.CreateZkpNamespaceReqDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpNamespaceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -42,8 +48,24 @@ public class ZkpNamespaceController {
     }
 
     @PostMapping
-    public ResponseEntity<EmptyResDto> createNamespaceResDto(@RequestBody CreateZkpNamespaceReqDto request) {
-        return ResponseEntity.ok(zkpNamespaceService.createZkpNamespaceReqDto(request));
+    public ResponseEntity<EmptyResDto> createZkpNamespace(@RequestBody ZkpNamespaceInfoDto request) {
+        return ResponseEntity.ok(zkpNamespaceService.createZkpNamespace(request));
     }
 
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<ZkpNamespaceInfoDto> getZkpNamespaceInfo(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(zkpNamespaceService.getZkpNamespaceInfoById(id));
+    }
+
+    @PatchMapping
+    @ResponseBody
+    public ResponseEntity<EmptyResDto> updateZkpNamespace(@RequestBody ZkpNamespaceUpdateDto request) {
+        return ResponseEntity.ok(zkpNamespaceService.updateZkpNamespace(request));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<EmptyResDto> deleteZkpNamespace(@RequestParam(name = "id") Long id) {
+        zkpNamespaceService.deleteZkpNamespaceById(id);
+        return ResponseEntity.ok(new EmptyResDto());
+    }
 }

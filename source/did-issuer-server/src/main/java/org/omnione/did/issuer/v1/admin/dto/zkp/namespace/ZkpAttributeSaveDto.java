@@ -15,13 +15,19 @@
  */
 package org.omnione.did.issuer.v1.admin.dto.zkp.namespace;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
 public class ZkpAttributeSaveDto {
     private String label;
     private String type;

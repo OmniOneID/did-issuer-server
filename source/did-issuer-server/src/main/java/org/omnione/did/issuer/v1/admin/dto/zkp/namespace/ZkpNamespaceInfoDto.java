@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.base.db.repository;
+package org.omnione.did.issuer.v1.admin.dto.zkp.namespace;
 
-import org.omnione.did.base.db.domain.ZkpAttribute;
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
-public interface ZkpAttributeRepository extends JpaRepository<ZkpAttribute, Long> {
-    List<ZkpAttribute> findByZkpNamespaceId(Long zkpNamespaceId);
-    void deleteByZkpNamespaceId(Long zkpNamespaceId);
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class ZkpNamespaceInfoDto {
+    private ZkpNamespaceSaveDto namespace;
+    private List<ZkpAttributeSaveDto> attributes;
 }

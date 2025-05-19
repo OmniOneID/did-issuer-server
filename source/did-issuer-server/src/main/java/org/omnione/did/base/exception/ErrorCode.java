@@ -135,7 +135,7 @@ public enum ErrorCode {
     JSON_SCHEMA_CLAIMS_SERIALIZE_FAILED("00703", "Failed to serialize SchemaClaims object to JSON.", 500),
     JSON_SCHEMA_CLAIMS_DESERIALIZE_FAILED("00704", "Failed to deserialize JSON string to SchemaClaims object.", 500),
 
-    // 800~ 899 = admin
+    // 800~ 999 = admin
     ADMIN_INFO_NOT_FOUND("00800", "Failed to find admin: admin is not registered.", 400),
     APPLICATION_CONFIG_NOT_FOUND("00801", "Application config not found.", 400),
     NAMESPACE_DELETE_CONFLICT("00802", "Cannot delete namespace: it is referenced by a VC schema.", 400),
@@ -154,7 +154,11 @@ public enum ErrorCode {
     TAS_COMMUNICATION_ERROR("00815","Failed to communicate with tas: unknown error occurred.", 500),
     URL_PING_ERROR("00816", "Failed to ping the URL.", 400),
     ADMIN_ALREADY_EXISTS("00817", "Failed to register admin: admin is already registered.", 400),
-
+    ZKP_NAMESPACE_SAVE_FAILED("00818", "Failed to save ZKP Namespace.", 500),
+    ZKP_NAMESPACE_NOT_FOUND("00819", "ZKP Namespace not found for the given ID.", 400),
+    ZKP_NAMESPACE_RETRIEVAL_FAILED("00820", "Failed to retrieve ZKP Namespace.", 500),
+    ZKP_NAMESPACE_UPDATE_FAILED("00821", "Failed to update ZKP Namespace.", 500),
+    ZKP_NAMESPACE_DELETE_FAILED("00822", "Failed to delete ZKP Namespace.", 500),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

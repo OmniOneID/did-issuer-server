@@ -8,6 +8,13 @@ import { useNavigate } from "react-router";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
+import { postNamespace } from '../../../apis/zkp_management-api';
+import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
+import CustomDialog from "../../../components/dialog/CustomDialog";
+import { useDialogs } from "@toolpad/core";
+import { attributeTypes } from "../../../constants/attribute-types";
+import { urlRegex, ipRegex } from "../../../utils/regex";
+
 
 type ItemType = "String" | "Number";
 
@@ -40,6 +47,7 @@ interface ErrorState {
 
 const ZkpNamespaceRegistrationPage = () => {
   const theme = useTheme();
+  const dialogs = useDialogs();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -50,7 +58,6 @@ const ZkpNamespaceRegistrationPage = () => {
   });
 
   const [errors, setErrors] = useState<ErrorState>({});
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +73,7 @@ const ZkpNamespaceRegistrationPage = () => {
         newItems[index][field] = e.target.value;
       }
       setFormData(prev => ({ ...prev, items: newItems }));
-    };
+  };
 
   const handleItemSelectChange = (index: number) =>
     (e: SelectChangeEvent<string>) => {
@@ -78,7 +85,11 @@ const ZkpNamespaceRegistrationPage = () => {
   const handleAddItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { label: "", type: "String", caption: "" }],
+      items: [...prev.items, {
+        label: "",
+        type: attributeTypes[0].value as ItemType,  // <-- 첫 번째 값으로 설정
+        caption: ""
+      }]
     }));
   };
 
@@ -102,13 +113,13 @@ const ZkpNamespaceRegistrationPage = () => {
     const tempErrors: ErrorState = {};
 
     if (!formData.namespaceId.trim()) {
-      tempErrors.namespaceId = "Invalid input.";
+      tempErrors.namespaceId = "Please enter a Namespace ID.";
     } else if (formData.namespaceId.length < 8 || formData.namespaceId.length > 64) {
       tempErrors.namespaceId = "Namespace ID must be between 8 and 64 characters.";
     }
 
     if (!formData.name.trim()) {
-      tempErrors.name = "Invalid input.";
+      tempErrors.name = "Please enter a Name.";
     } else if (formData.name.length < 2 || formData.name.length > 64) {
       tempErrors.name = "Name must be between 2 and 64 characters.";
     }
@@ -117,6 +128,9 @@ const ZkpNamespaceRegistrationPage = () => {
       if (formData.ref.length < 4 || formData.ref.length > 64) {
         tempErrors.ref = "Ref must be between 4 and 64 characters.";
       }
+      if (!urlRegex.test(formData.ref) && !ipRegex.test(formData.ref)) {
+        tempErrors.ref = "Please enter a valid URL.";
+      }
     } else {
       tempErrors.ref = undefined;
     }
@@ -124,7 +138,33 @@ const ZkpNamespaceRegistrationPage = () => {
     if (formData.items.length === 0) {
       tempErrors.errorItemsMessage = "At least one item is required.";
     } else {
-      tempErrors.items = formData.items.map(validateItem);
+      const labelCounts = formData.items.reduce((acc, item) => {
+        const labelKey = item.label.trim();
+          if (labelKey) {
+            acc[labelKey] = (acc[labelKey] || 0) + 1;
+          }
+          return acc;
+      }, {} as Record<string, number>);
+
+      tempErrors.items = formData.items.map((item) => {
+        const itemErrors: ItemError = {};
+
+        if (!item.label.trim()) {
+          itemErrors.label = "Label is required.";
+        } else if (labelCounts[item.label.trim()] > 1) {
+          itemErrors.label = "Label must be unique.";
+        }
+
+        if (!item.type) {
+          itemErrors.type = "Type is required.";
+        }
+
+        if (!item.caption.trim()) {
+          itemErrors.caption = "Caption is required.";
+        }
+
+        return itemErrors;
+      });
     }
 
     setErrors(tempErrors);
@@ -141,12 +181,10 @@ const ZkpNamespaceRegistrationPage = () => {
 
   useEffect(() => {
     const isModified = Object.values(formData).some((value) => value !== '');
-    setIsButtonDisabled(!isModified);
   }, [formData]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
-    // setIsLoading(true);
 
     const namespace: any = {
       namespaceId: formData.namespaceId,
@@ -168,7 +206,43 @@ const ZkpNamespaceRegistrationPage = () => {
     
     console.log("Request Body:", requestBody);
 
-    
+    const result = await dialogs.open(CustomConfirmDialog, {
+      title: 'Confirmation',
+      message: 'Are you sure you want to register ZKP Namespace?',
+      isModal: true,
+    });
+
+    if (result) {
+      setIsLoading(true);
+      try {
+        await postNamespace(requestBody);
+        setIsLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: 'Completed register ZKP namespace.',
+          isModal: true,
+        }, {
+          onClose: async () => navigate('/zkp-management/zkp-namespace-management'),
+        });
+      } catch (error) {
+        setIsLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: `Failed to register ZKP namespace: ${error}`,
+          isModal: true,
+        });
+      }
+    }
+  };
+
+  const handleReset = () => {
+    setErrors({});
+    setFormData({
+      namespaceId: "",
+      name: "",
+      ref: "",
+      items: [],
+    });
   };
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
@@ -198,7 +272,7 @@ const ZkpNamespaceRegistrationPage = () => {
       <Typography variant="h4">ZKP Namespace Management</Typography>
 
       <StyledContainer>
-        <StyledTitle>Namespace 등록</StyledTitle>
+        <StyledTitle>ZKP Namespace Registration</StyledTitle>
 
         <StyledInputArea>
           <TextField
@@ -256,7 +330,7 @@ const ZkpNamespaceRegistrationPage = () => {
                   <TableCell sx={{ width: 200 }}>Label *</TableCell>
                   <TableCell sx={{ width: 150 }}>Type *</TableCell>
                   <TableCell>Caption *</TableCell>
-                  <TableCell sx={{ width: 100 }}>삭제</TableCell>
+                  <TableCell sx={{ width: 100 }}>Delete</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -278,8 +352,11 @@ const ZkpNamespaceRegistrationPage = () => {
                           value={item.type}
                           onChange={handleItemSelectChange(index)}
                         >
-                          <MenuItem value="String">String</MenuItem>
-                          <MenuItem value="Number">Number</MenuItem>
+                        {attributeTypes.map((attributeType) => (
+                            <MenuItem key={attributeType.value} value={attributeType.value}>
+                                {attributeType.label}
+                            </MenuItem>
+                        ))}
                         </Select>
                       </FormControl>
                     </TableCell>
@@ -305,8 +382,9 @@ const ZkpNamespaceRegistrationPage = () => {
           </TableContainer>
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
-            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isButtonDisabled}>등록</Button>
-            <Button variant="outlined" onClick={() => navigate(-1)}>취소</Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>Register</Button>
+            <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
+            <Button variant="outlined" onClick={() => navigate(-1)}>Cancel</Button>
           </Box>
         </StyledInputArea>
       </StyledContainer>
