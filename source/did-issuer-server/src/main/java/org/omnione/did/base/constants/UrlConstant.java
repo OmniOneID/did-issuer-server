@@ -50,6 +50,8 @@ public class UrlConstant {
 
         public static final String ISSUED_VCS = "/issued-vcs";
 
+        public static final String ZKP_NAMESPACE  = "/zkp/namespaces";
+
     }
 
     public static class Tas {

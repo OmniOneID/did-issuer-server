@@ -26,4 +26,12 @@
   <include file="./set.2/admin-2phase-did_document.xml" relativeToChangelogFile="true"/>
   <include file="./set.2/admin-2phase-issuer.xml" relativeToChangelogFile="true"/>
 
+  <include file="./set.2/admin-2phase-zkp_namespace.xml" relativeToChangelogFile="true"/>
+  <include file="./set.2/admin-2phase-zkp_attribute.xml" relativeToChangelogFile="true"/>
+  <include file="./set.2/admin-2phase-zkp_schema_attribute.xml" relativeToChangelogFile="true"/>
+  <include file="./set.2/admin-2phase-zkp_schema.xml" relativeToChangelogFile="true"/>
+  <include file="./set.2/admin-2phase-zkp_credential_definition.xml" relativeToChangelogFile="true"/>
+  <include file="set.2/admin-2phase-issue-profile-update.xml" relativeToChangelogFile="true"/>
+  <include file="set.2/admin-2phase-vc-update.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

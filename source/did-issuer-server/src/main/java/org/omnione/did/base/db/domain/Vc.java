@@ -67,4 +67,7 @@ public class Vc extends BaseEntity implements Serializable {
 
     @Column(name = "status")
     private String status;
+
+    @Column(name = "vc_type", nullable = false)
+    private String vcType;
 }

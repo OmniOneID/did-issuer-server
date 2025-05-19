@@ -110,6 +110,6 @@ public class IssueController {
     @RequestMapping(value = "/v1/chain/get_table_rows", method=RequestMethod.POST, produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String getTableRow(@RequestBody ZkpLadgerRequestData zkpLadgerRequestData) throws ZkpException {
-        return ZkpSampleConstants.getTableRow(zkpLadgerRequestData);
+        return ZkpSampleConstants.getCredentialSchema(zkpLadgerRequestData);
     }
 }

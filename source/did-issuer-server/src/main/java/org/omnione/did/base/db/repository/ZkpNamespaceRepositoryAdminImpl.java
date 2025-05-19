@@ -22,7 +22,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Namespace;
-import org.omnione.did.base.db.domain.QNamespace;
+import org.omnione.did.base.db.domain.QZkpNamespace;
+import org.omnione.did.base.db.domain.ZkpNamespace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,43 +36,44 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
+public class ZkpNamespaceRepositoryAdminImpl implements ZkpNamespaceRepositoryAdmin {
+
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Namespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable) {
-        QNamespace namespace = QNamespace.namespace;
+    public Page<ZkpNamespace> searchNamespaces(String searchKey, String searchValue, Pageable pageable) {
+        QZkpNamespace zkpNamespace = QZkpNamespace.zkpNamespace;
         BooleanExpression predicate = buildPredicate(searchKey, searchValue);
 
         long total = Optional.ofNullable(queryFactory
-                .select(namespace.count())
-                .from(namespace)
-                .where(predicate)
-                .fetchOne())
-                .orElse(0L);
+                        .select(zkpNamespace.count())
+                        .from(zkpNamespace)
+                        .where(predicate)
+                        .fetchOne())
+                        .orElse(0L);
 
-        List<Namespace> results = queryFactory
-                .selectFrom(namespace)
+        List<ZkpNamespace> results = queryFactory
+                .selectFrom(zkpNamespace)
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getOrderSpecifier(pageable, namespace))
+                .orderBy(getOrderSpecifier(pageable, zkpNamespace))
                 .fetch();
 
         return new PageImpl<>(results, pageable, total);
     }
 
     public BooleanExpression buildPredicate(String searchKey, String searchValue) {
-        QNamespace namespace = QNamespace.namespace;
+        QZkpNamespace zkpNamespace = QZkpNamespace.zkpNamespace;
         BooleanExpression predicate = Expressions.asBoolean(true).isTrue();
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "namespaceId":
-                    predicate = predicate.and(namespace.namespaceId.eq(searchValue));
+                    predicate = predicate.and(zkpNamespace.namespaceId.eq(searchValue));
                     break;
                 case "name":
-                    predicate = predicate.and(namespace.name.eq(searchValue));
+                    predicate = predicate.and(zkpNamespace.name.eq(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);
@@ -81,11 +83,11 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
         return predicate;
     }
 
-    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QNamespace namespace) {
+    public OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable, QZkpNamespace zkpNamespace) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
 
         if (!pageable.getSort().isSorted()) {
-            orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+            orders.add(new OrderSpecifier<>(Order.ASC, zkpNamespace.createdAt));
         }
 
         for (Sort.Order order: pageable.getSort()) {
@@ -93,13 +95,13 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
 
             switch (order.getProperty()) {
                 case "namespaceId":
-                    orders.add(new OrderSpecifier<>(direction, namespace.namespaceId));
+                    orders.add(new OrderSpecifier<>(direction, zkpNamespace.namespaceId));
                     break;
                 case "name":
-                    orders.add(new OrderSpecifier<>(direction, namespace.name));
+                    orders.add(new OrderSpecifier<>(direction, zkpNamespace.name));
                     break;
                 default:
-                    orders.add(new OrderSpecifier<>(Order.ASC, namespace.createdAt));
+                    orders.add(new OrderSpecifier<>(Order.ASC, zkpNamespace.createdAt));
                     break;
             }
         }
