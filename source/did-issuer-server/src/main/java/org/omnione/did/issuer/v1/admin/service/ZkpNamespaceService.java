@@ -23,6 +23,7 @@ import org.omnione.did.base.db.domain.ZkpNamespace;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.VerifyNamespaceIdUniqueResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
@@ -173,5 +174,12 @@ public class ZkpNamespaceService {
             log.error("Error occurred while deleting ZKP Namespace", e);
             throw new OpenDidException(ErrorCode.ZKP_NAMESPACE_DELETE_FAILED);
         }
+    }
+
+    public VerifyNamespaceIdUniqueResDto verifyNamespaceIdUnique(String namespaceId) {
+        long count = zkpNamespaceQueryService.countByNamespaceId(namespaceId);
+        return VerifyNamespaceIdUniqueResDto.builder()
+                .isUnique(count == 0)
+                .build();
     }
 }

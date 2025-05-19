@@ -13,12 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.base.db.repository;
+package org.omnione.did.issuer.v1.admin.dto.zkp.namespace;
 
-import org.omnione.did.base.db.domain.ZkpNamespace;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface ZkpNamespaceRepository extends JpaRepository<ZkpNamespace, Long>, QuerydslPredicateExecutor<ZkpNamespace>, ZkpNamespaceRepositoryAdmin {
-    long countByNamespaceId(String namespaceId);
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class VerifyNamespaceIdUniqueResDto {
+    private boolean isUnique;
 }

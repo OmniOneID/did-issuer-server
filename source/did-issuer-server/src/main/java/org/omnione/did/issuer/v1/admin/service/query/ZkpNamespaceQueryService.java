@@ -22,6 +22,8 @@ import org.omnione.did.base.db.repository.ZkpAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpNamespaceRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
 import org.omnione.did.base.db.repository.projection.NamespaceCountProjection;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -76,5 +78,27 @@ public class ZkpNamespaceQueryService {
 
     public void saveAllAttributes(List<ZkpAttribute> zkpAttributes) {
         zkpAttributeRepository.saveAll(zkpAttributes);
+    }
+
+    public ZkpNamespace findNamespaceById(Long id) {
+        return zkpNamespaceRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_NAMESPACE_NOT_FOUND));
+    }
+
+    public List<ZkpAttribute> findAttributesByNamespaceId(Long zkpNamespaceId) {
+        return zkpAttributeRepository.findByZkpNamespaceId(zkpNamespaceId);
+    }
+
+    public void deleteAttributesByZkpNamespaceId(Long zkpNamespaceId) {
+        zkpAttributeRepository.deleteByZkpNamespaceId(zkpNamespaceId);
+    }
+
+    public void deleteZkpNamespaceById(Long id) {
+        zkpNamespaceRepository.deleteById(id);
+        zkpAttributeRepository.deleteByZkpNamespaceId(id);
+    }
+
+    public long countByNamespaceId(String namespaceId) {
+        return zkpNamespaceRepository.countByNamespaceId(namespaceId);
     }
 }

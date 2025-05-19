@@ -8,7 +8,7 @@ import { useNavigate } from "react-router";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
-import { postNamespace } from '../../../apis/zkp_management-api';
+import { postNamespace, verifyNamespaceIdUnique } from '../../../apis/zkp_management-api';
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import { useDialogs } from "@toolpad/core";
@@ -59,9 +59,14 @@ const ZkpNamespaceRegistrationPage = () => {
 
   const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isNamespaceIdIsValid, setIsNamespaceIdValid] = useState(false);
 
   const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    if (field === "namespaceId") {
+      setIsNamespaceIdValid(false);
+      setErrors((prev) => ({ ...prev, namespaceId: undefined }));
+    }
   };
 
   const handleItemTextChange = (index: number, field: keyof Item) =>
@@ -87,7 +92,7 @@ const ZkpNamespaceRegistrationPage = () => {
       ...prev,
       items: [...prev.items, {
         label: "",
-        type: attributeTypes[0].value as ItemType,  // <-- 첫 번째 값으로 설정
+        type: attributeTypes[0].value as ItemType, 
         caption: ""
       }]
     }));
@@ -99,16 +104,6 @@ const ZkpNamespaceRegistrationPage = () => {
     setFormData((prev) => ({ ...prev, items: newItems }));
   };
 
-  const validateItem = (item: Item): { label?: string; type?: string; caption?: string } => {
-    const itemErrors: { label?: string; type?: string; caption?: string } = {};
-
-    if (!item.label.trim()) itemErrors.label = "Label is required.";
-    if (!item.type) itemErrors.type = "Type is required.";
-    if (!item.caption.trim()) itemErrors.caption = "Caption is required.";
-
-    return itemErrors;
-  };
-
   const validate = () => {
     const tempErrors: ErrorState = {};
 
@@ -116,6 +111,8 @@ const ZkpNamespaceRegistrationPage = () => {
       tempErrors.namespaceId = "Please enter a Namespace ID.";
     } else if (formData.namespaceId.length < 8 || formData.namespaceId.length > 64) {
       tempErrors.namespaceId = "Namespace ID must be between 8 and 64 characters.";
+    } else if (!isNamespaceIdIsValid) {
+      tempErrors.namespaceId = "Namespace ID is not available.";
     }
 
     if (!formData.name.trim()) {
@@ -243,6 +240,20 @@ const ZkpNamespaceRegistrationPage = () => {
       ref: "",
       items: [],
     });
+    setIsNamespaceIdValid(false);
+  };
+
+  const handleCheckDuplicateNamespaceId = () => {
+    verifyNamespaceIdUnique(formData.namespaceId) 
+    .then((response) => {
+        if (response.data.unique === false) {
+            setErrors((prev) => ({ ...prev, namespaceId: 'Namespace ID already exists.' }));
+            setIsNamespaceIdValid(false);
+        } else {        
+            setIsNamespaceIdValid(true);
+            setErrors((prev) => ({ ...prev, namespaceId: undefined }));
+        }
+    });
   };
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
@@ -266,6 +277,7 @@ const ZkpNamespaceRegistrationPage = () => {
     marginTop: theme.spacing(2),
   })), []);
 
+
   return (
     <>
       <FullscreenLoader open={isLoading} />
@@ -275,17 +287,33 @@ const ZkpNamespaceRegistrationPage = () => {
         <StyledTitle>ZKP Namespace Registration</StyledTitle>
 
         <StyledInputArea>
-          <TextField
-            label="Namespace ID *"
-            fullWidth
-            size="small"
-            margin="normal"
-            sx={{ width: '60%' }}
-            value={formData.namespaceId}
-            onChange={handleChange("namespaceId")}
-            error={!!errors.namespaceId}
-            helperText={errors.namespaceId}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              label="Namespace ID *"
+              fullWidth
+              size="small"
+              margin="normal"
+              sx={{ width: '60%' }}
+              value={formData.namespaceId}
+              onChange={handleChange("namespaceId")}
+              error={!!errors.namespaceId}
+              helperText={errors.namespaceId}
+            />
+            <Button 
+                variant="contained" 
+                onClick={handleCheckDuplicateNamespaceId}
+                disabled={!formData.namespaceId}
+                sx={{ 
+                    minWidth: 150,  
+                    whiteSpace: 'nowrap', 
+                    textTransform: 'none' 
+                }}
+            >
+                Check Availability
+            </Button>
+
+          </Box>
+          
 
           <TextField
             label="Name *"

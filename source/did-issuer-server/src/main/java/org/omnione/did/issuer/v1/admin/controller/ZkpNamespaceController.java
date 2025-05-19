@@ -18,8 +18,9 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.VerifyNamespaceIdUniqueResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpNamespaceService;
 import org.springframework.data.domain.Page;
@@ -67,5 +68,10 @@ public class ZkpNamespaceController {
     public ResponseEntity<EmptyResDto> deleteZkpNamespace(@RequestParam(name = "id") Long id) {
         zkpNamespaceService.deleteZkpNamespaceById(id);
         return ResponseEntity.ok(new EmptyResDto());
+    }
+
+    @GetMapping(UrlConstant.Admin.CHECK_NAMESPACE_ID)
+    public VerifyNamespaceIdUniqueResDto verifyNamespaceIdUnique(@RequestParam String namespaceId) {
+        return zkpNamespaceService.verifyNamespaceIdUnique(namespaceId);
     }
 }

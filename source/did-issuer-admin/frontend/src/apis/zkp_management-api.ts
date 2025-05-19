@@ -31,3 +31,7 @@ export const getZkpNamespace = async (id: number) => {
 export const patchZkpNamespace = async (data: any) => {
     return patchData(API_BASE_URL, `zkp/namespaces`, data);
 }
+
+export const verifyNamespaceIdUnique = async (namespaceId: string) => {
+    return getData(API_BASE_URL, `zkp/namespaces/check-namespace-id?namespaceId=${namespaceId}`);
+}
