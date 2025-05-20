@@ -101,4 +101,8 @@ public class ZkpNamespaceQueryService {
     public long countByNamespaceId(String namespaceId) {
         return zkpNamespaceRepository.countByNamespaceId(namespaceId);
     }
+
+    public List<ZkpNamespace> findAllNamespaces() {
+        return zkpNamespaceRepository.findAll();
+    }
 }

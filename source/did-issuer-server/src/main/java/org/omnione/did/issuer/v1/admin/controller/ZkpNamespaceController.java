@@ -17,8 +17,10 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.base.constants.UrlConstant.Admin;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.VerifyNamespaceIdUniqueResDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
@@ -36,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -73,5 +77,15 @@ public class ZkpNamespaceController {
     @GetMapping(UrlConstant.Admin.CHECK_NAMESPACE_ID)
     public VerifyNamespaceIdUniqueResDto verifyNamespaceIdUnique(@RequestParam String namespaceId) {
         return zkpNamespaceService.verifyNamespaceIdUnique(namespaceId);
+    }
+
+    @GetMapping(UrlConstant.Admin.FIND_ALL)
+    public ResponseEntity<List<ZkpNamespaceDto>> getAllNamespaces() {
+        return ResponseEntity.ok(zkpNamespaceService.getAllNamespaces());
+    }
+
+    @GetMapping(Admin.ZKP_ATTRIBUTES + UrlConstant.Admin.FIND_ALL)
+    public ResponseEntity<List<ZkpAttributeDto>> getAttributes(@RequestParam(name = "id") Long namespaceId) {
+        return ResponseEntity.ok(zkpNamespaceService.getAttributesByNamespaceId(namespaceId));
     }
 }

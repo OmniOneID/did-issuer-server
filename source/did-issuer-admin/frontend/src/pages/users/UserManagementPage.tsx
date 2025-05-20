@@ -32,9 +32,10 @@ const UserManagementPage = (props: Props) => {
     pageSize: 10,
   });
 
-  const selectedRowData = useMemo(() => {
-    return rows.find(row => row.id === selectedRow) || null;
-  }, [rows, selectedRow]);
+  const selectedRowData = useMemo(
+    () => Array.isArray(rows) ? rows.find(row => row.id === selectedRow) || null : null,
+    [rows, selectedRow]
+  );
   
   useEffect(() => {
     setLoading(true);

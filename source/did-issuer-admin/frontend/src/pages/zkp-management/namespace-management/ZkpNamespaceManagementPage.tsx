@@ -34,7 +34,7 @@ const ZkpNamespaceManagementPage = () => {
   });
 
   const selectedRowData = useMemo(
-    () => rows.find(row => row.id === selectedRow) || null,
+    () => Array.isArray(rows) ? rows.find(row => row.id === selectedRow) || null : null,
     [rows, selectedRow]
   );
 
