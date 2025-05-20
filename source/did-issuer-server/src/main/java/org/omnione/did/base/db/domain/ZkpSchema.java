@@ -62,4 +62,7 @@ public class ZkpSchema extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50)")
     private ZkpSchemaStatus status;
+
+    @Column(name = "schema", nullable = false)
+    private String schema;
 }

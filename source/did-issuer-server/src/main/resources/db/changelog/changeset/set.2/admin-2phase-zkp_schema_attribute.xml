@@ -12,7 +12,7 @@
       <column name="schema_id" type="varchar(100)">
         <constraints nullable="false" unique="false"/>
       </column>
-      <column name="attribute_id" type="varchar(100)">
+      <column name="attribute_label" type="varchar(100)">
         <constraints nullable="false" unique="false"/>
       </column>
       <column name="namespace_id" type="varchar(100)">

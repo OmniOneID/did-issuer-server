@@ -8,13 +8,13 @@ import React, { useEffect, useState } from 'react';
 import { getZkpNamespaceAll, getZkpAttributes } from '../../../apis/zkp_management-api';
 
 interface Attribute {
-  namespaceId: string;
+  namespaceId: number;
   label: string;
   type: string;
 }
 
 interface AttributeMap {
-  [key: string]: { label: string; type: string; }[];
+  [key: string]: { id:number, namespaceId: number, label: string; type: string; }[];
 }
 
 type AttributeSelectDialogProps = DialogProps<Attribute[], Attribute[]>;
@@ -25,17 +25,22 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
   payload
 }) => {
   const [namespaceId, setNamespaceId] = useState<number | ''>('');
-  const [namespaceOptions, setNamespaceOptions] = useState<{ id: string; name: string }[]>([]);
-  const [attributes, setAttributes] = useState<{ label: string; type: string }[]>([]);
-  const [selectedMap, setSelectedMap] = useState<Record<string, boolean>>({});
+  const [namespaceOptions, setNamespaceOptions] = useState<
+    { id: number; name: string; identifier: string; ref: string }[]
+  >([]);
+  const [attributes, setAttributes] = useState<{ label: string; type: string; id:number; zkpNamespaceId: number }[]>([]);
+  const [selectedMap, setSelectedMap] = useState<Record<number, boolean>>({});
 
+  
   useEffect(() => {
     const fetchNamespaces = async () => {
       try {
-        const res = await getZkpNamespaceAll(); // API 호출
+        const res = await getZkpNamespaceAll(); 
         const options = res.data.map((ns: any) => ({
           id: ns.id,
           name: ns.name,
+          identifier: ns.namespaceId,
+          ref: ns.ref,
         }));
         setNamespaceOptions(options);
       } catch (error) {
@@ -50,9 +55,11 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
     const fetchAttributes = async () => {
       if (!namespaceId) return;
       try {
-        const res = await getZkpAttributes(namespaceId); // API 호출
+        const res = await getZkpAttributes(namespaceId);
         console.log('Fetched attributes:', res.data);
         const attrs = res.data.map((item: any) => ({
+          id: item.id,                                
+          zkpNamespaceId: item.zkpNamespaceId,      
           label: item.label,
           type: item.type,
         }));
@@ -67,8 +74,8 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
     fetchAttributes();
   }, [namespaceId]);
 
-  const handleToggle = (label: string) => {
-    setSelectedMap((prev) => ({ ...prev, [label]: !prev[label] }));
+  const handleToggle = (id: number) => {
+    setSelectedMap((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleClose = (event: unknown, reason?: string) => {
@@ -77,11 +84,17 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
   };
 
   const handleAdd = async () => {
-    const selected = attributes.filter(attr => selectedMap[attr.label]);
+    const selected = attributes.filter(attr => selectedMap[attr.id]);
+    const selectedNamespace = namespaceOptions.find(ns => ns.id === namespaceId);
+    
     const addedItems = selected.map(attr => ({
-      namespaceId: namespaceId.toString(),
+      id: attr.id,                               
+      namespaceId: attr.zkpNamespaceId,        
       label: attr.label,
       type: attr.type,
+      namespaceName: selectedNamespace?.name ?? '',
+      namespaceIdentifier: selectedNamespace?.identifier ?? '',
+      namespaceRef: selectedNamespace?.ref ?? '',
     }));
 
     if (addedItems.length > 0) {
@@ -133,10 +146,10 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
               {attributes.map(attr => (
                 <TableRow key={attr.label}>
                   <TableCell>
-                    <Checkbox
-                      checked={!!selectedMap[attr.label]}
-                      onChange={() => handleToggle(attr.label)}
-                    />
+                     <Checkbox
+                        checked={!!selectedMap[attr.id]}
+                        onChange={() => handleToggle(attr.id)}
+                      />
                   </TableCell>
                   <TableCell>{attr.label}</TableCell>
                   <TableCell>{attr.type}</TableCell>

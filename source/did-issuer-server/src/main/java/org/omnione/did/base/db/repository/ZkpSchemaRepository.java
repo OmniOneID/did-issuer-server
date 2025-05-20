@@ -15,9 +15,20 @@
  */
 package org.omnione.did.base.db.repository;
 
+import jakarta.transaction.Transactional;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
 
 public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, QuerydslPredicateExecutor<ZkpSchema>, ZkpSchemaRepositoryAdmin  {
+    @Modifying
+    @Transactional
+    @Query("UPDATE ZkpSchema s SET s.status = :status WHERE s.id = :id")
+    void updateStatusById(@Param("id") Long id, @Param("status") ZkpSchemaStatus status);
+
+    boolean existsBySchemaId(String schemaId);
 }

@@ -38,6 +38,10 @@ const CredentialSchemaManagementPage = () => {
     [rows, selectedRow]
   );
 
+  const hansdleReRegisterAll = async () => {
+      alert("준비중");
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchZkpSchemas(paginationModel.page, paginationModel.pageSize, null, null)
@@ -82,12 +86,12 @@ const CredentialSchemaManagementPage = () => {
           rows={rows}
           columns={[
             { field: 'schemaId', headerName: 'ID', width: 240 },
-            { field: 'name', headerName: 'Name', width: 200,
+            { field: 'name', headerName: 'Name', width: 100,
               renderCell: (params) => (
                 <Link
                   component="button"
                   variant='body2'
-                  onClick={() => navigate(`/zkp-management/zkp-namespace-management/${params.row.id}`)}
+                  onClick={() => navigate(`/zkp-management/credential-schema-management/${params.row.id}`)}
                   sx={{ cursor: 'pointer', color: 'primary.main' }}
                 >
                   {params.value}
@@ -95,9 +99,9 @@ const CredentialSchemaManagementPage = () => {
               ),
 
              },
-            { field: 'version', headerName: 'Version', width: 100 },
+            { field: 'version', headerName: 'Version', width: 50 },
             { field: 'definitionCount', headerName: 'Definition Count', width: 100 },
-            { field: 'status', headerName: 'Status', width: 100 },
+            { field: 'status', headerName: 'Status', width: 250 },
             { field: 'createdAt', headerName: 'Registered At', width: 150 },
             { field: 'updatedAt', headerName: 'Updated At', width: 150 },
           ]}
@@ -108,6 +112,9 @@ const CredentialSchemaManagementPage = () => {
           totalRows={totalRows}
           paginationModel={paginationModel}
           setPaginationModel={setPaginationModel}
+          additionalButtons={[
+            { label: 'Re-register all', onClick: () => hansdleReRegisterAll(), color: 'primary' },
+          ]}
         />
       </StyledContainer>
     </>

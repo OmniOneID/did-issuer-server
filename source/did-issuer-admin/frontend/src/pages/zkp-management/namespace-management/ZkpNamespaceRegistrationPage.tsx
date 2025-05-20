@@ -15,7 +15,6 @@ import { useDialogs } from "@toolpad/core";
 import { attributeTypes } from "../../../constants/attribute-types";
 import { urlRegex, ipRegex } from "../../../utils/regex";
 
-
 type ItemType = "String" | "Number";
 
 interface Item {

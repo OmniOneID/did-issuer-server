@@ -57,3 +57,11 @@ export const fetchZkpSchemas = async (page: number, size: number, searchKey: str
 export const getZkpAttributes = async (namespaceId: number) => {
     return getData(API_BASE_URL, `zkp/namespaces/attributes/all?id=${namespaceId}`);
 }
+
+export const postZkpSchema = async (data: any) => {
+    return postData(API_BASE_URL, `zkp/schemas`, data);
+}
+
+export const getZkpSchema = async (id: number) => {
+    return getData(API_BASE_URL, `zkp/schemas/${id}`);
+};

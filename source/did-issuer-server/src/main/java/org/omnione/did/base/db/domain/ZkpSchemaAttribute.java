@@ -38,7 +38,7 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "zkp_schema_attribute")
-public class ZkpSchemaAttribute extends BaseEntity implements Serializable {
+public class ZkpSchemaAttribute implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,8 +47,8 @@ public class ZkpSchemaAttribute extends BaseEntity implements Serializable {
     @Column(name = "schema_id", nullable = false, length = 100)
     private String schemaId;
 
-    @Column(name = "attribute_id", nullable = false, length = 100)
-    private String attributeId;
+    @Column(name = "attribute_label", nullable = false, length = 100)
+    private String attributeLabel;
 
     @Column(name = "namespace_id", nullable = false, length = 100)
     private String namespaceId;
