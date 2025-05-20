@@ -124,7 +124,6 @@ public class ZkpSchemaService {
                     )
                     .create();
 
-
             ZkpSchema zkpSchema = ZkpSchema.builder()
                     .name(request.getName())
                     .version(request.getVersion())
@@ -159,6 +158,7 @@ public class ZkpSchemaService {
         }
     }
 
+    //@TODO: Blockchain registration
     private void registerToBlockchain(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
         throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
 //        try {
@@ -176,20 +176,22 @@ public class ZkpSchemaService {
 //        }
     }
 
+    // @TODO: List Provider registration
     private void registerToListProvider(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
-        try {
-            log.debug("Registering to List Provider: {}", zkpSchema.getSchemaId());
-            registerCredentialSchemaToListProvider(credentialSchema);
-
-            zkpSchema.setStatus(ZkpSchemaStatus.ACTIVATE);
-            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
-        } catch (OpenDidException e) {
-            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
-            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
-        }
+        throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+//        try {
+//            log.debug("Registering to List Provider: {}", zkpSchema.getSchemaId());
+//            registerCredentialSchemaToListProvider(credentialSchema);
+//
+//            zkpSchema.setStatus(ZkpSchemaStatus.ACTIVATE);
+//            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
+//        } catch (OpenDidException e) {
+//            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+//            throw e;
+//        } catch (Exception e) {
+//            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+//            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+//        }
     }
 
     private CredentialSchema generateCredentialSchema(ZkpSchemaInfoDto zkpSchemaInfoDto, String schemaId) {
@@ -203,7 +205,7 @@ public class ZkpSchemaService {
 
         List<ZkpAttributeSaveDto> attributeList = zkpSchemaInfoDto.getAttributes();
 
-        // 1. sortOrder 기준으로 전체 리스트 정렬
+        // 1. Sort the entire list based on sortOrder
         List<ZkpAttributeSaveDto> sortedList = attributeList.stream()
                 .sorted((a, b) -> {
                     Integer orderA = a.getSortOrder();
@@ -215,27 +217,27 @@ public class ZkpSchemaService {
                 })
                 .toList();
 
-        // 2. attrNames 순서 지정
+        // 2. Set the order of attrNames
         List<String> attrNames = sortedList.stream()
                 .map(attr -> attr.getNamespaceIdentifier() + "." + attr.getLabel())
                 .toList();
         credentialSchema.setAttrNames(attrNames);
 
-        // 3. 네임스페이스 기준으로 그룹핑 (순서 보장 필요 → LinkedHashMap 사용)
+        // 3. Group by namespace (preserve order → use LinkedHashMap)
         Map<Long, List<ZkpAttributeSaveDto>> groupedByNamespace = sortedList.stream()
                 .collect(Collectors.groupingBy(
                         ZkpAttributeSaveDto::getNamespaceId,
-                        LinkedHashMap::new, // 입력 순서 유지
+                        LinkedHashMap::new,
                         Collectors.toList()
                 ));
 
-        // 4. AttributeType 구성
+        // 4. Construct AttributeType
         List<AttributeType> attrTypes = groupedByNamespace.entrySet().stream()
                 .map(entry -> {
                     List<ZkpAttributeSaveDto> groupAttributes = entry.getValue();
                     ZkpAttributeSaveDto firstAttr = groupAttributes.get(0);
 
-                    // 네임스페이스 구성
+                    // Build namespace
                     Namespace namespace = new Namespace();
                     namespace.setId(firstAttr.getNamespaceIdentifier());
                     namespace.setName(firstAttr.getNamespaceName());
@@ -243,7 +245,7 @@ public class ZkpSchemaService {
                         namespace.setRef(firstAttr.getNamespaceRef());
                     }
 
-                    // AttributeDef 구성
+                    // Build AttributeDef
                     List<AttributeDef> defs = groupAttributes.stream()
                             .map(attr -> {
                                 AttributeDef def = new AttributeDef();
@@ -291,7 +293,6 @@ public class ZkpSchemaService {
             return AttributeDef.ATTR_TYPE.STRING; // 기본값
         }
 
-        // 대소문자 구분 없이 비교
         if (typeStr.equalsIgnoreCase("String")) {
             return AttributeDef.ATTR_TYPE.STRING;
         } else if (typeStr.equalsIgnoreCase("Number")) {
