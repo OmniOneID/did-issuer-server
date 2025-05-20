@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 
@@ -26,7 +27,9 @@ import java.util.Arrays;
  * Enum class for the symmetric_padding_type table.
  */
 public enum SymmetricPaddingType {
+    @SerializedName("NOPAD")
     NOPAD("NOPAD"),
+    @SerializedName("PKCS5")
     PKCS5("PKCS5");
 
     private final String displayName;

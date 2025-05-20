@@ -17,9 +17,9 @@
 package org.omnione.did.issuer.v1.service;
 
 import org.junit.jupiter.api.*;
-import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.datamodel.data.AccE2e;
 import org.omnione.did.base.datamodel.data.Holder;
+import org.omnione.did.base.datamodel.data.zkp.CredentialInfo;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
@@ -28,7 +28,6 @@ import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
 import org.omnione.did.data.model.profile.ReqE2e;
-import org.omnione.did.data.model.vc.VerifiableCredential;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.helper.IssueServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ class IssueServiceTest {
     @Order(1)
     void offerVc() {
         OfferIssueVcReqDto request = new OfferIssueVcReqDto();
-        request.setVcPlanId("VCPLANID000000000001");
+        request.setVcPlanId("Testt");
         System.out.println("request = " + request);
 
         OfferIssueVcResDto response = issueService.requestOffer(request);
@@ -74,7 +73,7 @@ class IssueServiceTest {
     void inspectIssuePropose() {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
-        request.setVcPlanId("VCPLANID000000000001");
+        request.setVcPlanId("Testt");
         request.setId(RandomUtil.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);
@@ -135,8 +134,9 @@ class IssueServiceTest {
         IssueVcResDto response = issueService.issueVc(request);
 
         System.out.println("response = " + response);
-        VerifiableCredential vc = decIssueVc(response.getE2e().getEncVc(), response.getE2e().getIv());
-        vcId = vc.getId();
+        CredentialInfo vc = decIssueVc(response.getE2e().getEncVc(), response.getE2e().getIv());
+        vcId = vc.getVc().getId();
+        System.out.println("vc.toJson() = " + vc.toJson());
 
         Assertions.assertEquals(txId, response.getTxId(), "TxId Check");
     }
@@ -166,7 +166,7 @@ class IssueServiceTest {
 
     }
 
-    public VerifiableCredential decIssueVc(String endVc, String iv) {
+    public CredentialInfo decIssueVc(String endVc, String iv) {
         ECPrivateKey ecPriKey = (ECPrivateKey) keyPair.getPrivateKey();
         System.out.println("BaseMultibaseUtil.encode(ecPriKey.getEncoded()) = " + BaseMultibaseUtil.encode(ecPriKey.getEncoded()));
         byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1);
@@ -174,9 +174,10 @@ class IssueServiceTest {
 
         byte[] decrypt = BaseCryptoUtil.decrypt(endVc, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC, SymmetricPaddingType.PKCS5);
         String s = new String(decrypt, StandardCharsets.UTF_8);
-        VerifiableCredential verifiableCredential = new VerifiableCredential();
-        verifiableCredential.fromJson(s);
-        return verifiableCredential;
+
+        CredentialInfo credentialInfo = new CredentialInfo();
+        credentialInfo.fromJson(s);
+        return credentialInfo;
     }
 
 }

@@ -38,7 +38,7 @@ public class ZkpSchemaQueryService {
     private final ZkpSchemaAttributeRepository zkpSchemaAttributeRepository;
     private final ZkpCredentialDefinitionRepository zkpCredentialDefinitionRepository;
 
-    public Page<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         Page<ZkpSchema> entityPage = zkpSchemaRepository.searchSchemas(searchKey, searchValue, pageable);
         List<ZkpSchema> schemaList = entityPage.getContent();
 

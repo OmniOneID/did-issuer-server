@@ -23,6 +23,7 @@ import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.UserDto;
 import org.omnione.did.issuer.v1.admin.service.UserManagementService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +49,7 @@ public class UserInfoAdminController {
      * @return a page of user information
      */
     @GetMapping
-    public Page<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
         return userManagementService.searchUserInfoList(searchKey, searchValue, pageable);
     }
 

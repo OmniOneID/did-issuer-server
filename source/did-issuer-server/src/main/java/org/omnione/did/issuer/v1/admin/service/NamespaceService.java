@@ -25,6 +25,7 @@ import org.omnione.did.issuer.v1.admin.dto.namespace.NamespaceDto;
 import org.omnione.did.issuer.v1.admin.dto.namespace.UpdateNamespaceReqDto;
 import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -115,7 +116,7 @@ public class NamespaceService {
      * @param pageable    pagination information
      * @return page of matching namespace DTOs
      */
-    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return namespaceQueryService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 }

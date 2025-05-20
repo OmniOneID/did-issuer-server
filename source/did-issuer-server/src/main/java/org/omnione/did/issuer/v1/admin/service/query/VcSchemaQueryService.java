@@ -118,7 +118,7 @@ public class VcSchemaQueryService {
      * @param pageable pagination information
      * @return page of matching VC schema DTOs
      */
-    public Page<VcSchemaDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<VcSchemaDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         Page<VcSchema> entityPage = vcSchemaRepository.searchVcSchema(searchKey, searchValue, pageable);
         List<VcSchemaDto> vcSchemaDtos = entityPage.getContent().stream()
                 .map(VcSchemaDto::fromEntity)

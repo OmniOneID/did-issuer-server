@@ -102,18 +102,19 @@ public enum ErrorCode {
     WALLET_INFO_NOT_FOUND("00417", "Wallet is not registered.", 400),
     WALLET_CONNECT_FAILURE("00418", "Failed to connect wallet.", 500),
     WALLET_CREATION_FAILURE("00419", "Failed to create wallet.", 500),
-    WALLET_ALREADY_EXISTS("00420", "Failed to create wallet: wallet already exists.", 500),
-    INVALID_PROOF_PURPOSE("00421", "Invalid proof purpose.", 400),
-
-
 
     GET_SIGN_KEY_IDS_FAILED("00420", "Failed to get sign key ids", 400),
     GET_SIGN_DATA_FAILED("00421", "Failed to get sign data", 400),
     GET_VERIFICATION_METHOD_FAILED("00422", "Failed to retrieve verification method.", 500),
     HASH_GENERATION_FAILED("00423", "Failed to generate hash value.", 500),
-
     FAILED_TO_GET_FILE_WALLET_MANAGER("00424", "Failed to get File wallet manager", 500),
+    WALLET_ALREADY_EXISTS("00425", "Failed to create wallet: wallet already exists.", 500),
+    INVALID_PROOF_PURPOSE("00426", "Invalid proof purpose.", 400),
 
+    ZKP_WALLET_INFO_NOT_FOUND("00427", "ZKP Wallet is not registered.", 400),
+    ZKP_WALLET_CONNECT_FAILURE("00428", "Failed to connect ZKP wallet.", 500),
+    ZKP_WALLET_CREATION_FAILURE("00429", "Failed to create ZKP wallet.", 500),
+    ZKP_WALLET_ALREADY_EXISTS("00430", "Failed to create ZKP wallet: ZKP wallet already exists.", 500),
 
     // 500~ 599 = Issuer Error
     CERTIFICATE_DATA_NOT_FOUND("00501", "Certificate VC data not found.", 500),

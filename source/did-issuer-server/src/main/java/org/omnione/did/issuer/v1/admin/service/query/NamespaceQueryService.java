@@ -107,7 +107,7 @@ public class NamespaceQueryService {
      * @param pageable pagination information
      * @return page of NamespaceDto
      */
-    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         Page<Namespace> entityPage = namespaceRepository.searchNamespaces(searchKey, searchValue, pageable);
 
         List<NamespaceDto> namespaceDtos = entityPage.getContent().stream()

@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
 public class ZkpSchemaService {
     private final ZkpSchemaQueryService zkpSchemaQueryService;
 
-    public Page<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return zkpSchemaQueryService.searchZkpSchemaList(searchKey, searchValue, pageable);
     }
 }

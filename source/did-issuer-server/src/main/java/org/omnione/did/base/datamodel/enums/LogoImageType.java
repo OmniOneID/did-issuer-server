@@ -18,6 +18,7 @@ package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
 /**
@@ -25,7 +26,10 @@ import lombok.Getter;
  */
 @Getter
 public enum LogoImageType {
-    JPG("jpg"), PNG("png");
+    @SerializedName("jpg")
+    JPG("jpg"),
+    @SerializedName("png")
+    PNG("png");
 
     private final String value;
     LogoImageType(String value) {

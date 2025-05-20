@@ -21,6 +21,7 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpSchemaService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ public class ZkpSchemaController {
     private final ZkpSchemaService zkpSchemaService;
 
     @GetMapping
-    public Page<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return zkpSchemaService.searchZkpSchemaList(searchKey, searchValue, pageable);
     }
 }

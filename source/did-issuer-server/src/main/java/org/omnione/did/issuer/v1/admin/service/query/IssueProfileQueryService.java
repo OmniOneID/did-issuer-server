@@ -125,7 +125,7 @@ public class IssueProfileQueryService {
      * @param pageable pagination information
      * @return page of IssueProfileDto containing profile and VC Schema ID
      */
-    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
         Page<IssueProfile> entityPage = issueProfileRepository.searchIssueProfiles(searchKey, searchValue, pageable);
 
         List<IssueProfileDto> issueProfileDtos = entityPage.getContent().stream()

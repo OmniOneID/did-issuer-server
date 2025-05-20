@@ -6,17 +6,22 @@ import org.omnione.did.base.db.domain.User;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.util.BaseDigestUtil;
+import org.omnione.did.common.util.HexUtil;
+import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoFromDemoReqDto;
 import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoReqDto;
+import org.omnione.did.issuer.v1.admin.dto.user.SerializeUserInfoData;
 import org.omnione.did.issuer.v1.admin.dto.user.UserDto;
 import org.omnione.did.issuer.v1.admin.service.query.UserInfoQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Service for managing user information in the Admin Console.
@@ -39,7 +44,7 @@ public class UserManagementService {
      * @param pageable    pagination information
      * @return a page of UserDto
      */
-    public Page<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
         return userQueryService.searchUserInfoList(searchKey, searchValue, pageable);
     }
 
@@ -49,9 +54,16 @@ public class UserManagementService {
      * @param request DTO containing user creation data
      */
     public void createUserInfo(CreateUserInfoReqDto request) {
+        String pii = JsonUtil.serializeAndSort(SerializeUserInfoData.builder()
+                .firstname(request.getFirstName())
+                .lastname(request.getLastName())
+                .build());
+        byte[] hashedDataBytes = BaseDigestUtil.generateHash(pii.getBytes(StandardCharsets.UTF_8));
+        String hexStringPii = HexUtil.toHexString(hashedDataBytes);
+
         userQueryService.save(User.builder()
                 .did(request.getDid())
-                .pii(request.getFirstName() + request.getLastName()) // TODO: Trans PII
+                .pii(hexStringPii) // TODO: Trans PII
                 .data(request.getUserInfo())
                 .vcSchemaId(request.getVcSchemaId())
                 .build());

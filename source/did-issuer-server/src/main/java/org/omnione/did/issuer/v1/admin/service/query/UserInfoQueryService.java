@@ -48,12 +48,12 @@ public class UserInfoQueryService {
      * Searches user records based on a search key and value with pagination.
      * Includes associated VC schema information in the result.
      *
-     * @param searchKey the field to search by (e.g., DID or PII)
+     * @param searchKey   the field to search by (e.g., DID or PII)
      * @param searchValue the value to match
-     * @param pageable pagination configuration
+     * @param pageable    pagination configuration
      * @return a page of UserDto objects
      */
-    public Page<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<UserDto> searchUserInfoList(String searchKey, String searchValue, Pageable pageable) {
         Page<User> entityPage = userRepository.searchUser(searchKey, searchValue, pageable);
 
         List<UserDto> namespaceDtos = entityPage.getContent().stream()

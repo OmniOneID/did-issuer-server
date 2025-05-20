@@ -19,11 +19,13 @@ package org.omnione.did.issuer.v1.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
+import org.omnione.did.issuer.v1.admin.dto.PageResponse;
 import org.omnione.did.issuer.v1.admin.dto.vc.GetVcSchemaResDto;
 import org.omnione.did.issuer.v1.admin.dto.vc.VcSchemaDto;
 import org.omnione.did.issuer.v1.admin.dto.vc.VcSchemaReqDto;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,7 +83,9 @@ public class VcSchemaAdminController {
      * @return a page of VC schemas
      */
     @GetMapping
-    public Page<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<VcSchemaDto> searchVcSchemaList(@RequestParam(value = "searchKey", required = false)String searchKey,
+                                                    @RequestParam(value = "searchValue", required = false)String searchValue,
+                                                    Pageable pageable) {
         return vcSchemaManagerService.searchVcSchemaList(searchKey, searchValue, pageable);
     }
 

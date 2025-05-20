@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.datamodel.enums;
+package org.omnione.did.base.property;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Enum class for the offer_type table.
+ * Configuration properties class for the Wallet.
+ * This class maps configuration properties with the prefix "wallet" to its fields.
+ *
  */
 @Getter
-public enum OfferType {
-    @SerializedName("IssueOffer")
-    ISSUE_OFFER("IssueOffer"),
-    @SerializedName("VerifyOffer")
-    VERIFY_OFFER("VerifyOffer"),
-    ;
-    @JsonValue
-    private final String value;
-
-    OfferType(String value) {
-        this.value = value;
-    }
+@Setter
+@ConfigurationProperties(prefix = "zkp-wallet")
+public class ZkpWalletProperty {
+    private String filePath;
+    private String password;
 }

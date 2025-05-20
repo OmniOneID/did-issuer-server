@@ -574,6 +574,7 @@ public abstract class IssueServiceBase implements IssueService {
                             .vcId(vcMeta.getId())
                             .vcSchemaId(vcMeta.getCredentialSchema().getId())
                             .status(vcMeta.getStatus())
+                            .vcType("VC")
                             .build();
                 })
                 .orElseGet(() ->
@@ -587,6 +588,7 @@ public abstract class IssueServiceBase implements IssueService {
                                 .vcId(vcMeta.getId())
                                 .vcSchemaId(vcMeta.getCredentialSchema().getId())
                                 .status(vcMeta.getStatus())
+                                .vcType("VC")
                                 .build()
                 );
     }

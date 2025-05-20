@@ -43,12 +43,12 @@ public class IssuedVcQueryService {
     /**
      * Searches for issued VCs using the specified key and value with pagination.
      *
-     * @param searchKey the field to search by (e.g., DID, VC ID)
+     * @param searchKey   the field to search by (e.g., DID, VC ID)
      * @param searchValue the value to match
-     * @param pageable pagination configuration
+     * @param pageable    pagination configuration
      * @return a page of IssuedVcDto objects
      */
-    public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
         Page<Vc> entityPage = vcRepository.searchIssuedVc(searchKey, searchValue, pageable);
         List<IssuedVcDto> vcs = entityPage.stream()
                 .map(IssuedVcDto::fromEntity)

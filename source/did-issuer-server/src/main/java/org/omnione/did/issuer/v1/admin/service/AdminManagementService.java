@@ -29,7 +29,7 @@ import org.omnione.did.issuer.v1.admin.dto.admin.RegisterAdminReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.ResetPasswordByRootReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.VerifyAdminIdUniqueResDto;
 import org.omnione.did.issuer.v1.admin.service.query.AdminQueryService;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -64,12 +64,12 @@ public class AdminManagementService {
     /**
      * Searches for admin users with optional search parameters and pagination.
      *
-     * @param searchKey the field to search on
+     * @param searchKey   the field to search on
      * @param searchValue the value to search for
-     * @param pageable pagination information
+     * @param pageable    pagination information
      * @return page of AdminDto
      */
-    public Page<AdminDto> searchAdmins(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<AdminDto> searchAdmins(String searchKey, String searchValue, Pageable pageable) {
         return adminQueryService.searchAdminList(searchKey, searchValue, pageable);
     }
 

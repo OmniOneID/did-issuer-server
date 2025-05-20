@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.crypto.enums.DidKeyType;
@@ -25,7 +26,9 @@ import org.omnione.did.crypto.enums.DidKeyType;
  * Enum class for the ecc_curve_type table.
  */
 public enum EccCurveType {
+    @SerializedName("Secp256k1")
     SECP_256_K1("Secp256k1"),
+    @SerializedName("Secp256r1")
     SECP_256_R1("Secp256r1");
 
     private final String displayName;

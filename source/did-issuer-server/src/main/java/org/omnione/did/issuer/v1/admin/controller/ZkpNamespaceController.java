@@ -26,6 +26,7 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpNamespaceService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +49,7 @@ public class ZkpNamespaceController {
     private final ZkpNamespaceService zkpNamespaceService;
 
     @GetMapping
-    public Page<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return zkpNamespaceService.searchZkpNamespaceList(searchKey, searchValue, pageable);
     }
 
