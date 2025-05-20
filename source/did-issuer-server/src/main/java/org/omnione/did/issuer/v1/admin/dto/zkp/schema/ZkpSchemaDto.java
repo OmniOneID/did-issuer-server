@@ -17,6 +17,7 @@ package org.omnione.did.issuer.v1.admin.dto.zkp.schema;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
 
 import java.time.Instant;
@@ -32,6 +33,7 @@ public class ZkpSchemaDto {
     private final String name;
     private final String tag;
     private final Long definitionCount;
+    private final ZkpSchemaStatus status;
     private final String createdAt;
     private final String updatedAt;
 
@@ -44,6 +46,7 @@ public class ZkpSchemaDto {
                 .name(zkpSchema.getName())
                 .tag(zkpSchema.getTag())
                 .definitionCount(0L)
+                .status(zkpSchema.getStatus())
                 .createdAt(formatInstant(zkpSchema.getCreatedAt(), formatter))
                 .updatedAt(formatInstant(zkpSchema.getUpdatedAt(), formatter))
                 .build();
@@ -58,6 +61,7 @@ public class ZkpSchemaDto {
                 .name(zkpSchema.getName())
                 .tag(zkpSchema.getTag())
                 .definitionCount(definitionCount)
+                .status(zkpSchema.getStatus())
                 .createdAt(formatInstant(zkpSchema.getCreatedAt(), formatter))
                 .updatedAt(formatInstant(zkpSchema.getUpdatedAt(), formatter))
                 .build();

@@ -24,6 +24,7 @@ import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.VerifyNamespaceIdUniqueResDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
@@ -181,5 +182,19 @@ public class ZkpNamespaceService {
         return VerifyNamespaceIdUniqueResDto.builder()
                 .isUnique(count == 0)
                 .build();
+    }
+
+    public List<ZkpNamespaceDto> getAllNamespaces() {
+        List<ZkpNamespace> zkpNamespaceList = zkpNamespaceQueryService.findAllNamespaces();
+        return zkpNamespaceList.stream()
+                .map(ZkpNamespaceDto::fromEntity)
+                .toList();
+    }
+
+    public List<ZkpAttributeDto> getAttributesByNamespaceId(Long zkpNamespaceId) {
+        List<ZkpAttribute> zkpAttributeList = zkpNamespaceQueryService.findAttributesByNamespaceId(zkpNamespaceId);
+        return zkpAttributeList.stream()
+                .map(ZkpAttributeDto::fromEntity)
+                .toList();
     }
 }

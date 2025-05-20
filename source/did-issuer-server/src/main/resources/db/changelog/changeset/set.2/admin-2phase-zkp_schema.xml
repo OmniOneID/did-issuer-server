@@ -21,6 +21,9 @@
       <column name="tag" type="varchar(100)">
         <constraints nullable="false" unique="false"/>
       </column>
+      <column name="status" type="varchar(50)">
+        <constraints nullable="false" unique="false"/>
+      </column>
       <column name="created_at" type="timestamp" defaultValue="NOW()">
         <constraints nullable="false" unique="false"/>
       </column>

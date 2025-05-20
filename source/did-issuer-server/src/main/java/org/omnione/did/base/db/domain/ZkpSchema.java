@@ -17,6 +17,8 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
 
 import java.io.Serializable;
 
@@ -55,4 +58,8 @@ public class ZkpSchema extends BaseEntity implements Serializable {
 
     @Column(name = "tag", nullable = false, length = 100)
     private String tag;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50)")
+    private ZkpSchemaStatus status;
 }

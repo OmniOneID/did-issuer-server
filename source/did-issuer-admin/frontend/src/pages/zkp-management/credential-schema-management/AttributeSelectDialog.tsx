@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { DialogProps } from '@toolpad/core/useDialogs';
 import React, { useEffect, useState } from 'react';
+import { getZkpNamespaceAll, getZkpAttributes } from '../../../apis/zkp_management-api';
 
 interface Attribute {
   namespaceId: string;
@@ -12,45 +13,58 @@ interface Attribute {
   type: string;
 }
 
-// 인덱스 시그니처가 있는 인터페이스 추가
 interface AttributeMap {
   [key: string]: { label: string; type: string; }[];
 }
 
-// DialogProps 타입 수정 - 두 번째 제네릭 타입을 Attribute[]로 변경
 type AttributeSelectDialogProps = DialogProps<Attribute[], Attribute[]>;
-
-const mockNamespaceOptions = [
-  { id: 'org.rso.10001', name: 'org.rso.10001' },
-  { id: 'org.rso.10002', name: 'org.rso.10002' },
-];
-
-// 인터페이스 적용
-const mockAttributes: AttributeMap = {
-  'org.rso.10001': [
-    { label: 'zkpcity', type: 'String' },
-    { label: 'zkpphone', type: 'String' },
-  ],
-  'org.rso.10002': [
-    { label: 'zkpname', type: 'String' },
-    { label: 'zkpid', type: 'Number' },
-  ]
-};
 
 const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
   open,
   onClose,
   payload
 }) => {
-  const [namespaceId, setNamespaceId] = useState('');
+  const [namespaceId, setNamespaceId] = useState<number | ''>('');
+  const [namespaceOptions, setNamespaceOptions] = useState<{ id: string; name: string }[]>([]);
   const [attributes, setAttributes] = useState<{ label: string; type: string }[]>([]);
   const [selectedMap, setSelectedMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (namespaceId) {
-      setAttributes(mockAttributes[namespaceId] ?? []);
-      setSelectedMap({});
-    }
+    const fetchNamespaces = async () => {
+      try {
+        const res = await getZkpNamespaceAll(); // API 호출
+        const options = res.data.map((ns: any) => ({
+          id: ns.id,
+          name: ns.name,
+        }));
+        setNamespaceOptions(options);
+      } catch (error) {
+        console.error('Failed to fetch namespaces:', error);
+      }
+    };
+
+    fetchNamespaces();
+  }, []);
+
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      if (!namespaceId) return;
+      try {
+        const res = await getZkpAttributes(namespaceId); // API 호출
+        console.log('Fetched attributes:', res.data);
+        const attrs = res.data.map((item: any) => ({
+          label: item.label,
+          type: item.type,
+        }));
+        setAttributes(attrs);
+        setSelectedMap({});
+      } catch (error) {
+        console.error(`Failed to fetch attributes for namespace ${namespaceId}:`, error);
+        setAttributes([]);
+      }
+    };
+
+    fetchAttributes();
   }, [namespaceId]);
 
   const handleToggle = (label: string) => {
@@ -59,19 +73,18 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
 
   const handleClose = (event: unknown, reason?: string) => {
     if (reason === 'backdropClick') return;
-    onClose([]); // 이제 빈 배열 반환 가능
+    onClose([]);
   };
 
   const handleAdd = async () => {
     const selected = attributes.filter(attr => selectedMap[attr.label]);
     const addedItems = selected.map(attr => ({
-      namespaceId,
+      namespaceId: namespaceId.toString(),
       label: attr.label,
       type: attr.type,
     }));
 
     if (addedItems.length > 0) {
-      // 이제 Attribute[] 타입 반환 가능
       await onClose(addedItems);
     } else {
       await onClose([]);
@@ -95,13 +108,13 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
         <Typography sx={{ mt: 2, mb: 1 }}>Namespace</Typography>
         <Select
           value={namespaceId}
-          onChange={(e) => setNamespaceId(e.target.value)}
+          onChange={(e) => setNamespaceId(Number(e.target.value))}
           fullWidth
           size="small"
           displayEmpty
         >
           <MenuItem value="" disabled>Select a namespace</MenuItem>
-          {mockNamespaceOptions.map(ns => (
+          {namespaceOptions.map(ns => (
             <MenuItem key={ns.id} value={ns.id}>{ns.name}</MenuItem>
           ))}
         </Select>

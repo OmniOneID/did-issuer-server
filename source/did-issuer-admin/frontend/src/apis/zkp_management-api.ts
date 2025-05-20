@@ -35,3 +35,25 @@ export const patchZkpNamespace = async (data: any) => {
 export const verifyNamespaceIdUnique = async (namespaceId: string) => {
     return getData(API_BASE_URL, `zkp/namespaces/check-namespace-id?namespaceId=${namespaceId}`);
 }
+
+export const getZkpNamespaceAll = async () => {
+    return getData(API_BASE_URL, `zkp/namespaces/all`);
+}
+
+export const fetchZkpSchemas = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    });
+
+    if (searchKey && searchValue) {
+        params.append("searchKey", searchKey);
+        params.append("searchValue", searchValue);
+    }
+
+    return getData(API_BASE_URL, `zkp/schemas?${params.toString()}`);
+};
+
+export const getZkpAttributes = async (namespaceId: number) => {
+    return getData(API_BASE_URL, `zkp/namespaces/attributes/all?id=${namespaceId}`);
+}

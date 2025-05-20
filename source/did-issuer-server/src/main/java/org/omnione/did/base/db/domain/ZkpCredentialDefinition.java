@@ -29,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
 import org.omnione.did.zkp.datamodel.enums.CredentialType;
 
 import java.io.Serializable;
@@ -65,4 +66,8 @@ public class ZkpCredentialDefinition extends BaseEntity implements Serializable 
 
     @Column(name = "zkp_schema_id", nullable = false)
     private Long zkpSchemaId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(50)")
+    private ZkpCredentialDefinitionStatus status;
 }

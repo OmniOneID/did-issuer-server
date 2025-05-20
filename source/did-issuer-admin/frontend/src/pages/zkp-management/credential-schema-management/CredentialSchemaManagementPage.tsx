@@ -8,6 +8,7 @@ import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
 import CustomDialog from '../../../components/dialog/CustomDialog';
 import { formatErrorMessage } from '../../../utils/error-handler';
+import { fetchZkpSchemas } from '../../../apis/zkp_management-api';
 
 type ZkpNamespaceRow = {
   id: number;
@@ -38,10 +39,24 @@ const CredentialSchemaManagementPage = () => {
   );
 
   useEffect(() => {
-
+    setLoading(true);
+    fetchZkpSchemas(paginationModel.page, paginationModel.pageSize, null, null)
+    .then((response) => {
+      setLoading(false)
+        setRows(response.data.content);
+        setTotalRows(response.data.totalElements);
+    })
+    .catch((err) => {
+      setLoading(false)
+      console.error("Failed to retrieve zkp schemas. ", err);
+      dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: formatErrorMessage(err, "Failed to fetch zkp schema list."),
+          isModal: true,
+      });
+    });
 
   }, [paginationModel]);
-
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
     margin: 'auto',
@@ -81,9 +96,10 @@ const CredentialSchemaManagementPage = () => {
 
              },
             { field: 'version', headerName: 'Version', width: 100 },
-            { field: 'definitionCount', headerName: 'Definition Count', width: 150 },
-            { field: 'createdAt', headerName: 'Registered At', width: 200 },
-            { field: 'updatedAt', headerName: 'Updated At', width: 200 },
+            { field: 'definitionCount', headerName: 'Definition Count', width: 100 },
+            { field: 'status', headerName: 'Status', width: 100 },
+            { field: 'createdAt', headerName: 'Registered At', width: 150 },
+            { field: 'updatedAt', headerName: 'Updated At', width: 150 },
           ]}
           selectedRow={selectedRow}
           setSelectedRow={setSelectedRow}
