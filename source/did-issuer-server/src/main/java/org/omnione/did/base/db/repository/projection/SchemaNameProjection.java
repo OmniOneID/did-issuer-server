@@ -15,7 +15,7 @@
  */
 package org.omnione.did.base.db.repository.projection;
 
-public interface NamespaceCountProjection {
-    String getNamespaceId();
-    Long getCount();
+public interface SchemaNameProjection {
+    String getSchemaId();
+    String getName();
 }

@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.ZKP_SCHEMA)
@@ -52,5 +54,10 @@ public class ZkpSchemaController {
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
     public ResponseEntity<ZkpSchemaInfoDto> getZkpNamespaceInfo(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(zkpSchemaService.getZkpSchemaInfo(id));
+    }
+
+    @GetMapping(UrlConstant.Admin.FIND_ALL)
+    public ResponseEntity<List<ZkpSchemaDto>> getAllZkpSchemas() {
+        return ResponseEntity.ok(zkpSchemaService.getAllZkpSchemas());
     }
 }

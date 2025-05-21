@@ -16,7 +16,7 @@
 package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
-import org.omnione.did.base.db.repository.projection.NamespaceCountProjection;
+import org.omnione.did.base.db.repository.projection.NamespaceIdProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +30,7 @@ public interface ZkpSchemaAttributeRepository extends JpaRepository<ZkpSchemaAtt
             "FROM ZkpSchemaAttribute a " +
             "WHERE a.namespaceId IN :namespaceIds " +
             "GROUP BY a.namespaceId")
-    List<NamespaceCountProjection> countByNamespaceIdIn(@Param("namespaceIds") List<String> namespaceIds);
+    List<NamespaceIdProjection> countByNamespaceIdIn(@Param("namespaceIds") List<String> namespaceIds);
 
     List<ZkpSchemaAttribute> findByZkpSchemaId(Long id);
 }

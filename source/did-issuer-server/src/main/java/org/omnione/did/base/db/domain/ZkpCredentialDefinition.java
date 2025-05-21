@@ -56,10 +56,16 @@ public class ZkpCredentialDefinition extends BaseEntity implements Serializable 
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private CredentialType vcType;
+    private CredentialType type;
+
+    @Column(name = "alias", nullable = false, length = 50)
+    private String alias;
 
     @Column(name = "tag", nullable = false, length = 500)
     private String tag;
+
+    @Column(name = "version", nullable = false, length = 10)
+    private String version;
 
     @Column(name = "key_correctness_proof", nullable = false)
     private String keyCorrectnessProof;

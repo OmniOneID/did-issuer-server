@@ -32,24 +32,21 @@ import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaInfoDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpNamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
-import org.omnione.did.zkp.datamodel.credential.Credential;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef.ATTR_TYPE;
 import org.omnione.did.zkp.datamodel.schema.AttributeType;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.schema.Namespace;
-import org.omnione.did.zkp.datamodel.util.GsonWrapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.LinkedHashMap;
-import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -340,5 +337,12 @@ public class ZkpSchemaService {
                 .schemaId(zkpSchema.getSchemaId())
                 .attributes(attributes)
                 .build();
+    }
+
+    public List<ZkpSchemaDto> getAllZkpSchemas() {
+        List<ZkpSchema> zkpSchemaList = zkpSchemaQueryService.findAllSchemas();
+        return zkpSchemaList.stream()
+                .map(ZkpSchemaDto::fromEntity)
+                .toList();
     }
 }

@@ -11,8 +11,6 @@ import CustomDialog from "../../../components/dialog/CustomDialog";
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
 import AttributeSelectDialog from "./AttributeSelectDialog";
 import { postZkpSchema } from "../../../apis/zkp_management-api";
-
-
 import { useDialogs } from "@toolpad/core";
 import {
   DndContext,

@@ -46,12 +46,12 @@ const CredentialSchemaManagementPage = () => {
     setLoading(true);
     fetchZkpSchemas(paginationModel.page, paginationModel.pageSize, null, null)
     .then((response) => {
-      setLoading(false)
+        setLoading(false);
         setRows(response.data.content);
         setTotalRows(response.data.totalElements);
     })
     .catch((err) => {
-      setLoading(false)
+      setLoading(false);
       console.error("Failed to retrieve zkp schemas. ", err);
       dialogs.open(CustomDialog, {
           title: 'Notification',

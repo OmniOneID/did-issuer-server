@@ -39,6 +39,7 @@ import ZkpNamespaceDetailPage from './pages/zkp-management/namespace-management/
 import ZkpNamespaceEditPage from './pages/zkp-management/namespace-management/ZkpNamespaceEditPage';
 import ZkpCredentialSchemaRegistrationPage from './pages/zkp-management/credential-schema-management/CredentialSchemaRegistrationPage';
 import CredentialSchemaDetailPage from './pages/zkp-management/credential-schema-management/CredentialSchemaDetailPage';
+import CredentialDefinitionRegistrationPage from './pages/zkp-management/credential-definition-management/CredentialDefinitionRegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -199,6 +200,10 @@ const router = createBrowserRouter([
           },
 
           // zkp credential definition management
+          {
+            path: '/zkp-management/credential-definition-management/credential-definition-registration',
+            Component: CredentialDefinitionRegistrationPage,
+          },
           {
             path: '/zkp-management/credential-definition-management',
             Component: CredentialDefinitionManagementPage,

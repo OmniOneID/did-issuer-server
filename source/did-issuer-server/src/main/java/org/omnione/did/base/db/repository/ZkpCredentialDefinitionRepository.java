@@ -16,18 +16,23 @@
 package org.omnione.did.base.db.repository;
 
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
-import org.omnione.did.base.db.repository.projection.SchemaCountProjection;
+import org.omnione.did.base.db.repository.projection.SchemaIdProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ZkpCredentialDefinitionRepository extends JpaRepository<ZkpCredentialDefinition, Long> {
+public interface ZkpCredentialDefinitionRepository extends JpaRepository<ZkpCredentialDefinition, Long>, QuerydslPredicateExecutor<ZkpCredentialDefinition>, ZkpCredentialDefinitionRepositoryAdmin {
 
     @Query("SELECT cd.schemaId AS schemaId, COUNT(cd) AS count " +
             "FROM ZkpCredentialDefinition cd " +
             "WHERE cd.schemaId IN :schemaIds " +
             "GROUP BY cd.schemaId")
-    List<SchemaCountProjection> countBySchemaIdIn(@Param("schemaIds") List<String> schemaIds);
+    List<SchemaIdProjection> countBySchemaIdIn(@Param("schemaIds") List<String> schemaIds);
+
+    long countByAlias(String alias);
+
+    boolean existsByAlias(String alias);
 }

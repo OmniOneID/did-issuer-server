@@ -164,6 +164,7 @@ public enum ErrorCode {
     ZKP_SCHEMA_REGISTRATION_FAILED("00825", "Failed to register ZKP Schema. (Blockchain or List Provider)", 500),
     ZKP_SCHEMA_ID_ALREADY_EXISTS("00826", "Failed to register ZKP Schema: schema ID already exists.", 400),
     ZKP_SCHEMA_NOT_FOUND("00827", "ZKP Schema not found for the given ID.", 400),
+    CREDENTIAL_DEFINITION_ALIAS_ALREADY_EXISTS("00828", "Failed to register ZKP Credential Definition: alias already exists.", 400),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

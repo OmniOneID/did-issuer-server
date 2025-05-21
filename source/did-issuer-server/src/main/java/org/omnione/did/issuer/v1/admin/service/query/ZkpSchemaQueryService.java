@@ -22,7 +22,7 @@ import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaRepository;
-import org.omnione.did.base.db.repository.projection.SchemaCountProjection;
+import org.omnione.did.base.db.repository.projection.SchemaIdProjection;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
@@ -53,11 +53,11 @@ public class ZkpSchemaQueryService {
                 .toList();
 
         // 2. Fetch counts in batch
-        List<SchemaCountProjection> countResults = zkpCredentialDefinitionRepository.countBySchemaIdIn(schemaIds);
+        List<SchemaIdProjection> countResults = zkpCredentialDefinitionRepository.countBySchemaIdIn(schemaIds);
 
         // 3. Convert results to a Map
         Map<String, Long> countMap = countResults.stream()
-                .collect(Collectors.toMap(SchemaCountProjection::getSchemaId, SchemaCountProjection::getCount));
+                .collect(Collectors.toMap(SchemaIdProjection::getSchemaId, SchemaIdProjection::getCount));
 
         // 4. Convert to DTOs
         List<ZkpSchemaDto> zkpSchemaDtos = schemaList.stream()
@@ -89,5 +89,9 @@ public class ZkpSchemaQueryService {
     public ZkpSchema findById(Long id) {
         return zkpSchemaRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_SCHEMA_NOT_FOUND));
+    }
+
+    public List<ZkpSchema> findAllSchemas() {
+        return zkpSchemaRepository.findAll();
     }
 }

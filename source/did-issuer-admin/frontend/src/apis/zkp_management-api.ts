@@ -65,3 +65,29 @@ export const postZkpSchema = async (data: any) => {
 export const getZkpSchema = async (id: number) => {
     return getData(API_BASE_URL, `zkp/schemas/${id}`);
 };
+
+export const fetchCredentialDefinitions = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    });
+
+    if (searchKey && searchValue) {
+        params.append("searchKey", searchKey);
+        params.append("searchValue", searchValue);
+    }
+
+    return getData(API_BASE_URL, `zkp/definitions?${params.toString()}`);
+};
+
+export const postCredentialDefinition = async (data: any) => {
+    return postData(API_BASE_URL, `zkp/definitions`, data);
+}
+
+export const getZkpSchemaAll = async () => {
+    return getData(API_BASE_URL, `zkp/schemas/all`);
+}
+
+export const verifyCredentialDefinitionAliasUnique = async (alias: string) => {
+    return getData(API_BASE_URL, `zkp/definitions/check-credential-definition-alias?alias=${alias}`);
+}

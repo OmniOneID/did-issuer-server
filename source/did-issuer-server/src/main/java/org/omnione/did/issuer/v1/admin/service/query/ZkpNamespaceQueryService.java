@@ -22,7 +22,7 @@ import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
 import org.omnione.did.base.db.repository.ZkpAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpNamespaceRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
-import org.omnione.did.base.db.repository.projection.NamespaceCountProjection;
+import org.omnione.did.base.db.repository.projection.NamespaceIdProjection;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
@@ -56,11 +56,11 @@ public class ZkpNamespaceQueryService {
                 .collect(Collectors.toList());
 
         // 2. Fetch counts in batch
-        List<NamespaceCountProjection> countResults = zkpSchemaAttributeRepository.countByNamespaceIdIn(namespaceIds);
+        List<NamespaceIdProjection> countResults = zkpSchemaAttributeRepository.countByNamespaceIdIn(namespaceIds);
 
         // 3. Convert results to a Map
         Map<String, Long> countMap = countResults.stream()
-                .collect(Collectors.toMap(NamespaceCountProjection::getNamespaceId, NamespaceCountProjection::getCount));
+                .collect(Collectors.toMap(NamespaceIdProjection::getNamespaceId, NamespaceIdProjection::getCount));
 
         // 4. Convert to DTOs
         List<ZkpNamespaceDto> zkpNamespaceDtos = namespaceList.stream()

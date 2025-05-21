@@ -15,14 +15,7 @@
  */
 package org.omnione.did.base.db.repository.projection;
 
-/**
- * Please explain the class!!
- *
- * @author : yklee0911
- * @fileName : SchemaCountProjection
- * @since : 5/19/25
- */
-public interface SchemaCountProjection {
-    String getSchemaId();
+public interface NamespaceIdProjection {
+    String getNamespaceId();
     Long getCount();
 }
