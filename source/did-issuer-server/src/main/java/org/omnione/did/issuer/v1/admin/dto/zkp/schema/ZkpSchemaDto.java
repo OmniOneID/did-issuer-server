@@ -32,6 +32,7 @@ public class ZkpSchemaDto {
     private final String schemaId;
     private final String name;
     private final String tag;
+    private final String version;
     private final Long definitionCount;
     private final ZkpSchemaStatus status;
     private final String createdAt;
@@ -45,6 +46,7 @@ public class ZkpSchemaDto {
                 .schemaId(zkpSchema.getSchemaId())
                 .name(zkpSchema.getName())
                 .tag(zkpSchema.getTag())
+                .version(zkpSchema.getVersion())
                 .definitionCount(0L)
                 .status(zkpSchema.getStatus())
                 .createdAt(formatInstant(zkpSchema.getCreatedAt(), formatter))
@@ -60,6 +62,7 @@ public class ZkpSchemaDto {
                 .schemaId(zkpSchema.getSchemaId())
                 .name(zkpSchema.getName())
                 .tag(zkpSchema.getTag())
+                .version(zkpSchema.getVersion())
                 .definitionCount(definitionCount)
                 .status(zkpSchema.getStatus())
                 .createdAt(formatInstant(zkpSchema.getCreatedAt(), formatter))

@@ -15,10 +15,12 @@
  */
 package org.omnione.did.base.db.repository;
 
+import org.omnione.did.base.db.domain.Vc;
 import org.omnione.did.base.db.domain.ZkpAttribute;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ZkpAttributeRepository extends JpaRepository<ZkpAttribute, Long> {
     List<ZkpAttribute> findByZkpNamespaceId(Long zkpNamespaceId);

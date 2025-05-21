@@ -15,10 +15,14 @@
  */
 package org.omnione.did.base.db.repository;
 
+import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.ZkpNamespace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
+import java.util.Optional;
+
 public interface ZkpNamespaceRepository extends JpaRepository<ZkpNamespace, Long>, QuerydslPredicateExecutor<ZkpNamespace>, ZkpNamespaceRepositoryAdmin {
     long countByNamespaceId(String namespaceId);
+    Optional<ZkpNamespace> findByNamespaceId(String namespaceId);
 }

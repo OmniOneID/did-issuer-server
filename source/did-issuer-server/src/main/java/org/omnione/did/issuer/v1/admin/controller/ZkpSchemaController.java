@@ -17,13 +17,20 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceDto;
+import org.omnione.did.base.db.domain.ZkpSchema;
+import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceInfoDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaInfoDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpSchemaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,5 +43,15 @@ public class ZkpSchemaController {
     @GetMapping
     public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return zkpSchemaService.searchZkpSchemaList(searchKey, searchValue, pageable);
+    }
+
+    @PostMapping
+    public ResponseEntity<EmptyResDto> createZkpSchema(@RequestBody ZkpSchemaInfoDto request) {
+        return ResponseEntity.ok(zkpSchemaService.createZkpSchema(request));
+    }
+
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<ZkpSchemaInfoDto> getZkpNamespaceInfo(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(zkpSchemaService.getZkpSchemaInfo(id));
     }
 }

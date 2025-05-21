@@ -10,6 +10,9 @@ import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
 import AttributeSelectDialog from "./AttributeSelectDialog";
+import { postZkpSchema } from "../../../apis/zkp_management-api";
+
+
 import { useDialogs } from "@toolpad/core";
 import {
   DndContext,
@@ -25,11 +28,17 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { formatErrorMessage } from "../../../utils/error-handler";
 
 interface Attribute {
-  namespaceId: string;
+  id: number;
+  namespaceId: number;
   label: string;
   type: string;
+  sortOrder: number;
+  namespaceName: string;
+  namespaceIdentifier: string;
+  namespaceRef: string;
 }
 
 interface FormData {
@@ -46,6 +55,11 @@ interface ErrorState {
   attributes?: string;
 }
 
+interface ApiErrorResponse {
+  code: string;
+  description: string;
+}
+
 const SortableRow = ({ attr, index, onRemove }: {
   attr: Attribute;
   index: number;
@@ -59,6 +73,7 @@ const SortableRow = ({ attr, index, onRemove }: {
   
   return (
     <TableRow ref={setNodeRef} style={style}>
+      <TableCell>{attr.sortOrder + 1}</TableCell> 
       <TableCell {...attributes} {...listeners}>{attr.namespaceId}</TableCell>
       <TableCell {...attributes} {...listeners}>{attr.label}</TableCell>
       <TableCell {...attributes} {...listeners}>{attr.type}</TableCell>
@@ -101,51 +116,60 @@ const ZkpCredentialSchemaRegistrationPage = () => {
 
   const handleSubmit = async () => {
     if (!validate()) return;
-
+    
     const result = await dialogs.open(CustomConfirmDialog, {
       title: 'Confirmation',
       message: 'Register this Credential Schema?',
       isModal: true,
     });
 
+    console.log('Submitting form data:', formData);
+
     if (result) {
       setIsLoading(true);
       try {
-        // TODO: call post API here
+        await postZkpSchema(formData);
         setIsLoading(false);
+        
         await dialogs.open(CustomDialog, {
-          title: 'Success',
-          message: 'Credential Schema registered.',
+          title: 'Notification',
+          message: 'Completed register ZKP schema.',
           isModal: true,
         }, {
-          onClose: async () => navigate('/zkp-management/credential-schema-management')
+          onClose: async () => navigate(-1),
         });
-      } catch (error) {
+
+      } catch (error: any) {
         setIsLoading(false);
-        await dialogs.open(CustomDialog, {
-          title: 'Error',
-          message: `Failed: ${error}`,
+    
+        dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: formatErrorMessage(error, "Failed to register ZKP schema."),
           isModal: true,
         });
-      }
     }
   };
+};
 
 const handleOpenAttributeDialog = async () => {
-  // 'as any'로 타입 단언 후 Attribute[]로 지정
   const result = await dialogs.open(AttributeSelectDialog, []) as any as Attribute[];
   if (result && Array.isArray(result)) {
     const newList = [...formData.attributes];
     result.forEach(attr => {
       const exists = newList.some(a => a.namespaceId === attr.namespaceId && a.label === attr.label);
-      if (!exists) newList.push(attr);
+      if (!exists) {
+        newList.push({
+          ...attr,
+          sortOrder: newList.length,
+        });
+      }
     });
     setFormData(prev => ({ ...prev, attributes: newList }));
   }
 };
 
   const handleRemoveAttribute = (index: number) => {
-    console.log('Removing attribute at index:', index); // 로깅 추가
+    console.log('Removing attribute at index:', index);
     const updated = [...formData.attributes];
     updated.splice(index, 1);
     setFormData(prev => ({ ...prev, attributes: updated }));
@@ -155,7 +179,10 @@ const handleOpenAttributeDialog = async () => {
     const { active, over } = event;
     if (active.id === over?.id) return;
     setFormData((prev) => {
-      const reordered = arrayMove(prev.attributes, active.id, over.id);
+      const reordered = arrayMove(prev.attributes, active.id, over.id).map((attr, index) => ({
+        ...attr,
+        sortOrder: index,
+      }));
       return { ...prev, attributes: reordered };
     });
   };
@@ -212,7 +239,9 @@ const handleOpenAttributeDialog = async () => {
 
         <Typography variant="h6" sx={{ mt: 3 }}>Attributes *</Typography>
         {errors.attributes && (
-          <Typography color="error" variant="caption" sx={{ mt: 1 }}>{errors.attributes}</Typography>
+          <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>
+            {errors.attributes}
+          </Typography>
         )}
 
         <Button
@@ -233,6 +262,7 @@ const handleOpenAttributeDialog = async () => {
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                    <TableCell>Order</TableCell>
                     <TableCell>Namespace ID</TableCell>
                     <TableCell>Attribute Label</TableCell>
                     <TableCell>Attribute Type</TableCell>

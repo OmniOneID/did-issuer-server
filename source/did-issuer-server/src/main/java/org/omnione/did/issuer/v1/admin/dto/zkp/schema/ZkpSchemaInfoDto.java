@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.dto.zkp.namespace;
+package org.omnione.did.issuer.v1.admin.dto.zkp.schema;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +21,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -28,17 +32,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Builder
-public class ZkpAttributeSaveDto {
-    // Attribute Information
-    private Long id;
-    private String label;
-    private String type;
-    private String caption;
-    private Integer sortOrder;
-
-    // Namespace Information
-    private Long namespaceId;
-    private String namespaceRef;
-    private String namespaceName;
-    private String namespaceIdentifier;
+public class ZkpSchemaInfoDto {
+    private long id;
+    private String name;
+    private String version;
+    private ZkpSchemaStatus status;
+    private String tag;
+    private String schema;
+    private String schemaId;
+    private List<ZkpAttributeSaveDto> attributes;
 }

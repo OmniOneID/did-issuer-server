@@ -160,6 +160,11 @@ public enum ErrorCode {
     ZKP_NAMESPACE_RETRIEVAL_FAILED("00820", "Failed to retrieve ZKP Namespace.", 500),
     ZKP_NAMESPACE_UPDATE_FAILED("00821", "Failed to update ZKP Namespace.", 500),
     ZKP_NAMESPACE_DELETE_FAILED("00822", "Failed to delete ZKP Namespace.", 500),
+    ZKP_SCHEMA_SAVE_FAILED("00823", "Failed to save ZKP Schema.", 500),
+    ZKP_ATTRIBUTE_NOT_FOUND("00824", "ZKP Attribute not found for the given ID.", 400),
+    ZKP_SCHEMA_REGISTRATION_FAILED("00825", "Failed to register ZKP Schema. (Blockchain or List Provider)", 500),
+    ZKP_SCHEMA_ID_ALREADY_EXISTS("00826", "Failed to register ZKP Schema: schema ID already exists.", 400),
+    ZKP_SCHEMA_NOT_FOUND("00827", "ZKP Schema not found for the given ID.", 400),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

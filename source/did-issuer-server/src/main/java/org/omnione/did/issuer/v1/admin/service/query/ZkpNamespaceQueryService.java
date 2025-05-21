@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.service.query;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.ZkpAttribute;
 import org.omnione.did.base.db.domain.ZkpNamespace;
+import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
 import org.omnione.did.base.db.repository.ZkpAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpNamespaceRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
@@ -104,5 +105,19 @@ public class ZkpNamespaceQueryService {
 
     public List<ZkpNamespace> findAllNamespaces() {
         return zkpNamespaceRepository.findAll();
+    }
+
+    public ZkpAttribute findAttributeById(Long id) {
+        return zkpAttributeRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_ATTRIBUTE_NOT_FOUND));
+    }
+
+    public List<ZkpSchemaAttribute> findZkpSchemaAttributesBySchemaId(Long id) {
+        return zkpSchemaAttributeRepository.findByZkpSchemaId(id);
+    }
+
+    public ZkpNamespace findNamespaceByNamespaceId(String namespaceId) {
+        return zkpNamespaceRepository.findByNamespaceId(namespaceId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_NAMESPACE_NOT_FOUND));
     }
 }

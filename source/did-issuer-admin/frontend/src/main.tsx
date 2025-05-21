@@ -38,6 +38,7 @@ import ZkpNamespaceRegistrationPage from './pages/zkp-management/namespace-manag
 import ZkpNamespaceDetailPage from './pages/zkp-management/namespace-management/ZkpNamespaceDetailPage';
 import ZkpNamespaceEditPage from './pages/zkp-management/namespace-management/ZkpNamespaceEditPage';
 import ZkpCredentialSchemaRegistrationPage from './pages/zkp-management/credential-schema-management/CredentialSchemaRegistrationPage';
+import CredentialSchemaDetailPage from './pages/zkp-management/credential-schema-management/CredentialSchemaDetailPage';
 
 const router = createBrowserRouter([
   {
@@ -187,6 +188,10 @@ const router = createBrowserRouter([
           {
             path: '/zkp-management/credential-schema-management/credential-schema-registration',
             Component: ZkpCredentialSchemaRegistrationPage,
+          },
+           {
+            path: '/zkp-management/credential-schema-management/:id',
+            Component: CredentialSchemaDetailPage,
           },
           {
             path: '/zkp-management/credential-schema-management',

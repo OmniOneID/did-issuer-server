@@ -16,15 +16,20 @@
 package org.omnione.did.issuer.v1.admin.service.query;
 
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
+import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaRepository;
 import org.omnione.did.base.db.repository.projection.SchemaCountProjection;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,5 +68,26 @@ public class ZkpSchemaQueryService {
                 .toList();
 
         return new PageImpl<>(zkpSchemaDtos, pageable, entityPage.getTotalElements());
+    }
+
+    public ZkpSchema saveZkpSchema(ZkpSchema zkpSchema) {
+        return zkpSchemaRepository.save(zkpSchema);
+    }
+
+    public void saveAllSchemaAttributes(List<ZkpSchemaAttribute> attributes) {
+        zkpSchemaAttributeRepository.saveAll(attributes);
+    }
+
+    public void updateZkpSchemaStatusById(@Param("id") Long id, @Param("status") ZkpSchemaStatus status) {
+        zkpSchemaRepository.updateStatusById(id, status);
+    }
+
+    public boolean existsBySchemaId(String schemaId) {
+        return zkpSchemaRepository.existsBySchemaId(schemaId);
+    }
+
+    public ZkpSchema findById(Long id) {
+        return zkpSchemaRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_SCHEMA_NOT_FOUND));
     }
 }

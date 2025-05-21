@@ -17,6 +17,7 @@ import org.omnione.did.zkp.datamodel.enums.PredicateType;
 import org.omnione.did.zkp.datamodel.proofrequest.AttributeInfo;
 import org.omnione.did.zkp.datamodel.proofrequest.PredicateInfo;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
+import org.omnione.did.zkp.datamodel.schema.AttributeDef.ATTR_TYPE;
 import org.omnione.did.zkp.datamodel.schema.AttributeType;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.schema.Namespace;
@@ -117,7 +118,7 @@ public class ZkpSampleConstants {
         attributeDef1.setCaption("성별");
         attributeDefList.add(attributeDef1);
 
-        attributeDef2.setType(AttributeDef.ATTR_TYPE.NUMBER);
+        attributeDef2.setType(ATTR_TYPE.NUMBER);
         attributeDef2.setLabel("zkpbirth");
         attributeDef2.setCaption("생년월일");
         attributeDefList.add(attributeDef2);
@@ -164,17 +165,17 @@ public class ZkpSampleConstants {
         attributeDef1.setCaption("투표아이디");
         attributeDefList.add(attributeDef1);
 
-        attributeDef2.setType(AttributeDef.ATTR_TYPE.NUMBER);
+        attributeDef2.setType(ATTR_TYPE.NUMBER);
         attributeDef2.setLabel("citizenship");
         attributeDef2.setCaption("몰라");
         attributeDefList.add(attributeDef2);
 
-        attributeDef3.setType(AttributeDef.ATTR_TYPE.STRING);
+        attributeDef3.setType(ATTR_TYPE.STRING);
         attributeDef3.setLabel("region");
         attributeDef3.setCaption("지역");
         attributeDefList.add(attributeDef3);
 
-        attributeDef4.setType(AttributeDef.ATTR_TYPE.NUMBER);
+        attributeDef4.setType(ATTR_TYPE.NUMBER);
         attributeDef4.setLabel("birth");
         attributeDef4.setCaption("생일");
         attributeDefList.add(attributeDef4);

@@ -11,5 +11,5 @@ export const formatErrorMessage = (err: any, contextMessage: string): string => 
     errorMessage = String(err);
   }
 
-  return `${contextMessage}<br>${errorMessage}`;
+  return `${contextMessage} ${errorMessage}`;
 };

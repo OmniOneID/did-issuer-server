@@ -31,4 +31,6 @@ public interface ZkpSchemaAttributeRepository extends JpaRepository<ZkpSchemaAtt
             "WHERE a.namespaceId IN :namespaceIds " +
             "GROUP BY a.namespaceId")
     List<NamespaceCountProjection> countByNamespaceIdIn(@Param("namespaceIds") List<String> namespaceIds);
+
+    List<ZkpSchemaAttribute> findByZkpSchemaId(Long id);
 }
