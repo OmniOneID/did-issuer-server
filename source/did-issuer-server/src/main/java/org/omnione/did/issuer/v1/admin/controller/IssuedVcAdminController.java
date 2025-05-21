@@ -20,6 +20,7 @@ import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.dto.vc.IssuedVcDto;
 import org.omnione.did.issuer.v1.admin.service.IssuedVcService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,7 @@ public class IssuedVcAdminController {
      * @return a page of issued verifiable credentials
      */
     @GetMapping
-    public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable){
+    public PageImpl<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable){
 
         return issuedVcService.searchIssuedVcList(searchKey, searchValue, pageable);
     }

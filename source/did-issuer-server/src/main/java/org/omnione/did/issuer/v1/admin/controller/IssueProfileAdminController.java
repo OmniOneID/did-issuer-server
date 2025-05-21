@@ -24,6 +24,7 @@ import org.omnione.did.issuer.v1.admin.dto.profile.GetIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.service.IssueProfileService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,7 +85,7 @@ public class IssueProfileAdminController {
      * @return a page of issue profiles
      */
     @GetMapping
-    public Page<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<IssueProfileDto> searchIssueProfileList(String searchKey, String searchValue, Pageable pageable) {
         return issueProfileService.searchIssueProfileList(searchKey, searchValue, pageable);
     }
 

@@ -25,6 +25,7 @@ import org.omnione.did.issuer.v1.admin.dto.namespace.NamespaceDto;
 import org.omnione.did.issuer.v1.admin.dto.namespace.UpdateNamespaceReqDto;
 import org.omnione.did.issuer.v1.admin.service.NamespaceService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,7 +85,7 @@ public class NamespaceAdminController {
      * @return a page of namespaces
      */
     @GetMapping
-    public Page<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<NamespaceDto> searchNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         return namespaceService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 

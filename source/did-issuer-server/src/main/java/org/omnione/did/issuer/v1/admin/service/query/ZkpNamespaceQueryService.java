@@ -46,7 +46,7 @@ public class ZkpNamespaceQueryService {
         return zkpNamespaceRepository.save(zkpNamespace);
     }
 
-    public Page<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
         Page<ZkpNamespace> entityPage = zkpNamespaceRepository.searchNamespaces(searchKey, searchValue, pageable);
         List<ZkpNamespace> namespaceList = entityPage.getContent();
 

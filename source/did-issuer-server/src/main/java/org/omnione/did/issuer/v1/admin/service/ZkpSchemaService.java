@@ -37,12 +37,15 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaInfoDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpNamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.zkp.datamodel.credential.Credential;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef.ATTR_TYPE;
 import org.omnione.did.zkp.datamodel.schema.AttributeType;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.schema.Namespace;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +62,9 @@ public class ZkpSchemaService {
     private final ZkpSchemaQueryService zkpSchemaQueryService;
     private final ZkpNamespaceQueryService zkpNamespaceQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
+    private final StorageService storageService;
 
-    public Page<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return zkpSchemaQueryService.searchZkpSchemaList(searchKey, searchValue, pageable);
     }
 
@@ -155,40 +159,14 @@ public class ZkpSchemaService {
         }
     }
 
-    //@TODO: Blockchain registration
     private void registerToBlockchain(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
+        storageService.registerCredentialSchema(credentialSchema);
         throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
-//        try {
-//            log.debug("Registering to Blockchain: {}", zkpSchema.getSchemaId());
-//            registerCredentialSchemaToBlockchain(credentialSchema);
-//
-//            zkpSchema.setStatus(ZkpSchemaStatus.NEED_LIST_PROVIDER_REGISTRATION);
-//            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
-//        } catch (OpenDidException e) {
-//            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
-//            throw e;
-//        } catch (Exception e) {
-//            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
-//            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
-//        }
     }
 
     // @TODO: List Provider registration
     private void registerToListProvider(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
         throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
-//        try {
-//            log.debug("Registering to List Provider: {}", zkpSchema.getSchemaId());
-//            registerCredentialSchemaToListProvider(credentialSchema);
-//
-//            zkpSchema.setStatus(ZkpSchemaStatus.ACTIVATE);
-//            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
-//        } catch (OpenDidException e) {
-//            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
-//            throw e;
-//        } catch (Exception e) {
-//            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
-//            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
-//        }
     }
 
     private CredentialSchema generateCredentialSchema(ZkpSchemaInfoDto zkpSchemaInfoDto, String schemaId) {

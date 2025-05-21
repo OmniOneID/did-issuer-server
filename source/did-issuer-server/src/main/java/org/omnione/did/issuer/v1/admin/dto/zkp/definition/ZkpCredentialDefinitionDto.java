@@ -36,7 +36,7 @@ public class ZkpCredentialDefinitionDto {
     private final String alias;
     private final String tag;
     private final String version;
-    private final String keyCorrectnessProof;
+    private final String definition;
     private final Long zkpSchemaId;
     private final ZkpCredentialDefinitionStatus status;
     private final String createdAt;
@@ -53,7 +53,7 @@ public class ZkpCredentialDefinitionDto {
                 .alias(zkpCredentialDefinition.getAlias())
                 .tag(zkpCredentialDefinition.getTag())
                 .version(zkpCredentialDefinition.getVersion())
-                .keyCorrectnessProof(zkpCredentialDefinition.getKeyCorrectnessProof())
+                .definition(zkpCredentialDefinition.getDefinition())
                 .zkpSchemaId(zkpCredentialDefinition.getZkpSchemaId())
                 .status(zkpCredentialDefinition.getStatus())
                 .createdAt(formatInstant(zkpCredentialDefinition.getCreatedAt(), formatter))
@@ -71,7 +71,7 @@ public class ZkpCredentialDefinitionDto {
                 .alias(zkpCredentialDefinition.getAlias())
                 .tag(zkpCredentialDefinition.getTag())
                 .version(zkpCredentialDefinition.getVersion())
-                .keyCorrectnessProof(zkpCredentialDefinition.getKeyCorrectnessProof())
+                .definition(zkpCredentialDefinition.getDefinition())
                 .zkpSchemaId(zkpCredentialDefinition.getZkpSchemaId())
                 .status(zkpCredentialDefinition.getStatus())
                 .schemaName(schemaName)

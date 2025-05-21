@@ -25,6 +25,7 @@ interface FormData {
   name: string;
   ref: string;
   schema: string;
+  status: string;
   items: Item[];
 }
 
@@ -41,6 +42,7 @@ const CredentialSchemaDetailPage = () => {
     name: "",
     ref: "",
     schema: "",
+    status: "",
     items: [],
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +75,7 @@ const CredentialSchemaDetailPage = () => {
           name: data.name,
           ref: data.ref || "",
           schema: data.schema,
+          status: data.status,
           items: data.attributes || [],
         });
       } catch (err) {
@@ -109,10 +112,10 @@ const CredentialSchemaDetailPage = () => {
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Typography variant="h4">ZKP Credential Schema Detail</Typography>
+      <Typography variant="h4">Credential Schema Management</Typography>
 
       <StyledContainer>
-        <StyledTitle>Schema Detail</StyledTitle>
+        <StyledTitle>Credential Schema Registration</StyledTitle>
 
         <StyledInputArea>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -179,6 +182,17 @@ const CredentialSchemaDetailPage = () => {
             margin="normal"
             variant="standard"
             value={formData.ref}
+            slotProps={{ input: { readOnly: true } }}
+            sx={{ width: '60%' }}
+          />
+
+          <TextField
+            label="Status"
+            fullWidth
+            size="small"
+            margin="normal"
+            variant="standard"
+            value={formData.status}
             slotProps={{ input: { readOnly: true } }}
             sx={{ width: '60%' }}
           />

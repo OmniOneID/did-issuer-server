@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 OmniOne.
+ * Copyright 2024 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.dto.zkp.definition;
 
-import lombok.Builder;
+package org.omnione.did.base.property;
+
 import lombok.Getter;
-import org.omnione.did.zkp.datamodel.enums.CredentialType;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Configuration properties class for the Wallet.
+ * This class maps configuration properties with the prefix "wallet" to its fields.
+ *
+ */
 @Getter
-@Builder
-public class ZkpCredentialDefinitionInfoDto {
-    private final String schemaId;
-    private final String alias;
-    private final String version;
-    private final CredentialType type;
-    private final String tag;
+@Setter
+@ConfigurationProperties(prefix = "zkp-wallet")
+public class ZkpWalletProperty {
+    private String filePath;
+    private String password;
 }

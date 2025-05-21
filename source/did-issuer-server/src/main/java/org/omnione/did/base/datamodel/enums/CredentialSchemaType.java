@@ -18,6 +18,7 @@ package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
 /**
@@ -25,6 +26,7 @@ import lombok.Getter;
  */
 @Getter
 public enum CredentialSchemaType {
+    @SerializedName("OsdSchemaCredential")
     OSD_SCHEMA_CREDENTIAL("OsdSchemaCredential");
 
     private final String value;

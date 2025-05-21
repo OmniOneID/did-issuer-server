@@ -25,6 +25,8 @@ import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,9 +45,10 @@ public class UserInitIssueService extends IssueServiceBase {
                                 VcQueryService vcQueryService, StorageService storageService,
                                 FileWalletService walletService, UserQueryService userQueryService, VcSchemaService vcSchemaService,
                                 VcSchemaQueryService vcSchemaQueryService, IssueProfileQueryService issueProfileQueryService,
-                                IssuerInfoQueryService issuerInfoQueryService) {
+                                IssuerInfoQueryService issuerInfoQueryService, ZkpWalletService zkpWalletService) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService
-                , storageService, walletService, issueProfileQueryService, vcSchemaService, vcSchemaQueryService , issuerInfoQueryService);
+                , storageService, walletService, issueProfileQueryService, vcSchemaService,
+                vcSchemaQueryService , issuerInfoQueryService, zkpWalletService);
         this.userQueryService = userQueryService;
     }
 

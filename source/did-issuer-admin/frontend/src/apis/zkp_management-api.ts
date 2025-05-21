@@ -91,3 +91,7 @@ export const getZkpSchemaAll = async () => {
 export const verifyCredentialDefinitionAliasUnique = async (alias: string) => {
     return getData(API_BASE_URL, `zkp/definitions/check-credential-definition-alias?alias=${alias}`);
 }
+
+export const getCredentialDefinition = async (id: number) => {
+    return getData(API_BASE_URL, `zkp/definitions/${id}`);
+};

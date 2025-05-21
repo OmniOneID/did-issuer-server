@@ -19,8 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Vc;
 import org.omnione.did.issuer.v1.admin.dto.vc.IssuedVcDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssuedVcQueryService;
-import org.omnione.did.issuer.v1.agent.service.StorageService;
-import org.springframework.data.domain.Page;
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class IssuedVcService {
      * @param pageable    the pagination information
      * @return a page of IssuedVcDto
      */
-    public Page<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<IssuedVcDto> searchIssuedVcList(String searchKey, String searchValue, Pageable pageable) {
         return issuedVcQueryService.searchIssuedVcList(searchKey, searchValue, pageable);
     }
 

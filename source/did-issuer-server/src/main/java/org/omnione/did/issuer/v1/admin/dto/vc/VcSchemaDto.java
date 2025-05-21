@@ -15,6 +15,7 @@
  */
 package org.omnione.did.issuer.v1.admin.dto.vc;
 
+import com.google.gson.annotations.Expose;
 import lombok.Builder;
 import lombok.Getter;
 import org.omnione.did.base.db.domain.VcSchema;
@@ -30,13 +31,21 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Builder
 public class VcSchemaDto {
+    @Expose
     private Long id;
+    @Expose
     private String vcSchemaId;
+    @Expose
     private String title;
+    @Expose
     private String description;
+    @Expose
     private String language;
+    @Expose
     private String version;
+    @Expose
     private String createdAt;
+    @Expose
     private String updatedAt;
 
     public static VcSchemaDto fromEntity(VcSchema vcSchema) {

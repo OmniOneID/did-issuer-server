@@ -49,7 +49,7 @@ import org.omnione.did.issuer.v1.admin.service.query.ApplicationConfigQueryServi
 import org.omnione.did.issuer.v1.admin.service.query.DidDocumentQueryService;
 import org.omnione.did.issuer.v1.agent.service.EnrollEntityService;
 import org.omnione.did.issuer.v1.agent.service.FileWalletService;
-import org.omnione.did.issuer.v1.agent.service.StorageService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.issuer.v1.agent.service.query.CertificateVcQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.wallet.key.WalletManagerInterface;

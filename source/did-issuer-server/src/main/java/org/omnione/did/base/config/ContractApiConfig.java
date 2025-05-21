@@ -3,6 +3,7 @@ package org.omnione.did.base.config;
 import org.omnione.did.ContractApi;
 import org.omnione.did.ContractFactory;
 import org.omnione.did.base.property.BlockchainProperty;
+import org.omnione.did.zkp.datamodel.enums.CredentialType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

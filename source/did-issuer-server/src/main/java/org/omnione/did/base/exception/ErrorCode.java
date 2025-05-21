@@ -102,18 +102,23 @@ public enum ErrorCode {
     WALLET_INFO_NOT_FOUND("00417", "Wallet is not registered.", 400),
     WALLET_CONNECT_FAILURE("00418", "Failed to connect wallet.", 500),
     WALLET_CREATION_FAILURE("00419", "Failed to create wallet.", 500),
-    WALLET_ALREADY_EXISTS("00420", "Failed to create wallet: wallet already exists.", 500),
-    INVALID_PROOF_PURPOSE("00421", "Invalid proof purpose.", 400),
-
-
 
     GET_SIGN_KEY_IDS_FAILED("00420", "Failed to get sign key ids", 400),
     GET_SIGN_DATA_FAILED("00421", "Failed to get sign data", 400),
     GET_VERIFICATION_METHOD_FAILED("00422", "Failed to retrieve verification method.", 500),
     HASH_GENERATION_FAILED("00423", "Failed to generate hash value.", 500),
-
     FAILED_TO_GET_FILE_WALLET_MANAGER("00424", "Failed to get File wallet manager", 500),
+    WALLET_ALREADY_EXISTS("00425", "Failed to create wallet: wallet already exists.", 500),
+    INVALID_PROOF_PURPOSE("00426", "Invalid proof purpose.", 400),
 
+    // ZKP 10400~10499 = ZKP Error
+    ZKP_WALLET_INFO_NOT_FOUND("10400", "ZKP Wallet is not registered.", 400),
+    ZKP_WALLET_CONNECT_FAILURE("10401", "Failed to connect ZKP wallet.", 500),
+    ZKP_WALLET_CREATION_FAILURE("10402", "Failed to create ZKP wallet.", 500),
+    ZKP_WALLET_ALREADY_EXISTS("10403", "Failed to create ZKP wallet: ZKP wallet already exists.", 500),
+
+    FAILED_TO_GENERATE_CORRECTNESS_PROOF("10404", "Failed to Generate Correctness Proof.", 500),
+    FAILED_TO_GENERATE_CREDENTIAL_OFFER("10405", "Failed to Create Credential Offer.", 500),
 
     // 500~ 599 = Issuer Error
     CERTIFICATE_DATA_NOT_FOUND("00501", "Certificate VC data not found.", 500),
@@ -165,6 +170,9 @@ public enum ErrorCode {
     ZKP_SCHEMA_ID_ALREADY_EXISTS("00826", "Failed to register ZKP Schema: schema ID already exists.", 400),
     ZKP_SCHEMA_NOT_FOUND("00827", "ZKP Schema not found for the given ID.", 400),
     CREDENTIAL_DEFINITION_ALIAS_ALREADY_EXISTS("00828", "Failed to register ZKP Credential Definition: alias already exists.", 400),
+    CREDENTIAL_DEFINITION_GENERATION_FAILED("00829", "Failed to generate ZKP Credential Definition.", 500),
+    CREDENTIAL_DEFINITION_REGISTRATION_FAILED("00830", "Failed to register ZKP Credential Definition. (Blockchain or List Provider)", 500),
+    ZKP_CREDENTIAL_DEFINITION_NOT_FOUND("00831", "ZKP Credential Definition not found for the given ID.", 400),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

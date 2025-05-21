@@ -21,12 +21,13 @@ import org.omnione.did.base.constants.UrlConstant.Admin;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.definition.VerifyCredentialDefinitionAliasUniqueResDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionInfoDto;
+import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionSaveDto;
 import org.omnione.did.issuer.v1.admin.service.ZkpDefinitionService;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,7 @@ public class ZkpCredentialDefinitionController {
     private final ZkpDefinitionService zkpDefinitionService;
 
     @GetMapping
-    public Page<ZkpCredentialDefinitionDto> searchZkpDefinitionList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpCredentialDefinitionDto> searchZkpDefinitionList(String searchKey, String searchValue, Pageable pageable) {
         return zkpDefinitionService.searchZkpDefinitionList(searchKey, searchValue, pageable);
     }
 
@@ -50,7 +51,12 @@ public class ZkpCredentialDefinitionController {
     }
 
     @PostMapping
-    public ResponseEntity<EmptyResDto> createZkpCredentialDefinition(@RequestBody ZkpCredentialDefinitionInfoDto request) {
+    public ResponseEntity<EmptyResDto> createZkpCredentialDefinition(@RequestBody ZkpCredentialDefinitionSaveDto request) {
         return ResponseEntity.ok(zkpDefinitionService.createZkpCredentialDefinition(request));
+    }
+
+    @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    public ResponseEntity<ZkpCredentialDefinitionDto> getZkpCredentialDefinitionInfo(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(zkpDefinitionService.getZkpCredentialDefinitionInfo(id));
     }
 }

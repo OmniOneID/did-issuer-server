@@ -67,10 +67,19 @@ import org.omnione.did.issuer.v1.agent.service.query.*;
 
 
 import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
+import org.omnione.did.zkp.core.manager.ZkpCredentialManager;
+import org.omnione.did.zkp.crypto.constant.ZkpCryptoConstants;
+import org.omnione.did.zkp.crypto.util.BigIntegerUtil;
 import org.omnione.did.zkp.datamodel.credential.Credential;
 import org.omnione.did.zkp.datamodel.credentialoffer.CredentialOffer;
+import org.omnione.did.zkp.datamodel.credentialoffer.KeyCorrectnessProof;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.exception.ZkpException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.time.Instant;
@@ -99,6 +108,7 @@ public abstract class IssueServiceBase implements IssueService {
     private final VcSchemaService vcSchemaService;
     private final VcSchemaQueryService vcSchemaQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
+    private final ZkpWalletService zkpWalletService;
 
     /**
      * Generates an offer for issuing a Verifiable Credential.
@@ -363,6 +373,10 @@ public abstract class IssueServiceBase implements IssueService {
 
             log.debug("\t--> Issuing Credential");
             Credential credential = ZkpSampleConstants.getCredential(reqVc.getCredentialRequest(), vcMeta.getId());
+            // TODO
+//            ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
+//            Credential credential = issueCredential();
+
             log.debug("credential : {}", credential.toJson());
             log.debug("\t--> Encrypt VC");
             String encVc = encryptVerifiableCredential(verifiableCredential, credential, mergeSharedSecretAndNonce, iv, e2e);
@@ -574,6 +588,7 @@ public abstract class IssueServiceBase implements IssueService {
                             .vcId(vcMeta.getId())
                             .vcSchemaId(vcMeta.getCredentialSchema().getId())
                             .status(vcMeta.getStatus())
+                            .vcType("VC")
                             .build();
                 })
                 .orElseGet(() ->
@@ -587,6 +602,7 @@ public abstract class IssueServiceBase implements IssueService {
                                 .vcId(vcMeta.getId())
                                 .vcSchemaId(vcMeta.getCredentialSchema().getId())
                                 .status(vcMeta.getStatus())
+                                .vcType("VC")
                                 .build()
                 );
     }
@@ -917,7 +933,9 @@ public abstract class IssueServiceBase implements IssueService {
         issueProfile.setTitle(byVcPlanId.getTitle());
         issueProfile.setLanguage(byVcPlanId.getLanguage());
 
-        CredentialOffer zkpSampleOffer = ZkpSampleConstants.getZkpSampleOffer();
+        // TODO get ZKP Credential Definition
+        ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
+        CredentialOffer zkpSampleOffer = createCredentialOffer(zkpCredentialDefinition);
 
         ZkpInnerIssueProfile innerIssueProfile = new ZkpInnerIssueProfile();
         innerIssueProfile.setIssuer(getIssuer());
@@ -928,6 +946,21 @@ public abstract class IssueServiceBase implements IssueService {
         issueProfile.setProfile(innerIssueProfile);
 
         return issueProfile;
+    }
+
+    private CredentialOffer createCredentialOffer(ZkpCredentialDefinition zkpCredentialDefinition) {
+
+        BigInteger issuerNonce = new BigIntegerUtil().createRandomBigInteger(ZkpCryptoConstants.LARGE_NONCE);
+        KeyCorrectnessProof correctnessProof = zkpWalletService.getCorrectnessProof(zkpCredentialDefinition.getDefinitionId()); // TODO Change Alias
+
+
+        try {
+            return new ZkpCredentialManager().createCredentialOffer(correctnessProof,
+                    zkpCredentialDefinition.getSchemaId(), zkpCredentialDefinition.getDefinitionId(), issuerNonce);
+        } catch (ZkpException e) {
+            log.error("Failed Create Credential Offer: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.FAILED_TO_GENERATE_CREDENTIAL_OFFER);
+        }
     }
 
     private ProviderDetail getIssuer() {

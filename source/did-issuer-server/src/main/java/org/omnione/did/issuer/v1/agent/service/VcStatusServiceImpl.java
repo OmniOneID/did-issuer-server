@@ -17,7 +17,6 @@
 package org.omnione.did.issuer.v1.agent.service;
 
 
-import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.datamodel.data.ReqRevokeVc;
 import org.omnione.did.base.datamodel.data.RequestProof;
 import org.omnione.did.base.datamodel.enums.VerifyAuthType;
@@ -42,6 +41,7 @@ import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 
 import org.omnione.did.issuer.v1.agent.service.query.RevokeVcQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.VcQueryService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +72,7 @@ public class VcStatusServiceImpl implements VcStatusService {
         this.storageService = storageService;
         this.transactionService = transactionService;
         this.revokeVcQueryService = revokeVcQueryService;
-        this.applicationConfig = applicationConfigQueryService.getApplicationConfig();
+        this.applicationConfig = null;
         this.vcQueryService = vcQueryService;
     }
 

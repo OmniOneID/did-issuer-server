@@ -1,3 +1,7 @@
 wallet:
   file-path:
   password: omnioneopendid12!@
+
+zkp-wallet:
+  file-path:
+  password: omnioneopendid12!@

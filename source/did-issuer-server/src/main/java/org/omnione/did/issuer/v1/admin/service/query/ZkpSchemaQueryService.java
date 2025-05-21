@@ -43,7 +43,7 @@ public class ZkpSchemaQueryService {
     private final ZkpSchemaAttributeRepository zkpSchemaAttributeRepository;
     private final ZkpCredentialDefinitionRepository zkpCredentialDefinitionRepository;
 
-    public Page<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         Page<ZkpSchema> entityPage = zkpSchemaRepository.searchSchemas(searchKey, searchValue, pageable);
         List<ZkpSchema> schemaList = entityPage.getContent();
 
@@ -90,6 +90,12 @@ public class ZkpSchemaQueryService {
         return zkpSchemaRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_SCHEMA_NOT_FOUND));
     }
+
+    public ZkpSchema findBySchemaId(String schemaId) {
+        return zkpSchemaRepository.findBySchemaId(schemaId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_SCHEMA_NOT_FOUND));
+    }
+
 
     public List<ZkpSchema> findAllSchemas() {
         return zkpSchemaRepository.findAll();

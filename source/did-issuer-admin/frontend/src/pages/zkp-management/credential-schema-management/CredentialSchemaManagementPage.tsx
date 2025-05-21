@@ -63,6 +63,7 @@ const CredentialSchemaManagementPage = () => {
   }, [paginationModel]);
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
+    width: 1100,
     margin: 'auto',
     marginTop: theme.spacing(1),
     padding: theme.spacing(3),
@@ -85,7 +86,7 @@ const CredentialSchemaManagementPage = () => {
         <CustomDataGrid
           rows={rows}
           columns={[
-            { field: 'schemaId', headerName: 'ID', width: 240 },
+            { field: 'schemaId', headerName: 'ID', width: 200 },
             { field: 'name', headerName: 'Name', width: 100,
               renderCell: (params) => (
                 <Link
@@ -99,8 +100,8 @@ const CredentialSchemaManagementPage = () => {
               ),
 
              },
-            { field: 'version', headerName: 'Version', width: 50 },
-            { field: 'definitionCount', headerName: 'Definition Count', width: 100 },
+            { field: 'version', headerName: 'Version', width: 100 },
+            { field: 'definitionCount', headerName: 'Definition Count', width: 150 },
             { field: 'status', headerName: 'Status', width: 250 },
             { field: 'createdAt', headerName: 'Registered At', width: 150 },
             { field: 'updatedAt', headerName: 'Updated At', width: 150 },

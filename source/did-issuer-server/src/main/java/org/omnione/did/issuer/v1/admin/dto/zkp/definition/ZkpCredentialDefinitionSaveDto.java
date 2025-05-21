@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 OmniOne.
+ * Copyright 2025 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.omnione.did.issuer.v1.admin.dto.zkp.definition;
 
-package org.omnione.did.base.datamodel.enums;
-
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.gson.annotations.SerializedName;
+import lombok.Builder;
 import lombok.Getter;
+import org.omnione.did.zkp.datamodel.enums.CredentialType;
 
-/**
- * Enum class for the offer_type table.
- */
 @Getter
-public enum OfferType {
-    @SerializedName("IssueOffer")
-    ISSUE_OFFER("IssueOffer"),
-    @SerializedName("VerifyOffer")
-    VERIFY_OFFER("VerifyOffer"),
-    ;
-    @JsonValue
-    private final String value;
-
-    OfferType(String value) {
-        this.value = value;
-    }
+@Builder
+public class ZkpCredentialDefinitionSaveDto {
+    private final String schemaId;
+    private final String alias;
+    private final String version;
+    private final CredentialType type;
+    private final String tag;
 }

@@ -33,6 +33,7 @@ import org.omnione.did.issuer.v1.admin.service.query.NamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -134,7 +135,7 @@ public class VcSchemaManagerService {
      * @param pageable    pagination information
      * @return page of matching VC schema DTOs
      */
-    public Page<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<VcSchemaDto> searchVcSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return vcSchemaQueryService.searchNamespaceList(searchKey, searchValue, pageable);
     }
 

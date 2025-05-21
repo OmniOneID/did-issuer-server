@@ -28,6 +28,7 @@ import org.omnione.did.issuer.v1.admin.dto.admin.ResetPasswordByRootReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.VerifyAdminIdUniqueResDto;
 import org.omnione.did.issuer.v1.admin.service.AdminManagementService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +67,7 @@ public class AdminManagementController {
      * @return a page of admin user results
      */
     @GetMapping(value = "/list")
-    public Page<AdminDto> searchAdmins(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<AdminDto> searchAdmins(String searchKey, String searchValue, Pageable pageable) {
         return adminManagementService.searchAdmins(searchKey, searchValue, pageable);
     }
 

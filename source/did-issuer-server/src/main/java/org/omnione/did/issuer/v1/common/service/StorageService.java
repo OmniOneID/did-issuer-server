@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.agent.service;
+package org.omnione.did.issuer.v1.common.service;
 
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.vc.VcMeta;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 
 /**
  * Storage service interface for handling DID documents and VC metadata.
@@ -51,4 +53,11 @@ public interface StorageService {
      * @return Found VC metadata.
      */
     VcMeta getVcMetaByVcId(String vcId);
+
+    void registerCredentialSchema(CredentialSchema credentialSchema);
+    void registerCredentialDefinition(CredentialDefinition credentialDefinition);
+
+    CredentialSchema getCredentialSchema(String credentialSchemaId);
+    CredentialDefinition getCredentialDefinition(String credentialDefinitionId);
+
 }

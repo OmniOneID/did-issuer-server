@@ -20,6 +20,8 @@ import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaRepository;
 import org.omnione.did.base.db.repository.projection.SchemaNameProjection;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,7 +38,7 @@ public class ZkpCredentialDefinitionQueryService {
     private final ZkpCredentialDefinitionRepository zkpCredentialDefinitionRepository;
     private final ZkpSchemaRepository zkpSchemaRepository;
 
-    public Page<ZkpCredentialDefinitionDto> searchZkpCredentialDefinitionList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpCredentialDefinitionDto> searchZkpCredentialDefinitionList(String searchKey, String searchValue, Pageable pageable) {
         Page<ZkpCredentialDefinition> entityPage = zkpCredentialDefinitionRepository.searchCredentialDefinitions(searchKey, searchValue, pageable);
         List<ZkpCredentialDefinition> definitionList = entityPage.getContent();
 
@@ -69,5 +71,14 @@ public class ZkpCredentialDefinitionQueryService {
 
     public boolean existByAlias(String alias) {
         return zkpCredentialDefinitionRepository.existsByAlias(alias);
+    }
+
+    public ZkpCredentialDefinition saveCredentialDefinition(ZkpCredentialDefinition zkpCredentialDefinition) {
+        return zkpCredentialDefinitionRepository.save(zkpCredentialDefinition);
+    }
+
+    public ZkpCredentialDefinition findById(Long id) {
+        return zkpCredentialDefinitionRepository.findById(id)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_CREDENTIAL_DEFINITION_NOT_FOUND));
     }
 }

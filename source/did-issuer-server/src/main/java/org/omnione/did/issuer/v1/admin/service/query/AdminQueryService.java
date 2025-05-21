@@ -64,7 +64,7 @@ public class AdminQueryService {
      * @param pageable    pagination information
      * @return page of AdminDto
      */
-    public Page<AdminDto> searchAdminList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<AdminDto> searchAdminList(String searchKey, String searchValue, Pageable pageable) {
         Page<Admin> adminPage = adminRepository.searchAdmins(searchKey, searchValue, pageable);
 
         List<AdminDto> adminDtos = adminPage.getContent().stream()

@@ -32,7 +32,7 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceSaveDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpNamespaceUpdateDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpNamespaceQueryService;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ import java.util.List;
 public class ZkpNamespaceService {
     private final ZkpNamespaceQueryService zkpNamespaceQueryService;
 
-    public Page<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
+    public PageImpl<ZkpNamespaceDto> searchZkpNamespaceList(String searchKey, String searchValue, Pageable pageable) {
        return zkpNamespaceQueryService.searchZkpNamespaceList(searchKey, searchValue, pageable);
     }
 

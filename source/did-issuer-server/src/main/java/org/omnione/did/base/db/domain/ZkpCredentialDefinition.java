@@ -67,8 +67,8 @@ public class ZkpCredentialDefinition extends BaseEntity implements Serializable 
     @Column(name = "version", nullable = false, length = 10)
     private String version;
 
-    @Column(name = "key_correctness_proof", nullable = false)
-    private String keyCorrectnessProof;
+    @Column(name = "definition", nullable = false)
+    private String definition;
 
     @Column(name = "zkp_schema_id", nullable = false)
     private Long zkpSchemaId;

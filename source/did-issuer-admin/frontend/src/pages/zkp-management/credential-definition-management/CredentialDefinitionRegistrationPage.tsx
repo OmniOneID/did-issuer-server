@@ -10,7 +10,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import CustomDialog from "../../../components/dialog/CustomDialog";
 import CustomConfirmDialog from "../../../components/dialog/CustomConfirmDialog";
-import { postZkpSchema, getZkpSchemaAll, verifyCredentialDefinitionAliasUnique } from "../../../apis/zkp_management-api";
+import { postCredentialDefinition, getZkpSchemaAll, verifyCredentialDefinitionAliasUnique } from "../../../apis/zkp_management-api";
 import { useDialogs } from "@toolpad/core";
 import {
   DndContext,
@@ -149,6 +149,34 @@ const CredentialDefinitionRegistrationPage = () => {
   
   const handleSubmit = async () => {
     if (!validate()) return;
+
+    const result = await dialogs.open(CustomConfirmDialog, {
+      title: 'Confirmation',
+      message: 'Are you sure you want to register ZKP Credential Definition?',
+      isModal: true,
+    });
+
+    if (result) {
+      setIsLoading(true);
+      try {
+        await postCredentialDefinition(formData);
+        setIsLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: 'Completed register ZKP Credential Definition',
+          isModal: true,
+        }, {
+          onClose: async () => navigate('/zkp-management/credential-definition-management'),
+        });
+      } catch (error) {
+        setIsLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: formatErrorMessage(error, "Failed to register ZKP Credential Definition."),
+          isModal: true,
+        });
+      }
+    }
   };
 
   const handleCheckDuplicateDefinitionAlias = () => {

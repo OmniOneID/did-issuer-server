@@ -17,6 +17,7 @@ package org.omnione.did.base.db.repository;
 
 import jakarta.transaction.Transactional;
 import org.omnione.did.base.db.constant.ZkpSchemaStatus;
+import org.omnione.did.base.db.domain.ZkpNamespace;
 import org.omnione.did.base.db.domain.ZkpSchema;
 import org.omnione.did.base.db.repository.projection.SchemaNameProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, QuerydslPredicateExecutor<ZkpSchema>, ZkpSchemaRepositoryAdmin  {
     @Modifying
@@ -39,4 +41,6 @@ public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, Que
             "FROM ZkpSchema s " +
             "WHERE s.schemaId IN :schemaIds")
     List<SchemaNameProjection> findNamesBySchemaIds(@Param("schemaIds") List<String> schemaIds);
+
+    Optional<ZkpSchema> findBySchemaId(String schemaId);
 }

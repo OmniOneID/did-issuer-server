@@ -93,7 +93,7 @@ const CredentialDefinitionManagementPage = () => {
                   <Link
                     component="button"
                     variant='body2'
-                    onClick={() => navigate(`/zkp-management/credential-schema-management/${params.row.id}`)}
+                    onClick={() => navigate(`/zkp-management/credential-definition-management/${params.row.id}`)}
                     sx={{ cursor: 'pointer', color: 'primary.main' }}
                   >
                     {params.value}

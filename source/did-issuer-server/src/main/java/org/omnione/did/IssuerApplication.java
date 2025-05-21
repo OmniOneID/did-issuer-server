@@ -18,9 +18,10 @@ package org.omnione.did;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {JacksonAutoConfiguration.class})
 @ConfigurationPropertiesScan(basePackages = "org.omnione.did.base.property")
 public class IssuerApplication {
 

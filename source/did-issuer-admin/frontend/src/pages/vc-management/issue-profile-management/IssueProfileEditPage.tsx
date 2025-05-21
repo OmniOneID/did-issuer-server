@@ -52,7 +52,7 @@ interface ItemFormData {
 }
 
 const cipherOptions = ["AES-128-CBC", "AES-128-ECB", "AES-256-CBC", "AES-256-ECB"];
-const curveOptions = ["secp256r1"];
+const curveOptions = ["Secp256r1"];
 const paddingOptions = ["PKCS5", "OAEP"];
 const initiateTypeOptions = [{ key: "User Initiate", value: "user_init" },
 { key: "Issuer Initiate", "value": "issuer_init" }

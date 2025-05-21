@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 
@@ -26,10 +27,15 @@ import java.util.Arrays;
  * Enum class for the symmetric_cipher_type table.
  */
 public enum SymmetricCipherType {
+    @SerializedName("AES-128-CBC")
     AES_128_CBC("AES-128-CBC"),
+    @SerializedName("AES-128-ECB")
     AES_128_ECB("AES-128-ECB"),
+    @SerializedName("AES-256-CBC")
     AES_256_CBC("AES-256-CBC"),
+    @SerializedName("AES-256-ECB")
     AES_256_ECB("AES-256-ECB");
+
     private final String displayName;
 
     SymmetricCipherType(String displayName) {
