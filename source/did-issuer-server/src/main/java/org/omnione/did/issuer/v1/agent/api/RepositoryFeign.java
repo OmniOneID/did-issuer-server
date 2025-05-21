@@ -21,6 +21,8 @@ import org.omnione.did.data.model.vc.VcMeta;
 import org.omnione.did.issuer.v1.agent.api.dto.DidDocApiResDto;
 import org.omnione.did.issuer.v1.agent.api.dto.UpdateVcStatusApiReqDto;
 import org.omnione.did.issuer.v1.agent.api.dto.VcMetaApiResDto;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.cloud.openfeign.FeignClient;
 
@@ -57,4 +59,14 @@ public interface RepositoryFeign {
      */
     @PutMapping("/vc-meta")
     void updateVcStatus(@RequestBody UpdateVcStatusApiReqDto request);
+
+    @PostMapping("/credential-schema")
+    void registerCredentialSchema(CredentialSchema credentialSchema);
+    @PostMapping("/credential-definition")
+    void registerCredentialDefinition(CredentialDefinition credentialDefinition);
+
+    @GetMapping("/credential-schema")
+    CredentialSchema getCredentialSchema(@RequestParam String credentialSchemaId);
+    @GetMapping("/credential-definition")
+    CredentialDefinition getCredentialDefinition(@RequestParam String credentialDefinitionId);
 }

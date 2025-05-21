@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.Vc;
 import org.omnione.did.issuer.v1.admin.dto.vc.IssuedVcDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssuedVcQueryService;
-import org.omnione.did.issuer.v1.agent.service.StorageService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

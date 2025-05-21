@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.agent.service;
+package org.omnione.did.issuer.v1.common.service;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,8 @@ import org.omnione.did.data.model.vc.VcMeta;
 import org.omnione.did.issuer.v1.agent.api.RepositoryFeign;
 import org.omnione.did.issuer.v1.agent.api.dto.DidDocApiResDto;
 import org.omnione.did.issuer.v1.agent.api.dto.UpdateVcStatusApiReqDto;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -118,5 +120,25 @@ public class RepositoryServiceImpl implements StorageService {
         VcMeta vcMeta = new VcMeta();
         vcMeta.fromJson(jsonVcMeta);
         return vcMeta;
+    }
+
+    @Override
+    public void registerCredentialSchema(CredentialSchema credentialSchema) {
+        repositoryFeign.registerCredentialSchema(credentialSchema);
+    }
+
+    @Override
+    public void registerCredentialDefinition(CredentialDefinition credentialDefinition) {
+        repositoryFeign.registerCredentialDefinition(credentialDefinition);
+    }
+
+    @Override
+    public CredentialSchema getCredentialSchema(String credentialSchemaId) {
+        return repositoryFeign.getCredentialSchema(credentialSchemaId);
+    }
+
+    @Override
+    public CredentialDefinition getCredentialDefinition(String credentialDefinitionId) {
+        return repositoryFeign.getCredentialDefinition(credentialDefinitionId);
     }
 }

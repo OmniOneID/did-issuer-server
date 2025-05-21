@@ -37,6 +37,7 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpNamespaceQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.zkp.datamodel.credential.Credential;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef.ATTR_TYPE;
@@ -63,6 +64,7 @@ public class ZkpSchemaService {
     private final ZkpSchemaQueryService zkpSchemaQueryService;
     private final ZkpNamespaceQueryService zkpNamespaceQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
+    private final StorageService storageService;
 
     public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
         return zkpSchemaQueryService.searchZkpSchemaList(searchKey, searchValue, pageable);
@@ -161,6 +163,8 @@ public class ZkpSchemaService {
 
     //@TODO: Blockchain registration
     private void registerToBlockchain(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
+
+        storageService.registerCredentialSchema(credentialSchema);
         throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
 //        try {
 //            log.debug("Registering to Blockchain: {}", zkpSchema.getSchemaId());

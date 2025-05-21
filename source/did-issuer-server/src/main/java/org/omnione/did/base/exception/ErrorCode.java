@@ -111,10 +111,14 @@ public enum ErrorCode {
     WALLET_ALREADY_EXISTS("00425", "Failed to create wallet: wallet already exists.", 500),
     INVALID_PROOF_PURPOSE("00426", "Invalid proof purpose.", 400),
 
-    ZKP_WALLET_INFO_NOT_FOUND("00427", "ZKP Wallet is not registered.", 400),
-    ZKP_WALLET_CONNECT_FAILURE("00428", "Failed to connect ZKP wallet.", 500),
-    ZKP_WALLET_CREATION_FAILURE("00429", "Failed to create ZKP wallet.", 500),
-    ZKP_WALLET_ALREADY_EXISTS("00430", "Failed to create ZKP wallet: ZKP wallet already exists.", 500),
+    // ZKP 10400~10499 = ZKP Error
+    ZKP_WALLET_INFO_NOT_FOUND("10400", "ZKP Wallet is not registered.", 400),
+    ZKP_WALLET_CONNECT_FAILURE("10401", "Failed to connect ZKP wallet.", 500),
+    ZKP_WALLET_CREATION_FAILURE("10402", "Failed to create ZKP wallet.", 500),
+    ZKP_WALLET_ALREADY_EXISTS("10403", "Failed to create ZKP wallet: ZKP wallet already exists.", 500),
+
+    FAILED_TO_GENERATE_CORRECTNESS_PROOF("10404", "Failed to Generate Correctness Proof.", 500),
+    FAILED_TO_GENERATE_CREDENTIAL_OFFER("10405", "Failed to Create Credential Offer.", 500),
 
     // 500~ 599 = Issuer Error
     CERTIFICATE_DATA_NOT_FOUND("00501", "Certificate VC data not found.", 500),

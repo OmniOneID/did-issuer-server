@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.agent.service;
+package org.omnione.did.issuer.v1.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +25,10 @@ import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.BlockchainProperty;
 import org.omnione.did.data.model.did.DidDocAndStatus;
 import org.omnione.did.data.model.did.DidDocument;
-import org.omnione.did.data.model.did.InvokedDidDoc;
-import org.omnione.did.data.model.enums.did.DidDocStatus;
-import org.omnione.did.data.model.enums.vc.RoleType;
 import org.omnione.did.data.model.enums.vc.VcStatus;
 import org.omnione.did.data.model.vc.VcMeta;
-import org.omnione.did.fabric.FabricContractApi;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.exception.BlockChainException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -54,9 +52,9 @@ public class BlockChainServiceImpl implements StorageService {
      *
      * @return a ContractApi instance.
      */
-    public ContractApi initBlockChain() {
-        return ContractFactory.FABRIC.create(blockchainProperty.getFilePath());
-    }
+//    public ContractApi initBlockChain() {
+//        return ContractFactory.FABRIC.create(blockchainProperty.getFilePath());
+//    }
 
     /**
      * Retrieves a DID document and its status from the blockchain.
@@ -120,6 +118,48 @@ public class BlockChainServiceImpl implements StorageService {
         } catch (BlockChainException e) {
             log.error("Failed to find VC Meta: " + e.getMessage());
             throw new OpenDidException(ErrorCode.BLOCKCHAIN_VC_META_RETRIEVAL_FAILED);
+        }
+    }
+
+    @Override
+    public void registerCredentialSchema(CredentialSchema credentialSchema) {
+        // TODO Impl
+        try {
+            contractApi.registZKPCredential(credentialSchema);
+        } catch (BlockChainException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void registerCredentialDefinition(CredentialDefinition credentialDefinition) {
+        // TODO Impl
+        try {
+            contractApi.registZKPCredentialDefinition(credentialDefinition);
+        } catch (BlockChainException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CredentialSchema getCredentialSchema(String credentialSchemaId) {
+        try {
+            return (CredentialSchema) contractApi.getZKPCredential(credentialSchemaId);
+        } catch (BlockChainException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CredentialDefinition getCredentialDefinition(String credentialDefinitionId) {
+        try {
+            return (CredentialDefinition) contractApi.getZKPCredentialDefinition(credentialDefinitionId);
+        } catch (BlockChainException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
