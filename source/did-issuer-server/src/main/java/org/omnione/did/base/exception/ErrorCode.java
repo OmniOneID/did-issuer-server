@@ -120,6 +120,11 @@ public enum ErrorCode {
     FAILED_TO_GENERATE_CORRECTNESS_PROOF("10404", "Failed to Generate Correctness Proof.", 500),
     FAILED_TO_GENERATE_CREDENTIAL_OFFER("10405", "Failed to Create Credential Offer.", 500),
 
+    FAILED_TO_GENERATE_ZKP_ATTRIBUTE_VALUE("10406", "Failed to Create Attribute Value.", 500),
+    FAILED_TO_SIGNATURE_CORRECTNESS_PROOF("10407", "Failed to Create Signature correctness proof.", 500),
+    FAILED_TO_CREDENTIAL_SIGNATURE("10407", "Failed to Create Credential Signature.", 500),
+    FAILED_TO_ISSUE_CREDENTIAL("10407", "Failed to Issued Credential.", 500),
+
     // 500~ 599 = Issuer Error
     CERTIFICATE_DATA_NOT_FOUND("00501", "Certificate VC data not found.", 500),
 
@@ -180,7 +185,6 @@ public enum ErrorCode {
 
 
     ;
-
     private final String code;
     private final String message;
     private final int httpStatus;

@@ -8,11 +8,17 @@ import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.ZkpWalletProperty;
 import org.omnione.did.base.util.BaseWalletUtil;
 import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
+import org.omnione.did.zkp.datamodel.credential.CredentialSignature;
+import org.omnione.did.zkp.datamodel.credential.CredentialValues;
+import org.omnione.did.zkp.datamodel.credential.PrimaryCredentialSignature;
+import org.omnione.did.zkp.datamodel.credential.SignatureCorrectnessProof;
 import org.omnione.did.zkp.datamodel.credentialoffer.KeyCorrectnessProof;
+import org.omnione.did.zkp.datamodel.credentialrequest.CredentialRequest;
 import org.omnione.did.zkp.exception.ZkpException;
 import org.omnione.did.zkp.wallet.key.ZkpWalletManagerInterface;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -59,9 +65,35 @@ public class ZkpWalletService {
         }
     }
 
-    public KeyCorrectnessProof getCorrectnessProof(String credentialDefinitionKeyId) {
+    public CredentialSignature credSignature(String alias, CredentialRequest credentialRequest, CredentialValues credentialValues) {
         try {
-            byte[] zkpKeyProof = zkpWalletManager.generateZkpKeyProof(credentialDefinitionKeyId);
+            connectToZkpWallet();
+            byte[] zkpSignature = zkpWalletManager.generateZkpSignature(alias, credentialRequest, credentialValues);
+            PrimaryCredentialSignature pCredSignature = new Gson().fromJson(new String(zkpSignature), PrimaryCredentialSignature.class);
+
+            CredentialSignature credSignature = new CredentialSignature();
+            credSignature.setPrimaryCredential(pCredSignature);
+
+            return credSignature;
+        } catch (ZkpException ex) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_CREDENTIAL_SIGNATURE);
+        }
+    }
+
+    public SignatureCorrectnessProof signatureCorrectnessProof(String alias, CredentialRequest credentialRequest, CredentialSignature credSignature) {
+        try {
+            connectToZkpWallet();
+            byte[] zkpSignatureProof = zkpWalletManager.generateZkpSignatureProof(alias, credSignature, credentialRequest.getNonce());
+            return new Gson().fromJson(new String(zkpSignatureProof), SignatureCorrectnessProof.class);
+        } catch (ZkpException ex) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_SIGNATURE_CORRECTNESS_PROOF);
+        }
+    }
+
+    public KeyCorrectnessProof getCorrectnessProof(String alias) {
+        try {
+            connectToZkpWallet();
+            byte[] zkpKeyProof = zkpWalletManager.generateZkpKeyProof(alias);
 
             return new Gson()
                     .fromJson(new String(zkpKeyProof), KeyCorrectnessProof.class);

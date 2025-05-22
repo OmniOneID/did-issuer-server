@@ -61,7 +61,7 @@ class IssueServiceTest {
     @Order(1)
     void offerVc() {
         OfferIssueVcReqDto request = new OfferIssueVcReqDto();
-        request.setVcPlanId("Testt");
+        request.setVcPlanId("vcplanid000000000001");
         System.out.println("request = " + request);
 
         OfferIssueVcResDto response = issueService.requestOffer(request);
@@ -73,7 +73,7 @@ class IssueServiceTest {
     void inspectIssuePropose() {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
-        request.setVcPlanId("Testt");
+        request.setVcPlanId("vcplanid000000000001");
         request.setId(RandomUtil.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);

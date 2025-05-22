@@ -33,5 +33,6 @@
   <include file="./set.2/admin-2phase-zkp_credential_definition.xml" relativeToChangelogFile="true"/>
   <include file="set.2/admin-2phase-issue-profile-update.xml" relativeToChangelogFile="true"/>
   <include file="set.2/admin-2phase-vc-update.xml" relativeToChangelogFile="true"/>
+  <include file="set.2/admin-2phase-vc-profile-update.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

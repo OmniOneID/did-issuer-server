@@ -60,6 +60,9 @@ public class VcProfile extends BaseEntity implements Serializable {
     @Column(name = "nonce")
     private String nonce;
 
+    @Column(name = "zkp_nonce")
+    private String zkpNonce;
+
     /**
      * user_id
      */

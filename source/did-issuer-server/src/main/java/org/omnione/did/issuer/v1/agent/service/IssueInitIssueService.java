@@ -24,6 +24,8 @@ import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 import org.omnione.did.issuer.v1.common.service.StorageService;
@@ -48,10 +50,13 @@ public class IssueInitIssueService extends IssueServiceBase {
                                  VcQueryService vcQueryService, StorageService storageService,
                                  FileWalletService walletService, UserQueryService userQueryService, VcSchemaService vcSchemaService,
                                  VcSchemaQueryService vcSchemaQueryService, IssueProfileQueryService issueProfileQueryService,
-                                 IssuerInfoQueryService issuerInfoQueryService, ZkpWalletService zkpWalletService) {
+                                 IssuerInfoQueryService issuerInfoQueryService, ZkpWalletService zkpWalletService,
+                                 ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService,
+                                 ZkpSchemaQueryService zkpSchemaQueryService) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService
                 , storageService, walletService, issueProfileQueryService, vcSchemaService
-                , vcSchemaQueryService, issuerInfoQueryService, zkpWalletService);
+                , vcSchemaQueryService, issuerInfoQueryService, zkpWalletService, zkpCredentialDefinitionQueryService,
+                zkpSchemaQueryService);
         this.userQueryService = userQueryService;
     }
 

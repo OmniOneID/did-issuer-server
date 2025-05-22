@@ -16,6 +16,7 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
@@ -62,19 +63,21 @@ import org.omnione.did.data.model.schema.VcSchema;
 import org.omnione.did.data.model.vc.*;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 
-import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
 import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
 import org.omnione.did.zkp.core.manager.ZkpCredentialManager;
 import org.omnione.did.zkp.crypto.constant.ZkpCryptoConstants;
 import org.omnione.did.zkp.crypto.util.BigIntegerUtil;
-import org.omnione.did.zkp.datamodel.credential.Credential;
+import org.omnione.did.zkp.datamodel.credential.*;
 import org.omnione.did.zkp.datamodel.credentialoffer.CredentialOffer;
 import org.omnione.did.zkp.datamodel.credentialoffer.KeyCorrectnessProof;
+import org.omnione.did.zkp.datamodel.credentialrequest.CredentialRequest;
 import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
 import org.omnione.did.zkp.exception.ZkpException;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,9 +87,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +110,8 @@ public abstract class IssueServiceBase implements IssueService {
     private final VcSchemaQueryService vcSchemaQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
     private final ZkpWalletService zkpWalletService;
+    private final ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService;
+    private final ZkpSchemaQueryService zkpSchemaQueryService;
 
     /**
      * Generates an offer for issuing a Verifiable Credential.
@@ -152,7 +155,7 @@ public abstract class IssueServiceBase implements IssueService {
             return OfferIssueVcResDto.builder()
                     .issueOfferPayload(issueOfferPayload)
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("OpenDidException occurred during requestOffer: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
@@ -161,6 +164,7 @@ public abstract class IssueServiceBase implements IssueService {
         }
 
     }
+
     /**
      * Inspects the issue proposal for a Verifiable Credential.
      *
@@ -220,7 +224,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .txId(txId)
                     .refId(refId)
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("OpenDidException occurred during inspectIssuePropose: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
@@ -275,6 +279,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .transactionId(transaction.getId())
                     .did(holder.getDid())
                     .nonce(reqE2e.getNonce())
+                    .zkpNonce(profile.getProfile().getCredentialOffer().getNonce().toString())
                     .userId(user.getId())
                     .build());
 
@@ -302,7 +307,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .txId(transaction.getTxId())
                     .profile(profile)
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             e.printStackTrace();
             log.error("OpenDidException occurred during generateIssueProfile: {}", e.getErrorCode().getMessage());
             throw e;
@@ -313,6 +318,7 @@ public abstract class IssueServiceBase implements IssueService {
             throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
         }
     }
+
     /**
      * Issues a Verifiable Credential.
      *
@@ -372,12 +378,8 @@ public abstract class IssueServiceBase implements IssueService {
             byte[] iv = BaseCryptoUtil.generateInitialVector();
 
             log.debug("\t--> Issuing Credential");
-            Credential credential = ZkpSampleConstants.getCredential(reqVc.getCredentialRequest(), vcMeta.getId());
-            // TODO
-//            ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
-//            Credential credential = issueCredential();
+            Credential credential = issueCredential(reqVc.getCredentialRequest(), user, vcMeta.getId(), vcProfile.getZkpNonce());
 
-            log.debug("credential : {}", credential.toJson());
             log.debug("\t--> Encrypt VC");
             String encVc = encryptVerifiableCredential(verifiableCredential, credential, mergeSharedSecretAndNonce, iv, e2e);
 
@@ -402,7 +404,7 @@ public abstract class IssueServiceBase implements IssueService {
                             .iv(BaseMultibaseUtil.encode(iv))
                             .build())
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("OpenDidException occurred during issueVc: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
@@ -411,6 +413,34 @@ public abstract class IssueServiceBase implements IssueService {
         }
 
     }
+
+    private Credential issueCredential(CredentialRequest credentialRequest, User user, String vcId, String issuerNonce) {
+        if (credentialRequest == null) {
+            return null;
+        }
+        try {
+            ZkpCredentialDefinition definition = zkpCredentialDefinitionQueryService.findByDefinitionId(credentialRequest.getCredDefId());
+            ZkpSchema zkpSchema = zkpSchemaQueryService.findBySchemaId(definition.getSchemaId());
+
+            org.omnione.did.zkp.datamodel.schema.CredentialSchema credentialSchema = new Gson()
+                    .fromJson(zkpSchema.getSchema(), org.omnione.did.zkp.datamodel.schema.CredentialSchema.class);
+
+            LinkedHashMap<String, AttributeValue> attributeInfo = getAttributeInfo(credentialSchema.getAttrNames(), user.getData());
+            CredentialDefinition credentialDefinition = new Gson().fromJson(definition.getDefinition(), CredentialDefinition.class);
+            CredentialValues credentialValues = new CredentialValues();
+            credentialValues.setValues(attributeInfo);
+
+            CredentialSignature credentialSignature = zkpWalletService.credSignature(definition.getAlias(), credentialRequest, credentialValues);
+            SignatureCorrectnessProof signatureCorrectnessProof = zkpWalletService.signatureCorrectnessProof(definition.getAlias(), credentialRequest, credentialSignature);
+
+            BigInteger nonce = new BigInteger(issuerNonce);
+
+            return new ZkpCredentialManager().createCredential(credentialDefinition, credentialSignature, signatureCorrectnessProof, attributeInfo, credentialRequest, nonce, vcId);
+        } catch (ZkpException e) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_ISSUE_CREDENTIAL);
+        }
+    }
+
     /**
      * Completes the Verifiable Credential issuance process.
      *
@@ -445,7 +475,7 @@ public abstract class IssueServiceBase implements IssueService {
             return CompleteVcResDto.builder()
                     .txId(transaction.getTxId())
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("OpenDidException occurred during completeVc: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
@@ -453,6 +483,7 @@ public abstract class IssueServiceBase implements IssueService {
             throw new OpenDidException(ErrorCode.TR_VC_ISSUE_COMPLETE_FAILED);
         }
     }
+
     /**
      * Retrieves the result of a Verifiable Credential issuance process.
      *
@@ -482,7 +513,7 @@ public abstract class IssueServiceBase implements IssueService {
                     .offerId(offerId)
                     .result(SubTransactionType.COMPLETE_VC.equals(subTransaction.getType()))
                     .build();
-        } catch(OpenDidException e) {
+        } catch (OpenDidException e) {
             log.error("OpenDidException occurred during issueVcResult: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
@@ -496,8 +527,8 @@ public abstract class IssueServiceBase implements IssueService {
      * The merged result is hashed using SHA-256 and the length of the result is determined by the symmetric cipher type.
      *
      * @param sharedSecretKey The shared secret key.
-     * @param nonce The nonce.
-     * @param cipherType The symmetric cipher type.
+     * @param nonce           The nonce.
+     * @param cipherType      The symmetric cipher type.
      * @return The merged shared secret and nonce.
      */
     private byte[] mergeSharedSecretAndNonce(byte[] sharedSecretKey, String nonce, String cipherType) {
@@ -537,10 +568,10 @@ public abstract class IssueServiceBase implements IssueService {
     /**
      * ReqE2e's public key and nonce are set.
      *
-     * @param reqE2e The ReqE2e object to set
+     * @param reqE2e  The ReqE2e object to set
      * @param process The IssueProcess object to set
      * @param keyPair The EcKeyPair object to set
-     * @param nonce The nonce to set
+     * @param nonce   The nonce to set
      */
     private void setPublicKeyAndNonce(ReqE2e reqE2e, IssueProcess process, EcKeyPair keyPair, String nonce) {
         ECPublicKey publicKey = (ECPublicKey) keyPair.getPublicKey();
@@ -565,12 +596,11 @@ public abstract class IssueServiceBase implements IssueService {
     /**
      * handle VC creation or update
      *
-     * @param user The user
-     * @param holderDid The holder DID
+     * @param user        The user
+     * @param holderDid   The holder DID
      * @param transaction The transaction
-     * @param vcMeta The VC Meta
+     * @param vcMeta      The VC Meta
      * @return The created or updated VC
-     *
      */
     private Vc handleVcCreationOrUpdate(User user, String holderDid, Transaction transaction, VcMeta vcMeta) {
         String vcPlanId = transaction.getVcPlanId();
@@ -611,9 +641,9 @@ public abstract class IssueServiceBase implements IssueService {
      * Encrypts a Verifiable Credential.
      *
      * @param verifiableCredential The Verifiable Credential to encrypt.
-     * @param sharedSecretKey The shared secret key.
-     * @param iv The initialization vector.
-     * @param e2e The end-to-end encryption information.
+     * @param sharedSecretKey      The shared secret key.
+     * @param iv                   The initialization vector.
+     * @param e2e                  The end-to-end encryption information.
      * @return The encrypted Verifiable Credential.
      */
     private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
@@ -632,9 +662,9 @@ public abstract class IssueServiceBase implements IssueService {
      * Encrypts a Verifiable Credential.
      *
      * @param verifiableCredential The Verifiable Credential to encrypt.
-     * @param sharedSecretKey The shared secret key.
-     * @param iv The initialization vector.
-     * @param e2e The end-to-end encryption information.
+     * @param sharedSecretKey      The shared secret key.
+     * @param iv                   The initialization vector.
+     * @param e2e                  The end-to-end encryption information.
      * @return The encrypted Verifiable Credential.
      */
     private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, Credential credential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
@@ -674,7 +704,7 @@ public abstract class IssueServiceBase implements IssueService {
      * Generates a shared secret key.
      *
      * @param accE2e The AccE2e object containing the public key
-     * @param e2e The E2e object containing the session key
+     * @param e2e    The E2e object containing the session key
      * @return byte[] The generated shared secret key
      */
     private byte[] generateSharedSecretKey(E2E e2e, AccE2e accE2e) {
@@ -688,10 +718,10 @@ public abstract class IssueServiceBase implements IssueService {
     /**
      * Decrypts the request VC.
      *
-     * @param request The request containing the encrypted request VC.
+     * @param request         The request containing the encrypted request VC.
      * @param sharedSecretKey The shared secret key.
-     * @param iv The initialization vector.
-     * @param e2e The end-to-end encryption information.
+     * @param iv              The initialization vector.
+     * @param e2e             The end-to-end encryption information.
      * @return The decrypted request VC.
      */
     private String decryptRequestVc(IssueVcReqDto request, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
@@ -713,9 +743,9 @@ public abstract class IssueServiceBase implements IssueService {
      * @throws OpenDidException if there's an error in the parsing process.
      */
     private ReqVc parseRequestVc(String requestVc) {
-            ReqVc reqVc = new ReqVc();
-            reqVc.fromJson(requestVc);
-            return reqVc;
+        ReqVc reqVc = new ReqVc();
+        reqVc.fromJson(requestVc);
+        return reqVc;
     }
 
 
@@ -724,7 +754,7 @@ public abstract class IssueServiceBase implements IssueService {
      * If the request VC is invalid, the transaction status is updated to FAILED.
      *
      * @param transaction The transaction.
-     * @param reqVc The request VC.
+     * @param reqVc       The request VC.
      * @throws OpenDidException if the refId is not valid.
      * @throws OpenDidException if the profile nonce is not valid
      * @throws OpenDidException if the profile issuer nonce is not valid
@@ -746,12 +776,13 @@ public abstract class IssueServiceBase implements IssueService {
             throw new OpenDidException(ErrorCode.VC_PROFILE_ISSUER_NONCE_INVALID);
         }
     }
+
     /**
      * Issues a Verifiable Credential using the provided VcManager.
      *
      * @param vcManager The VcManager to use for issuing the VC.
      * @param holderDid The DID of the credential holder.
-     * @param data The data to include in the credential.
+     * @param data      The data to include in the credential.
      * @return The issued VerifiableCredential.
      * @throws OpenDidException if there's an error in the VC issuance process.
      */
@@ -823,7 +854,7 @@ public abstract class IssueServiceBase implements IssueService {
      * Signs a Verifiable Credential profile.
      *
      * @param profile The profile to sign.
-     * @param keyId The ID of the key to use for signing.
+     * @param keyId   The ID of the key to use for signing.
      */
     private void signProfile(ZkpIssueProfile profile, String keyId) {
         Proof proof = new Proof();
@@ -840,6 +871,7 @@ public abstract class IssueServiceBase implements IssueService {
 
         proof.setProofValue(BaseMultibaseUtil.encode(bytes));
     }
+
     private List<VcType> getVcType() {
         return List.of(VcType.VERIFIABLE_CREDENTIAL);
     }
@@ -891,6 +923,29 @@ public abstract class IssueServiceBase implements IssueService {
         }
     }
 
+    private LinkedHashMap<String, AttributeValue> getAttributeInfo(List<String> attrNames, String data) {
+        JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
+
+        return attrNames.stream()
+                .map(attrName -> createAttributeValue(attrName, jsonObject))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(Object::toString, attributeValue -> attributeValue, (existing, replacement) -> existing, LinkedHashMap::new));
+    }
+
+    private AttributeValue createAttributeValue(String id, JsonObject jsonObject) {
+        if (!jsonObject.has(id) || jsonObject.get(id).isJsonNull()) {
+            return null;
+        }
+
+        try {
+            AttributeValue attributeValue = new AttributeValue();
+            attributeValue.setRaw(jsonObject.get(id).getAsString());
+
+            return attributeValue;
+        } catch (ZkpException e) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_GENERATE_ZKP_ATTRIBUTE_VALUE);
+        }
+    }
 
     /**
      * Generates claim information for a Verifiable Credential.
@@ -933,31 +988,31 @@ public abstract class IssueServiceBase implements IssueService {
         issueProfile.setTitle(byVcPlanId.getTitle());
         issueProfile.setLanguage(byVcPlanId.getLanguage());
 
-        // TODO get ZKP Credential Definition
-//        ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
-//        CredentialOffer zkpSampleOffer = createCredentialOffer(zkpCredentialDefinition);
-        CredentialOffer zkpSampleOffer = ZkpSampleConstants.getZkpSampleOffer();
-
         ZkpInnerIssueProfile innerIssueProfile = new ZkpInnerIssueProfile();
         innerIssueProfile.setIssuer(getIssuer());
         innerIssueProfile.setCredentialSchema(createCredentialSchema(byVcPlanId.getVcSchemaId()));
         innerIssueProfile.setProcess(createIssueProcess(byVcPlanId));
-        innerIssueProfile.setCredentialOffer(zkpSampleOffer);
+
+        String definitionId = byVcPlanId.getDefinitionId();
+        if (Optional.ofNullable(definitionId).isPresent()) {
+            CredentialOffer credentialOffer = createCredentialOffer(definitionId);
+            innerIssueProfile.setCredentialOffer(credentialOffer);
+        }
 
         issueProfile.setProfile(innerIssueProfile);
 
         return issueProfile;
     }
 
-    private CredentialOffer createCredentialOffer(ZkpCredentialDefinition zkpCredentialDefinition) {
+    private CredentialOffer createCredentialOffer(String definitionId) {
+        ZkpCredentialDefinition definition = zkpCredentialDefinitionQueryService.findByDefinitionId(definitionId);
 
         BigInteger issuerNonce = new BigIntegerUtil().createRandomBigInteger(ZkpCryptoConstants.LARGE_NONCE);
-        KeyCorrectnessProof correctnessProof = zkpWalletService.getCorrectnessProof(zkpCredentialDefinition.getDefinitionId()); // TODO Change Alias
-
+        KeyCorrectnessProof correctnessProof = zkpWalletService.getCorrectnessProof(definition.getAlias());
 
         try {
             return new ZkpCredentialManager().createCredentialOffer(correctnessProof,
-                    zkpCredentialDefinition.getSchemaId(), zkpCredentialDefinition.getDefinitionId(), issuerNonce);
+                    definition.getSchemaId(), definition.getDefinitionId(), issuerNonce);
         } catch (ZkpException e) {
             log.error("Failed Create Credential Offer: {}", e.getMessage());
             throw new OpenDidException(ErrorCode.FAILED_TO_GENERATE_CREDENTIAL_OFFER);
@@ -1000,6 +1055,7 @@ public abstract class IssueServiceBase implements IssueService {
 
         return reqE2e;
     }
+
     /**
      * Gets the VC schema to use for issuing Verifiable Credentials.
      *
@@ -1017,6 +1073,7 @@ public abstract class IssueServiceBase implements IssueService {
      * @return The found User.
      */
     protected abstract User findUserByVcProfile(VcProfile vcProfile);
+
     /**
      * Finds a user by their VcProfile.
      *
