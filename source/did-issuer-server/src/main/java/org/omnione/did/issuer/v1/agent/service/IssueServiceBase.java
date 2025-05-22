@@ -934,8 +934,9 @@ public abstract class IssueServiceBase implements IssueService {
         issueProfile.setLanguage(byVcPlanId.getLanguage());
 
         // TODO get ZKP Credential Definition
-        ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
-        CredentialOffer zkpSampleOffer = createCredentialOffer(zkpCredentialDefinition);
+//        ZkpCredentialDefinition zkpCredentialDefinition = new ZkpCredentialDefinition();
+//        CredentialOffer zkpSampleOffer = createCredentialOffer(zkpCredentialDefinition);
+        CredentialOffer zkpSampleOffer = ZkpSampleConstants.getZkpSampleOffer();
 
         ZkpInnerIssueProfile innerIssueProfile = new ZkpInnerIssueProfile();
         innerIssueProfile.setIssuer(getIssuer());
