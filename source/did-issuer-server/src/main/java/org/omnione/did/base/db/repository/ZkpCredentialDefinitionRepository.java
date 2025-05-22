@@ -15,14 +15,18 @@
  */
 package org.omnione.did.base.db.repository;
 
+import jakarta.transaction.Transactional;
+import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.repository.projection.SchemaIdProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ZkpCredentialDefinitionRepository extends JpaRepository<ZkpCredentialDefinition, Long>, QuerydslPredicateExecutor<ZkpCredentialDefinition>, ZkpCredentialDefinitionRepositoryAdmin {
 
@@ -35,4 +39,11 @@ public interface ZkpCredentialDefinitionRepository extends JpaRepository<ZkpCred
     long countByAlias(String alias);
 
     boolean existsByAlias(String alias);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ZkpCredentialDefinition s SET s.status = :status WHERE s.id = :id")
+    void updateStatusById(@Param("id") Long id, @Param("status") ZkpCredentialDefinitionStatus status);
+
+    Optional<ZkpCredentialDefinition> findByDefinitionId(String definitionId);
 }

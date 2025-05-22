@@ -32,4 +32,5 @@ import org.omnione.did.base.db.domain.IssueProfile;
 public class RegisterVcPlanReqDto {
     private String vcPlan;
     private String issuerDid;
+    private String initiate;
 }

@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.admin.dto.profile;
+package org.omnione.did.base.datamodel.data.zkp;
 
 import lombok.*;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-
-import java.util.List;
 
 /**
- * Request DTO for creating or updating an issue profile in the Admin Console.
+ * This class represents the CredentialSchema structure.
  */
 @Getter
 @Setter
@@ -30,19 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateIssueProfileReqDto {
-    private Long id;
-    private String vcPlanId;
-    private String title;
-    private String description;
-    private Long vcSchemaId;
-    private String language;
-    private List<String> endpoints;
-    private String cipher;
-    private String curve;
-    private String padding;
-    private InitiateType initiateType;
-    private List<String> tags;
-    private Boolean zkpEnabled;
-    private String definitionId;
+public class CredentialDefinition {
+    private String id;
+    private String schemaId;
 }

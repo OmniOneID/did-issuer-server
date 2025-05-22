@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.omnione.did.issuer.v1.admin.dto.profile;
+package org.omnione.did.issuer.v1.admin.api.dto;
 
 import lombok.*;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-
-import java.util.List;
 
 /**
- * Request DTO for creating or updating an issue profile in the Admin Console.
+ * RegisterCredentialDefinitionReqDto
+ * This is a DTO class that represents the request to Register Credential Definition.
  */
 @Getter
 @Setter
@@ -30,19 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CreateIssueProfileReqDto {
-    private Long id;
-    private String vcPlanId;
-    private String title;
-    private String description;
-    private Long vcSchemaId;
-    private String language;
-    private List<String> endpoints;
-    private String cipher;
-    private String curve;
-    private String padding;
-    private InitiateType initiateType;
-    private List<String> tags;
-    private Boolean zkpEnabled;
-    private String definitionId;
+public class RegisterCredentialDefinitionReqDto {
+    private String credentialDefinition;
+    private String issuerDid;
 }

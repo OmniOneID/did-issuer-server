@@ -20,12 +20,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.VcSchema;
+import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.issuer.v1.admin.dto.profile.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.CreateIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.GetIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.IssueProfileDto;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,6 +48,7 @@ public class IssueProfileService {
     private final IssueProfileQueryService issueProfileQueryService;
     private final VcSchemaQueryService vcSchemaQueryService;
     private final ListCommunityService listCommunityService;
+    private final ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService;
 
     /**
      * Creates a new issue profile and registers it with the external community service.
@@ -66,6 +69,8 @@ public class IssueProfileService {
                 .initiateType(request.getInitiateType())
                 .language(request.getLanguage())
                 .tags(request.getTags())
+                .zkpEnabled(request.getZkpEnabled())
+                .definitionId(request.getDefinitionId())
                 .build());
 
         listCommunityService.registerVcPlan(issueProfile);
@@ -92,7 +97,6 @@ public class IssueProfileService {
     public GetIssueProfileResDto getIssueProfileById(Long id) {
         IssueProfile issueProfile = issueProfileQueryService.findById(id);
         VcSchema vcSchema = vcSchemaQueryService.findById(issueProfile.getVcSchemaId());
-
         return GetIssueProfileResDto.builder()
                 .issueProfile(issueProfile)
                 .vcSchemaName(vcSchema.getVcSchemaId())
@@ -138,5 +142,7 @@ public class IssueProfileService {
         issueProfile.setEndpoints(request.getEndpoints());
         issueProfile.setVcSchemaId(request.getVcSchemaId());
         issueProfile.setTags(request.getTags());
+        issueProfile.setZkpEnabled(request.getZkpEnabled());
+        issueProfile.setDefinitionId(request.getDefinitionId());
     }
 }

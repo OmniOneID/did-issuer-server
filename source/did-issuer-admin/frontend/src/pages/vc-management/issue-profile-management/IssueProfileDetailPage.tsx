@@ -67,6 +67,8 @@ const IssueProfileDetailPage = (props: Props) => {
           language: data.issueProfile.language,
           initiateType: data.issueProfile.initiateType,
           tags: data.issueProfile.tags,
+          credentialDefinitionId: data.issueProfile.definitionId,
+          zkpEnabled: data.issueProfile.zkpEnabled
         });
         setNumericVcSchemaId(data.issueProfile.vcSchemaId);
       } catch (err) {
@@ -150,7 +152,7 @@ const IssueProfileDetailPage = (props: Props) => {
           <TextField label="Cipher" value={issueProfileData?.cipher || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Curve" value={issueProfileData?.curve || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
           <TextField label="Padding" value={issueProfileData?.padding || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
-
+          
           <Typography variant="h6" sx={{ mt: 3 }}>Tags</Typography>
           <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>
             <Table>
@@ -170,6 +172,12 @@ const IssueProfileDetailPage = (props: Props) => {
             </Table>
           </TableContainer>
 
+          {issueProfileData?.zkpEnabled && (
+          <>
+            <Typography variant="h6" sx={{ mt: 3 }}>ZKP</Typography>
+            <TextField label="Definition ID" value={issueProfileData?.credentialDefinitionId || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+          </>
+          )}
           <Typography variant="h6" sx={{ mt: 3 }}></Typography>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>

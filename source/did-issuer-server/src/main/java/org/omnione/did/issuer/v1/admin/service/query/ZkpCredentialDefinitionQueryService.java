@@ -16,6 +16,7 @@
 package org.omnione.did.issuer.v1.admin.service.query;
 
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaRepository;
@@ -80,5 +81,14 @@ public class ZkpCredentialDefinitionQueryService {
     public ZkpCredentialDefinition findById(Long id) {
         return zkpCredentialDefinitionRepository.findById(id)
                 .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_CREDENTIAL_DEFINITION_NOT_FOUND));
+    }
+
+    public ZkpCredentialDefinition findByDefinitionId(String definitionId) {
+        return zkpCredentialDefinitionRepository.findByDefinitionId(definitionId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.ZKP_CREDENTIAL_DEFINITION_NOT_FOUND));
+    }
+
+    public void updateZkpCredentialStatusById(Long id, ZkpCredentialDefinitionStatus status) {
+        zkpCredentialDefinitionRepository.updateStatusById(id, status);
     }
 }

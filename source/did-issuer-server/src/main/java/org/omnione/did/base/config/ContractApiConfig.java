@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Configuration;
 public class ContractApiConfig {
     @Bean
     public ContractApi contractApi(BlockchainProperty blockchainProperty) {
-        return ContractFactory.FABRIC.create(blockchainProperty.getFilePath());
+        return ContractFactory.EVM.create(blockchainProperty.getFilePath());
     }
 }

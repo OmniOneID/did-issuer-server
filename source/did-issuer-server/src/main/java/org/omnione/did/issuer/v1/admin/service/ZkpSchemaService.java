@@ -62,6 +62,7 @@ public class ZkpSchemaService {
     private final ZkpSchemaQueryService zkpSchemaQueryService;
     private final ZkpNamespaceQueryService zkpNamespaceQueryService;
     private final IssuerInfoQueryService issuerInfoQueryService;
+    private final ListCommunityService listCommunityService;
     private final StorageService storageService;
 
     public PageImpl<ZkpSchemaDto> searchZkpSchemaList(String searchKey, String searchValue, Pageable pageable) {
@@ -160,13 +161,37 @@ public class ZkpSchemaService {
     }
 
     private void registerToBlockchain(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
-        storageService.registerCredentialSchema(credentialSchema);
-        throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+        try {
+            log.debug("Registering to Blockchain: {}", zkpSchema.getSchemaId());
+            registerCredentialSchemaToBlockchain(credentialSchema);
+
+            zkpSchema.setStatus(ZkpSchemaStatus.NEED_LIST_PROVIDER_REGISTRATION);
+            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
+        } catch (OpenDidException e) {
+            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+        }
     }
 
     // @TODO: List Provider registration
     private void registerToListProvider(ZkpSchema zkpSchema, CredentialSchema credentialSchema) {
-        throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+
+        try {
+            log.debug("Registering to List Provider: {}", zkpSchema.getSchemaId());
+            registerCredentialSchemaToListProvider(credentialSchema);
+
+            zkpSchema.setStatus(ZkpSchemaStatus.ACTIVATE);
+            zkpSchemaQueryService.updateZkpSchemaStatusById(zkpSchema.getId(), zkpSchema.getStatus());
+        } catch (OpenDidException e) {
+            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.ZKP_SCHEMA_REGISTRATION_FAILED);
+        }
     }
 
     private CredentialSchema generateCredentialSchema(ZkpSchemaInfoDto zkpSchemaInfoDto, String schemaId) {
@@ -248,11 +273,13 @@ public class ZkpSchemaService {
 
     // TODO:
     private void registerCredentialSchemaToBlockchain(CredentialSchema credentialSchema) {
+        storageService.registerCredentialSchema(credentialSchema);
 
     }
 
     // TODO:
     private void registerCredentialSchemaToListProvider(CredentialSchema credentialSchema) {
+        listCommunityService.registerCredentialSchema(credentialSchema);
 
     }
 

@@ -33,6 +33,7 @@ interface Attribute {
   namespaceId: number;
   label: string;
   type: string;
+  caption: string;
   sortOrder: number;
   namespaceName: string;
   namespaceIdentifier: string;
@@ -73,6 +74,7 @@ const SortableRow = ({ attr, index, onRemove }: {
     <TableRow ref={setNodeRef} style={style}>
       <TableCell>{attr.sortOrder + 1}</TableCell> 
       <TableCell {...attributes} {...listeners}>{attr.namespaceId}</TableCell>
+      <TableCell {...attributes} {...listeners}>{attr.caption}</TableCell>
       <TableCell {...attributes} {...listeners}>{attr.label}</TableCell>
       <TableCell {...attributes} {...listeners}>{attr.type}</TableCell>
       <TableCell>
@@ -262,6 +264,7 @@ const handleOpenAttributeDialog = async () => {
                   <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                     <TableCell>Order</TableCell>
                     <TableCell>Namespace ID</TableCell>
+                    <TableCell>Attribute Caption</TableCell>
                     <TableCell>Attribute Label</TableCell>
                     <TableCell>Attribute Type</TableCell>
                     <TableCell>Delete</TableCell>

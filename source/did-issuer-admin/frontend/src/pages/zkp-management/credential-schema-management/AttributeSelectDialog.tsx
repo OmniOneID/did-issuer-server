@@ -28,7 +28,7 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
   const [namespaceOptions, setNamespaceOptions] = useState<
     { id: number; name: string; identifier: string; ref: string }[]
   >([]);
-  const [attributes, setAttributes] = useState<{ label: string; type: string; id:number; zkpNamespaceId: number }[]>([]);
+  const [attributes, setAttributes] = useState<{ label: string; type: string; id:number; zkpNamespaceId: number; caption: string; }[]>([]);
   const [selectedMap, setSelectedMap] = useState<Record<number, boolean>>({});
 
   
@@ -62,6 +62,7 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
           zkpNamespaceId: item.zkpNamespaceId,      
           label: item.label,
           type: item.type,
+          caption: item.caption,
         }));
         setAttributes(attrs);
         setSelectedMap({});
@@ -92,6 +93,7 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
       namespaceId: attr.zkpNamespaceId,        
       label: attr.label,
       type: attr.type,
+      caption: attr.caption,
       namespaceName: selectedNamespace?.name ?? '',
       namespaceIdentifier: selectedNamespace?.identifier ?? '',
       namespaceRef: selectedNamespace?.ref ?? '',
@@ -138,6 +140,7 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
             <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
               <TableRow>
                 <TableCell>Select</TableCell>
+                <TableCell>Caption</TableCell>
                 <TableCell>Label</TableCell>
                 <TableCell>Type</TableCell>
               </TableRow>
@@ -151,6 +154,7 @@ const AttributeSelectDialog: React.FC<AttributeSelectDialogProps> = ({
                         onChange={() => handleToggle(attr.id)}
                       />
                   </TableCell>
+                  <TableCell>{attr.caption}</TableCell>
                   <TableCell>{attr.label}</TableCell>
                   <TableCell>{attr.type}</TableCell>
                 </TableRow>

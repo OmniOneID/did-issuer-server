@@ -1,7 +1,7 @@
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel, styled, FormHelperText } from "@mui/material";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Radio, Select, MenuItem, FormControl, InputLabel, styled, FormHelperText, Switch, OutlinedInput } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
@@ -12,6 +12,8 @@ import CustomDialog from "../../../components/dialog/CustomDialog";
 import { Language } from "@mui/icons-material";
 import VcSchemaSelectionDialog from "./VcSchemaSelectionDialog";
 import { formatErrorMessage } from "../../../utils/error-handler";
+import CredentialDefinitionSelectionDialog from "./CredentialDefinitionSelectionDialog";
+import { fetchCredentialDefinitions } from "../../../apis/zkp_management-api";
 
 type Props = {}
 
@@ -27,6 +29,8 @@ interface IssueProfileFormData {
     initiateType: string;
     language: string;
     tags: string[];
+    zkpEnabled: boolean;
+    definitionId: string;
 }
 
 interface ErrorState {
@@ -43,12 +47,21 @@ interface ErrorState {
     language?: string;
     tagsErrorMessage?: string;
     tags?: string[] | undefined;
+    definitionId?: string;
 }
 
 interface ItemFormData {
     id: string;
     vcSchemaId: string;
     title: string;
+}
+
+interface ZkpItemFormData {
+    id: string;
+    definitionId: string;
+    schemaId: string;
+    version: string;
+    tag: string;
 }
 
 const cipherOptions = ["AES-128-CBC", "AES-128-ECB", "AES-256-CBC", "AES-256-ECB"];
@@ -76,12 +89,18 @@ const IssueProfileRegistrationPage = (props: Props) => {
         initiateType: '',
         language: '',
         tags: [''],
+        zkpEnabled: false,
+        definitionId: ''
     });
 
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+    const [openZkpDialog, setOpenZkpDialog] = useState(false);
+
     const [availableItems, setAvailableItems] = useState<ItemFormData[]>([]);
+    const [availableZkpItems, setAvailableZkpItems] = useState<ZkpItemFormData[]>([]);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const [selectedZkpItemId, setSelectedZkpItemId] = useState<string | null>(null);
 
     const { id } = useParams();
     const numericIssueProfileId = id ? parseInt(id, 10) : null;
@@ -94,7 +113,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
     const handleSubmit = async () => {
         if (!validate()) return;
 
-        const requestBody = {
+        const requestBody: any = {
             id: numericIssueProfileId,
             vcPlanId: formData.vcPlanId,
             title: formData.title,
@@ -107,8 +126,15 @@ const IssueProfileRegistrationPage = (props: Props) => {
             initiateType: formData.initiateType,
             language: formData.language,
             tags: formData.tags,
+            zkpEnabled: formData.zkpEnabled,
+
         };
 
+        if (formData.initiateType === 'issuer_init' && formData.zkpEnabled) {
+            requestBody.definitionId = selectedZkpItemId;
+        } else {
+            requestBody.definitionId = null;
+        }
         const result = await dialogs.open(CustomConfirmDialog, {
             title: 'Confirmation',
             message: 'Are you sure you want to register Issue Profile?',
@@ -149,7 +175,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
         tempErrors.curve = validateCurve(formData.curve);
         tempErrors.padding = validatePadding(formData.padding);
         tempErrors.initiateType = validateInitiateType(formData.initiateType);
-        tempErrors.language = validateLanguage(formData.language)
+        tempErrors.language = validateLanguage(formData.language);
 
         if (formData.endpoints.length === 0) {
             tempErrors.endpointsErrorMessage = "At least one Endpoint is required.";
@@ -164,7 +190,13 @@ const IssueProfileRegistrationPage = (props: Props) => {
             tempErrors.tagsErrorMessage = undefined;
             tempErrors.tags = formData.tags.map(validateTag).filter(tag => tag?.length !== 0);
         }
-        
+
+        if (formData.zkpEnabled && formData.initiateType === 'issuer_init') {
+            if (!formData.definitionId) {
+                tempErrors.definitionId = "Definition ID is required when ZKP is enabled.";
+            }
+        }
+
         setErrors(tempErrors);
 
         return (
@@ -177,6 +209,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                 Object.values(tag).every((e) => !e))
         );
     };
+
 
     const validateVcPlanId = (vcPlanId?: string): string | undefined => {
         if (!vcPlanId) return 'Please enter a VC Plan ID.';
@@ -338,6 +371,66 @@ const IssueProfileRegistrationPage = (props: Props) => {
         handleCloseDialog();
     };
 
+
+    // 서버에서 데이터 가져오기
+    const fetchZkpItems = async () => {
+        try {
+            fetchCredentialDefinitions(0, 10, null, null)
+                .then((response) => {
+                    setAvailableZkpItems(response.data.content || []);
+                })
+                .catch((error) => {
+                    console.error("Failed to retrieve Zkp Credential Definition. ", error);
+                    navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Zkp Credential Definition.") } });
+                });
+        } catch (error) {
+            console.error("Failed to fetch Zkp Credential Definition", error);
+        }
+    };
+
+    // 다이얼로그 열기
+    const handleOpenZkpDialog = () => {
+        fetchZkpItems(); // 데이터 조회
+
+        // 기존 `vcSchemaId` 값을 유지하여 선택된 상태로 유지
+        setSelectedZkpItemId(formData.definitionId || null);
+
+        setOpenZkpDialog(true);
+    };
+
+    // 다이얼로그 닫기
+    const handleCloseZkpDialog = () => {
+        setOpenZkpDialog(false);
+    };
+
+    // 단일 선택 (Radio 버튼)
+    const handleSelectZkpItem = (formData: ZkpItemFormData) => {
+        setSelectedZkpItemId(formData.definitionId);
+    };
+
+    // 선택한 항목을 VC Schema ID에 설정
+    const handleAddSelectedZkpItem = () => {
+        if (!selectedZkpItemId) return;
+
+        const selectedZkpItem = availableZkpItems.find(
+            (item) => item.definitionId === selectedZkpItemId
+        );
+        if (!selectedZkpItem) return;
+
+        setFormData((prev) => ({
+            ...prev,
+            definitionId: selectedZkpItem.definitionId,
+        }));
+
+
+        setErrors((prev) => ({
+            ...prev,
+            definitionId: undefined,
+        }));
+
+        handleCloseZkpDialog();
+    };
+
     // Select Box 값 변경 핸들러
     const handleSelectChange = (field: keyof IssueProfileFormData) => (event: any) => {
         setFormData((prev) => ({
@@ -386,6 +479,8 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     initiateType: data.issueProfile.initiateType,
                     language: data.issueProfile.language,
                     tags: data.issueProfile.tags,
+                    zkpEnabled: data.issueProfile.zkpEnabled,
+                    definitionId: data.issueProfile.definitionId,
                 });
 
                 setSelectedItemId(data.issueProfile.vcSchemaId);
@@ -520,6 +615,49 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     ))}
                     <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddTag}>Add Tag</Button>
 
+
+                    {formData.initiateType === 'issuer_init' && (
+                        <>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 3 }}>
+                                <Typography variant="h6">ZKP 발급 여부</Typography>
+                                <Switch
+                                    checked={formData.zkpEnabled}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            zkpEnabled: e.target.checked,
+                                            definitionId: e.target.checked ? prev.definitionId : '',
+                                        }))
+                                    }
+                                    color="primary"
+                                />
+                            </Box>
+
+                            {formData.zkpEnabled && (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                    <FormControl fullWidth margin="normal" size="small">
+                                        <InputLabel shrink>Credential Definition ID *</InputLabel>
+                                        <OutlinedInput
+                                            notched
+                                            label="Credential Definition ID *"
+                                            value={formData.definitionId}
+                                            disabled
+                                            error={!!errors.definitionId}
+                                        />
+                                        <FormHelperText error={!!errors.definitionId}>
+                                            {errors.definitionId}
+                                        </FormHelperText>
+                                    </FormControl>
+
+                                    <IconButton color="primary" onClick={handleOpenZkpDialog}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Box>
+                            )}
+                        </>
+                    )}
+
+
                     <VcSchemaSelectionDialog
                         open={openDialog}
                         onClose={handleCloseDialog}
@@ -527,6 +665,14 @@ const IssueProfileRegistrationPage = (props: Props) => {
                         selectedItemId={selectedItemId}
                         onSelectItem={handleSelectItem}
                         onConfirmSelection={handleAddSelectedItem}
+                    />
+                    <CredentialDefinitionSelectionDialog
+                        open={openZkpDialog}
+                        onClose={handleCloseZkpDialog}
+                        availableItems={availableZkpItems}
+                        selectedItemId={selectedZkpItemId}
+                        onSelectItem={handleSelectZkpItem}
+                        onConfirmSelection={handleAddSelectedZkpItem}
                     />
 
                     <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>

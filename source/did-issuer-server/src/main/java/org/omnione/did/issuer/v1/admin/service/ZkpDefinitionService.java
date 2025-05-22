@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.base.db.constant.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.domain.ZkpSchema;
@@ -31,6 +32,7 @@ import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitio
 import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
 import org.omnione.did.zkp.core.manager.ZkpCredentialMetadataManager;
 import org.omnione.did.zkp.crypto.keypair.CredentialPrimaryPublicKey;
@@ -40,7 +42,6 @@ import org.omnione.did.zkp.datamodel.util.GsonWrapper;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.omnione.did.zkp.datamodel.enums.CredentialType;
 
 @Slf4j
 @Transactional
@@ -51,6 +52,8 @@ public class ZkpDefinitionService {
     private final IssuerInfoQueryService issuerInfoQueryService;
     private final ZkpSchemaQueryService zkpSchemaQueryService;
     private final ZkpWalletService zkpWalletService;
+    private final StorageService storageService;
+    private final ListCommunityService listCommunityService;
 
     public PageImpl<ZkpCredentialDefinitionDto> searchZkpDefinitionList(String searchKey, String searchValue, Pageable pageable) {
         return zkpCredentialDefinitionQueryService.searchZkpCredentialDefinitionList(searchKey, searchValue, pageable);
@@ -89,16 +92,16 @@ public class ZkpDefinitionService {
 
         // Save Credential Definition
         log.debug("Saving Credential Definition");
-        saveCredentialDefinition(request, credentialDefinition, zkpSchema);
+        ZkpCredentialDefinition zkpCredentialDefinition = saveCredentialDefinition(request, credentialDefinition, zkpSchema);
 
         try {
             // Register to Blockchain
             log.debug("Registering Credential Definition to Blockchain");
-            registerToBlockchain(credentialDefinition);
+            registerToBlockchain(zkpCredentialDefinition, credentialDefinition);
 
             // Register to List Provider
             log.debug("Registering Credential Definition to List Provider");
-            registerToListProvider(credentialDefinition);
+            registerToListProvider(zkpCredentialDefinition, credentialDefinition);
         } catch (OpenDidException e) {
             log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
         } catch (Exception e) {
@@ -136,8 +139,8 @@ public class ZkpDefinitionService {
         }
     }
 
-    private void saveCredentialDefinition(ZkpCredentialDefinitionSaveDto request, CredentialDefinition credentialDefinition, ZkpSchema zkpSchema) {
-        zkpCredentialDefinitionQueryService.saveCredentialDefinition(
+    private ZkpCredentialDefinition saveCredentialDefinition(ZkpCredentialDefinitionSaveDto request, CredentialDefinition credentialDefinition, ZkpSchema zkpSchema) {
+        return zkpCredentialDefinitionQueryService.saveCredentialDefinition(
                 ZkpCredentialDefinition.builder()
                 .definitionId(credentialDefinition.getId())
                 .schemaId(request.getSchemaId())
@@ -152,14 +155,46 @@ public class ZkpDefinitionService {
         );
     }
 
-    // @TODO: Blockchain registration
-    private void registerToBlockchain(CredentialDefinition credentialDefinition) {
-        throw new OpenDidException(ErrorCode.CREDENTIAL_DEFINITION_REGISTRATION_FAILED);
+    private void registerToBlockchain(ZkpCredentialDefinition zkpCredentialDefinition, CredentialDefinition credentialDefinition) {
+
+        try {
+            log.debug("Registering to Blockchain: {}", zkpCredentialDefinition.getSchemaId());
+            registerCredentialDefinitionToBlockchain(credentialDefinition);
+
+            zkpCredentialDefinition.setStatus(ZkpCredentialDefinitionStatus.NEED_LIST_PROVIDER_REGISTRATION);
+            zkpCredentialDefinitionQueryService.updateZkpCredentialStatusById(zkpCredentialDefinition.getId(), zkpCredentialDefinition.getStatus());
+        } catch (OpenDidException e) {
+            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to register to Blockchain: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.CREDENTIAL_DEFINITION_REGISTRATION_FAILED);
+        }
     }
 
-    // @TODO: List Provider registration
-    private void registerToListProvider(CredentialDefinition credentialDefinition) {
-        throw new OpenDidException(ErrorCode.CREDENTIAL_DEFINITION_REGISTRATION_FAILED);
+    private void registerCredentialDefinitionToBlockchain(CredentialDefinition credentialDefinition) {
+        storageService.registerCredentialDefinition(credentialDefinition);
+    }
+
+    private void registerToListProvider(ZkpCredentialDefinition zkpCredentialDefinition, CredentialDefinition credentialDefinition) {
+        try {
+            log.debug("Registering to List Provider: {}", zkpCredentialDefinition.getDefinitionId());
+            registerCredentialDefinitionToListProvider(credentialDefinition);
+
+            zkpCredentialDefinition.setStatus(ZkpCredentialDefinitionStatus.ACTIVATE);
+            zkpCredentialDefinitionQueryService.updateZkpCredentialStatusById(
+                    zkpCredentialDefinition.getId(), zkpCredentialDefinition.getStatus());
+        } catch (OpenDidException e) {
+            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to register to List Provider: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.CREDENTIAL_DEFINITION_REGISTRATION_FAILED);
+        }
+    }
+
+    private void registerCredentialDefinitionToListProvider(CredentialDefinition credentialDefinition) {
+        listCommunityService.registerCredentialDefinition(credentialDefinition);
     }
 
     public ZkpCredentialDefinitionDto getZkpCredentialDefinitionInfo(Long id) {

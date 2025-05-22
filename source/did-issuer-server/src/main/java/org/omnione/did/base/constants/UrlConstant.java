@@ -78,6 +78,8 @@ public class UrlConstant {
         public static final String V1 = "/list/admin/v1";
         public static final String VC_SCHEMA_PUBLIC = "/vc-schemas/public";
         public static final String VC_PLAN_PUBLIC = "/vc-plans/public";
+        public static final String CREDENTIAL_SCHEMA_PUBLIC = "/credential-schemas/public";
+        public static final String CREDENTIAL_DEFINITION_PUBLIC = "/credential-definitions/public";
     }
 
 }

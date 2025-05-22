@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.data;
 
 import lombok.*;
+import org.omnione.did.base.datamodel.data.zkp.CredentialDefinition;
 import org.omnione.did.data.model.vc.CredentialSchema;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class VcPlan {
     private String validUntil;
     private List<String> tags;
     private CredentialSchema credentialSchema;
+    private CredentialDefinition credentialDefinition;
     private Option option;
     private String delegator;
     private List<String> allowedIssuers;
