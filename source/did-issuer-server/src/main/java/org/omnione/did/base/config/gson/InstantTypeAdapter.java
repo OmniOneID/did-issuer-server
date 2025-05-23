@@ -1,4 +1,4 @@
-package org.omnione.did.base.config;
+package org.omnione.did.base.config.gson;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

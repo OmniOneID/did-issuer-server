@@ -72,7 +72,7 @@ public class VcStatusServiceImpl implements VcStatusService {
         this.storageService = storageService;
         this.transactionService = transactionService;
         this.revokeVcQueryService = revokeVcQueryService;
-        this.applicationConfig = null;
+        this.applicationConfig = applicationConfigQueryService.getApplicationConfig();
         this.vcQueryService = vcQueryService;
     }
 

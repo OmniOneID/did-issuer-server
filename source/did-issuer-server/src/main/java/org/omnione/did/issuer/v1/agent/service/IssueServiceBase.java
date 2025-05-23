@@ -274,14 +274,18 @@ public abstract class IssueServiceBase implements IssueService {
             User user = findUserByHolderAndVcSchemaId(holder, byVcPlanId.getVcSchemaId());
 
             log.debug("\t--> VC Profile save to DB");
-            vcProfileQueryService.save(VcProfile.builder()
+            VcProfile vcProfile = VcProfile.builder()
                     .profileId(profile.getId())
                     .transactionId(transaction.getId())
                     .did(holder.getDid())
                     .nonce(reqE2e.getNonce())
-                    .zkpNonce(profile.getProfile().getCredentialOffer().getNonce().toString())
                     .userId(user.getId())
-                    .build());
+                    .build();
+
+            if (profile.getProfile().getCredentialOffer() != null) {
+                vcProfile.setZkpNonce(profile.getProfile().getCredentialOffer().getNonce().toString());
+            }
+            vcProfileQueryService.save(vcProfile);
 
             log.debug("\t--> E2E save to DB");
             e2EQueryService.save(E2E.builder()
@@ -927,9 +931,17 @@ public abstract class IssueServiceBase implements IssueService {
         JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
 
         return attrNames.stream()
-                .map(attrName -> createAttributeValue(attrName, jsonObject))
+                .map(attrName -> {
+                    AttributeValue attributeValue = createAttributeValue(attrName, jsonObject);
+                    return attributeValue != null ? new AbstractMap.SimpleEntry<>(attrName, attributeValue) : null;
+                })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(Object::toString, attributeValue -> attributeValue, (existing, replacement) -> existing, LinkedHashMap::new));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
     }
 
     private AttributeValue createAttributeValue(String id, JsonObject jsonObject) {
