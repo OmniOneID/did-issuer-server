@@ -100,4 +100,8 @@ public class ZkpSchemaQueryService {
     public List<ZkpSchema> findAllSchemas() {
         return zkpSchemaRepository.findAll();
     }
+
+    public List<ZkpSchema> findByStatusNot(ZkpSchemaStatus status) {
+        return zkpSchemaRepository.findAllByStatusNot(status);
+    }
 }

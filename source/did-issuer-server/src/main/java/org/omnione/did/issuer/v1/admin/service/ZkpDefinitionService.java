@@ -43,6 +43,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
@@ -94,21 +96,9 @@ public class ZkpDefinitionService {
         log.debug("Saving Credential Definition");
         ZkpCredentialDefinition zkpCredentialDefinition = saveCredentialDefinition(request, credentialDefinition, zkpSchema);
 
-        try {
-            // Register to Blockchain
-            log.debug("Registering Credential Definition to Blockchain");
-            registerToBlockchain(zkpCredentialDefinition, credentialDefinition);
-
-            // Register to List Provider
-            log.debug("Registering Credential Definition to List Provider");
-            registerToListProvider(zkpCredentialDefinition, credentialDefinition);
-        } catch (OpenDidException e) {
-            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
-        }
-
+        register(zkpCredentialDefinition, credentialDefinition);
         log.debug("Credential Definition created successfully");
+
         return new EmptyResDto();
     }
 
@@ -142,16 +132,16 @@ public class ZkpDefinitionService {
     private ZkpCredentialDefinition saveCredentialDefinition(ZkpCredentialDefinitionSaveDto request, CredentialDefinition credentialDefinition, ZkpSchema zkpSchema) {
         return zkpCredentialDefinitionQueryService.saveCredentialDefinition(
                 ZkpCredentialDefinition.builder()
-                .definitionId(credentialDefinition.getId())
-                .schemaId(request.getSchemaId())
-                .type(request.getType())
-                .alias(request.getAlias())
-                .tag(request.getTag())
-                .version(request.getVersion())
-                .definition(credentialDefinition.toJson())
-                .status(ZkpCredentialDefinitionStatus.NEED_BLOCKCHAIN_REGISTRATION)
-                .zkpSchemaId(zkpSchema.getId())
-                .build()
+                        .definitionId(credentialDefinition.getId())
+                        .schemaId(request.getSchemaId())
+                        .type(request.getType())
+                        .alias(request.getAlias())
+                        .tag(request.getTag())
+                        .version(request.getVersion())
+                        .definition(credentialDefinition.toJson())
+                        .status(ZkpCredentialDefinitionStatus.NEED_BLOCKCHAIN_REGISTRATION)
+                        .zkpSchemaId(zkpSchema.getId())
+                        .build()
         );
     }
 
@@ -204,5 +194,45 @@ public class ZkpDefinitionService {
         ZkpSchema zkpSchema = zkpSchemaQueryService.findBySchemaId(zkpCredentialDefinition.getSchemaId());
 
         return ZkpCredentialDefinitionDto.fromEntity(zkpCredentialDefinition, zkpSchema.getName());
+    }
+
+    public EmptyResDto reRegisterZkpCredentialDefinition() {
+        var credentialDefinitionList = zkpCredentialDefinitionQueryService.findByStatus(ZkpCredentialDefinitionStatus.ACTIVATE);
+
+        credentialDefinitionList.forEach(zkpCredentialDefinition -> {
+            try {
+                var status = zkpCredentialDefinition.getStatus();
+                var credentialDefinition = GsonWrapper.getGson()
+                        .fromJson(zkpCredentialDefinition.getDefinition(), CredentialDefinition.class);
+
+                if (ZkpCredentialDefinitionStatus.NEED_BLOCKCHAIN_REGISTRATION.equals(status)) {
+                    register(zkpCredentialDefinition, credentialDefinition);
+                } else if (ZkpCredentialDefinitionStatus.NEED_LIST_PROVIDER_REGISTRATION.equals(status)) {
+                    registerToListProvider(zkpCredentialDefinition, credentialDefinition);
+                }
+            } catch (OpenDidException e) {
+                log.error("Failed to register for definition {}: {}", zkpCredentialDefinition.getId(), e.getMessage(), e);
+            } catch (Exception e) {
+                log.error("Unexpected error for definition {}: {}", zkpCredentialDefinition.getId(), e.getMessage(), e);
+            }
+        });
+
+        return new EmptyResDto();
+    }
+
+    private void register(ZkpCredentialDefinition zkpCredentialDefinition, CredentialDefinition credentialDefinition) {
+        try {
+            // Register to Blockchain
+            log.debug("Registering Credential Definition to Blockchain");
+            registerToBlockchain(zkpCredentialDefinition, credentialDefinition);
+
+            // Register to List Provider
+            log.debug("Registering Credential Definition to List Provider");
+            registerToListProvider(zkpCredentialDefinition, credentialDefinition);
+        } catch (OpenDidException e) {
+            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
+        }
     }
 }

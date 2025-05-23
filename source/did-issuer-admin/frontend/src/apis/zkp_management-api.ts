@@ -95,3 +95,13 @@ export const verifyCredentialDefinitionAliasUnique = async (alias: string) => {
 export const getCredentialDefinition = async (id: number) => {
     return getData(API_BASE_URL, `zkp/definitions/${id}`);
 };
+
+export const postReRegisterSchema = async () => {
+
+    return postData(API_BASE_URL, "zkp/schemas/re-register", null)
+}
+
+export const postReRegisterDefinition = async () => {
+
+    return postData(API_BASE_URL, "zkp/definitions/re-register", null)
+}

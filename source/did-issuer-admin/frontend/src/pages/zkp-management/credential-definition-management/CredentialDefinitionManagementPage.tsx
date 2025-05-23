@@ -8,7 +8,7 @@ import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
 import CustomDialog from '../../../components/dialog/CustomDialog';
 import { formatErrorMessage } from '../../../utils/error-handler';
-import { fetchCredentialDefinitions } from '../../../apis/zkp_management-api';
+import { fetchCredentialDefinitions, postReRegisterDefinition, postReRegisterSchema } from '../../../apis/zkp_management-api';
 
 type ZkpNamespaceRow = {
   id: number;
@@ -41,7 +41,27 @@ const CredentialDefinitionManagementPage = () => {
   );
 
   const hansdleReRegisterAll = async () => {
-      alert("준비중");
+
+      setLoading(true);
+      try {
+        await postReRegisterDefinition();
+
+        setLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: 'Completed re-register ZKP Credential Definition',
+          isModal: true,
+        }, {
+          onClose: async () => navigate('/zkp-management/credential-definition-management'),
+        });
+      } catch (error) {
+        setLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: formatErrorMessage(error, "Failed to re-register ZKP Credential Definition."),
+          isModal: true,
+        });
+      }
   };
 
   useEffect(() => {
@@ -87,9 +107,8 @@ const CredentialDefinitionManagementPage = () => {
         <CustomDataGrid
             rows={rows}
             columns={[
-              { field: 'definitionId', headerName: 'Definition ID', width: 250 },
-              { field: 'schemaName', headerName: 'Schema Name', width: 120,
-                renderCell: (params) => (
+              { field: 'definitionId', headerName: 'Definition ID', width: 250,
+                  renderCell: (params) => (
                   <Link
                     component="button"
                     variant='body2'
@@ -99,8 +118,8 @@ const CredentialDefinitionManagementPage = () => {
                     {params.value}
                   </Link>
                 ),
-  
-                },
+               },
+              { field: 'schemaName', headerName: 'Schema Name', width: 120 },
               { field: 'version', headerName: 'Version', width: 100 },
               { field: 'tag', headerName: 'Tag', width: 100 },
               { field: 'status', headerName: 'Status', width: 230 },

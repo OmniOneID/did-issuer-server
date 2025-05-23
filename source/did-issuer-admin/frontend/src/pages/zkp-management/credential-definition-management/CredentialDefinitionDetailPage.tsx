@@ -122,7 +122,7 @@ const CredentialDefinitionDetailPage = () => {
         <Typography variant="h4">Credential Definition Management</Typography>
 
         <StyledContainer>
-            <StyledTitle>Credential Definition Registration</StyledTitle>
+            <StyledTitle>Credential Definition Detail</StyledTitle>
 
             <StyledInputArea>
                 <TextField
@@ -178,7 +178,15 @@ const CredentialDefinitionDetailPage = () => {
                         </Typography>
                     </Box>
                 </Popover>
-
+                <TextField
+                    label="Alias"
+                    fullWidth
+                    size="small"
+                    margin="normal"
+                    variant="standard"
+                    value={formData.alias}
+                    slotProps={{ input: { readOnly: true } }}
+                />
                 <TextField
                     label="Definition Version"
                     fullWidth

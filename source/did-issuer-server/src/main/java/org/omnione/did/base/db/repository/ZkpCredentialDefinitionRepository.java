@@ -46,4 +46,6 @@ public interface ZkpCredentialDefinitionRepository extends JpaRepository<ZkpCred
     void updateStatusById(@Param("id") Long id, @Param("status") ZkpCredentialDefinitionStatus status);
 
     Optional<ZkpCredentialDefinition> findByDefinitionId(String definitionId);
+
+    List<ZkpCredentialDefinition> findAllByStatusNot(ZkpCredentialDefinitionStatus status);
 }

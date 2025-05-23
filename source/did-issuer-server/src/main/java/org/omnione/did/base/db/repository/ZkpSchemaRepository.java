@@ -43,4 +43,6 @@ public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, Que
     List<SchemaNameProjection> findNamesBySchemaIds(@Param("schemaIds") List<String> schemaIds);
 
     Optional<ZkpSchema> findBySchemaId(String schemaId);
+
+    List<ZkpSchema> findAllByStatusNot(ZkpSchemaStatus status);
 }

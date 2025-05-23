@@ -58,6 +58,7 @@ public class UrlConstant {
 
         public static final String ZKP_CREDENTIAL_DEFINITION  = "/zkp/definitions";
         public static final String CHECK_CREDENTIAL_DEFINITION_ALIAS = "/check-credential-definition-alias";
+        public static final String RE_REGISTER = "/re-register";
 
     }
 

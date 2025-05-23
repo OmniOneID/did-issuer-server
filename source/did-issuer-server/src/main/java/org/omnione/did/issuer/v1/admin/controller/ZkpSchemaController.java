@@ -52,6 +52,11 @@ public class ZkpSchemaController {
         return ResponseEntity.ok(zkpSchemaService.createZkpSchema(request));
     }
 
+    @PostMapping(UrlConstant.Admin.RE_REGISTER)
+    public ResponseEntity<EmptyResDto> reRegisterZkpCredentialSchema() {
+        return ResponseEntity.ok(zkpSchemaService.reRegisterZkpCredentialSchema());
+    }
+
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
     public ResponseEntity<ZkpSchemaInfoDto> getZkpNamespaceInfo(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(zkpSchemaService.getZkpSchemaInfo(id));

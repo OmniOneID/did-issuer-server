@@ -22,12 +22,9 @@ import com.google.gson.JsonSerializer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.constant.ZkpSchemaStatus;
-import org.omnione.did.base.db.domain.IssuerInfo;
-import org.omnione.did.base.db.domain.ZkpAttribute;
-import org.omnione.did.base.db.domain.ZkpNamespace;
-import org.omnione.did.base.db.domain.ZkpSchema;
-import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
+import org.omnione.did.base.db.domain.*;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
@@ -39,11 +36,13 @@ import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.zkp.datamodel.credential.Credential;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef;
 import org.omnione.did.zkp.datamodel.schema.AttributeDef.ATTR_TYPE;
 import org.omnione.did.zkp.datamodel.schema.AttributeType;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.schema.Namespace;
+import org.omnione.did.zkp.datamodel.util.GsonWrapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -349,5 +348,45 @@ public class ZkpSchemaService {
         return zkpSchemaList.stream()
                 .map(ZkpSchemaDto::fromEntity)
                 .toList();
+    }
+
+    public EmptyResDto reRegisterZkpCredentialSchema() {
+        var credentialSchemaList = zkpSchemaQueryService.findByStatusNot(ZkpSchemaStatus.ACTIVATE);
+
+        credentialSchemaList.forEach(zkpCredentialSchema -> {
+            try {
+                var status = zkpCredentialSchema.getStatus();
+                var credentialSchema = GsonWrapper.getGson()
+                        .fromJson(zkpCredentialSchema.getSchema(), CredentialSchema.class);
+
+                if (ZkpSchemaStatus.NEED_BLOCKCHAIN_REGISTRATION.equals(status)) {
+                    register(zkpCredentialSchema, credentialSchema);
+                } else if (ZkpSchemaStatus.NEED_LIST_PROVIDER_REGISTRATION.equals(status)) {
+                    registerToListProvider(zkpCredentialSchema, credentialSchema);
+                }
+            } catch (OpenDidException e) {
+                log.error("Failed to re-register for schema {}: {}", zkpCredentialSchema.getId(), e.getMessage(), e);
+            } catch (Exception e) {
+                log.error("Unexpected error for schema {}: {}", zkpCredentialSchema.getId(), e.getMessage(), e);
+            }
+        });
+
+        return new EmptyResDto();
+    }
+
+    private void register(ZkpSchema zkpCredentialDefinition, CredentialSchema credentialDefinition) {
+        try {
+            // Register to Blockchain
+            log.debug("Registering Credential Schema to Blockchain");
+            registerToBlockchain(zkpCredentialDefinition, credentialDefinition);
+
+            // Register to List Provider
+            log.debug("Registering Credential Schema to List Provider");
+            registerToListProvider(zkpCredentialDefinition, credentialDefinition);
+        } catch (OpenDidException e) {
+            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Failed to register to Blockchain or List Provider: {}", e.getMessage(), e);
+        }
     }
 }

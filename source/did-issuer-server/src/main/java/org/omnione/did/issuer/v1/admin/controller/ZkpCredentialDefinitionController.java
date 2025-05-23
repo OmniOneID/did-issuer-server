@@ -55,6 +55,11 @@ public class ZkpCredentialDefinitionController {
         return ResponseEntity.ok(zkpDefinitionService.createZkpCredentialDefinition(request));
     }
 
+    @PostMapping(Admin.RE_REGISTER)
+    public ResponseEntity<EmptyResDto> reRegisterZkpCredentialDefinition() {
+        return ResponseEntity.ok(zkpDefinitionService.reRegisterZkpCredentialDefinition());
+    }
+
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
     public ResponseEntity<ZkpCredentialDefinitionDto> getZkpCredentialDefinitionInfo(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(zkpDefinitionService.getZkpCredentialDefinitionInfo(id));

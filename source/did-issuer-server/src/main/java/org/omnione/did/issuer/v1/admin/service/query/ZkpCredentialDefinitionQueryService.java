@@ -91,4 +91,8 @@ public class ZkpCredentialDefinitionQueryService {
     public void updateZkpCredentialStatusById(Long id, ZkpCredentialDefinitionStatus status) {
         zkpCredentialDefinitionRepository.updateStatusById(id, status);
     }
+
+    public List<ZkpCredentialDefinition> findByStatus(ZkpCredentialDefinitionStatus status) {
+        return zkpCredentialDefinitionRepository.findAllByStatusNot(status);
+    }
 }

@@ -8,7 +8,7 @@ import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
 import CustomDialog from '../../../components/dialog/CustomDialog';
 import { formatErrorMessage } from '../../../utils/error-handler';
-import { fetchZkpSchemas } from '../../../apis/zkp_management-api';
+import { fetchZkpSchemas, postReRegisterSchema } from '../../../apis/zkp_management-api';
 
 type ZkpNamespaceRow = {
   id: number;
@@ -39,7 +39,26 @@ const CredentialSchemaManagementPage = () => {
   );
 
   const hansdleReRegisterAll = async () => {
-      alert("준비중");
+       setLoading(true);
+      try {
+        await postReRegisterSchema();
+
+        setLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: 'Completed re-register ZKP Credential Schema',
+          isModal: true,
+        }, {
+          onClose: async () => navigate('/zkp-management/credential-schema-management'),
+        });
+      } catch (error) {
+        setLoading(false);
+        await dialogs.open(CustomDialog, {
+          title: 'Notification',
+          message: formatErrorMessage(error, "Failed to re-register ZKP Credential Schema."),
+          isModal: true,
+        });
+      }
   };
 
   useEffect(() => {

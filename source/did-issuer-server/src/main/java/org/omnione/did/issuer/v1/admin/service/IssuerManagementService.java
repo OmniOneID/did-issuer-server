@@ -356,7 +356,7 @@ public class IssuerManagementService {
                 .name(issuerInfo.getName())
                 .serverUrl(issuerInfo.getServerUrl())
                 .certificateUrl(issuerInfo.getCertificateUrl())
-                .role(RoleType.APP_PROVIDER)
+                .role(RoleType.ISSUER)
                 .build();
         try {
             String request = JsonUtil.serializeToJson(registerDidToTaReqDto);
