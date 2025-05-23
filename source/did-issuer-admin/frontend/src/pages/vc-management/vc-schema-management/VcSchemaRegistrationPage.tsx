@@ -179,9 +179,10 @@ const VcSchemaRegistrationPage = (props: Props) => {
     return undefined;
   };
 
+
   const validateDescription = (description?: string): string | undefined => {
     if (!description) return;
-    if (description.length > 2000) return 'Description must be 2000 characters or less.';
+    if (description.length < 4 || description.length > 2000) return 'Description must be 2000 characters or less.';
     return undefined;
 };
 
@@ -334,7 +335,7 @@ const VcSchemaRegistrationPage = (props: Props) => {
           />
 
           <TextField
-            label="Description"
+            label="Description *"
             variant="outlined"
             margin="normal"
             size="small"
