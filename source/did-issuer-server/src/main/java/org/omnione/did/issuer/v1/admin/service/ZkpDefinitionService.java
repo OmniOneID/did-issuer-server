@@ -39,6 +39,7 @@ import org.omnione.did.zkp.crypto.keypair.CredentialPrimaryPublicKey;
 import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
 import org.omnione.did.zkp.datamodel.schema.CredentialSchema;
 import org.omnione.did.zkp.datamodel.util.GsonWrapper;
+import org.omnione.did.zkp.exception.ZkpException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -123,7 +124,7 @@ public class ZkpDefinitionService {
             log.debug("Generated Credential Definition: {}", GsonWrapper.getGsonPrettyPrinting().toJson(generatedCredentialDefinition));
 
             return generatedCredentialDefinition;
-        } catch (Exception e) {
+        } catch (OpenDidException | ZkpException e) {
             log.error("Error generating Credential Definition", e);
             throw new OpenDidException(ErrorCode.CREDENTIAL_DEFINITION_GENERATION_FAILED);
         }

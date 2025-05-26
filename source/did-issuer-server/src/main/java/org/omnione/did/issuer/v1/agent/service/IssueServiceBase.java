@@ -312,12 +312,9 @@ public abstract class IssueServiceBase implements IssueService {
                     .profile(profile)
                     .build();
         } catch (OpenDidException e) {
-            e.printStackTrace();
             log.error("OpenDidException occurred during generateIssueProfile: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-
             log.error("Exception occurred during generateIssueProfile: {}", e.getMessage(), e);
             throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
         }
