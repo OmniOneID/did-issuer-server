@@ -153,7 +153,7 @@ public class ZkpSchemaService {
             zkpSchemaQueryService.saveAllSchemaAttributes(schemaAttributes);
             return savedZkpSchema;
 
-        } catch (Exception e) {
+        } catch (OpenDidException e) {
             log.error("Failed to save ZKP schema and attributes: {}", e.getMessage(), e);
             throw new OpenDidException(ErrorCode.ZKP_SCHEMA_SAVE_FAILED);
         }

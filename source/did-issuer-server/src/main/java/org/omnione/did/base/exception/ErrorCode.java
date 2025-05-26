@@ -94,7 +94,6 @@ public enum ErrorCode {
     CRYPTO_KEY_PAIR_GENERATION_FAILED("00410", "Failed to generate key pair.", 500),
     CRYPTO_PUBLIC_KEY_UN_COMPRESS_FAILED("00411", "Failed to uncompress public key.", 500),
     CRYPTO_PUBLIC_KEY_COMPRESS_FAILED("00412", "Failed to compress public key.", 500),
-    CRYPTO_KEY_PAIR_ALREADY_EXISTS("00413", "Failed to generate keys: key already exists.", 500),
 
     SIGNATURE_VERIFICATION_FAILED("00413", "Failed to Signature verification.", 400),
     SIGNATURE_GENERATION_FAILED("00415", "Failed to generate signature.", 500),
@@ -110,6 +109,7 @@ public enum ErrorCode {
     FAILED_TO_GET_FILE_WALLET_MANAGER("00424", "Failed to get File wallet manager", 500),
     WALLET_ALREADY_EXISTS("00425", "Failed to create wallet: wallet already exists.", 500),
     INVALID_PROOF_PURPOSE("00426", "Invalid proof purpose.", 400),
+    CRYPTO_KEY_PAIR_ALREADY_EXISTS("00427", "Failed to generate keys: key already exists.", 500),
 
     // ZKP 10400~10499 = ZKP Error
     ZKP_WALLET_INFO_NOT_FOUND("10400", "ZKP Wallet is not registered.", 400),

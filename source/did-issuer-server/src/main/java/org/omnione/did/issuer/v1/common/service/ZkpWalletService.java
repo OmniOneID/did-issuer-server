@@ -58,10 +58,10 @@ public class ZkpWalletService {
             zkpWalletManager.generateRandomZkpKey(keyId, attrNames);
         } catch (ZkpException e) {
             log.error("Failed to Generate ZKP Key: {}", e.getMessage());
-            e.printStackTrace();
             throw new OpenDidException(ErrorCode.CRYPTO_KEY_PAIR_GENERATION_FAILED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to Generate ZKP Key: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.CRYPTO_KEY_PAIR_GENERATION_FAILED);
         }
     }
 
