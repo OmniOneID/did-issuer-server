@@ -120,7 +120,7 @@ public class ZkpDefinitionService {
 
             // Create Credential Definition
             log.debug("Creating Credential Definition");
-            CredentialDefinition generatedCredentialDefinition = new ZkpCredentialMetadataManager().createDefinition(issuerInfo.getDid(), credentialSchema, credentialPrimaryPublicKey, request.getTag(), request.getVersion());
+            CredentialDefinition generatedCredentialDefinition = new ZkpCredentialMetadataManager().createDefinition(issuerInfo.getDid(), credentialSchema, credentialPrimaryPublicKey, request.getVersion(), request.getTag());
             log.debug("Generated Credential Definition: {}", GsonWrapper.getGsonPrettyPrinting().toJson(generatedCredentialDefinition));
 
             return generatedCredentialDefinition;
