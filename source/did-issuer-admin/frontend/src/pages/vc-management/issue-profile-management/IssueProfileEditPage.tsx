@@ -213,7 +213,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
 
     const validateVcPlanId = (vcPlanId?: string): string | undefined => {
         if (!vcPlanId) return 'Please enter a VC Plan ID.';
-        if (vcPlanId.length < 4 || vcPlanId.length > 64) return 'VC Plan ID must be between 4 and 64 characters.';
+        if (vcPlanId.length < 4 || vcPlanId.length > 20) return 'VC Plan ID must be between 4 and 20 characters.';
         return undefined;
     };
 
