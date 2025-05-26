@@ -7,7 +7,6 @@ import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.ZkpWalletProperty;
 import org.omnione.did.base.util.BaseWalletUtil;
-import org.omnione.did.issuer.v1.agent.service.sample.ZkpSampleConstants;
 import org.omnione.did.zkp.datamodel.credential.CredentialSignature;
 import org.omnione.did.zkp.datamodel.credential.CredentialValues;
 import org.omnione.did.zkp.datamodel.credential.PrimaryCredentialSignature;
