@@ -41,7 +41,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.web3j:core:4.13.0'
+    implementation 'org.web3j:core:4.14.0'
 
     // DB
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
