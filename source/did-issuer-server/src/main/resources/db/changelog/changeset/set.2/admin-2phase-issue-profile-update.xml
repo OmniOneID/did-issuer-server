@@ -20,4 +20,8 @@
     </addColumn>
   </changeSet>
 
+  <changeSet id="admin-2phase-modify-vc-plan-id" author="gwnam">
+    <modifyDataType tableName="issue_profile" columnName="vc_plan_id" newDataType="VARCHAR(20)"/>
+  </changeSet>
+
 </databaseChangeLog>
