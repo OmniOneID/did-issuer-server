@@ -58,8 +58,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     // Query DSL
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
@@ -97,6 +97,18 @@ tasks.named('test') {
         exclude("org/**/*.class")
     }
 }
+
+import com.github.jk1.license.render.*
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
+import com.github.gradle.node.npm.task.NpmTask
+
+licenseReport {
+    outputDir = "$projectDir/build/licenses"
+    renderers = [new InventoryMarkdownReportRenderer()]
+    filters = [new LicenseBundleNormalizer(), new ExcludeTransitiveDependenciesFilter()]
+}
+
 node {
     version = "22.9.0"
     download = true
@@ -105,7 +117,6 @@ node {
     npmWorkDir = file("${projectDir}/.gradle/npm")
 }
 
-import com.github.gradle.node.npm.task.NpmTask
 
 tasks.register('deleteFrontResources', Delete) {
     delete "${backendResourceDir}/**"

@@ -48,7 +48,6 @@ public class VcSchemaService {
         this.namespaceQueryService = namespaceQueryService;
         this.vcSchemaQueryService = vcSchemaQueryService;
         this.issuerInfoQueryService = issuerInfoQueryService;
-        ;
     }
 
     /**

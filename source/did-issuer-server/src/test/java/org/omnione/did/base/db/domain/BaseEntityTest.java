@@ -1,39 +1,34 @@
 package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
-import org.omnione.did.base.config.JpaConfig;
-import org.omnione.did.base.config.QuerydslConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
+import org.omnione.did.InMemoryDataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@TestPropertySource(properties = {
-        "spring.datasource.url = jdbc:h2:mem:test",
-        "spring.datasource.driverClassName = org.h2.Driver",
-        "spring.datasource.username = sa",
-        "spring.datasource.password = ",
-})
-@DataJpaTest
-@Import({JpaConfig.class, QuerydslConfig.class})
+/**
+ * The BaseEntityTest class contains unit tests for verifying the behavior of
+ * entity auditing fields such as `createdAt` and `updatedAt` during persistence.
+ *
+ * @author birariro
+ */
+@InMemoryDataJpaTest
 class BaseEntityTest {
 
-    @Autowired
+    @PersistenceContext
     EntityManager entityManager;
 
     @Test
     void shouldSetAuditingFieldsOnPersist() {
 
-        CertificateVc auditableEntity = CertificateVc.builder().vc("").build();
-        assertNull(auditableEntity.getCreatedAt());
-        assertNull(auditableEntity.getUpdatedAt());
+        TestSimpleAuditingEntity testSimpleAuditingEntity = new TestSimpleAuditingEntity();
+        assertNull(testSimpleAuditingEntity.getCreatedAt());
+        assertNull(testSimpleAuditingEntity.getUpdatedAt());
 
-        entityManager.persist(auditableEntity);
-        assertNotNull(auditableEntity.getCreatedAt());
-        assertNotNull(auditableEntity.getUpdatedAt());
+        entityManager.persist(testSimpleAuditingEntity);
+        assertNotNull(testSimpleAuditingEntity.getCreatedAt());
+        assertNotNull(testSimpleAuditingEntity.getUpdatedAt());
     }
 }
