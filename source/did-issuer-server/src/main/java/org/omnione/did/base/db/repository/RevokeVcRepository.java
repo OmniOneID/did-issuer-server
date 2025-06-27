@@ -26,7 +26,6 @@ import java.util.Optional;
  * Repository interface for RevokeVc entity operations.
  * Provides CRUD operations for RevokeVc entities and custom query methods.
  */
-@Repository
 public interface RevokeVcRepository extends JpaRepository<RevokeVc, Long> {
     /**
      * Finds a RevokeVc entity by its associated transaction ID.

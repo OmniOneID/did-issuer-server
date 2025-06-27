@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
  * This class configures OpenFeign to enable Feign clients for the specified API package.
  */
 @Configuration
-@EnableFeignClients("org.omnione.did.issuer.v1.api")
+@EnableFeignClients("org.omnione.did.issuer.v1.agent.api")
 public class OpenFeignConfig {
 
 }

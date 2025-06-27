@@ -3,13 +3,14 @@ plugins {
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'com.github.jk1.dependency-license-report' version '2.0'
+    id("com.github.node-gradle.node") version "5.0.0"
 }
 
 group = 'org.omnione.did'
-version = '1.0.0'
+version = '2.0.0'
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = '21'
 }
 
 jar {
@@ -24,6 +25,9 @@ configurations {
 
 ext {
     set('springCloudVersion', "2023.0.1")
+    set("skipFrontendBuild", System.getProperty("skipFrontendBuild"))
+    set("frontendResourceDir", "${project.projectDir}/../did-issuer-admin/frontend")
+    set("backendResourceDir", "${projectDir}/src/main/resources/static")
 }
 
 springBoot {
@@ -37,6 +41,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.web3j:core:4.14.0'
 
     // DB
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -52,8 +57,16 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
+    // Query DSL
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.mockito:mockito-core'
+    implementation 'org.mockito:mockito-junit-jupiter'
 
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 
@@ -64,8 +77,12 @@ dependencies {
     implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
     implementation 'org.apache.commons:commons-pool2:2.12.0'
     implementation('org.hyperledger.fabric:fabric-gateway-java:2.2.9')
+    testRuntimeOnly 'com.h2database:h2'
     implementation fileTree(dir: "libs", includes: ["*"])
 
+    implementation 'com.google.code.gson:gson'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 dependencyManagement {
@@ -77,12 +94,14 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform {
         exclude("org/**/service/*.class")
+        exclude("org/**/*.class")
     }
 }
 
 import com.github.jk1.license.render.*
 import com.github.jk1.license.filter.LicenseBundleNormalizer
 import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
+import com.github.gradle.node.npm.task.NpmTask
 
 licenseReport {
     outputDir = "$projectDir/build/licenses"
@@ -90,3 +109,49 @@ licenseReport {
     filters = [new LicenseBundleNormalizer(), new ExcludeTransitiveDependenciesFilter()]
 }
 
+node {
+    version = "22.9.0"
+    download = true
+    nodeProjectDir = file("${frontendResourceDir}")
+    workDir = file("${projectDir}/.gradle/nodejs")
+    npmWorkDir = file("${projectDir}/.gradle/npm")
+}
+
+
+tasks.register('deleteFrontResources', Delete) {
+    delete "${backendResourceDir}/**"
+    delete "${backendResourceDir}"
+    delete "${frontendResourceDir}/dist/**"
+    delete "${frontendResourceDir}/dist"
+}
+
+tasks.register('npm_install', NpmTask) {
+    dependsOn tasks.named("nodeSetup")
+    workingDir = file("${frontendResourceDir}")
+    args = ['install']
+}
+
+tasks.register('npm_build', NpmTask) {
+    dependsOn 'deleteFrontResources'
+    dependsOn 'npm_install'
+    workingDir = file("${frontendResourceDir}")
+    args = ['run', 'build']
+}
+
+tasks.register('copyFrontResources', Copy) {
+    dependsOn 'npm_build'
+    from "${frontendResourceDir}/dist"
+    into "${backendResourceDir}"
+}
+
+tasks.named('copyFrontResources') {
+    mustRunAfter('npm_build')
+}
+
+tasks.named('processResources') {
+    println "## skipFrontendBuild : ${skipFrontendBuild}"
+    if (!Boolean.valueOf(skipFrontendBuild)) {
+        dependsOn('npm_build', 'copyFrontResources')
+    }
+
+}

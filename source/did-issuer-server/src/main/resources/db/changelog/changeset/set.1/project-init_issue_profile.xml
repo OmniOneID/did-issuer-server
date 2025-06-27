@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+
+    <changeSet id="init-issue_profile" author="gwnam" >
+        <createTable tableName="issue_profile">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="vc_plan_id" type="varchar(100)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="title" type="varchar(100)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="description" type="varchar(200)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="endpoints" type="varchar(2000)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="language" type="varchar(10)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="cipher" type="varchar(64)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="curve" type="varchar(64)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="padding" type="varchar(64)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="created_at" type="timestamp" defaultValue="NOW()">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="vc_schema_id" type="bigint">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="initiate_type" type="varchar(20)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="tags" type="varchar(200)">
+                <constraints nullable="false" unique="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+
+</databaseChangeLog>

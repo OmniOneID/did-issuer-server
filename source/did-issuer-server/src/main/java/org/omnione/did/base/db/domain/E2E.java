@@ -18,10 +18,8 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the e2e table.
@@ -35,7 +33,6 @@ import java.time.Instant;
 @ToString
 @Entity
 @Table(name = "e2e")
-@EntityListeners(AuditingEntityListener.class)
 public class E2E extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)

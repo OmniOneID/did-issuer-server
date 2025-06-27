@@ -17,9 +17,9 @@
 package org.omnione.did.issuer.v1.service;
 
 import org.junit.jupiter.api.*;
-import org.omnione.did.base.constants.VcPlanId;
 import org.omnione.did.base.datamodel.data.AccE2e;
 import org.omnione.did.base.datamodel.data.Holder;
+import org.omnione.did.base.datamodel.data.zkp.CredentialInfo;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
@@ -28,12 +28,12 @@ import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
 import org.omnione.did.data.model.profile.ReqE2e;
-import org.omnione.did.data.model.vc.VerifiableCredential;
-import org.omnione.did.issuer.v1.dto.vc.*;
-import org.omnione.did.issuer.v1.helper.IssueServiceHelper;
+import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.helper.IssueServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
@@ -42,6 +42,7 @@ import java.security.interfaces.ECPublicKey;
 //@Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
+@ActiveProfiles("dev")
 @SpringBootTest
 class IssueServiceTest {
 
@@ -60,7 +61,7 @@ class IssueServiceTest {
     @Order(1)
     void offerVc() {
         OfferIssueVcReqDto request = new OfferIssueVcReqDto();
-        request.setVcPlanId(VcPlanId.VCPLANID000000000001.getLabel());
+        request.setVcPlanId("vcplanid000000000001");
         System.out.println("request = " + request);
 
         OfferIssueVcResDto response = issueService.requestOffer(request);
@@ -72,7 +73,7 @@ class IssueServiceTest {
     void inspectIssuePropose() {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
-        request.setVcPlanId(VcPlanId.VCPLANID000000000002.getLabel());
+        request.setVcPlanId("vcplanid000000000001");
         request.setId(RandomUtil.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);
@@ -90,8 +91,8 @@ class IssueServiceTest {
         GenerateIssueProfileReqDto request = new GenerateIssueProfileReqDto();
         request.setTxId(txId);
         request.setHolder(Holder.builder()
-                .did("did:omn:user1")
-                .pii("f6043e73f3bf4c54864bde2418d1a4fcc617a9319e06d483d57f670c0089fd4d")
+                .did("did:omn:issuer")
+                .pii("kimraon")
                 .build());
         System.out.println("request = " + request);
         GenerateIssueProfileResDto response = issueService.generateIssueProfile(request);
@@ -133,8 +134,9 @@ class IssueServiceTest {
         IssueVcResDto response = issueService.issueVc(request);
 
         System.out.println("response = " + response);
-        VerifiableCredential vc = decIssueVc(response.getE2e().getEncVc(), response.getE2e().getIv());
-        vcId = vc.getId();
+        CredentialInfo vc = decIssueVc(response.getE2e().getEncVc(), response.getE2e().getIv());
+        vcId = vc.getVc().getId();
+        System.out.println("vc.toJson() = " + vc.toJson());
 
         Assertions.assertEquals(txId, response.getTxId(), "TxId Check");
     }
@@ -164,7 +166,7 @@ class IssueServiceTest {
 
     }
 
-    public VerifiableCredential decIssueVc(String endVc, String iv) {
+    public CredentialInfo decIssueVc(String endVc, String iv) {
         ECPrivateKey ecPriKey = (ECPrivateKey) keyPair.getPrivateKey();
         System.out.println("BaseMultibaseUtil.encode(ecPriKey.getEncoded()) = " + BaseMultibaseUtil.encode(ecPriKey.getEncoded()));
         byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1);
@@ -172,9 +174,10 @@ class IssueServiceTest {
 
         byte[] decrypt = BaseCryptoUtil.decrypt(endVc, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC, SymmetricPaddingType.PKCS5);
         String s = new String(decrypt, StandardCharsets.UTF_8);
-        VerifiableCredential verifiableCredential = new VerifiableCredential();
-        verifiableCredential.fromJson(s);
-        return verifiableCredential;
+
+        CredentialInfo credentialInfo = new CredentialInfo();
+        credentialInfo.fromJson(s);
+        return credentialInfo;
     }
 
 }

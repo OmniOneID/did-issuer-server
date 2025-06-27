@@ -27,7 +27,6 @@ import java.util.Optional;
  * Repository interface for CertificateVc entity operations.
  * Provides CRUD operations for CertificateVc entities and custom query methods.
  */
-@Repository
 public interface CertificateVcRepository extends JpaRepository<CertificateVc, Long> {
 
     /**

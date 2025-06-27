@@ -1,0 +1,2 @@
+tas_url,assert_key_id,revoke_auth_type
+http://127.0.0.1:8090,assert,PIN_OR_BIO

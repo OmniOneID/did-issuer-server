@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
 /**
@@ -24,8 +25,10 @@ import lombok.Getter;
  */
 @Getter
 public enum OfferType {
+    @SerializedName("IssueOffer")
     ISSUE_OFFER("IssueOffer"),
-    VERIFY_OFFER("VerifyOffer")
+    @SerializedName("VerifyOffer")
+    VERIFY_OFFER("VerifyOffer"),
     ;
     @JsonValue
     private final String value;

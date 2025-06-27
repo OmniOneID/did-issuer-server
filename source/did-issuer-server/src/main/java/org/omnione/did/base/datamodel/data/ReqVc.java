@@ -16,7 +16,13 @@
 
 package org.omnione.did.base.datamodel.data;
 
+import com.google.gson.annotations.Expose;
 import lombok.*;
+import org.omnione.did.data.model.DataObject;
+import org.omnione.did.data.model.did.Controller;
+import org.omnione.did.data.model.schema.MetaData;
+import org.omnione.did.data.model.util.json.GsonWrapper;
+import org.omnione.did.zkp.datamodel.credentialrequest.CredentialRequest;
 
 /**
  * request vc data structure.
@@ -27,7 +33,21 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Builder
-public class ReqVc {
+public class ReqVc extends DataObject {
+    @Expose
     private String refId;
+    @Expose
     private ProfileInfo profile;
+    @Expose
+    private CredentialRequest credentialRequest;
+
+    @Override
+    public void fromJson(String data) {
+        GsonWrapper gson = new GsonWrapper();
+        ReqVc reqVc = gson.fromJson(data, ReqVc.class);
+
+        this.refId = reqVc.refId;
+        this.profile = reqVc.profile;
+        this.credentialRequest = reqVc.credentialRequest;
+    }
 }

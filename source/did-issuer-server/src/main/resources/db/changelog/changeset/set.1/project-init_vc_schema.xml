@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+
+    <changeSet id="init-vc_schema" author="gwnam" >
+        <createTable tableName="vc_schema">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="vc_schema_id" type="varchar(100)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="title" type="varchar(100)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="description" type="VARCHAR(200)">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="language" type="varchar(10)">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="version" type="varchar(10)">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="created_at" type="timestamp" defaultValue="NOW()">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+</databaseChangeLog>

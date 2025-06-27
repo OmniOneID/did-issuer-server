@@ -18,11 +18,6 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -66,4 +61,13 @@ public class Vc extends BaseEntity implements Serializable {
 
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "vc_schema_id")
+    private String vcSchemaId;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "vc_type", nullable = false)
+    private String vcType;
 }

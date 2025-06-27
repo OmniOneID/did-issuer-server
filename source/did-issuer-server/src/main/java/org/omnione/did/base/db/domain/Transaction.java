@@ -18,14 +18,12 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.omnione.did.base.datamodel.enums.InitiateType;
 import org.omnione.did.base.db.constant.TransactionStatus;
 import org.omnione.did.base.db.constant.TransactionType;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
 
 /**
  * Entity class for the transaction table.
@@ -39,7 +37,6 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "transaction")
-@EntityListeners(AuditingEntityListener.class)
 public class Transaction extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
@@ -65,4 +62,7 @@ public class Transaction extends BaseEntity implements Serializable {
 
     @Column(name = "expired_at", nullable = false)
     private Instant expiredAt;
+
+    @Column(name = "issue_profile_id")
+    private Long issueProfileId;
 }

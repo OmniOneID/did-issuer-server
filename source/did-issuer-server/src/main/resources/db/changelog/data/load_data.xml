@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="load-data" author="gwnam">
+<!--        <loadData tableName="issuer" file="issuer.csv" relativeToChangelogFile="true"/>-->
+        <loadData tableName="application_config" file="application_config.csv" relativeToChangelogFile="true"/>
+    </changeSet>
+<!--    <changeSet id="load-data-2" author="gwnam">-->
+<!--        <sqlFile path="insert_namespace.sql" relativeToChangelogFile="true"/>-->
+<!--        <loadData tableName="vc_schema" file="vc_schema.csv" relativeToChangelogFile="true"/>-->
+<!--        <loadData tableName="vc_schema_namespace" file="vc_schema_namespace.csv" relativeToChangelogFile="true"/>-->
+<!--        <loadData tableName="issue_profile" file="issue_profile.csv" relativeToChangelogFile="true"/>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>

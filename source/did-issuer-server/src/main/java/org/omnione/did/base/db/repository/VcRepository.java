@@ -25,14 +25,14 @@ import java.util.Optional;
  * Repository interface for Vc entity operations.
  * Provides CRUD operations for Vc entities and custom query methods.
  */
-public interface VcRepository extends JpaRepository<Vc, Long> {
+public interface VcRepository extends JpaRepository<Vc, Long>, VcRepositoryAdmin {
     /**
      * Finds a Vc entity by its associated VC ID.
      *
-     * @param vcRepository The ID of the VC to search for.
+     * @param vcId The ID of the VC to search for.
      * @return An Optional containing the Vc if found, or an empty Optional if not found.
      */
-    Optional<Vc> findByVcId(VcRepository vcRepository);
+    Optional<Vc> findByVcId(String vcId);
 
     /**
      * Finds a Vc entity by its associated user ID.
@@ -49,7 +49,7 @@ public interface VcRepository extends JpaRepository<Vc, Long> {
      * @param vcPlanId The ID of the VC plan to search for.
      * @return An Optional containing the Vc if found, or an empty Optional if not found.
      */
-    Optional<Vc> findByUserIdAndVcPlanId(Long id, String vcPlanId);
+    Optional<Vc> findTopByUserIdAndVcPlanIdOrderByCreatedAtDesc(Long id, String vcPlanId);
 
     Optional<Vc> findByTxId(String txId);
 }

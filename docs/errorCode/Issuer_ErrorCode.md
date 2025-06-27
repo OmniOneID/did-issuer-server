@@ -18,12 +18,13 @@ puppeteer:
 Issuer Server Error
 ==
 
-- Date: 2024-08-20
-- Version: v1.0.0
+- Date: 2025-05-30
+- Version: v2.0.0
 
 | Version          | Date       | Changes                  |
 | ---------------- | ---------- | ------------------------ |
 | v1.0.0  | 2024-08-20 | Initial version          |
+| v2.0.0 | 2025-05-30 | add ErrorCode |
 
 <div style="page-break-after: always;"></div>
 
@@ -45,6 +46,9 @@ Issuer Server Error
     - [1.6. Issuer(005xx)](#16-issuer005xx)
     - [1.7. B/C(006xx)](#17-bc006xx)
     - [1.8. etc.(007xx)](#18-etc007xx)
+    - [1.9. ZKP(104xx)](#19-zkp104xx)
+    - [1.10. Admin / Config(008xx)](#110-admin--config008xx)
+    - [1.11. TAS(900xx)](#111-tas900xx)
 
 # Model
 ## Error Response
@@ -78,10 +82,10 @@ public class ErrorResponse {
 
 | Error Code   | Error Message                                | Description      | Action Required                             |
 |--------------|----------------------------------------------|------------------|---------------------------------------------|
-| SSRVISS00000 | The transaction does not exist.              | -                | Verify the transaction ID and try again.    |
-| SSRVISS00001 | The transaction is not valid.                | -                | Check the transaction details for validity. |
-| SSRVISS00002 | The transaction has expired.                 | -                | Initiate a new transaction.                 |
-| SSRVISS00003 | The refId is not valid.                      | -                | Confirm the refId.                          |
+| SSRVISS00001 | The transaction does not exist.              | -                | Verify the transaction ID and try again.    |
+| SSRVISS00002 | The transaction is not valid.                | -                | Check the transaction details for validity. |
+| SSRVISS00003 | The transaction has expired.                 | -                | Initiate a new transaction.                 |
+| SSRVISS00004 | The refId is not valid.                      | -                | Confirm the refId.                          |
 | SSRVISS00005 | Failed to process the 'request-offer' API request.               | -           | Verify the API request payload and try again.            |
 | SSRVISS00006 | Failed to process the 'inspect-propose-issue' API request.       | -           | Check the API request for valid input and retry.         |
 | SSRVISS00007 | Failed to process the 'generate-issue-profile' API request.      | -           | Ensure the profile data is correct and resubmit.         |
@@ -104,6 +108,8 @@ public class ErrorResponse {
 |--------------|----------------------------------------------|------------------|----------------------------------------|
 | SSRVISS00100 | Failed to find DID Document.                 | -                | Verify the DID and ensure it exists.   |
 | SSRVISS00101 | Invalid DID Document version.                | -                | Check the DID Document version.        |
+| SSRVISS00102 | Invalid DID Document                     | -           | Check the DID format.      |
+| SSRVISS00103 | Failed to retrieve DID Document.         | -           | Try fetching DID again.    |
 
 
 <br>
@@ -126,6 +132,7 @@ public class ErrorResponse {
 | SSRVISS00211 | VC Schema name is not valid.                 | -                | Verify and correct the schema name.     |
 | SSRVISS00212 | Failed to generate VC            | -           | Check the generation process and try again.  |
 | SSRVISS00213 | Failed to parse VC Schema        | -           | Validate the schema format and retry parsing.|
+| SSRVISS00214 | VC Schema not found for given ID.          | -           | Verify VC schema ID.         |
 
 <br>
 
@@ -166,8 +173,11 @@ public class ErrorResponse {
 | SSRVISS00421 | Failed to get sign data                                  | -           | Check the signing data request and retry.             | 
 | SSRVISS00422 | Failed to retrieve verification method.                  | -           | Validate the verification method request and resubmit.| 
 | SSRVISS00423 | Failed to generate hash value.                           | -           | Verify the input data for hash generation and retry.  |
+| SSRVISS00424 | Failed to get File wallet manager              | -           | Check wallet manager service.            |
+| SSRVISS00425 | Failed to create wallet: wallet already exists.| -           | Use a different wallet ID.               |
+| SSRVISS00426 | Invalid proof purpose.                         | -           | Verify proof purpose parameter.          |
+| SSRVISS00427 | Failed to generate keys: key already exists.   | -           | Avoid duplicate key creation.            |
 
-<br>
 
 ### 1.6. Issuer(005xx)
 
@@ -198,4 +208,71 @@ public class ErrorResponse {
 | SSRVISS00700 | Failed to Json serialize.                    | -                | Check JSON structure and try again.      |
 | SSRVISS00701 | Failed to Json deserialize.                  | -                | Check structure and try again.           |
 | SSRVISS00702 | Unable to process the request.               | -                | Review and correct the request format.   |
+| SSRVISS00703 | Failed to serialize SchemaClaims object to JSON.               | -           | Check schema claims and retry.       |
+| SSRVISS00704 | Failed to deserialize JSON string to SchemaClaims object.      | -           | Verify JSON structure and retry.     |
 | SSRVISS99999 | An unknown server error.                     | -                | Investigate server logs and retry later. |
+
+<br>
+
+### 1.9. ZKP(104xx)
+
+| Error Code   | Error Message                                        | Description | Action Required                            |
+|--------------|------------------------------------------------------|-------------|--------------------------------------------|
+| SSRVISS10400 | ZKP Wallet is not registered.                        | -           | Register ZKP wallet.                       |
+| SSRVISS10401 | Failed to connect ZKP wallet.                        | -           | Verify ZKP wallet connection.              |
+| SSRVISS10402 | Failed to create ZKP wallet.                         | -           | Retry ZKP wallet creation.                 |
+| SSRVISS10403 | Failed to create ZKP wallet: ZKP wallet already exists. | -        | Check for existing ZKP wallet.             |
+| SSRVISS10404 | Failed to Generate Correctness Proof.                | -           | Verify correctness proof logic.            |
+| SSRVISS10405 | Failed to Create Credential Offer.                   | -           | Check credential offer creation steps.     |
+| SSRVISS10406 | Failed to Create Attribute Value.                    | -           | Review ZKP attribute logic.                |
+| SSRVISS10407 | Failed to Create Signature correctness proof.        | -           | Validate ZKP signature process.            |
+| SSRVISS10408 | Failed to Create Credential Signature.               | -           | Retry credential signature creation.       |
+| SSRVISS10409 | Failed to Issued Credential.                         | -           | Review and retry issuance logic.           |
+
+<br>
+
+### 1.10. Admin / Config(008xx)
+
+| Error Code   | Error Message                                                | Description | Action Required                            |
+|--------------|--------------------------------------------------------------|-------------|--------------------------------------------|
+| SSRVISS00800 | Failed to find admin: admin is not registered.               | -           | Register or verify admin user.             |
+| SSRVISS00801 | Application config not found.                                | -           | Check configuration setup.                 |
+| SSRVISS00802 | Cannot delete namespace: it is referenced by a VC schema.    | -           | Remove references before deletion.         |
+| SSRVISS00803 | Cannot delete vc schema: it is referenced by a Issue Profile.| -           | Unlink schema from profiles.               |
+| SSRVISS00804 | Namespace not found for the given ID.                        | -           | Verify namespace ID.                       |
+| SSRVISS00805 | Issuer info not found during initialization.                 | -           | Confirm issuer registration.               |
+| SSRVISS00806 | Issuer is already registered                                 | -           | Use different issuer or update info.       |
+| SSRVISS00807 | Failed to register Issuer DID Document: document is already requested. | - | Cancel or wait for existing request.       |
+| SSRVISS00808 | Failed to register Issuer DID Document: document is already registered. | - | Skip re-registration.                      |
+| SSRVISS00809 | Failed to generate DID document.                             | -           | Check DID document generation logic.       |
+| SSRVISS00810 | Failed to register Issuer DID Document.                      | -           | Retry DID registration.                    |
+| SSRVISS00811 | Failed to find Issuer DID Document: no registration request made. | -       | Submit DID registration request.           |
+| SSRVISS00812 | Failed to process certificate VC: invalid JSON format.       | -           | Fix certificate VC JSON format.            |
+| SSRVISS00813 | Failed to process the 'request-certificate-vc' API request.  | -           | Check API request payload.                 |
+| SSRVISS00814 | Failed to load key element.                                  | -           | Check key storage and retry.               |
+| SSRVISS00815 | Failed to communicate with tas: unknown error occurred.      | -           | Verify TAS server connectivity.            |
+| SSRVISS00816 | Failed to ping the URL.                                      | -           | Check URL status.                          |
+| SSRVISS00817 | Failed to register admin: admin is already registered.       | -           | Skip or update existing admin.             |
+| SSRVISS00818 | Failed to save ZKP Namespace.                                               | -           | Check DB connection and namespace structure.             |
+| SSRVISS00819 | ZKP Namespace not found for the given ID.                                   | -           | Verify namespace ID exists before querying.              |
+| SSRVISS00820 | Failed to retrieve ZKP Namespace.                                           | -           | Ensure namespace exists and is accessible.               |
+| SSRVISS00821 | Failed to update ZKP Namespace.                                             | -           | Check input data and DB update logic.                    |
+| SSRVISS00822 | Failed to delete ZKP Namespace.                                             | -           | Confirm deletable state and retry.                       |
+| SSRVISS00823 | Failed to save ZKP Schema.                                                  | -           | Ensure schema is valid and DB save logic is correct.     |
+| SSRVISS00824 | ZKP Attribute not found for the given ID.                                   | -           | Check the attribute ID or input source.                  |
+| SSRVISS00825 | Failed to register ZKP Schema. (Blockchain or List Provider)                | -           | Check external system status and registration logic.     |
+| SSRVISS00826 | Failed to register ZKP Schema: schema ID already exists.                    | -           | Use a unique schema ID when registering.                 |
+| SSRVISS00827 | ZKP Schema not found for the given ID.                                      | -           | Verify schema ID before accessing.                       |
+| SSRVISS00828 | Failed to register ZKP Credential Definition: alias already exists.         | -           | Use a different alias for registration.                  |
+| SSRVISS00829 | Failed to generate ZKP Credential Definition.                               | -           | Check schema structure and generation logic.             |
+| SSRVISS00830 | Failed to register ZKP Credential Definition. (Blockchain or List Provider) | -           | Verify external systems and credentials.                 |
+| SSRVISS00831 | ZKP Credential Definition not found for the given ID.                       | -           | Check the definition ID and confirm registration status. |
+| SSRVISS00832 | ZKP Credential schema is already in use.                | -           | Ensure the schema is not already registered or used. |
+
+<br>
+
+### 1.11. TAS(900xx)
+
+| Error Code   | Error Message                                                       | Description | Action Required                            |
+|--------------|---------------------------------------------------------------------|-------------|--------------------------------------------|
+| SSRVISS90000 | Failed to process response: received unknown data from the Tas.     | -           | Check TAS response format and content.     |

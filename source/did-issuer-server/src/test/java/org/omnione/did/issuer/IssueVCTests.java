@@ -29,10 +29,18 @@ import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
 import org.omnione.did.base.util.BaseCryptoUtil;
 import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
-import org.omnione.did.issuer.v1.dto.vc.*;
+import org.omnione.did.issuer.v1.admin.service.IssueProfileService;
+import org.omnione.did.issuer.v1.admin.service.ListCommunityService;
+import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
+import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.service.EnrollEntityServiceImpl;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,11 +53,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.web.servlet.function.RequestPredicates.param;
 
 @DisplayName("VC Issuance Test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest(classes = IssuerApplication.class)
+@SpringBootTest(classes = {IssuerApplication.class})
 @ActiveProfiles("sample")
 @AutoConfigureMockMvc
 class IssueVCTests {
@@ -58,6 +65,7 @@ class IssueVCTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
 
     @Order(1)
     @Test
@@ -113,9 +121,9 @@ class IssueVCTests {
         GenerateIssueProfileReqDto reqDto = new GenerateIssueProfileReqDto();
         reqDto.setId("did:example:123456789abcdefghi");
         reqDto.setHolder(Holder.builder()
-                        .pii("pii")
-                        .did("did:omn:example123")
-                        .build());
+                .pii("pii")
+                .did("did:omn:example123")
+                .build());
         reqDto.setTxId("99999999-9999-9999-9999-999999999999");
 
         MvcResult result = mockMvc.perform(post(UrlConstant.Issuer.V1 + UrlConstant.Issuer.GENERATE_ISSUE_PROFILE)
@@ -140,9 +148,9 @@ class IssueVCTests {
         IssueVcReqDto reqDto = new IssueVcReqDto();
         reqDto.setTxId("99999999-9999-9999-9999-999999999999");
         reqDto.setAccE2e(AccE2e.builder()
-                        .iv("u9Mytc_E57cDAaAIIuCqfhw")
-                        .publicKey("mAvuqNcA0akRCgC5anv6fTQFstQynq2WZgYg/9Eh0QkAy")
-                        .build());
+                .iv("u9Mytc_E57cDAaAIIuCqfhw")
+                .publicKey("mAvuqNcA0akRCgC5anv6fTQFstQynq2WZgYg/9Eh0QkAy")
+                .build());
         reqDto.setEncReqVc("mYMh5+wqo+sFh3oMBpuQCVVNslPLH8juMMBQsUcoJ/NTGzqX4VkLwUML5gWecrHlpVeijasMZFbWVl9prwQApuB0ECzJWXvgJD9c4NwWRrMorMl+uU0eTHMMxbQhu4FARDy98pHpoBj6kP1pQ2Ai3iFgY9qQRowj0B6wW9Xu79Ugu+X+Labl3yqxrA9/5H3Z+b5VTmYZ/TZPKZRQuZRBb8qxz32GX1lCAPxki1ni2XDg");
 
         MvcResult result = mockMvc.perform(post(UrlConstant.Issuer.V1 + UrlConstant.Issuer.ISSUE_VC)
@@ -196,7 +204,7 @@ class IssueVCTests {
         String offerId = "99999999-9999-9999-9999-999999999999";
 
         MvcResult result = mockMvc.perform(get(UrlConstant.Issuer.V1 + UrlConstant.Issuer.ISSUE_VC + UrlConstant.Issuer.RESULT)
-                            .param("offerId", offerId))
+                        .param("offerId", offerId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

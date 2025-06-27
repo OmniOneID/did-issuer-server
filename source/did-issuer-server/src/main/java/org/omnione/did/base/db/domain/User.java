@@ -20,7 +20,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * Entity class for the user table.
@@ -45,6 +44,9 @@ public class User extends BaseEntity implements Serializable {
 
     @Column(name = "did")
     private String did;
+
+    @Column(name = "vc_schema_id")
+    private Long vcSchemaId;
 
     @Column(name = "data")
     private String data;

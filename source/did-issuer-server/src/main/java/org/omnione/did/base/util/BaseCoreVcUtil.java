@@ -53,15 +53,14 @@ public class BaseCoreVcUtil {
     /**
      * Set Issuer
      * @param issueVcParam Issue VC Param
-     * @param issuerDid Issuer DID
-     * @param issuerName Issuer Name
+     * @param issuer Issuer Info
      *
      */
-    //@TODO: it should be changed to id
-    public static void setIssuer(IssueVcParam issueVcParam, String issuerDid, String issuerName) {
+    public static void setIssuer(IssueVcParam issueVcParam, ProviderDetail issuer) {
         ProviderDetail providerDetail = new ProviderDetail();
-        providerDetail.setDid(issuerDid);
-        providerDetail.setName(issuerName);
+        providerDetail.setDid(issuer.getDid());
+        providerDetail.setName(issuer.getName());
+        providerDetail.setCertVcRef(issuer.getCertVcRef());
         issueVcParam.setProviderDetail(providerDetail);
     }
 
@@ -138,5 +137,18 @@ public class BaseCoreVcUtil {
         VcManager vcManager = new VcManager();
 
         return vcManager.generateVcMetaData(vc, certVcRef);
+    }
+
+    /**
+     * Parses VC metadata from its JSON representation.
+     *
+     * @param vcMetaJson The JSON string representing the VC metadata.
+     * @return The parsed VC metadata object.
+     */
+    public static VcMeta parseVcMeta(String vcMetaJson) {
+        VcMeta vcMeta = new VcMeta();
+        vcMeta.fromJson(vcMetaJson);
+
+        return vcMeta;
     }
 }

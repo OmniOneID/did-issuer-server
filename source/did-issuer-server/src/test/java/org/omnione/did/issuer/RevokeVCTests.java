@@ -20,17 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.omnione.did.IssuerApplication;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.base.datamodel.data.AccE2e;
-import org.omnione.did.base.datamodel.data.E2e;
-import org.omnione.did.base.datamodel.data.Holder;
-import org.omnione.did.base.datamodel.data.ReqRevokeVc;
-import org.omnione.did.base.datamodel.enums.EccCurveType;
-import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
-import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
-import org.omnione.did.base.util.BaseCryptoUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
-import org.omnione.did.base.util.RandomUtil;
-import org.omnione.did.issuer.v1.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.dto.vc.CompleteRevokeReqDto;
+import org.omnione.did.issuer.v1.agent.dto.vc.InspectProposeRevokeReqDto;
+import org.omnione.did.issuer.v1.agent.dto.vc.RevokeVcReqDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,8 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Revoke VC")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest(classes = IssuerApplication.class)
+@SpringBootTest(classes = {IssuerApplication.class})
 @ActiveProfiles("sample")
 @AutoConfigureMockMvc
 class RevokeVCTests {

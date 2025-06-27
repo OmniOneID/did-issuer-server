@@ -1,0 +1,1112 @@
+/*
+ * Copyright 2024 - 2025 OmniOne.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.omnione.did.issuer.v1.agent.service;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.omnione.did.base.datamodel.data.*;
+import org.omnione.did.base.datamodel.data.zkp.CredentialInfo;
+import org.omnione.did.base.datamodel.data.zkp.ZkpInnerIssueProfile;
+import org.omnione.did.base.datamodel.data.zkp.ZkpIssueProfile;
+import org.omnione.did.base.datamodel.enums.*;
+import org.omnione.did.base.db.constant.SubTransactionStatus;
+import org.omnione.did.base.db.constant.SubTransactionType;
+import org.omnione.did.base.db.constant.TransactionStatus;
+import org.omnione.did.base.db.constant.TransactionType;
+import org.omnione.did.base.db.domain.*;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.util.*;
+import org.omnione.did.common.util.DateTimeUtil;
+import org.omnione.did.common.util.JsonUtil;
+import org.omnione.did.core.data.rest.ClaimInfo;
+import org.omnione.did.core.data.rest.IssueVcParam;
+import org.omnione.did.core.data.rest.SignatureParams;
+import org.omnione.did.core.data.rest.SignatureVcParams;
+import org.omnione.did.core.exception.CoreException;
+import org.omnione.did.core.manager.VcManager;
+import org.omnione.did.crypto.keypair.EcKeyPair;
+import org.omnione.did.crypto.keypair.KeyPairInterface;
+import org.omnione.did.data.model.did.DidDocument;
+import org.omnione.did.data.model.did.Proof;
+import org.omnione.did.data.model.enums.did.ProofPurpose;
+import org.omnione.did.data.model.enums.did.ProofType;
+import org.omnione.did.data.model.enums.profile.ProfileType;
+import org.omnione.did.data.model.enums.vc.CredentialSchemaType;
+import org.omnione.did.data.model.enums.vc.VcStatus;
+import org.omnione.did.data.model.enums.vc.VcType;
+import org.omnione.did.data.model.profile.ReqE2e;
+import org.omnione.did.data.model.profile.issue.IssueProcess;
+import org.omnione.did.data.model.provider.ProviderDetail;
+import org.omnione.did.data.model.schema.ClaimDef;
+import org.omnione.did.data.model.schema.SchemaClaims;
+import org.omnione.did.data.model.schema.VcSchema;
+import org.omnione.did.data.model.vc.*;
+import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
+import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
+import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.service.query.*;
+
+
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
+import org.omnione.did.zkp.core.manager.ZkpCredentialManager;
+import org.omnione.did.zkp.crypto.constant.ZkpCryptoConstants;
+import org.omnione.did.zkp.crypto.util.BigIntegerUtil;
+import org.omnione.did.zkp.datamodel.credential.*;
+import org.omnione.did.zkp.datamodel.credentialoffer.CredentialOffer;
+import org.omnione.did.zkp.datamodel.credentialoffer.KeyCorrectnessProof;
+import org.omnione.did.zkp.datamodel.credentialrequest.CredentialRequest;
+import org.omnione.did.zkp.datamodel.definition.CredentialDefinition;
+import org.omnione.did.zkp.exception.ZkpException;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPrivateKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Abstract base class for issuing Verifiable Credentials (VCs).
+ * This class provides the core functionality for the VC issuance process,
+ * including offer generation, inspection, profile generation, VC issuance, and completion.
+ */
+@Slf4j
+@RequiredArgsConstructor
+public abstract class IssueServiceBase implements IssueService {
+    private final VcProfileQueryService vcProfileQueryService;
+    private final VcOfferQueryService vcOfferQueryService;
+    private final TransactionService transactionService;
+    private final E2EQueryService e2EQueryService;
+    private final VcQueryService vcQueryService;
+    private final StorageService storageService;
+    private final FileWalletService walletService;
+    private final IssueProfileQueryService issueProfileQueryService;
+    private final VcSchemaService vcSchemaService;
+    private final VcSchemaQueryService vcSchemaQueryService;
+    private final IssuerInfoQueryService issuerInfoQueryService;
+    private final ZkpWalletService zkpWalletService;
+    private final ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService;
+    private final ZkpSchemaQueryService zkpSchemaQueryService;
+
+    /**
+     * Generates an offer for issuing a Verifiable Credential.
+     *
+     * @param request The request containing the VC plan ID.
+     * @return OfferIssueVcResDto containing the issue offer payload.
+     * @throws OpenDidException if there's an error in the offer generation process.
+     */
+    @Override
+    public OfferIssueVcResDto requestOffer(OfferIssueVcReqDto request) {
+        try {
+            log.debug("=== Starting Request Offer ===");
+            log.debug("\t--> Validating VC plan");
+            validateVcPlanId(request.getVcPlanId());
+
+            log.debug("\t--> Generating offer payload");
+            String offerId = RandomUtil.generateUUID();
+            String issuer = issuerInfoQueryService.getIssuerInfo().getDid();
+            // TODO: Valid Until property
+            String validUntil = DateTimeUtil.addToCurrentTimeString(3, ChronoUnit.MINUTES);
+
+            IssueOfferPayload issueOfferPayload = IssueOfferPayload.builder()
+                    .offerId(offerId)
+                    .type(OfferType.ISSUE_OFFER)
+                    .vcPlanId(request.getVcPlanId())
+                    .issuer(issuer)
+                    .validUntil(validUntil)
+                    .build();
+
+            // TODO: Valid Until property
+            log.debug("\t--> VC Offer save to DB");
+            vcOfferQueryService.save(VcOffer.builder()
+                    .offerId(offerId)
+                    .did(issuer)
+                    .validUntil(Instant.now().plusSeconds(86400L))
+                    .offerType(OfferType.ISSUE_OFFER)
+                    .vcPlanId(request.getVcPlanId())
+                    .build());
+            log.debug("*** Finished Request Offer ***");
+
+            return OfferIssueVcResDto.builder()
+                    .issueOfferPayload(issueOfferPayload)
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during requestOffer: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during requestOffer: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_OFFER_FAILED);
+        }
+
+    }
+
+    /**
+     * Inspects the issue proposal for a Verifiable Credential.
+     *
+     * @param request The request containing the VC plan ID and offer ID.
+     * @return InspectIssueProposeResDto containing transaction and reference IDs.
+     * @throws OpenDidException if there's an error in the inspection process.
+     */
+    @Override
+    @Transactional
+    public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
+        try {
+            log.debug("=== Starting Inspect Issue Propose ===");
+
+            log.debug("\t--> Validating VC plan");
+            String vcPlanId = request.getVcPlanId();
+            org.omnione.did.base.db.domain.IssueProfile issueProfile = validateVcPlanId(vcPlanId);
+
+            // TODO: Needs to be modified to make it clear what it's for
+            VcOffer vcOffer = null;
+            if (Strings.isNotBlank(request.getOfferId())) {
+                log.debug("\t--> Validating Offer");
+                vcOffer = validateOfferId(request.getOfferId());
+            }
+
+            String txId = RandomUtil.generateUUID();
+            String refId = RandomUtil.generateRefId();
+
+            log.debug("\t--> Insert Transaction");
+            // TODO: Expired at
+            Transaction transaction = transactionService.insertTransaction(Transaction.builder()
+                    .txId(txId)
+                    .refId(refId)
+                    .vcPlanId(vcPlanId)
+                    .expiredAt(Instant.now().plusSeconds(3600L))
+                    .type(TransactionType.ISSUE_VC)
+                    .status(TransactionStatus.COMPLETED)
+                    .issueProfileId(issueProfile.getId())
+                    .build());
+
+            if (vcOffer != null) {
+                // FIXME: If an offer has no limit, transactions are still being created.
+                //  5times limit
+                vcOffer.setTransactionId(transaction.getId());
+            }
+
+            log.debug("\t--> Insert SubTransaction");
+            transactionService.insertSubTransaction(SubTransaction.builder()
+                    .transactionId(transaction.getId())
+                    .step(1)
+                    .type(SubTransactionType.INSPECT_ISSUE_PROPOSE)
+                    .status(SubTransactionStatus.COMPLETED)
+                    .build());
+
+            log.debug("=== Finished Inspect Issue Propose ===");
+
+            return InspectIssueProposeResDto.builder()
+                    .txId(txId)
+                    .refId(refId)
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during inspectIssuePropose: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during inspectIssuePropose: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Generates an issue profile for a Verifiable Credential.
+     *
+     * @param request The request containing the transaction ID and holder information.
+     * @return GenerateIssueProfileResDto containing the transaction ID and generated profile.
+     * @throws OpenDidException if there's an error in the profile generation process.
+     */
+    @Override
+    @Transactional
+    public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
+        try {
+            log.debug("=== Starting Generate Issue Profile ===");
+            log.debug("\t--> Validating Transaction");
+            Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.INSPECT_ISSUE_PROPOSE);
+
+            Holder holder = request.getHolder();
+
+            log.debug("\t--> Generate Issue Profile");
+            String vcPlanId = transaction.getVcPlanId();
+
+            org.omnione.did.base.db.domain.IssueProfile byVcPlanId = issueProfileQueryService.findByVcPlanId(vcPlanId);
+            ZkpIssueProfile profile = getIssueProfile(byVcPlanId);
+
+            IssueProcess process = profile.getProfile().getProcess();
+            ReqE2e reqE2e = process.getReqE2e();
+            profile.setId(RandomUtil.generateUUID());
+
+            log.debug("\t--> Generate Key pair");
+            EcKeyPair keyPair = generateEcKeyPair(reqE2e.getCurve());
+
+            String nonce = BaseCryptoUtil.generateNonceWithMultibase(16);
+
+            setPublicKeyAndNonce(reqE2e, process, keyPair, nonce);
+            // TODO: Key ID
+            signProfile(profile, "assert");
+            String encodedSessionKey = encodedSessionKey((ECPrivateKey) keyPair.getPrivateKey());
+
+            log.debug("\t--> Find User by Holder data");
+            User user = findUserByHolderAndVcSchemaId(holder, byVcPlanId.getVcSchemaId());
+
+            log.debug("\t--> VC Profile save to DB");
+            VcProfile vcProfile = VcProfile.builder()
+                    .profileId(profile.getId())
+                    .transactionId(transaction.getId())
+                    .did(holder.getDid())
+                    .nonce(reqE2e.getNonce())
+                    .userId(user.getId())
+                    .build();
+
+            if (profile.getProfile().getCredentialOffer() != null) {
+                vcProfile.setZkpNonce(profile.getProfile().getCredentialOffer().getNonce().toString());
+            }
+            vcProfileQueryService.save(vcProfile);
+
+            log.debug("\t--> E2E save to DB");
+            e2EQueryService.save(E2E.builder()
+                    .curve(reqE2e.getCurve())
+                    .cipher(reqE2e.getCipher())
+                    .padding(reqE2e.getPadding())
+                    .nonce(reqE2e.getNonce())
+                    .sessionKey(encodedSessionKey)
+                    .transactionId(transaction.getId())
+                    .build());
+
+            log.debug("\t--> SubTransaction save to DB");
+            transactionService.insertSubTransaction(SubTransaction.builder()
+                    .transactionId(transaction.getId())
+                    .step(2)
+                    .type(SubTransactionType.GENERATE_ISSUE_PROFILE)
+                    .status(SubTransactionStatus.COMPLETED)
+                    .build());
+
+            log.debug("=== Finished Generate Issue Profile ===");
+            log.debug("\t--> Profile: {}", profile.toJson());
+            return GenerateIssueProfileResDto.builder()
+                    .txId(transaction.getTxId())
+                    .profile(profile)
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during generateIssueProfile: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during generateIssueProfile: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
+        }
+    }
+
+    /**
+     * Issues a Verifiable Credential.
+     *
+     * @param request The request containing the transaction ID and E2E information.
+     * @return IssueVcResDto containing the transaction ID and encrypted VC.
+     * @throws OpenDidException if there's an error in the VC issuance process.
+     */
+    @Override
+    @Transactional
+    public IssueVcResDto issueVc(IssueVcReqDto request) {
+        try {
+            log.debug("=== Starting Issue VC ===");
+            log.debug("\t--> Validating Transaction");
+            Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.GENERATE_ISSUE_PROFILE);
+            AccE2e accE2e = request.getAccE2e();
+
+            log.debug("\t--> Validating AccE2E");
+            validateAccE2e(accE2e);
+
+            log.debug("\t--> Get E2E");
+
+            E2E e2e = e2EQueryService.findByTransactionId(transaction.getId());
+
+            log.debug("\t--> Get Issue Profile");
+            VcProfile vcProfile = vcProfileQueryService.findByTransactionId(transaction.getId());
+
+            log.debug("\t--> Generate SharedSecretKey");
+            byte[] sharedSecretKey = generateSharedSecretKey(e2e, accE2e);
+
+            log.debug("\t--> Generate MergeSharedSecretKey");
+            byte[] mergeSharedSecretAndNonce = mergeSharedSecretAndNonce(sharedSecretKey, vcProfile.getNonce(), e2e.getCipher());
+
+            log.debug("\t--> Decrypt Request VC");
+            String decryptedRequestVc = decryptRequestVc(request, mergeSharedSecretAndNonce,
+                    BaseMultibaseUtil.decode(accE2e.getIv()), e2e);
+
+            log.debug("\t--> Parse Request VC");
+            ReqVc reqVc = parseRequestVc(decryptedRequestVc);
+            validateRequestVc(transaction, reqVc);
+            System.out.println("reqVc.toJson() = " + reqVc.toJson());
+            log.debug("\t--> Find User By VC Profile");
+            Long vcSchemaId = issueProfileQueryService.findById(transaction.getIssueProfileId()).getVcSchemaId();
+            User user = findUserByVcProfileAndVcSchemaId(vcProfile, vcSchemaId); // @@
+            VcManager vcManager = new VcManager();
+
+            log.debug("\t--> Issuing VC");
+            VerifiableCredential verifiableCredential = issueVerifiableCredential(vcManager,
+                    vcProfile.getDid(), user.getData(), vcSchemaId);
+            log.debug("\t--> VerifiableCredential {}", verifiableCredential.toJson());
+
+            log.debug("\t--> Registering VC to B/C");
+            VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, issuerInfoQueryService.getIssuerInfo().getCertificateUrl());
+
+            storageService.registerVcMeta(vcMeta);
+
+            log.debug("\t--> Generate IV");
+            byte[] iv = BaseCryptoUtil.generateInitialVector();
+
+            log.debug("\t--> Issuing Credential");
+            Credential credential = issueCredential(reqVc.getCredentialRequest(), user, vcMeta.getId(), vcProfile.getZkpNonce());
+
+            log.debug("\t--> Encrypt VC");
+            String encVc = encryptVerifiableCredential(verifiableCredential, credential, mergeSharedSecretAndNonce, iv, e2e);
+
+            Vc vc = handleVcCreationOrUpdate(user, vcProfile.getDid(), transaction, vcMeta);
+
+            log.debug("\t--> VC_ID, Holder info save to DB");
+            vcQueryService.save(vc);
+
+            log.debug("\t--> SubTransaction save to DB");
+            transactionService.insertSubTransaction(SubTransaction.builder()
+                    .transactionId(transaction.getId())
+                    .step(3)
+                    .type(SubTransactionType.ISSUE_VC)
+                    .status(SubTransactionStatus.COMPLETED)
+                    .build());
+
+            log.debug("=== Finished Generate Issue Profile ===");
+            return IssueVcResDto.builder()
+                    .txId(transaction.getTxId())
+                    .e2e(E2e.builder()
+                            .encVc(encVc)
+                            .iv(BaseMultibaseUtil.encode(iv))
+                            .build())
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during issueVc: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during issueVc: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_ISSUE_FAILED);
+        }
+
+    }
+
+    private Credential issueCredential(CredentialRequest credentialRequest, User user, String vcId, String issuerNonce) {
+        if (credentialRequest == null) {
+            return null;
+        }
+        try {
+            ZkpCredentialDefinition definition = zkpCredentialDefinitionQueryService.findByDefinitionId(credentialRequest.getCredDefId());
+            ZkpSchema zkpSchema = zkpSchemaQueryService.findBySchemaId(definition.getSchemaId());
+
+            org.omnione.did.zkp.datamodel.schema.CredentialSchema credentialSchema = new Gson()
+                    .fromJson(zkpSchema.getSchema(), org.omnione.did.zkp.datamodel.schema.CredentialSchema.class);
+
+            LinkedHashMap<String, AttributeValue> attributeInfo = getAttributeInfo(credentialSchema.getAttrNames(), user.getData());
+            CredentialDefinition credentialDefinition = new Gson().fromJson(definition.getDefinition(), CredentialDefinition.class);
+            CredentialValues credentialValues = new CredentialValues();
+            credentialValues.setValues(attributeInfo);
+
+            CredentialSignature credentialSignature = zkpWalletService.credSignature(definition.getAlias(), credentialRequest, credentialValues);
+            SignatureCorrectnessProof signatureCorrectnessProof = zkpWalletService.signatureCorrectnessProof(definition.getAlias(), credentialRequest, credentialSignature);
+
+            BigInteger nonce = new BigInteger(issuerNonce);
+
+            return new ZkpCredentialManager().createCredential(credentialDefinition, credentialSignature, signatureCorrectnessProof, attributeInfo, credentialRequest, nonce, vcId);
+        } catch (ZkpException e) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_ISSUE_CREDENTIAL);
+        }
+    }
+
+    /**
+     * Completes the Verifiable Credential issuance process.
+     *
+     * @param request The request containing the transaction ID.
+     * @return CompleteVcResDto containing the transaction ID.
+     * @throws OpenDidException if there's an error in the completion process.
+     */
+    @Override
+    @Transactional
+    public CompleteVcResDto completeVc(CompleteVcReqDto request) {
+        try {
+            log.debug("=== Starting Complete VC ===");
+            log.debug("\t--> Validate Transaction");
+            Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(), SubTransactionType.ISSUE_VC);
+            String txId = transaction.getTxId();
+            Vc vc = vcQueryService.findByTxId(txId);
+            if (!vc.getVcId().equals(request.getVcId())) {
+                throw new OpenDidException(ErrorCode.VC_ID_NOT_MATCH);
+            }
+            log.debug("\t--> Update Transaction");
+            transactionService.updateTransactionStatus(transaction, TransactionStatus.FINISH);
+
+            log.debug("\t--> SubTransaction save to DB");
+            transactionService.insertSubTransaction(SubTransaction.builder()
+                    .transactionId(transaction.getId())
+                    .step(4)
+                    .type(SubTransactionType.COMPLETE_VC)
+                    .status(SubTransactionStatus.COMPLETED)
+                    .build());
+
+            log.debug("=== Finished Complete VC ===");
+            return CompleteVcResDto.builder()
+                    .txId(transaction.getTxId())
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during completeVc: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during completeVc: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_ISSUE_COMPLETE_FAILED);
+        }
+    }
+
+    /**
+     * Retrieves the result of a Verifiable Credential issuance process.
+     *
+     * @param offerId The ID of the offer.
+     * @return IssueVcResultResDto containing the result of the issuance process.
+     * @throws OpenDidException if there's an error in retrieving the result.
+     */
+    @Override
+    public IssueVcResultResDto issueVcResult(String offerId) {
+        try {
+            log.debug("=== Starting Issue VC Result ===");
+            VcOffer vcOffer = vcOfferQueryService.findByOfferId(offerId);
+
+            Transaction transaction = transactionService.findById(vcOffer.getTransactionId());
+            if (transaction == null) {
+                return IssueVcResultResDto.builder()
+                        .offerId(offerId)
+                        .result(false)
+                        .build();
+            }
+            SubTransaction subTransaction = transactionService
+                    .findByTransactionIdOrderByStepDesc(transaction.getId());
+
+            log.debug("=== Finished Issue VC Result ===");
+            return IssueVcResultResDto.builder()
+                    .txId(transaction.getTxId())
+                    .offerId(offerId)
+                    .result(SubTransactionType.COMPLETE_VC.equals(subTransaction.getType()))
+                    .build();
+        } catch (OpenDidException e) {
+            log.error("OpenDidException occurred during issueVcResult: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during issueVcResult: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_ISSUE_RESULT_FAILED);
+        }
+    }
+
+    /**
+     * Merge a shared secret and nonce.
+     * The merged result is hashed using SHA-256 and the length of the result is determined by the symmetric cipher type.
+     *
+     * @param sharedSecretKey The shared secret key.
+     * @param nonce           The nonce.
+     * @param cipherType      The symmetric cipher type.
+     * @return The merged shared secret and nonce.
+     */
+    private byte[] mergeSharedSecretAndNonce(byte[] sharedSecretKey, String nonce, String cipherType) {
+        return BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecretKey,
+                BaseMultibaseUtil.decode(nonce),
+                SymmetricCipherType.fromDisplayName(cipherType));
+    }
+
+
+    /**
+     * Validate Offer ID
+     *
+     * @param vcPlanId The plan ID to validate
+     * @throws OpenDidException The vcPlanId is not valid
+     */
+
+    private org.omnione.did.base.db.domain.IssueProfile validateVcPlanId(String vcPlanId) {
+        return issueProfileQueryService.findByVcPlanId(vcPlanId);
+    }
+
+    /**
+     * Validate Offer ID
+     *
+     * @param offerId The offer ID to validate
+     * @return VcOffer The VC offer
+     * @throws OpenDidException if the offer as expired.
+     */
+    private VcOffer validateOfferId(String offerId) {
+        VcOffer vcOffer = vcOfferQueryService.findByOfferId(offerId);
+
+        if (ValidationUtil.isExpiredDate(vcOffer.getValidUntil())) {
+            throw new OpenDidException(ErrorCode.VC_OFFER_EXPIRED);
+        }
+        return vcOffer;
+    }
+
+    /**
+     * ReqE2e's public key and nonce are set.
+     *
+     * @param reqE2e  The ReqE2e object to set
+     * @param process The IssueProcess object to set
+     * @param keyPair The EcKeyPair object to set
+     * @param nonce   The nonce to set
+     */
+    private void setPublicKeyAndNonce(ReqE2e reqE2e, IssueProcess process, EcKeyPair keyPair, String nonce) {
+        ECPublicKey publicKey = (ECPublicKey) keyPair.getPublicKey();
+        byte[] encodedPublicKey = BaseCryptoUtil.compressPublicKey(publicKey.getEncoded(),
+                EccCurveType.fromValue(reqE2e.getCurve()));
+        reqE2e.setPublicKey(BaseMultibaseUtil.encode(encodedPublicKey));
+
+        process.setIssuerNonce(nonce);
+        reqE2e.setNonce(nonce);
+    }
+
+    /**
+     * Encodes a session key.
+     *
+     * @param privateKey The private key to encode
+     * @return String The encoded session key
+     */
+    private String encodedSessionKey(ECPrivateKey privateKey) {
+        return BaseMultibaseUtil.encode(privateKey.getEncoded());
+    }
+
+    /**
+     * handle VC creation or update
+     *
+     * @param user        The user
+     * @param holderDid   The holder DID
+     * @param transaction The transaction
+     * @param vcMeta      The VC Meta
+     * @return The created or updated VC
+     */
+    private Vc handleVcCreationOrUpdate(User user, String holderDid, Transaction transaction, VcMeta vcMeta) {
+        String vcPlanId = transaction.getVcPlanId();
+        String txId = transaction.getTxId();
+        return vcQueryService.findByUserIdAndVcPlanId(user.getId(), vcPlanId)
+                .map(existingVc -> {
+                    revokeVc(existingVc);
+                    return Vc.builder()
+                            .issuedAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getIssuanceDate()))
+                            .expiredAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getValidUntil()))
+                            .did(holderDid)
+                            .userId(user.getId())
+                            .vcPlanId(vcPlanId)
+                            .txId(txId)
+                            .vcId(vcMeta.getId())
+                            .vcSchemaId(vcMeta.getCredentialSchema().getId())
+                            .status(vcMeta.getStatus())
+                            .vcType("VC")
+                            .build();
+                })
+                .orElseGet(() ->
+                        Vc.builder()
+                                .issuedAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getIssuanceDate()))
+                                .expiredAt(DateTimeUtil.parseUtcTimeStringToInstant(vcMeta.getValidUntil()))
+                                .did(holderDid)
+                                .userId(user.getId())
+                                .vcPlanId(vcPlanId)
+                                .txId(txId)
+                                .vcId(vcMeta.getId())
+                                .vcSchemaId(vcMeta.getCredentialSchema().getId())
+                                .status(vcMeta.getStatus())
+                                .vcType("VC")
+                                .build()
+                );
+    }
+
+    /**
+     * Encrypts a Verifiable Credential.
+     *
+     * @param verifiableCredential The Verifiable Credential to encrypt.
+     * @param sharedSecretKey      The shared secret key.
+     * @param iv                   The initialization vector.
+     * @param e2e                  The end-to-end encryption information.
+     * @return The encrypted Verifiable Credential.
+     */
+    private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
+        String vcJsonString = verifiableCredential.toJson();
+
+        byte[] encrypt = BaseCryptoUtil.encrypt(vcJsonString,
+                sharedSecretKey,
+                iv,
+                SymmetricCipherType.fromDisplayName(e2e.getCipher()),
+                SymmetricPaddingType.fromDisplayName(e2e.getPadding()));
+
+        return BaseMultibaseUtil.encode(encrypt);
+    }
+
+    /**
+     * Encrypts a Verifiable Credential.
+     *
+     * @param verifiableCredential The Verifiable Credential to encrypt.
+     * @param sharedSecretKey      The shared secret key.
+     * @param iv                   The initialization vector.
+     * @param e2e                  The end-to-end encryption information.
+     * @return The encrypted Verifiable Credential.
+     */
+    private String encryptVerifiableCredential(VerifiableCredential verifiableCredential, Credential credential, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
+        CredentialInfo credentialInfo = CredentialInfo.builder()
+                .vc(verifiableCredential)
+                .credential(credential)
+                .build();
+        String credentialJson = credentialInfo.toJson();
+
+        byte[] encrypt = BaseCryptoUtil.encrypt(credentialJson,
+                sharedSecretKey,
+                iv,
+                SymmetricCipherType.fromDisplayName(e2e.getCipher()),
+                SymmetricPaddingType.fromDisplayName(e2e.getPadding()));
+
+        return BaseMultibaseUtil.encode(encrypt);
+    }
+
+    /**
+     * if proof is not null, Validate the proof of an AccE2e object.
+     *
+     * @param accE2e The AccE2e object to verify
+     * @throws OpenDidException if Failed to Json serialize
+     */
+    private void validateAccE2e(AccE2e accE2e) {
+        Proof proof = accE2e.getProof();
+
+        if (Objects.nonNull(proof)) {
+            String verificationMethod = proof.getVerificationMethod();
+            DidDocument holderDidDoc = storageService.findDidDoc(verificationMethod);
+
+            ValidationUtil.verifySign(accE2e, holderDidDoc);
+        }
+    }
+
+    /**
+     * Generates a shared secret key.
+     *
+     * @param accE2e The AccE2e object containing the public key
+     * @param e2e    The E2e object containing the session key
+     * @return byte[] The generated shared secret key
+     */
+    private byte[] generateSharedSecretKey(E2E e2e, AccE2e accE2e) {
+        byte[] decodePubKey = BaseMultibaseUtil.decode(accE2e.getPublicKey());
+        byte[] decodePriKey = BaseMultibaseUtil.decode(e2e.getSessionKey());
+
+        return BaseCryptoUtil.generateSharedSecret(decodePubKey, decodePriKey,
+                EccCurveType.fromValue(e2e.getCurve()));
+    }
+
+    /**
+     * Decrypts the request VC.
+     *
+     * @param request         The request containing the encrypted request VC.
+     * @param sharedSecretKey The shared secret key.
+     * @param iv              The initialization vector.
+     * @param e2e             The end-to-end encryption information.
+     * @return The decrypted request VC.
+     */
+    private String decryptRequestVc(IssueVcReqDto request, byte[] sharedSecretKey, byte[] iv, E2E e2e) {
+        byte[] decrypt = BaseCryptoUtil.decrypt(
+                BaseMultibaseUtil.decode(request.getEncReqVc()),
+                sharedSecretKey,
+                iv,
+                SymmetricCipherType.fromDisplayName(e2e.getCipher()),
+                SymmetricPaddingType.fromDisplayName(e2e.getPadding())
+        );
+        return new String(decrypt);
+    }
+
+    /**
+     * parse request VC
+     *
+     * @param requestVc request VC
+     * @return parsing request VC
+     * @throws OpenDidException if there's an error in the parsing process.
+     */
+    private ReqVc parseRequestVc(String requestVc) {
+        ReqVc reqVc = new ReqVc();
+        reqVc.fromJson(requestVc);
+        return reqVc;
+    }
+
+
+    /**
+     * Validates the request VC.
+     * If the request VC is invalid, the transaction status is updated to FAILED.
+     *
+     * @param transaction The transaction.
+     * @param reqVc       The request VC.
+     * @throws OpenDidException if the refId is not valid.
+     * @throws OpenDidException if the profile nonce is not valid
+     * @throws OpenDidException if the profile issuer nonce is not valid
+     */
+    private void validateRequestVc(Transaction transaction, ReqVc reqVc) {
+        if (!transaction.getRefId().equals(reqVc.getRefId())) {
+            transactionService.updateTransactionStatus(transaction, TransactionStatus.FAILED);
+            throw new OpenDidException(ErrorCode.REF_ID_INVALID);
+        }
+        VcProfile vcProfile = vcProfileQueryService.findByTransactionId(transaction.getId());
+
+        if (!reqVc.getProfile().getId().equals(vcProfile.getProfileId())) {
+            transactionService.updateTransactionStatus(transaction, TransactionStatus.FAILED);
+            throw new OpenDidException(ErrorCode.VC_PROFILE_INVALID);
+        }
+
+        if (!reqVc.getProfile().getIssuerNonce().equals(vcProfile.getNonce())) {
+            transactionService.updateTransactionStatus(transaction, TransactionStatus.FAILED);
+            throw new OpenDidException(ErrorCode.VC_PROFILE_ISSUER_NONCE_INVALID);
+        }
+    }
+
+    /**
+     * Issues a Verifiable Credential using the provided VcManager.
+     *
+     * @param vcManager The VcManager to use for issuing the VC.
+     * @param holderDid The DID of the credential holder.
+     * @param data      The data to include in the credential.
+     * @return The issued VerifiableCredential.
+     * @throws OpenDidException if there's an error in the VC issuance process.
+     */
+    private VerifiableCredential issueVerifiableCredential(VcManager vcManager, String holderDid, String data
+            , Long vcSchemaId) {
+        log.debug("\t--> Issue Verifiable Credential");
+        try {
+
+            IssueVcParam issueVcParam = new IssueVcParam();
+
+            DidDocument didDocument = getDidDocument();
+            VcSchema vcSchema = getVcSchema(vcSchemaId);
+            BaseCoreVcUtil.setVcSchema(issueVcParam, vcSchema.toJson());
+            BaseCoreVcUtil.setClaimInfo(issueVcParam, getClaimInfo(vcSchema.getCredentialSubject().getClaims(), data));
+            BaseCoreVcUtil.setIssuer(issueVcParam, getIssuer());
+            BaseCoreVcUtil.setVcTypes(issueVcParam, getVcType());
+            BaseCoreVcUtil.setEvidence(issueVcParam, getEvidence());
+            // TODO: Valid Until property
+            BaseCoreVcUtil.setValidateUntil(issueVcParam, 1);
+
+            VerifiableCredential verifiableCredential = vcManager.issueCredential(issueVcParam, holderDid);
+            List<SignatureVcParams> signatureParams = vcManager.getOriginDataForSign("assert", didDocument, verifiableCredential);
+            signVc(signatureParams);
+
+            verifiableCredential = vcManager.addProof(verifiableCredential, signatureParams);
+
+            return verifiableCredential;
+        } catch (CoreException e) {
+            log.error("Failed to issue Verifiable Credential: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.VC_ISSUE_FAILED);
+        }
+    }
+
+    /**
+     * Revokes a Verifiable Credential.
+     *
+     * @param vc The VC to revoke.
+     */
+    private void revokeVc(Vc vc) {
+        VcMeta vcMetByVcId = storageService.getVcMetaByVcId(vc.getVcId());
+        if (!VcStatus.REVOKED.getRawValue().equals(vcMetByVcId.getStatus())) {
+            storageService.updateVcStatus(vc.getVcId(), VcStatus.REVOKED);
+            vc.setStatus(VcStatus.REVOKED.getRawValue());
+        }
+    }
+
+    /**
+     * Generates Ecc key pair.
+     *
+     * @param curve The curve to use for generating the key pair.
+     * @return The generated key pair.
+     */
+    private EcKeyPair generateEcKeyPair(String curve) {
+        return (EcKeyPair) generateKeyPair(curve);
+    }
+
+    /**
+     * Generates a key pair.
+     *
+     * @param curve The curve to use for generating the key pair.
+     * @return The generated key pair.
+     */
+    private KeyPairInterface generateKeyPair(String curve) {
+        EccCurveType eccCurveType = EccCurveType.fromValue(curve);
+        return BaseCryptoUtil.generateKeyPair(eccCurveType);
+    }
+
+    /**
+     * Signs a Verifiable Credential profile.
+     *
+     * @param profile The profile to sign.
+     * @param keyId   The ID of the key to use for signing.
+     */
+    private void signProfile(ZkpIssueProfile profile, String keyId) {
+        Proof proof = new Proof();
+        proof.setType(ProofType.SECP256R1_SIGNATURE_2018.getRawValue());
+        proof.setProofPurpose(ProofPurpose.ASSERTION_METHOD.getRawValue());
+        proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
+        // Key ID
+        proof.setVerificationMethod(issuerInfoQueryService.getIssuerInfo().getDid() + "#" + "assert");
+        // TODO: Verification method(refer to TAS)
+        profile.setProof(proof);
+
+        String source = JsonUtil.serializeAndSort(profile);
+        byte[] bytes = walletService.generateCompactSignature(keyId, source);
+
+        proof.setProofValue(BaseMultibaseUtil.encode(bytes));
+    }
+
+    private List<VcType> getVcType() {
+        return List.of(VcType.VERIFIABLE_CREDENTIAL);
+    }
+
+    /**
+     * Generates a DID Document.
+     *
+     * @return The generated DID Document.
+     */
+    private DidDocument getDidDocument() {
+
+        return storageService.findDidDoc(issuerInfoQueryService.getIssuerInfo().getDid());
+    }
+
+    /**
+     * Generates a DocumentVerificationEvidence object.
+     *
+     * @return The generated DocumentVerificationEvidence object.
+     */
+    private DocumentVerificationEvidence getEvidence() {
+        // TODO Evidence
+        DocumentVerificationEvidence evidence = new DocumentVerificationEvidence();
+        evidence.fromJson("""
+                {
+                    "evidenceDocument":"BusinessLicense",
+                    "subjectPresence":"Physical",
+                    "documentPresence":"Physical",
+                    "type":"DocumentVerification",
+                    "verifier":"did:omn:tas"
+                }
+                """);
+
+        return evidence;
+    }
+
+    /**
+     * Signs a Verifiable Credential.
+     *
+     * @param signatureParams The signature parameters to use for signing the VC.
+     */
+    private void signVc(List<SignatureVcParams> signatureParams) {
+        for (SignatureParams signatureParam : signatureParams) {
+            String originData = signatureParam.getOriginData();
+
+            byte[] sign = walletService.generateCompactSignature(signatureParam.getKeyId(), originData);
+            String signatureValue = BaseMultibaseUtil.encode(sign);
+
+            signatureParam.setSignatureValue(signatureValue);
+        }
+    }
+
+    private LinkedHashMap<String, AttributeValue> getAttributeInfo(List<String> attrNames, String data) {
+        JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
+
+        return attrNames.stream()
+                .map(attrName -> {
+                    AttributeValue attributeValue = createAttributeValue(attrName, jsonObject);
+                    return attributeValue != null ? new AbstractMap.SimpleEntry<>(attrName, attributeValue) : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
+    }
+
+    private AttributeValue createAttributeValue(String id, JsonObject jsonObject) {
+        if (!jsonObject.has(id) || jsonObject.get(id).isJsonNull()) {
+            return null;
+        }
+
+        try {
+            AttributeValue attributeValue = new AttributeValue();
+            attributeValue.setRaw(jsonObject.get(id).getAsString());
+
+            return attributeValue;
+        } catch (ZkpException e) {
+            throw new OpenDidException(ErrorCode.FAILED_TO_GENERATE_ZKP_ATTRIBUTE_VALUE);
+        }
+    }
+
+    /**
+     * Generates claim information for a Verifiable Credential.
+     *
+     * @param data The data to use for generating claim information.
+     * @return A HashMap containing the generated claim information.
+     */
+    private HashMap<String, ClaimInfo> getClaimInfo(List<SchemaClaims> schemaClaimList, String data) {
+        JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
+        return schemaClaimList.stream()
+                .flatMap(schemaClaim -> schemaClaim.getItems().stream()
+                        .map(item -> createClaimInfo(schemaClaim.getNamespace().getId(), item, jsonObject)))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(ClaimInfo::getCode, claimInfo -> claimInfo, (existing, replacement) -> existing, HashMap::new));
+    }
+
+    private ClaimInfo createClaimInfo(String namespace, ClaimDef item, JsonObject jsonObject) {
+        String claimCode = namespace + "." + item.getId();
+
+        // TODO: Uncommenting after demo development
+        if (!jsonObject.has(claimCode) || jsonObject.get(claimCode).isJsonNull()) {
+            return null;
+        }
+
+        ClaimInfo claimInfo = new ClaimInfo();
+        claimInfo.setCode(claimCode);
+//        claimInfo.setValue((claimCode + "_Value").getBytes(StandardCharsets.UTF_8)); // TODO: Uncommenting after demo development
+        claimInfo.setValue(jsonObject.get(claimCode).getAsString().getBytes(StandardCharsets.UTF_8));
+
+        return claimInfo;
+    }
+
+
+    private ZkpIssueProfile getIssueProfile(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        ZkpIssueProfile issueProfile = new ZkpIssueProfile();
+
+        issueProfile.setType(ProfileType.ISSUE_PROFILE.getRawValue());
+        issueProfile.setEncoding(StandardCharsets.UTF_8.name());
+        issueProfile.setDescription(byVcPlanId.getDescription());
+        issueProfile.setTitle(byVcPlanId.getTitle());
+        issueProfile.setLanguage(byVcPlanId.getLanguage());
+
+        ZkpInnerIssueProfile innerIssueProfile = new ZkpInnerIssueProfile();
+        innerIssueProfile.setIssuer(getIssuer());
+        innerIssueProfile.setCredentialSchema(createCredentialSchema(byVcPlanId.getVcSchemaId()));
+        innerIssueProfile.setProcess(createIssueProcess(byVcPlanId));
+
+        String definitionId = byVcPlanId.getDefinitionId();
+        if (Optional.ofNullable(definitionId).isPresent()) {
+            CredentialOffer credentialOffer = createCredentialOffer(definitionId);
+            innerIssueProfile.setCredentialOffer(credentialOffer);
+        }
+
+        issueProfile.setProfile(innerIssueProfile);
+
+        return issueProfile;
+    }
+
+    private CredentialOffer createCredentialOffer(String definitionId) {
+        ZkpCredentialDefinition definition = zkpCredentialDefinitionQueryService.findByDefinitionId(definitionId);
+
+        BigInteger issuerNonce = new BigIntegerUtil().createRandomBigInteger(ZkpCryptoConstants.LARGE_NONCE);
+        KeyCorrectnessProof correctnessProof = zkpWalletService.getCorrectnessProof(definition.getAlias());
+
+        try {
+            return new ZkpCredentialManager().createCredentialOffer(correctnessProof,
+                    definition.getSchemaId(), definition.getDefinitionId(), issuerNonce);
+        } catch (ZkpException e) {
+            log.error("Failed Create Credential Offer: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.FAILED_TO_GENERATE_CREDENTIAL_OFFER);
+        }
+    }
+
+    private ProviderDetail getIssuer() {
+        IssuerInfo issuerInfo = issuerInfoQueryService.getIssuerInfo();
+
+        ProviderDetail issuer = new ProviderDetail();
+        issuer.setCertVcRef(issuerInfo.getCertificateUrl());
+        issuer.setDid(issuerInfo.getDid());
+        issuer.setName(issuerInfo.getName());
+
+        return issuer;
+    }
+
+    private CredentialSchema createCredentialSchema(Long vcSchemaId) {
+        VcSchema vcSchemaById = vcSchemaService.getVcSchemaById(vcSchemaId);
+        CredentialSchema credentialSchema = new CredentialSchema();
+        credentialSchema.setId(vcSchemaById.getId());
+        credentialSchema.setType(CredentialSchemaType.OSD_SCHEMA_CREDENTIAL.getRawValue());
+
+        return credentialSchema;
+    }
+
+    private IssueProcess createIssueProcess(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        IssueProcess issueProcess = new IssueProcess();
+        issueProcess.setEndpoints(byVcPlanId.getEndpoints());
+        issueProcess.setReqE2e(createReqE2e(byVcPlanId));
+
+        return issueProcess;
+    }
+
+    private ReqE2e createReqE2e(org.omnione.did.base.db.domain.IssueProfile byVcPlanId) {
+        ReqE2e reqE2e = new ReqE2e();
+        reqE2e.setCurve(byVcPlanId.getCurve());
+        reqE2e.setPadding(byVcPlanId.getPadding());
+        reqE2e.setCipher(byVcPlanId.getCipher());
+
+        return reqE2e;
+    }
+
+    /**
+     * Gets the VC schema to use for issuing Verifiable Credentials.
+     *
+     * @return The VC schema as a String.
+     */
+    private VcSchema getVcSchema(Long vcSchemaId) {
+
+        return vcSchemaService.getVcSchemaById(vcSchemaId);
+    }
+
+    /**
+     * Finds a user by their VcProfile.
+     *
+     * @param vcProfile The VcProfile to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByVcProfile(VcProfile vcProfile);
+
+    /**
+     * Finds a user by their VcProfile.
+     *
+     * @param vcProfile The VcProfile to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId);
+
+    /**
+     * Finds a user by their Holder information.
+     *
+     * @param holder The Holder information to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByHolder(Holder holder);
+
+
+    /**
+     * Finds a user by their Holder information.
+     *
+     * @param holder The Holder information to use for finding the user.
+     * @return The found User.
+     */
+    protected abstract User findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId);
+
+
+}

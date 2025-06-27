@@ -25,7 +25,7 @@ import java.util.Optional;
  * Repository interface for User entity operations.
  * Provides CRUD operations for User entities and custom query methods.
  */
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryAdmin {
     /**
      * Finds a User entity by its associated PII.
      *
@@ -33,6 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return An Optional containing the User if found, or an empty Optional if not found.
      */
     Optional<User> findByPii(String pii);
+    Optional<User> findByPiiAndVcSchemaId(String pii, Long vcSchemaId);
 
     /**
      * Finds a User entity by its associated DID.
@@ -41,4 +42,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return An Optional containing the User if found, or an empty Optional if not found.
      */
     Optional<User> findByDid(String did);
+    Optional<User> findByDidAndVcSchemaId(String did, Long vcSchemaId);
+    Optional<User> findByIdAndVcSchemaId(Long id, Long vcSchemaId);
 }

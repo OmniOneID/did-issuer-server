@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+
+    <changeSet id="modify_user" author="gwnam" >
+        <addColumn tableName="vc">
+            <column name="vc_schema_id" type="VARCHAR(100)" defaultValue="">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false" unique="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+</databaseChangeLog>

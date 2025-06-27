@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+  <changeSet id="admin-2phase-add-definition-id-to-issue-profile" author="yklee0911">
+    <addColumn tableName="issue_profile">
+      <column name="definition_id" type="varchar(100)">
+        <constraints nullable="true" unique="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="admin-2phase-add-zkp-enabled-to-issue-profile" author="yklee0911">
+    <addColumn tableName="issue_profile">
+      <column name="zkp_enabled" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false" unique="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="admin-2phase-modify-vc-plan-id" author="gwnam">
+    <modifyDataType tableName="issue_profile" columnName="vc_plan_id" newDataType="VARCHAR(20)"/>
+  </changeSet>
+
+</databaseChangeLog>
