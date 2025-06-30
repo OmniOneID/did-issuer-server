@@ -1054,4 +1054,4 @@ Clicking the **REGISTER** button on the `Admin Management` screen moves to the r
 | 8    | **CANCEL Button**             | Cancels registration and returns to the previous screen.                           |
 
 
-[Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V2.0.0.0/OepnDID_Installation_Guide-V2.0.0.0_ko.md
+[Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/main/release-V2.0.0.0/OpenDID_Installation_Guide-V2.0.0.0.md
