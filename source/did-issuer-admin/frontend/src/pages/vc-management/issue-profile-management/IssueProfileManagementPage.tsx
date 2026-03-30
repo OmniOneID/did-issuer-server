@@ -1,9 +1,9 @@
 import { Box, Link, styled, Typography } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { deleteIssueProfile, fetchIssueProfile, fetchVcSchema } from '../../../apis/vc-management-api';
+import { deleteIssueProfile, fetchIssueProfile } from '../../../apis/vc-management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
 import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
@@ -27,10 +27,11 @@ const IssueProfileManagementPage = (props: Props) => {
   const navigate = useNavigate();
   const dialogs = useDialogs();
   const [loading, setLoading] = useState<boolean>(false);
-  // const [rows, setRows] = useState<{ id: string | number }[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [selectedRow, setSelectedRow] = useState<string | number | null>(null);
   const [rows, setRows] = useState<IssueProfileRow[]>([]);
+  const [searchText, setSearchText] = useState<string>('');
+  const [selectedSearch, setSelectedSearch] = useState<string>('vcPlanId');
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -41,6 +42,54 @@ const IssueProfileManagementPage = (props: Props) => {
     () => Array.isArray(rows) ? rows.find(row => row.id === selectedRow) || null : null,
     [rows, selectedRow]
   );
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchIssueProfile(
+        paginationModel.page,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+    } catch (err) {
+      console.error("Failed to retrieve Issue Profiles. ", err);
+      navigate('/error', { state: { message: formatErrorMessage(err, "Failed to retrieve Issue Profiles.") } });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.page, paginationModel.pageSize, selectedSearch, searchText, navigate]);
+
+  const getData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchIssueProfile(
+        0,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    } catch (err) {
+      setLoading(false);
+      console.error("Failed to retrieve Issue Profiles. ", err);
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: formatErrorMessage(err, 'Failed to retrieve Issue Profiles.'),
+        isModal: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.pageSize, selectedSearch, searchText, dialogs]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDelete = async () => {
     const id = selectedRowData?.id as number;
@@ -55,6 +104,8 @@ const IssueProfileManagementPage = (props: Props) => {
         setLoading(true);
         deleteIssueProfile(id)
           .then(() => {
+            setLoading(false);
+            getData();
             dialogs.open(CustomDialog, {
               title: 'Notification',
               message: 'Issue Profile delete completed.',
@@ -66,27 +117,28 @@ const IssueProfileManagementPage = (props: Props) => {
             });
           })
           .catch((err) => {
+            setLoading(false);
             console.error("Failed to delete Issue Profile. ", err);
-            navigate('/error', { state: { message: formatErrorMessage(err, "Failed to delete Issue Profile.") } });
-          })
-          .finally(() => setLoading(false));
+            dialogs.open(CustomDialog, {
+              title: 'Notification',
+              message: formatErrorMessage(err, "Failed to delete Issue Profile."),
+              isModal: true,
+            });
+          });
       }
     }
-};
+  };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchIssueProfile(paginationModel.page, paginationModel.pageSize, null, null)
-      .then((response) => {
-        setRows(response.data.content);
-        setTotalRows(response.data.total);
-      })
-      .catch((error) => {
-        console.error("Failed to retrieve Issue Profiles. ", error);
-        navigate('/error', { state: { message: formatErrorMessage(error, "Failed to retrieve Issue Profiles.") } });
-      })
-      .finally(() => setLoading(false));
-  }, [paginationModel]);
+  const handleSearch = useCallback(
+    async (field: string, text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setSelectedSearch(field);
+      setSearchText(trimmed);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    },
+    []
+  );
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
     margin: 'auto',
@@ -139,16 +191,25 @@ const IssueProfileManagementPage = (props: Props) => {
           }}
           onRegister={() => navigate('/vc-management/issue-profile-management/issue-profile-registration')}
           onDelete={handleDelete}
-          additionalButtons={[
-
-          ]}
+          additionalButtons={[]}
           paginationMode="server"
           totalRows={totalRows}
           paginationModel={paginationModel}
           setPaginationModel={setPaginationModel}
+          enableSearch={true}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          selectedSearch={selectedSearch}
+          setSelectedSearch={setSelectedSearch}
+          searchOptions={[
+            { value: 'vcPlanId', label: 'VC Plan ID' },
+            { value: 'title', label: 'Title' },
+          ]}
+          onSearch={handleSearch}
+          onRefresh={getData}
         />
       </StyledContainer>
     </>
   )
 }
-export default IssueProfileManagementPage 
+export default IssueProfileManagementPage

@@ -57,6 +57,9 @@ public class VcRepositoryAdminImpl implements VcRepositoryAdmin {
                 case "vcId":
                     predicate = predicate.and(vc.vcId.eq(searchValue));
                     break;
+                case "vcSchemaId":
+                    predicate = predicate.and(vc.vcSchemaId.contains(searchValue));
+                    break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);
             }

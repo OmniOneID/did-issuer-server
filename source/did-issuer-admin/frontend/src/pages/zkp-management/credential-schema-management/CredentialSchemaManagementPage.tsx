@@ -1,11 +1,10 @@
 import { Box, Link, styled, Typography } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
 import FullscreenLoader from '../../../components/loading/FullscreenLoader';
-import CustomConfirmDialog from '../../../components/dialog/CustomConfirmDialog';
 import CustomDialog from '../../../components/dialog/CustomDialog';
 import { formatErrorMessage } from '../../../utils/error-handler';
 import { fetchZkpSchemas, postReRegisterSchema } from '../../../apis/zkp_management-api';
@@ -27,6 +26,8 @@ const CredentialSchemaManagementPage = () => {
   const [rows, setRows] = useState<ZkpNamespaceRow[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [selectedRow, setSelectedRow] = useState<string| number | null>(null);
+  const [searchText, setSearchText] = useState<string>('');
+  const [selectedSearch, setSelectedSearch] = useState<string>('schemaId');
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -37,6 +38,58 @@ const CredentialSchemaManagementPage = () => {
     () => Array.isArray(rows) ? rows.find(row => row.id === selectedRow) || null : null,
     [rows, selectedRow]
   );
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchZkpSchemas(
+        paginationModel.page,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+    } catch (err) {
+      console.error("Failed to retrieve zkp schemas. ", err);
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: formatErrorMessage(err, "Failed to fetch zkp schema list."),
+        isModal: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.page, paginationModel.pageSize, selectedSearch, searchText, dialogs]);
+
+  const getData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchZkpSchemas(
+        0,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    } catch (err) {
+      setLoading(false);
+      console.error("Failed to retrieve zkp schemas. ", err);
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: formatErrorMessage(err, 'Failed to fetch zkp schema list.'),
+        isModal: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.pageSize, selectedSearch, searchText, dialogs]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const hansdleReRegisterAll = async () => {
        setLoading(true);
@@ -61,25 +114,16 @@ const CredentialSchemaManagementPage = () => {
       }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchZkpSchemas(paginationModel.page, paginationModel.pageSize, null, null)
-    .then((response) => {
-        setLoading(false);
-        setRows(response.data.content);
-        setTotalRows(response.data.total);
-    })
-    .catch((err) => {
-      setLoading(false);
-      console.error("Failed to retrieve zkp schemas. ", err);
-      dialogs.open(CustomDialog, {
-          title: 'Notification',
-          message: formatErrorMessage(err, "Failed to fetch zkp schema list."),
-          isModal: true,
-      });
-    });
-
-  }, [paginationModel]);
+  const handleSearch = useCallback(
+    async (field: string, text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setSelectedSearch(field);
+      setSearchText(trimmed);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    },
+    []
+  );
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
     width: 1100,
@@ -135,6 +179,17 @@ const CredentialSchemaManagementPage = () => {
           additionalButtons={[
             { label: 'Re-register all', onClick: () => hansdleReRegisterAll(), color: 'primary' },
           ]}
+          enableSearch={true}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          selectedSearch={selectedSearch}
+          setSelectedSearch={setSelectedSearch}
+          searchOptions={[
+            { value: 'schemaId', label: 'ID' },
+            { value: 'name', label: 'Name' },
+          ]}
+          onSearch={handleSearch}
+          onRefresh={getData}
         />
       </StyledContainer>
     </>

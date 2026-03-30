@@ -1,7 +1,7 @@
 import { Box, Link, styled, Typography } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { fetchZkpNamespaces, zkpDeleteNamespace } from '../../../apis/zkp_management-api';
 import CustomDataGrid from '../../../components/data-grid/CustomDataGrid';
@@ -27,6 +27,8 @@ const ZkpNamespaceManagementPage = () => {
   const [rows, setRows] = useState<ZkpNamespaceRow[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [selectedRow, setSelectedRow] = useState<string| number | null>(null);
+  const [searchText, setSearchText] = useState<string>('');
+  const [selectedSearch, setSelectedSearch] = useState<string>('namespaceId');
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -37,6 +39,58 @@ const ZkpNamespaceManagementPage = () => {
     () => Array.isArray(rows) ? rows.find(row => row.id === selectedRow) || null : null,
     [rows, selectedRow]
   );
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchZkpNamespaces(
+        paginationModel.page,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+    } catch (err) {
+      console.error("Failed to retrieve zkp namespaces. ", err);
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: formatErrorMessage(err, "Failed to fetch zkp namespace list."),
+        isModal: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.page, paginationModel.pageSize, selectedSearch, searchText, dialogs]);
+
+  const getData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchZkpNamespaces(
+        0,
+        paginationModel.pageSize,
+        selectedSearch && searchText.trim() ? selectedSearch : null,
+        selectedSearch && searchText.trim() ? searchText.trim() : null
+      );
+      setRows(response.data.content);
+      setTotalRows(response.data.total);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    } catch (err) {
+      setLoading(false);
+      console.error("Failed to retrieve zkp namespaces. ", err);
+      await dialogs.open(CustomDialog, {
+        title: 'Notification',
+        message: formatErrorMessage(err, 'Failed to fetch zkp namespace list.'),
+        isModal: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [paginationModel.pageSize, selectedSearch, searchText, dialogs]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleUpdate = async () => {
     if (!selectedRowData) return;
@@ -78,6 +132,7 @@ const ZkpNamespaceManagementPage = () => {
       zkpDeleteNamespace(id)
           .then(() => {
             setLoading(false);
+            getData();
             dialogs.open(CustomDialog, {
               title: 'Notification',
               message: 'ZKP Namespace delete completed.',
@@ -93,33 +148,24 @@ const ZkpNamespaceManagementPage = () => {
             console.error("Failed to delete ZKP Namespace. ", err);
             dialogs.open(CustomDialog, {
               title: 'Notification',
-              message: `Failed to delete ZKP namespace: ${err}`,
+              message: formatErrorMessage(err, "Failed to delete ZKP Namespace."),
               isModal: true,
             });
           })
-      
+
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-
-    fetchZkpNamespaces(paginationModel.page, paginationModel.pageSize, null, null)
-    .then((response) => {
-      setLoading(false)
-        setRows(response.data.content);
-        setTotalRows(response.data.total);
-    })
-    .catch((err) => {
-      setLoading(false)
-      console.error("Failed to retrieve zkp namespaces. ", err);
-      dialogs.open(CustomDialog, {
-          title: 'Notification',
-          message: formatErrorMessage(err, "Failed to fetch zkp namespace list."),
-          isModal: true,
-      });
-    });
-  }, [paginationModel]);
+  const handleSearch = useCallback(
+    async (field: string, text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setSelectedSearch(field);
+      setSearchText(trimmed);
+      setPaginationModel((prev) => ({ ...prev, page: 0 }));
+    },
+    []
+  );
 
   const StyledContainer = useMemo(() => styled(Box)(({ theme }) => ({
     margin: 'auto',
@@ -171,6 +217,17 @@ const ZkpNamespaceManagementPage = () => {
           totalRows={totalRows}
           paginationModel={paginationModel}
           setPaginationModel={setPaginationModel}
+          enableSearch={true}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          selectedSearch={selectedSearch}
+          setSelectedSearch={setSelectedSearch}
+          searchOptions={[
+            { value: 'namespaceId', label: 'ID' },
+            { value: 'name', label: 'Name' },
+          ]}
+          onSearch={handleSearch}
+          onRefresh={getData}
         />
       </StyledContainer>
     </>
