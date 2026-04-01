@@ -7,6 +7,7 @@ export interface IssuerInfoResDto {
   status: IssuerStatus;
   serverUrl: string;
   certificateUrl: string;
+  certificateVc: string;
   didDocument?: any;
   createdAt: string;
   updatedAt: string;

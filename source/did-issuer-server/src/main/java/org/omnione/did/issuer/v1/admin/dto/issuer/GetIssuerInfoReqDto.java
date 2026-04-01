@@ -49,6 +49,7 @@ public class GetIssuerInfoReqDto {
     private IssuerStatus status;
     private String serverUrl;
     private String certificateUrl;
+    private String certificateVc;
     private DidDocument didDocument;
     private String createdAt;
     private String updatedAt;
@@ -77,6 +78,23 @@ public class GetIssuerInfoReqDto {
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
                         .certificateUrl(t.getCertificateUrl())
+                        .didDocument(didDocument)
+                        .createdAt(formatInstant(t.getCreatedAt()))
+                        .updatedAt(formatInstant(t.getUpdatedAt()))
+                        .build())
+                .orElse(null);
+    }
+
+    public static GetIssuerInfoReqDto fromEntity(IssuerInfo issuerInfo, DidDocument didDocument, String certificateVc) {
+        return Optional.ofNullable(issuerInfo)
+                .map(t -> GetIssuerInfoReqDto.builder()
+                        .id(t.getId())
+                        .did(t.getDid())
+                        .name(t.getName())
+                        .status(t.getStatus())
+                        .serverUrl(t.getServerUrl())
+                        .certificateUrl(t.getCertificateUrl())
+                        .certificateVc(certificateVc)
                         .didDocument(didDocument)
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))

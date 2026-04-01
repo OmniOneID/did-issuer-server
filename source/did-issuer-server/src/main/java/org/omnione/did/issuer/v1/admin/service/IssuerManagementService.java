@@ -108,6 +108,13 @@ public class IssuerManagementService {
         }
 
         DidDocument didDocument = storageService.findDidDoc(issuerInfo.getDid());
+
+        if (issuerInfo.getStatus() == IssuerStatus.ACTIVATE) {
+            log.debug("\t--> Returning complete Issuer info with certificate VC");
+            String certificateVc = certificateVcQueryService.findCertificateVc().getVc();
+            return GetIssuerInfoReqDto.fromEntity(issuerInfo, didDocument, certificateVc);
+        }
+
         return GetIssuerInfoReqDto.fromEntity(issuerInfo, didDocument);
     }
 
