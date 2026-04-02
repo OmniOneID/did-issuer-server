@@ -20,6 +20,7 @@ package org.omnione.did.issuer.v1.agent.api;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.data.model.vc.VcMeta;
 import org.omnione.did.issuer.v1.agent.api.dto.*;
+import org.omnione.did.issuer.v1.agent.config.RepositoryFeignConfig;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.cloud.openfeign.FeignClient;
 
@@ -28,7 +29,7 @@ import org.springframework.cloud.openfeign.FeignClient;
  * RepositoryFeign
  * This is a Feign client that communicates with the Storage API.
  */
-@FeignClient(value = "Storage", url = "${lss.url:http://127.0.0.1:8098}" + UrlConstant.LSS.V1)
+@FeignClient(value = "Storage", url = "${lss.url:http://127.0.0.1:8098}" + UrlConstant.LSS.V1, configuration = RepositoryFeignConfig.class)
 public interface RepositoryFeign {
 
     /**

@@ -184,6 +184,7 @@ public enum ErrorCode {
 
     // 1000~ 10999 = Ledger Service Server
     LSS_FIND_VC_META_FAILED("01000", "Failed to find VC Meta.", 500),
+    SERVER_CONFIG_KEY_NOT_FOUND("01101", "Server configuration key not found.", 400),
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 

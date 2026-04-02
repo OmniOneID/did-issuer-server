@@ -35,5 +35,6 @@
   <include file="set.2/admin-2phase-vc-update.xml" relativeToChangelogFile="true"/>
   <include file="set.2/admin-2phase-vc-profile-update.xml" relativeToChangelogFile="true"/>
   <include file="set.2/admin-2phase_admin.xml" relativeToChangelogFile="true"/>
+  <include file="set.3/create-table_server_config.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
