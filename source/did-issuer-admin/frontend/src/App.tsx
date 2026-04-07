@@ -2,6 +2,7 @@ import type { Navigation, Session } from '@toolpad/core/AppProvider';
 import { ReactRouterAppProvider } from '@toolpad/core/react-router';
 import { DialogsProvider } from '@toolpad/core/useDialogs';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { PasswordPolicyProvider } from './context/PasswordPolicyContext';
 import { Outlet, useNavigate } from 'react-router';
 import { ExtendedSession, SessionContext, useSession } from './context/SessionContext';
 import { ServerStatusProvider, useServerStatus } from './context/ServerStatusContext';
@@ -89,11 +90,13 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SessionProvider>
-      <ServerStatusProvider>
-        <GlobalStyles styles={{ body: { padding: "10px" } }} />
-        <AppContent />
-      </ServerStatusProvider>
-    </SessionProvider>
+    <PasswordPolicyProvider>
+      <SessionProvider>
+        <ServerStatusProvider>
+          <GlobalStyles styles={{ body: { padding: "10px" } }} />
+          <AppContent />
+        </ServerStatusProvider>
+      </SessionProvider>
+    </PasswordPolicyProvider>
   );
 }

@@ -26,6 +26,7 @@ import org.omnione.did.issuer.v1.admin.dto.admin.ResetPasswordReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.RegisterAdminReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.ResetPasswordByRootReqDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.VerifyAdminIdUniqueResDto;
+import org.omnione.did.issuer.v1.admin.dto.admin.ChangeAdminIdAndPasswordReqDto;
 import org.omnione.did.issuer.v1.admin.service.AdminManagementService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -125,6 +126,17 @@ public class AdminManagementController {
     @ResponseBody
     public EmptyResDto resetPasswordByRoot(@RequestBody ResetPasswordByRootReqDto resetPasswordByRootReqDto) {
         return adminManagementService.resetPasswordByRoot(resetPasswordByRootReqDto);
+    }
+
+    /**
+     * Changes both the login ID and password for an admin (used on first login).
+     *
+     * @param req the DTO containing old/new login ID and password
+     * @return the updated admin information
+     */
+    @PostMapping(value = "/change-id-and-password")
+    public AdminDto changeAdminIdAndPassword(@Valid @RequestBody ChangeAdminIdAndPasswordReqDto req) {
+        return adminManagementService.changeAdminIdAndPassword(req);
     }
 
 }

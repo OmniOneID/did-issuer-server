@@ -46,6 +46,18 @@ export const requestPasswordResetByRoot = async (data: any) => {
     return postData(API_BASE_URL, `admins/root/reset-password`, data);
 }
 
+export const getAdminPasswordPolicy = async () => {
+    return getData(API_BASE_URL, `admin-password-policy`);
+}
+
+export const registerAdminPasswordPolicy = async (data: any) => {
+    return postData(API_BASE_URL, `admin-password-policy`, data);
+}
+
+export const changeAdminIdAndPassword = async (data: any) => {
+    return postData(API_BASE_URL, `admins/change-id-and-password`, data);
+}
+
 
 export const fetchUserInfos = async (page: number, size: number, searchKey: string | null, searchValue: string | null) => {
     const params = new URLSearchParams({

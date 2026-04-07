@@ -19,9 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.omnione.did.base.db.constant.AdminRole;
-import org.omnione.did.base.db.constant.PasswordResetReason;
-import org.omnione.did.base.db.domain.Admin;
+import org.omnione.did.base.db.domain.AdminPasswordPolicy;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,42 +27,34 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Admin information DTO used in the Admin Console.
+ * DTO for admin password policy information.
  */
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-public class AdminDto {
+public class AdminPasswordPolicyDto {
     private final Long id;
-    private final String loginId;
-    private final String name;
-    private final String email;
-    private final Boolean emailVerified;
-    private final Boolean requirePasswordReset;
-    private final AdminRole role;
-    private final String createdBy;
+    private final Short minLength;
+    private final Boolean requireUppercase;
+    private final Boolean requireNumber;
+    private final Boolean requireSpecial;
+    private final Short passwordExpiryDays;
     private final String createdAt;
     private final String updatedAt;
-    private final String passwordResetReason;
-    private final Boolean isPasswordExpired;
 
-    public static AdminDto fromAdmin(Admin admin) {
+    public static AdminPasswordPolicyDto fromAdminPasswordPolicy(AdminPasswordPolicy policy) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        PasswordResetReason reason = admin.getPasswordResetReason();
-        return AdminDto.builder()
-                .id(admin.getId())
-                .loginId(admin.getLoginId())
-                .name(admin.getName())
-                .emailVerified(admin.getEmailVerified())
-                .requirePasswordReset(admin.getRequirePasswordReset())
-                .role(admin.getRole())
-                .createdBy(admin.getCreatedBy())
-                .createdAt(formatInstant(admin.getCreatedAt(), formatter))
-                .updatedAt(formatInstant(admin.getUpdatedAt(), formatter))
-                .passwordResetReason(reason != null ? reason.name() : null)
-                .isPasswordExpired(reason == PasswordResetReason.EXPIRED)
+        return AdminPasswordPolicyDto.builder()
+                .id(policy.getId())
+                .minLength(policy.getMinLength())
+                .requireUppercase(policy.getRequireUppercase())
+                .requireNumber(policy.getRequireNumber())
+                .requireSpecial(policy.getRequireSpecial())
+                .passwordExpiryDays(policy.getPasswordExpiryDays())
+                .createdAt(formatInstant(policy.getCreatedAt(), formatter))
+                .updatedAt(formatInstant(policy.getUpdatedAt(), formatter))
                 .build();
     }
 

@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.omnione.did.base.db.constant.AdminRole;
+import org.omnione.did.base.db.constant.PasswordResetReason;
 
 import java.io.Serializable;
 
@@ -68,4 +69,11 @@ public class Admin extends BaseEntity implements Serializable {
 
     @Column(name = "created_by", nullable = false, length = 50)
     private String createdBy;
+
+    @Column(name = "last_password_changed_at", nullable = true)
+    private java.time.Instant lastPasswordChangedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "password_reset_reason", nullable = true, length = 20)
+    private PasswordResetReason passwordResetReason;
 }

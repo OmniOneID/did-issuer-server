@@ -18,8 +18,10 @@ package org.omnione.did.issuer.v1.admin.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.db.constant.PasswordResetReason;
 import org.omnione.did.base.db.domain.Admin;
 import org.omnione.did.base.db.repository.AdminRepository;
+import org.omnione.did.issuer.v1.admin.dto.admin.ChangeAdminIdAndPasswordReqDto;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
@@ -57,6 +59,8 @@ public class AdminManagementService {
         Admin admin = adminQueryService.findByLoginIdAndLoginPassword(resetPasswordReqDto.getLoginId(), resetPasswordReqDto.getOldPassword());
         admin.setLoginPassword(resetPasswordReqDto.getNewPassword());
         admin.setRequirePasswordReset(false);
+        admin.setPasswordResetReason(null);
+        admin.setLastPasswordChangedAt(java.time.Instant.now());
 
         return AdminDto.fromAdmin(adminRepository.save(admin));
     }
@@ -102,6 +106,7 @@ public class AdminManagementService {
                 .role(registerAdminReqDto.getRole())
                 .loginPassword(registerAdminReqDto.getLoginPassword())
                 .requirePasswordReset(true)
+                .passwordResetReason(PasswordResetReason.FIRST_LOGIN)
                 .emailVerified(false)
                 .createdBy("SYSTEM")
                 .build();
@@ -120,7 +125,7 @@ public class AdminManagementService {
     public VerifyAdminIdUniqueResDto verifyAdminIdUnique(String loginId) {
         long count = adminQueryService.countByLoginId(loginId);
         return VerifyAdminIdUniqueResDto.builder()
-                .isUnique(count == 0)
+                .unique(count == 0)
                 .build();
     }
 
@@ -146,8 +151,36 @@ public class AdminManagementService {
         Admin admin = adminQueryService.findByLoginId(resetPasswordByRootReqDto.getLoginId());
         admin.setLoginPassword(resetPasswordByRootReqDto.getNewPassword());
         admin.setRequirePasswordReset(true);
+        admin.setPasswordResetReason(PasswordResetReason.ADMIN_FORCED);
 
         adminRepository.save(admin);
         return new EmptyResDto();
+    }
+
+    /**
+     * Changes both the login ID and password for an admin (used on first login).
+     *
+     * @param req DTO containing old/new login ID and old/new password
+     * @return updated AdminDto
+     */
+    public AdminDto changeAdminIdAndPassword(ChangeAdminIdAndPasswordReqDto req) {
+        Admin admin = adminQueryService.findByLoginIdAndLoginPassword(req.getOldLoginId(), req.getOldPassword());
+
+        if (!req.getOldLoginId().equals(req.getNewLoginId())) {
+            Admin existingWithNewId = adminQueryService.findByLoginIdOrNull(req.getNewLoginId());
+            if (existingWithNewId != null) {
+                throw new OpenDidException(ErrorCode.ADMIN_ALREADY_EXISTS);
+            }
+        } else {
+            throw new OpenDidException(ErrorCode.ADMIN_ALREADY_EXISTS);
+        }
+
+        admin.setLoginId(req.getNewLoginId());
+        admin.setLoginPassword(req.getNewPassword());
+        admin.setRequirePasswordReset(false);
+        admin.setPasswordResetReason(null);
+        admin.setLastPasswordChangedAt(java.time.Instant.now());
+
+        return AdminDto.fromAdmin(adminRepository.save(admin));
     }
 }

@@ -15,13 +15,29 @@
  */
 package org.omnione.did.issuer.v1.admin.dto.admin;
 
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+/**
+ * Request DTO for changing admin login ID and password simultaneously (used on first login).
+ */
 @Getter
-@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class VerifyAdminIdUniqueResDto {
-    private boolean unique;
+public class ChangeAdminIdAndPasswordReqDto {
+    @NotNull
+    private String oldLoginId;
+
+    @NotNull
+    private String newLoginId;
+
+    @NotNull
+    private String oldPassword;
+
+    @NotNull
+    private String newPassword;
 }

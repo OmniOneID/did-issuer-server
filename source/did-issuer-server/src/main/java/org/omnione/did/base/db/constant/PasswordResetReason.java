@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.dto.admin;
+package org.omnione.did.base.db.constant;
 
-import lombok.*;
-
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class VerifyAdminIdUniqueResDto {
-    private boolean unique;
+public enum PasswordResetReason {
+    FIRST_LOGIN, EXPIRED, ADMIN_FORCED
 }

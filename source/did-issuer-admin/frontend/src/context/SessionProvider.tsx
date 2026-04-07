@@ -27,10 +27,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setSession = useCallback((newSession: ExtendedSession | null) => {
     setSessionState(newSession);
     if (newSession) {
-      const storage = localStorage.getItem('rememberMe') === 'true' ? localStorage : sessionStorage;
-      storage.setItem('session', JSON.stringify(newSession));
+      sessionStorage.setItem('session', JSON.stringify(newSession));
+      localStorage.removeItem('session');
       resetTimeout();
     } else {
+      sessionStorage.removeItem('session');
+      localStorage.removeItem('session');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
   }, [resetTimeout]);
@@ -56,8 +58,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // 초기 세션 복구
   useEffect(() => {
-    const storedSession =
-      localStorage.getItem('session') || sessionStorage.getItem('session');
+    const storedSession = sessionStorage.getItem('session');
     if (storedSession) {
       setSessionState(JSON.parse(storedSession));
     }

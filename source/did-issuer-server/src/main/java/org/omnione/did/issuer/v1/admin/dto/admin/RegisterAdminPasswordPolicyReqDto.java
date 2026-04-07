@@ -15,13 +15,32 @@
  */
 package org.omnione.did.issuer.v1.admin.dto.admin;
 
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+/**
+ * Request DTO for registering or updating the admin password policy.
+ */
 @Getter
-@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class VerifyAdminIdUniqueResDto {
-    private boolean unique;
+public class RegisterAdminPasswordPolicyReqDto {
+    @NotNull
+    private Short minLength;
+
+    @NotNull
+    private Boolean requireUppercase;
+
+    @NotNull
+    private Boolean requireNumber;
+
+    @NotNull
+    private Boolean requireSpecial;
+
+    @NotNull
+    private Short passwordExpiryDays;
 }

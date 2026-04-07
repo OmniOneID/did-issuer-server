@@ -41,6 +41,8 @@ import ZkpCredentialSchemaRegistrationPage from './pages/zkp-management/credenti
 import CredentialSchemaDetailPage from './pages/zkp-management/credential-schema-management/CredentialSchemaDetailPage';
 import CredentialDefinitionRegistrationPage from './pages/zkp-management/credential-definition-management/CredentialDefinitionRegistrationPage';
 import CredentialDefinitionDetailPage from './pages/zkp-management/credential-definition-management/CredentialDefinitionDetailPage';
+import ServerConfigurationPage from './pages/server-configuration/ServerConfigurationPage';
+import PasswordPolicyManagementPage from './pages/admins/password-policy/PasswordPolicyManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -147,17 +149,31 @@ const router = createBrowserRouter([
             Component: IssuedVcManagementPage,
           },
           {
-            path: '/admin-management/admin-registration',
+            path: 'admins/admin-management/admin-registration',
             Component: AdminRegisterPage,
           },
           {
-            path: '/admin-management/:id',
+            path: 'admins/admin-management/:id',
             Component: AdminDetailPage,
+          },
+
+          // server configuration
+          {
+            path: '/server-configuration',
+            Component: ServerConfigurationPage,
           },
 
           // admin management
           {
-            path: '/admin-management',
+            path: 'admins/admin-management',
+            Component: AdminManagementPage,
+          },
+          {
+            path: 'admins/password-policy',
+            Component: PasswordPolicyManagementPage,
+          },
+          {
+            path: 'admins',
             Component: AdminManagementPage,
           },
 
