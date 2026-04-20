@@ -66,6 +66,7 @@ import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.issuer.v1.agent.helper.PublishCertificateHelper;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
 
@@ -371,7 +372,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> VerifiableCredential {}", verifiableCredential.toJson());
 
             log.debug("\t--> Registering VC to B/C");
-            VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, issuerInfoQueryService.getIssuerInfo().getCertificateUrl());
+            VcMeta vcMeta = vcManager.generateVcMetaData(verifiableCredential, PublishCertificateHelper.getCertificateVcURL(issuerInfoQueryService.getIssuerInfo()));
 
             storageService.registerVcMeta(vcMeta);
 
@@ -1032,7 +1033,7 @@ public abstract class IssueServiceBase implements IssueService {
         IssuerInfo issuerInfo = issuerInfoQueryService.getIssuerInfo();
 
         ProviderDetail issuer = new ProviderDetail();
-        issuer.setCertVcRef(issuerInfo.getCertificateUrl());
+        issuer.setCertVcRef(PublishCertificateHelper.getCertificateVcURL(issuerInfo));
         issuer.setDid(issuerInfo.getDid());
         issuer.setName(issuerInfo.getName());
 

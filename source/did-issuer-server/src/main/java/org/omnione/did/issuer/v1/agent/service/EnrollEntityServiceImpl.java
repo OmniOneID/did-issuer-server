@@ -137,6 +137,12 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
 
             log.debug("\t\t--> Update Issuer Status");
             issuerInfo.setStatus(IssuerStatus.ACTIVATE);
+
+            if (enrollEntityResponse.getVcUrl() != null) {
+                log.debug("\t\t--> Update Issuer VC URL to: {}", enrollEntityResponse.getVcUrl());
+                issuerInfo.setPublishedCertificateUrl(enrollEntityResponse.getVcUrl());
+            }
+
             issuerInfoQueryService.save(issuerInfo);
 
             log.debug("*** Finished enrollEntity ***");
