@@ -34,6 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
      */
     Optional<User> findByPii(String pii);
     Optional<User> findByPiiAndVcSchemaId(String pii, Long vcSchemaId);
+    Optional<User> findFirstByPiiAndVcSchemaId(String pii, Long vcSchemaId);
 
     /**
      * Finds a User entity by its associated DID.
@@ -43,5 +44,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
      */
     Optional<User> findByDid(String did);
     Optional<User> findByDidAndVcSchemaId(String did, Long vcSchemaId);
+    Optional<User> findFirstByDidAndVcSchemaId(String did, Long vcSchemaId);
     Optional<User> findByIdAndVcSchemaId(Long id, Long vcSchemaId);
 }

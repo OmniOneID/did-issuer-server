@@ -118,6 +118,18 @@ public class IssueProfileQueryService {
     }
 
     /**
+     * Finds the first IssueProfile associated with the given VcSchema DB id.
+     *
+     * @param vcSchemaId the DB id of the VcSchema
+     * @return the matching IssueProfile
+     * @throws OpenDidException if not found
+     */
+    public IssueProfile findFirstByVcSchemaId(Long vcSchemaId) {
+        return issueProfileRepository.findFirstByVcSchemaId(vcSchemaId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.VC_PROFILE_INVALID));
+    }
+
+    /**
      * Searches issue profiles based on a key-value filter with pagination.
      *
      * @param searchKey field to search by

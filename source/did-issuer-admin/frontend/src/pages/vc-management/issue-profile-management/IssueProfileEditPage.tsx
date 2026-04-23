@@ -14,6 +14,7 @@ import VcSchemaSelectionDialog from "./VcSchemaSelectionDialog";
 import { formatErrorMessage } from "../../../utils/error-handler";
 import CredentialDefinitionSelectionDialog from "./CredentialDefinitionSelectionDialog";
 import { fetchCredentialDefinitions } from "../../../apis/zkp_management-api";
+import UserQuerySection, { UserQueryType } from "./UserQuerySection";
 
 type Props = {}
 
@@ -31,6 +32,7 @@ interface IssueProfileFormData {
     tags: string[];
     zkpEnabled: boolean;
     definitionId: string;
+    userQueryType: UserQueryType;
 }
 
 interface ErrorState {
@@ -103,7 +105,8 @@ const IssueProfileRegistrationPage = (props: Props) => {
         language: '',
         tags: [''],
         zkpEnabled: false,
-        definitionId: ''
+        definitionId: '',
+        userQueryType: 'DB',
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -139,7 +142,8 @@ const IssueProfileRegistrationPage = (props: Props) => {
             initiateType: formData.initiateType,
             language: formData.language,
             tags: formData.tags,
-            zkpEnabled: formData.zkpEnabled,                      
+            zkpEnabled: formData.zkpEnabled,
+            userQueryType: formData.userQueryType,
         };
         
         if (formData.initiateType === 'issuer_init' && formData.zkpEnabled) {
@@ -499,6 +503,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     tags: data.issueProfile.tags,
                     zkpEnabled: data.issueProfile.zkpEnabled,
                     definitionId: data.issueProfile.definitionId,
+                    userQueryType: (data.issueProfile.userQueryType as UserQueryType) ?? 'DB',
                 });
 
                 setSelectedItemId(data.issueProfile.vcSchemaId);
@@ -684,6 +689,10 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     ))}
                     <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddTag}>Add Tag</Button>
 
+                    <UserQuerySection
+                        value={formData.userQueryType}
+                        onChange={(type) => setFormData((prev) => ({ ...prev, userQueryType: type }))}
+                    />
 
                     {formData.initiateType === 'issuer_init' && (
                         <>

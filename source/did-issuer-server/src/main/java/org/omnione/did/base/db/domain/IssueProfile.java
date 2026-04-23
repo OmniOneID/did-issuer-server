@@ -19,6 +19,7 @@ package org.omnione.did.base.db.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.omnione.did.base.datamodel.enums.InitiateType;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
 import org.omnione.did.base.db.converter.StringListConverter;
 
 import java.io.Serializable;
@@ -82,4 +83,14 @@ public class IssueProfile extends BaseEntity implements Serializable {
 
     @Column(name = "definition_id")
     private String definitionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_query_type", nullable = false)
+    private UserQueryType userQueryType = UserQueryType.DB;
+
+    @Column(name = "user_query_url")
+    private String userQueryUrl;
+
+    @Column(name = "user_query_headers", columnDefinition = "TEXT")
+    private String userQueryHeaders;
 }

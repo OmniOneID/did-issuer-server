@@ -18,9 +18,12 @@ package org.omnione.did.issuer.v1.admin.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
 import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.dto.profile.CreateIssueProfileReqDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.CreateIssueProfileResDto;
 import org.omnione.did.issuer.v1.admin.dto.profile.GetIssueProfileResDto;
@@ -57,6 +60,12 @@ public class IssueProfileService {
      * @return an empty response DTO
      */
     public CreateIssueProfileResDto createIssueProfile(CreateIssueProfileReqDto request) {
+        UserQueryType userQueryType = request.getUserQueryType() != null ? request.getUserQueryType() : UserQueryType.DB;
+        validateUserQueryFields(userQueryType, request.getUserQueryUrl());
+
+        String userQueryUrl = UserQueryType.API.equals(userQueryType) ? request.getUserQueryUrl() : null;
+        String userQueryHeaders = UserQueryType.API.equals(userQueryType) ? request.getUserQueryHeaders() : null;
+
         IssueProfile issueProfile = issueProfileQueryService.save(IssueProfile.builder()
                 .vcPlanId(request.getVcPlanId())
                 .title(request.getTitle())
@@ -71,6 +80,9 @@ public class IssueProfileService {
                 .tags(request.getTags())
                 .zkpEnabled(request.getZkpEnabled())
                 .definitionId(request.getDefinitionId())
+                .userQueryType(userQueryType)
+                .userQueryUrl(userQueryUrl)
+                .userQueryHeaders(userQueryHeaders)
                 .build());
 
         listCommunityService.registerVcPlan(issueProfile);
@@ -130,6 +142,9 @@ public class IssueProfileService {
      * @param request the DTO containing updated information
      */
     public void updateIssueProfile(CreateIssueProfileReqDto request) {
+        UserQueryType userQueryType = request.getUserQueryType() != null ? request.getUserQueryType() : UserQueryType.DB;
+        validateUserQueryFields(userQueryType, request.getUserQueryUrl());
+
         IssueProfile issueProfile = issueProfileQueryService.findById(request.getId());
 
         issueProfile.setDescription(request.getDescription());
@@ -144,7 +159,38 @@ public class IssueProfileService {
         issueProfile.setTags(request.getTags());
         issueProfile.setZkpEnabled(request.getZkpEnabled());
         issueProfile.setDefinitionId(request.getDefinitionId());
+        issueProfile.setUserQueryType(userQueryType);
+
+        if (UserQueryType.API.equals(userQueryType)) {
+            issueProfile.setUserQueryUrl(request.getUserQueryUrl());
+            issueProfile.setUserQueryHeaders(request.getUserQueryHeaders());
+        } else {
+            issueProfile.setUserQueryUrl(null);
+            issueProfile.setUserQueryHeaders(null);
+        }
 
         listCommunityService.registerVcPlan(issueProfile);
+    }
+
+    /**
+     * Finds an issue profile by its VC schema string ID (e.g., "university-id-v1").
+     *
+     * @param vcSchemaId the string identifier of the VC schema
+     * @return the matching issue profile response
+     */
+    public GetIssueProfileResDto findByVcSchemaId(String vcSchemaId) {
+        VcSchema vcSchema = vcSchemaQueryService.findByVcSchemaId(vcSchemaId);
+        IssueProfile issueProfile = issueProfileQueryService.findFirstByVcSchemaId(vcSchema.getId());
+        return GetIssueProfileResDto.builder()
+                .issueProfile(issueProfile)
+                .vcSchemaName(vcSchema.getVcSchemaId())
+                .build();
+    }
+
+    private void validateUserQueryFields(UserQueryType userQueryType, String userQueryUrl) {
+        if (UserQueryType.API.equals(userQueryType) &&
+                (userQueryUrl == null || userQueryUrl.isBlank())) {
+            throw new OpenDidException(ErrorCode.URL_PING_ERROR);
+        }
     }
 }

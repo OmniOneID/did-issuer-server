@@ -89,12 +89,12 @@ public class UserInfoQueryService {
     }
 
     public User findByPiiAndVcSchemaIdOrNew(String pii, Long vcSchemaId) {
-        return userRepository.findByPiiAndVcSchemaId(pii, vcSchemaId)
+        return userRepository.findFirstByPiiAndVcSchemaId(pii, vcSchemaId)
                 .orElse(User.builder().build());
     }
 
     public User findByDidAndVcSchemaIdOrNew(String did, Long vcSchemaId) {
-        return userRepository.findByDidAndVcSchemaId(did, vcSchemaId)
+        return userRepository.findFirstByDidAndVcSchemaId(did, vcSchemaId)
                 .orElse(User.builder().build());
     }
 }

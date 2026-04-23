@@ -75,7 +75,7 @@ public class UserQueryService {
      * @return the user with the given DID
      */
     public Optional<User> findByDidAndVcSchemaId(String did, Long vcSchemaId) {
-        return userRepository.findByDidAndVcSchemaId(did, vcSchemaId);
+        return userRepository.findFirstByDidAndVcSchemaId(did, vcSchemaId);
     }
 
 

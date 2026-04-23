@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.dto.profile;
 import lombok.Builder;
 import lombok.Getter;
 import org.omnione.did.base.datamodel.enums.InitiateType;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
 import org.omnione.did.base.db.domain.IssueProfile;
 
 import java.time.Instant;
@@ -43,6 +44,7 @@ public class IssueProfileDto {
     private String padding;
     private String language;
     private InitiateType initiateType;
+    private UserQueryType userQueryType;
     private final String createdAt;
     private final String updatedAt;
 
@@ -61,6 +63,7 @@ public class IssueProfileDto {
                 .padding(issueProfile.getPadding())
                 .language(issueProfile.getLanguage())
                 .initiateType(issueProfile.getInitiateType())
+                .userQueryType(issueProfile.getUserQueryType())
                 .createdAt(formatInstant(issueProfile.getCreatedAt(), formatter))
                 .updatedAt(formatInstant(issueProfile.getUpdatedAt(), formatter))
                 .build();

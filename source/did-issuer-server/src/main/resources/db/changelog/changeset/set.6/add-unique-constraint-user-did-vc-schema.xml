@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="deduplicate-user-did-vc-schema" author="demo-fix">
+        <sql>
+            DELETE FROM "user" u1
+            USING "user" u2
+            WHERE u1.id > u2.id
+              AND u1.did = u2.did
+              AND u1.vc_schema_id = u2.vc_schema_id;
+        </sql>
+    </changeSet>
+
+    <changeSet id="add-unique-constraint-user-did-vc-schema" author="demo-fix">
+        <addUniqueConstraint
+            tableName="user"
+            columnNames="did, vc_schema_id"
+            constraintName="user_did_vc_schema_id_key" />
+    </changeSet>
+
+</databaseChangeLog>

@@ -14,6 +14,7 @@ import VcSchemaSelectionDialog from "./VcSchemaSelectionDialog";
 import { formatErrorMessage } from "../../../utils/error-handler";
 import { fetchCredentialDefinitions } from "../../../apis/zkp_management-api";
 import CredentialDefinitionSelectionDialog from "./CredentialDefinitionSelectionDialog";
+import UserQuerySection, { UserQueryType } from "./UserQuerySection";
 
 type Props = {}
 
@@ -31,6 +32,7 @@ interface IssueProfileFormData {
   tags: string[];
   zkpEnabled: boolean;
   definitionId: string;
+  userQueryType: UserQueryType;
 }
 
 interface ItemFormData {
@@ -101,7 +103,8 @@ const IssueProfileRegistrationPage = (props: Props) => {
     language: '',
     tags: [''],
     definitionId: '',
-    zkpEnabled: false
+    zkpEnabled: false,
+    userQueryType: 'DB',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -130,6 +133,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
       language: formData.language,
       tags: formData.tags,
       zkpEnabled: formData.zkpEnabled,
+      userQueryType: formData.userQueryType,
     };
 
     // 조건부로 definitionId 추가
@@ -610,6 +614,12 @@ const IssueProfileRegistrationPage = (props: Props) => {
             </Box>
           ))}
           <Button startIcon={<AddCircleOutlineIcon />} sx={{ mt: 1 }} onClick={handleAddTag}>Add Tag</Button>
+
+          <UserQuerySection
+            value={formData.userQueryType}
+            onChange={(type) => setFormData((prev) => ({ ...prev, userQueryType: type }))}
+          />
+
           {formData.initiateType === 'issuer_init' && (
             <>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 3 }}>

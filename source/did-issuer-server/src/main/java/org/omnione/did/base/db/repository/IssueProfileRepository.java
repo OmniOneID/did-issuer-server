@@ -33,4 +33,6 @@ public interface IssueProfileRepository extends JpaRepository<IssueProfile, Long
     Optional<IssueProfile> findByVcPlanId(String vcPlanId);
 
     boolean existsByVcSchemaId(Long id);
+
+    Optional<IssueProfile> findFirstByVcSchemaId(Long vcSchemaId);
 }

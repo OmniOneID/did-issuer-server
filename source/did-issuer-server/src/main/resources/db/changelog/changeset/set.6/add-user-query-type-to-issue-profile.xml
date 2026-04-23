@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+  <changeSet id="add-user-query-type-to-issue-profile" author="omnione">
+    <addColumn tableName="issue_profile">
+      <column name="user_query_type" type="VARCHAR(10)" defaultValue="DB">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_query_url" type="VARCHAR(2000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="user_query_headers" type="TEXT">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+</databaseChangeLog>

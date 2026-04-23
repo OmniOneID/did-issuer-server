@@ -125,6 +125,7 @@ public enum ErrorCode {
 
     // 500~ 599 = Issuer Error
     CERTIFICATE_DATA_NOT_FOUND("00501", "Certificate VC data not found.", 500),
+    USER_QUERY_API_NOT_SUPPORTED("00502", "User Query API mode is not currently supported.", 400),
 
     // 600~ 699 = B/C
     BLOCKCHAIN_INITIALIZATION_FAILED("00600", "Failed to initialize blockchain.", 500),

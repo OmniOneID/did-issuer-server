@@ -99,4 +99,15 @@ public class IssueProfileAdminController {
     public ResponseEntity<GetIssueProfileResDto> getIssueProfile(@PathVariable("id") Long id) {
         return ResponseEntity.ok(issueProfileService.getIssueProfileById(id));
     }
+
+    /**
+     * Retrieves the issue profile by the VC schema string ID.
+     *
+     * @param vcSchemaId the string identifier of the VC schema (e.g., "university-id-v1")
+     * @return the issue profile associated with the given VC schema
+     */
+    @GetMapping("/by-vc-schema")
+    public ResponseEntity<GetIssueProfileResDto> getIssueProfileByVcSchemaId(@RequestParam String vcSchemaId) {
+        return ResponseEntity.ok(issueProfileService.findByVcSchemaId(vcSchemaId));
+    }
 }

@@ -40,5 +40,7 @@
   <include file="set.4/alter-table_admin_add_password_fields.xml" relativeToChangelogFile="true"/>
   <include file="set.4/update-password_reset_reason_admin.xml" relativeToChangelogFile="true"/>
   <include file="set.5/add-publishedCertificateUrl-column_issuer.xml" relativeToChangelogFile="true"/>
+  <include file="set.6/add-user-query-type-to-issue-profile.xml" relativeToChangelogFile="true"/>
+  <include file="set.6/add-unique-constraint-user-did-vc-schema.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

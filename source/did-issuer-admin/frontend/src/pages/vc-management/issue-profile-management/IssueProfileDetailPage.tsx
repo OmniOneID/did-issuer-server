@@ -6,6 +6,7 @@ import CustomDialog from "../../../components/dialog/CustomDialog";
 import FullscreenLoader from "../../../components/loading/FullscreenLoader";
 import { Box, Button, Paper, styled, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
 import { formatErrorMessage } from "../../../utils/error-handler";
+import UserQuerySection, { UserQueryType } from "./UserQuerySection";
 
 type Props = {}
 
@@ -68,7 +69,8 @@ const IssueProfileDetailPage = (props: Props) => {
           initiateType: data.issueProfile.initiateType,
           tags: data.issueProfile.tags,
           credentialDefinitionId: data.issueProfile.definitionId,
-          zkpEnabled: data.issueProfile.zkpEnabled
+          zkpEnabled: data.issueProfile.zkpEnabled,
+          userQueryType: (data.issueProfile.userQueryType as UserQueryType) ?? 'DB',
         });
         setNumericVcSchemaId(data.issueProfile.vcSchemaId);
       } catch (err) {
@@ -171,6 +173,11 @@ const IssueProfileDetailPage = (props: Props) => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          <UserQuerySection
+            value={issueProfileData?.userQueryType ?? 'DB'}
+            readOnly
+          />
 
           {issueProfileData?.zkpEnabled && (
           <>

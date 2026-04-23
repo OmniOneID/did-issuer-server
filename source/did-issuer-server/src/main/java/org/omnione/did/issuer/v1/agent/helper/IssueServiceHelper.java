@@ -19,6 +19,8 @@ package org.omnione.did.issuer.v1.agent.helper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.datamodel.enums.InitiateType;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
+import org.omnione.did.base.db.domain.IssueProfile;
 import org.omnione.did.base.db.domain.Transaction;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
@@ -26,7 +28,9 @@ import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.IssueInitIssueService;
 import org.omnione.did.issuer.v1.agent.service.IssueService;
 import org.omnione.did.issuer.v1.agent.service.IssueServiceBase;
+import org.omnione.did.issuer.v1.agent.service.TestIssueService;
 import org.omnione.did.issuer.v1.agent.service.UserInitIssueService;
+import org.omnione.did.issuer.v1.agent.service.UserQueryApiIssueService;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -45,6 +49,8 @@ public class IssueServiceHelper implements IssueService {
     private final IssueInitIssueService issueInitIssueService;
     private final IssueProfileQueryService issueProfileQueryService;
     private final TransactionService transactionService;
+    private final UserQueryApiIssueService userQueryApiIssueService;
+    private final TestIssueService testIssueService;
 
     /**
      * Request an offer for the given VC.
@@ -123,11 +129,18 @@ public class IssueServiceHelper implements IssueService {
      */
     private IssueServiceBase getIssueServiceByTransaction(String txId) {
         Transaction transaction = transactionService.findByTxId(txId);
-        Long issueProfileId = transaction.getIssueProfileId();
+        IssueProfile profile = issueProfileQueryService.findById(transaction.getIssueProfileId());
 
-        if (InitiateType.ISSUER_INIT.equals(issueProfileQueryService.findById(issueProfileId).getInitiateType())) {
-            return issueInitIssueService;
+        if (UserQueryType.API.equals(profile.getUserQueryType())) {
+            return userQueryApiIssueService;
         }
-        return userInitIssueService;
+        if (UserQueryType.TEST.equals(profile.getUserQueryType())) {
+            return testIssueService;
+        }
+
+        return switch (profile.getInitiateType()) {
+            case ISSUER_INIT -> issueInitIssueService;
+            case USER_INIT -> userInitIssueService;
+        };
     }
 }

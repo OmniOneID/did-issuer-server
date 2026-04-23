@@ -1,4 +1,4 @@
-import { Box, Link, styled, Typography } from '@mui/material';
+import { Box, Chip, Link, styled, Typography } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import { useDialogs } from '@toolpad/core/useDialogs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -18,6 +18,7 @@ type IssueProfileRow = {
   vcPlanId: string;
   title: string;
   vcSchemaId: string;
+  userQueryType: 'DB' | 'TEST';
   createdAt: string;
   updatedAt: string;
 };
@@ -180,6 +181,19 @@ const IssueProfileManagementPage = (props: Props) => {
                 </Link>),
             },
             { field: 'vcSchemaId', headerName: "VC Schema ID", width: 200 },
+            {
+              field: 'userQueryType',
+              headerName: 'User Query Type',
+              width: 160,
+              renderCell: (params) => (
+                <Chip
+                  label={params.value}
+                  size="small"
+                  color={params.value === 'TEST' ? 'warning' : 'default'}
+                  variant="outlined"
+                />
+              ),
+            },
             { field: 'createdAt', headerName: "Registered At", width: 200 },
           ]}
           selectedRow={selectedRow}

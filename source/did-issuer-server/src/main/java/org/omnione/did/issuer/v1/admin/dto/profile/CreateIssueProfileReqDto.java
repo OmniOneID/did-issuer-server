@@ -18,6 +18,7 @@ package org.omnione.did.issuer.v1.admin.dto.profile;
 
 import lombok.*;
 import org.omnione.did.base.datamodel.enums.InitiateType;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
 
 import java.util.List;
 
@@ -45,4 +46,7 @@ public class CreateIssueProfileReqDto {
     private List<String> tags;
     private Boolean zkpEnabled;
     private String definitionId;
+    private UserQueryType userQueryType;
+    private String userQueryUrl;
+    private String userQueryHeaders;
 }
