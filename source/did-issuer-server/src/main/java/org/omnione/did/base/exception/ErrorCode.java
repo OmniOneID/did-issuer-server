@@ -187,6 +187,8 @@ public enum ErrorCode {
 
     TAS_UNKNOWN_RESPONSE("000900", "Failed to process response: received unknown data from the Tas.", 500),
 
+    KYC_COMMUNICATION_ERROR("15505", "Failed to communicate with KYC server: unknown error occurred.", 500),
+
     UNKNOWN_SERVER_ERROR("99999", "An unknown server error.", 500),
 
 

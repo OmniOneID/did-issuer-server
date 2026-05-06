@@ -67,6 +67,7 @@ public class IssueProfileService {
                 .padding(request.getPadding())
                 .vcSchemaId(request.getVcSchemaId())
                 .initiateType(request.getInitiateType())
+                .issuanceMode(request.getIssuanceMode())
                 .language(request.getLanguage())
                 .tags(request.getTags())
                 .zkpEnabled(request.getZkpEnabled())
@@ -138,6 +139,7 @@ public class IssueProfileService {
         issueProfile.setCurve(request.getCurve());
         issueProfile.setPadding(request.getPadding());
         issueProfile.setInitiateType(request.getInitiateType());
+        issueProfile.setIssuanceMode(request.getIssuanceMode());
         issueProfile.setLanguage(request.getLanguage());
         issueProfile.setEndpoints(request.getEndpoints());
         issueProfile.setVcSchemaId(request.getVcSchemaId());

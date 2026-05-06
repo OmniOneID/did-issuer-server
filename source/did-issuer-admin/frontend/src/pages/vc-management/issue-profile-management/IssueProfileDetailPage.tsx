@@ -29,9 +29,20 @@ const IssueProfileDetailPage = (props: Props) => {
     { key: "Issuer Initiate", value: "issuer_init" }
   ];
 
+  // Issuance Mode 옵션
+  const issuanceModeOptions = [
+    { key: "Direct", value: "DIRECT" },
+    { key: "Proxy", value: "PROXY" }
+  ];
+
   // 선택한 initiateType의 key 반환 함수
   const getInitiateTypeKey = (value: string) => {
     return initiateTypeOptions.find(option => option.value === value)?.key || "Unknown";
+  };
+
+  // 선택한 issuanceMode의 key 반환 함수
+  const getIssuanceModeKey = (value: string) => {
+    return issuanceModeOptions.find(option => option.value === value)?.key || "Unknown";
   };
 
   const handleOpenVcSchemaDetail = () => {
@@ -65,6 +76,7 @@ const IssueProfileDetailPage = (props: Props) => {
           curve: data.issueProfile.curve,
           padding: data.issueProfile.padding,
           language: data.issueProfile.language,
+          issuanceMode: data.issueProfile.issuanceMode,
           initiateType: data.issueProfile.initiateType,
           tags: data.issueProfile.tags,
           credentialDefinitionId: data.issueProfile.definitionId,
@@ -127,6 +139,15 @@ const IssueProfileDetailPage = (props: Props) => {
             slotProps={{ input: { readOnly: true } }}
           />
           <TextField label="Language" value={issueProfileData?.language || ''} fullWidth variant="standard" margin="normal" slotProps={{ input: { readOnly: true } }} />
+
+          <TextField
+            label="Issuance Mode"
+            value={getIssuanceModeKey(issueProfileData?.issuanceMode)}
+            fullWidth
+            variant="standard"
+            margin="normal"
+            slotProps={{ input: { readOnly: true } }}
+          />
 
           <Typography variant="h6" sx={{ mt: 3 }}>Endpoints</Typography>
           <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>

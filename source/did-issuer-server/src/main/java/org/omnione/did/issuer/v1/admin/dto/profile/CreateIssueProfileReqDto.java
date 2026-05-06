@@ -17,6 +17,7 @@
 package org.omnione.did.issuer.v1.admin.dto.profile;
 
 import lombok.*;
+import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.enums.InitiateType;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class CreateIssueProfileReqDto {
     private String curve;
     private String padding;
     private InitiateType initiateType;
+    private VcIssuanceMode issuanceMode;
     private List<String> tags;
     private Boolean zkpEnabled;
     private String definitionId;

@@ -32,4 +32,6 @@ import org.omnione.did.data.model.profile.issue.IssueProfile;
 public class GenerateIssueProfileResDto {
     private String txId;
     private ZkpIssueProfile profile;
+    private String authNonce;
+
 }

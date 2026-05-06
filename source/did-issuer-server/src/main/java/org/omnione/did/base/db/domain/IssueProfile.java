@@ -18,6 +18,7 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.enums.InitiateType;
 import org.omnione.did.base.db.converter.StringListConverter;
 
@@ -68,6 +69,10 @@ public class IssueProfile extends BaseEntity implements Serializable {
 
     @Column(name = "language")
     private String language;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "issuance_mode")
+    private VcIssuanceMode issuanceMode;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "initiate_type")

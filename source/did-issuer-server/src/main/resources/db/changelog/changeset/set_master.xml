@@ -36,4 +36,7 @@
   <include file="set.2/admin-2phase-vc-profile-update.xml" relativeToChangelogFile="true"/>
   <include file="set.2/admin-2phase_admin.xml" relativeToChangelogFile="true"/>
 
+  <include file="./set.4/add-issuanceMode-column_issue_profile.xml" relativeToChangelogFile="true"/>
+  <include file="./set.4/drop-nullable-did-column_vc_profile.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

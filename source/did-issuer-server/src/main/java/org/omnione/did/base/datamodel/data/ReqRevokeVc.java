@@ -19,6 +19,7 @@ package org.omnione.did.base.datamodel.data;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.omnione.did.data.model.util.json.GsonWrapper;
 
 /**
@@ -26,7 +27,7 @@ import org.omnione.did.data.model.util.json.GsonWrapper;
  */
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 public class ReqRevokeVc extends RequestProof {
     private String vcId;
     private String issuerNonce;

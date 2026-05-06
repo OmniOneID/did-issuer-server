@@ -28,6 +28,7 @@ interface IssueProfileFormData {
     padding: string;
     initiateType: string;
     language: string;
+    issuanceMode: string;
     tags: string[];
     zkpEnabled: boolean;
     definitionId: string;
@@ -45,6 +46,7 @@ interface ErrorState {
     padding?: string;
     initiateType?: string;
     language?: string;
+    issuanceMode?: string;
     tagsErrorMessage?: string;
     tags?: string[] | undefined;
     definitionId?: string;
@@ -80,10 +82,14 @@ const paddingOptions = [
   { value: "PKCS5", label: "PKCS5", disabled: false },
   { value: "NOPAD", label: "NOPAD", disabled: true }
 ];
-const initiateTypeOptions = [{ key: "User Initiate", value: "user_init" },
-{ key: "Issuer Initiate", "value": "issuer_init" }
-]
-    ;
+const initiateTypeOptions = [
+    { key: "User Initiate", value: "user_init" },
+    { key: "Issuer Initiate", "value": "issuer_init" }
+];
+const issuanceModeOptions = [
+    { key: "Direct", value: "DIRECT" },
+    { key: "Proxy", "value": "PROXY" }
+];
 
 const IssueProfileRegistrationPage = (props: Props) => {
     const navigate = useNavigate();
@@ -101,6 +107,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
         padding: '',
         initiateType: '',
         language: '',
+        issuanceMode: '',
         tags: [''],
         zkpEnabled: false,
         definitionId: ''
@@ -138,6 +145,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
             padding: formData.padding,
             initiateType: formData.initiateType,
             language: formData.language,
+            issuanceMode: formData.issuanceMode,
             tags: formData.tags,
             zkpEnabled: formData.zkpEnabled,                      
         };
@@ -193,6 +201,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
         tempErrors.curve = validateCurve(formData.curve);
         tempErrors.padding = validatePadding(formData.padding);
         tempErrors.initiateType = validateInitiateType(formData.initiateType);
+        tempErrors.issuanceMode = validateIssuanceMode(formData.issuanceMode);
         tempErrors.language = validateLanguage(formData.language);
 
         if (formData.endpoints.length === 0) {
@@ -269,6 +278,11 @@ const IssueProfileRegistrationPage = (props: Props) => {
 
     const validateInitiateType = (initiateType?: string): string | undefined => {
         if (!initiateType) return 'Please choose a Iinitiate Type.';
+        return undefined;
+    };
+    
+    const validateIssuanceMode = (issuanceMode?: string): string | undefined => {
+        if (!issuanceMode) return 'Please choose a Issuance Mode.';
         return undefined;
     };
 
@@ -496,6 +510,7 @@ const IssueProfileRegistrationPage = (props: Props) => {
                     padding: data.issueProfile.padding,
                     initiateType: data.issueProfile.initiateType,
                     language: data.issueProfile.language,
+                    issuanceMode: data.issueProfile.issuanceMode,
                     tags: data.issueProfile.tags,
                     zkpEnabled: data.issueProfile.zkpEnabled,
                     definitionId: data.issueProfile.definitionId,
@@ -578,6 +593,13 @@ const IssueProfileRegistrationPage = (props: Props) => {
                         <FormHelperText error>{errors.initiateType}</FormHelperText>
                     </FormControl>
                     <TextField label="Language *" fullWidth margin="normal" size="small" error={!!errors.language} helperText={errors.language} value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} />
+                    <FormControl fullWidth size="small" sx={{ maxWidth: 800, margin: 'auto', mt: 2, }}>
+                        <InputLabel>Issuance Mode *</InputLabel>
+                        <Select label="Issuance Mode *" value={formData.issuanceMode} error={!!errors.issuanceMode} onChange={handleSelectChange("issuanceMode")}>
+                            {issuanceModeOptions.map((option) => <MenuItem key={option.key} value={option.value}> {option.key}</MenuItem>)}
+                        </Select>
+                        <FormHelperText error>{errors.issuanceMode}</FormHelperText>
+                    </FormControl>
                     {/* Endpoints 입력 필드 */}
                     <Typography variant="h6" sx={{ mt: 3 }}>Endpoints *</Typography>
                     {errors.endpointsErrorMessage && (

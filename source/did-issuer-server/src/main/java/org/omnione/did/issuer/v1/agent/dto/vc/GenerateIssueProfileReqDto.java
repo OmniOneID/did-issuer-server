@@ -29,4 +29,5 @@ public class GenerateIssueProfileReqDto {
     private String id;
     private String txId;
     private Holder holder;
+    private String userId;
 }

@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,8 +37,12 @@ import org.omnione.did.base.db.constant.TransactionType;
 import org.omnione.did.base.db.domain.*;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.property.KycProperty;
+import org.omnione.did.base.response.ErrorResponse;
 import org.omnione.did.base.util.*;
+import org.omnione.did.common.exception.HttpClientException;
 import org.omnione.did.common.util.DateTimeUtil;
+import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.core.data.rest.ClaimInfo;
 import org.omnione.did.core.data.rest.IssueVcParam;
@@ -65,6 +71,8 @@ import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
+import org.omnione.did.issuer.v1.agent.dto.user.RetrievePiiApiReqDto;
+import org.omnione.did.issuer.v1.agent.dto.user.RetrievePiiApiResDto;
 import org.omnione.did.issuer.v1.agent.dto.vc.*;
 import org.omnione.did.issuer.v1.agent.service.query.*;
 
@@ -112,7 +120,7 @@ public abstract class IssueServiceBase implements IssueService {
     private final ZkpWalletService zkpWalletService;
     private final ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService;
     private final ZkpSchemaQueryService zkpSchemaQueryService;
-
+    private final KycProperty kycProperty;
     /**
      * Generates an offer for issuing a Verifiable Credential.
      *
@@ -310,6 +318,7 @@ public abstract class IssueServiceBase implements IssueService {
             return GenerateIssueProfileResDto.builder()
                     .txId(transaction.getTxId())
                     .profile(profile)
+                    .authNonce(process.getIssuerNonce())
                     .build();
         } catch (OpenDidException e) {
             log.error("OpenDidException occurred during generateIssueProfile: {}", e.getErrorCode().getMessage());
@@ -317,6 +326,108 @@ public abstract class IssueServiceBase implements IssueService {
         } catch (Exception e) {
             log.error("Exception occurred during generateIssueProfile: {}", e.getMessage(), e);
             throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
+        }
+    }
+
+
+    @Override
+    public GenerateIssueProfileResDto generateIssueProfileFromProxy(GenerateIssueProfileReqDto request,
+                                                                    String userId) {
+        try {
+            log.debug("=== Server: Starting Generate Issue Profile Proxy ===");
+            Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(),
+                    SubTransactionType.INSPECT_ISSUE_PROPOSE);
+
+            String sub = requestUserPii(userId);
+            Holder holder = Holder.builder().pii(sub).build();
+            request.setHolder(holder);
+
+            GenerateIssueProfileResDto response = generateIssueProfile(request);
+
+            transactionService.insertSubTransaction(SubTransaction.builder()
+                    .transactionId(transaction.getId())
+                    .step(2)
+                    .type(SubTransactionType.GENERATE_ISSUE_PROFILE)
+                    .status(SubTransactionStatus.COMPLETED)
+                    .build());
+
+            return response;
+        } catch (OpenDidException e) {
+            log.error("SdkException occurred during generateIssueProfileFromProxy: {}", e.getErrorCode().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Exception occurred during generateIssueProfileFromProxy: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.TR_VC_ISSUE_PROFILE_FAILED);
+        }
+    }
+
+    @Override
+    @Transactional
+    public IssueVcResDto issueVcFromProxy(IssueVcReqDto request) {
+        Transaction transaction = transactionService.validateAndFindTransaction(request.getTxId(),
+                SubTransactionType.GENERATE_ISSUE_PROFILE);
+
+
+        DidAuth didAuth = request.getDidAuth();
+        Proof proof = didAuth.getProof();
+
+        if (Objects.nonNull(proof)) {
+            String did = didAuth.getDid();
+            DidDocument holderDidDoc = storageService.findDidDoc(did);
+            ValidationUtil.verifySign(didAuth, holderDidDoc);
+        } else {
+            throw new OpenDidException(ErrorCode.INVALID_PROOF_PURPOSE);
+        }
+
+        VcProfile vcProfile = vcProfileQueryService.findByTransactionId(transaction.getId());
+        validateAuthNonce(didAuth.getAuthNonce(), vcProfile.getNonce());
+        vcProfile.setDid(didAuth.getDid());
+
+        vcProfileQueryService.save(vcProfile);
+        IssueVcResDto response = issueVc(request);
+
+        transactionService.insertSubTransaction(SubTransaction.builder()
+                .transactionId(transaction.getId())
+                .step(3)
+                .type(SubTransactionType.ISSUE_VC)
+                .status(SubTransactionStatus.COMPLETED)
+                .build());
+        return response;
+    }
+
+    private String requestUserPii(String kycTxId) {
+        RetrievePiiApiReqDto apiRetrievePiiReqDto = RetrievePiiApiReqDto.builder()
+                .userId(kycTxId)
+                .build();
+
+        try {
+            String request = JsonUtil.serializeToJson(apiRetrievePiiReqDto);
+            RetrievePiiApiResDto retrievePiiApiResDto = HttpClientUtil.postData(kycProperty.getUrl() + "/api/v1/retrieve-pii", request, RetrievePiiApiResDto.class);
+
+            return retrievePiiApiResDto.getPii();
+        } catch (HttpClientException e) {
+            log.error("HttpClientException occurred while sending retrieve-pii request:: {}", e.getMessage(), e);
+            ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
+            throw new OpenDidException(errorResponse);
+        } catch (Exception e) {
+            log.error("Failed to retrieve PII information: {}", e.getMessage(), e);
+            throw new OpenDidException(ErrorCode.KYC_COMMUNICATION_ERROR);
+        }
+    }
+
+    private void validateAuthNonce(String authNonce, String nonce) {
+        if (!authNonce.equals(nonce)) {
+            throw new OpenDidException(ErrorCode.ISSUER_NONCE_INVALID);
+        }
+    }
+
+    private ErrorResponse convertExternalErrorResponse(String resBody) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(resBody, ErrorResponse.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse external error response: {}", resBody, e);
+            throw new OpenDidException(ErrorCode.KYC_COMMUNICATION_ERROR);
         }
     }
 

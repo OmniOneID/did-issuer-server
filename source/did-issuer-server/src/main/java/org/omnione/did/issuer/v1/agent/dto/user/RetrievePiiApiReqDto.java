@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 OmniOne.
+ * Copyright 2025 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package org.omnione.did.issuer.v1.agent.dto.vc;
+package org.omnione.did.issuer.v1.agent.dto.user;
 
-import org.omnione.did.base.datamodel.data.AccE2e;
 import lombok.*;
-import org.omnione.did.base.datamodel.data.DidAuth;
-
 
 /**
- * request for issue VC.
+ * DTO class used for communication with external servers.
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
-public class IssueVcReqDto {
-    private String id;
-    private String txId;
-    private AccE2e accE2e;
-    private String encReqVc;
-    private DidAuth didAuth;
-
+@Builder
+public class RetrievePiiApiReqDto {
+    private String userId;
 }
