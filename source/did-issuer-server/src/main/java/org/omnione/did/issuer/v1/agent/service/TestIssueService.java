@@ -25,6 +25,7 @@ import org.omnione.did.base.db.repository.ZkpAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.property.KycProperty;
 import org.omnione.did.base.util.RandomUtil;
 import org.omnione.did.data.model.enums.vc.ClaimFormat;
 import org.omnione.did.data.model.enums.vc.ClaimType;
@@ -104,11 +105,12 @@ public class TestIssueService extends IssueServiceBase {
                             ZkpSchemaQueryService zkpSchemaQueryService,
                             UserQueryService userQueryService,
                             ZkpSchemaAttributeRepository zkpSchemaAttributeRepository,
-                            ZkpAttributeRepository zkpAttributeRepository) {
+                            ZkpAttributeRepository zkpAttributeRepository,
+                            KycProperty kycProperty) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService,
                 vcQueryService, storageService, walletService, issueProfileQueryService,
                 vcSchemaService, vcSchemaQueryService, issuerInfoQueryService, zkpWalletService,
-                zkpCredentialDefinitionQueryService, zkpSchemaQueryService);
+                zkpCredentialDefinitionQueryService, zkpSchemaQueryService, kycProperty);
         this.userQueryService = userQueryService;
         this.vcSchemaService2 = vcSchemaService;
         this.issueProfileQueryService2 = issueProfileQueryService;

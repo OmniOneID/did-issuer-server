@@ -22,6 +22,7 @@ import org.omnione.did.base.db.domain.User;
 import org.omnione.did.base.db.domain.VcProfile;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
+import org.omnione.did.base.property.KycProperty;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
@@ -52,11 +53,11 @@ public class IssueInitIssueService extends IssueServiceBase {
                                  VcSchemaQueryService vcSchemaQueryService, IssueProfileQueryService issueProfileQueryService,
                                  IssuerInfoQueryService issuerInfoQueryService, ZkpWalletService zkpWalletService,
                                  ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService,
-                                 ZkpSchemaQueryService zkpSchemaQueryService) {
+                                 ZkpSchemaQueryService zkpSchemaQueryService, KycProperty kycProperty) {
         super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService
                 , storageService, walletService, issueProfileQueryService, vcSchemaService
                 , vcSchemaQueryService, issuerInfoQueryService, zkpWalletService, zkpCredentialDefinitionQueryService,
-                zkpSchemaQueryService);
+                zkpSchemaQueryService, kycProperty);
         this.userQueryService = userQueryService;
     }
 

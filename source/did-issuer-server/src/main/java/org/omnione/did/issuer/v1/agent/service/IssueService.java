@@ -57,6 +57,10 @@ public interface IssueService {
      */
     IssueVcResDto issueVc(IssueVcReqDto request);
 
+    GenerateIssueProfileResDto generateIssueProfileFromProxy(GenerateIssueProfileReqDto request, String userId);
+
+    IssueVcResDto issueVcFromProxy(IssueVcReqDto request);
+
     /**
      * Completes the issuance of a Verifiable Credential.
      *

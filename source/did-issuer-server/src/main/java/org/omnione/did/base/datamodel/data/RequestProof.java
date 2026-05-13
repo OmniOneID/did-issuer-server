@@ -18,6 +18,7 @@ package org.omnione.did.base.datamodel.data;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.omnione.did.data.model.did.Proof;
 
 /**
@@ -25,6 +26,7 @@ import org.omnione.did.data.model.did.Proof;
  */
 @Getter
 @Setter
+@SuperBuilder
 public abstract class RequestProof {
     private Proof proof;
 }

@@ -84,6 +84,23 @@ public class IssueController {
         return issueServiceHelper.issueVc(request);
     }
 
+
+    @PostMapping(UrlConstant.Issuer.GENERATE_ISSUE_PROFILE_PROXY)
+    public GenerateIssueProfileResDto generateIssueProfileProxy(@RequestBody GenerateIssueProfileReqDto request) {
+        ;
+        return issueServiceHelper.generateIssueProfileFromProxy(request, request.getUserId());
+    }
+
+    /**
+     * Issues a Verifiable Credential.
+     *
+     * @param request the VC to issue
+     * @return the result of issuing the given VC
+     */
+    @PostMapping(UrlConstant.Issuer.ISSUE_VC_PROXY)
+    public IssueVcResDto issueVcProxy(@RequestBody IssueVcReqDto request) {
+        return issueServiceHelper.issueVcFromProxy(request);
+    }
     /**
      * completing the issuance of a VC.
      *

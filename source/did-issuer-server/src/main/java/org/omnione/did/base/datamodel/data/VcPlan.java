@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.data;
 
 import lombok.*;
+import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.data.zkp.CredentialDefinition;
 import org.omnione.did.data.model.vc.CredentialSchema;
 
@@ -46,4 +47,6 @@ public class VcPlan {
     private String delegator;
     private List<String> allowedIssuers;
     private String manager;
+    private VcIssuanceMode issuanceMode;
+    private List<String> endpoints;
 }

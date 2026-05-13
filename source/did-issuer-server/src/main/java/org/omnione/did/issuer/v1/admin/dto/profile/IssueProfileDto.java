@@ -17,6 +17,7 @@ package org.omnione.did.issuer.v1.admin.dto.profile;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.enums.InitiateType;
 import org.omnione.did.base.datamodel.enums.UserQueryType;
 import org.omnione.did.base.db.domain.IssueProfile;
@@ -45,6 +46,7 @@ public class IssueProfileDto {
     private String language;
     private InitiateType initiateType;
     private UserQueryType userQueryType;
+    private VcIssuanceMode issuanceMode;
     private final String createdAt;
     private final String updatedAt;
 
@@ -64,6 +66,7 @@ public class IssueProfileDto {
                 .language(issueProfile.getLanguage())
                 .initiateType(issueProfile.getInitiateType())
                 .userQueryType(issueProfile.getUserQueryType())
+                .issuanceMode(issueProfile.getIssuanceMode())
                 .createdAt(formatInstant(issueProfile.getCreatedAt(), formatter))
                 .updatedAt(formatInstant(issueProfile.getUpdatedAt(), formatter))
                 .build();

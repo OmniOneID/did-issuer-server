@@ -17,6 +17,7 @@
 package org.omnione.did.base.datamodel.data;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.omnione.did.data.model.util.json.GsonWrapper;
 
 /**
@@ -24,10 +25,8 @@ import org.omnione.did.data.model.util.json.GsonWrapper;
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
-@Builder
+@SuperBuilder
 public class AccE2e extends RequestProof {
     private String publicKey;
     private String iv;

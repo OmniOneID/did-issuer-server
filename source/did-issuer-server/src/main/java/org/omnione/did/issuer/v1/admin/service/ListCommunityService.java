@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.data.Option;
 import org.omnione.did.base.datamodel.data.VcPlan;
 import org.omnione.did.base.datamodel.enums.InitiateType;
@@ -127,6 +128,9 @@ public class ListCommunityService {
                 .allowedIssuers(List.of(issuerInfoQueryService.getIssuerInfo().getDid()))
                 .manager(issuerInfoQueryService.getIssuerInfo().getDid())
                 .tags(issueProfile.getTags())
+                .endpoints(issueProfile.getEndpoints())
+                .issuanceMode(VcIssuanceMode
+                        .valueOf(issueProfile.getIssuanceMode().name()))
                 .build();
 
         if (issueProfile.getZkpEnabled() && Objects.equals(issueProfile.getInitiateType().getType(), InitiateType.ISSUER_INIT.getType())) {

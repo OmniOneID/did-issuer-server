@@ -98,6 +98,19 @@ public class IssueServiceHelper implements IssueService {
         return getIssueServiceByTransaction(request.getTxId()).issueVc(request);
     }
 
+    @Override
+    public GenerateIssueProfileResDto generateIssueProfileFromProxy(GenerateIssueProfileReqDto request,
+                                                                    String userId) {
+
+        return getIssueServiceByTransaction(request.getTxId()).generateIssueProfileFromProxy(request, userId);
+    }
+
+    @Override
+    public IssueVcResDto issueVcFromProxy(IssueVcReqDto request) {
+        return getIssueServiceByTransaction(request.getTxId()).issueVcFromProxy(request);
+    }
+
+
     /**
      * completeVc for the given VC.
      *

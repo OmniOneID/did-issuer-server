@@ -19,6 +19,7 @@ package org.omnione.did.base.datamodel.data;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.omnione.did.data.model.did.Proof;
 
 /**
@@ -26,15 +27,11 @@ import org.omnione.did.data.model.did.Proof;
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
-@Builder
-public class DidAuth {
+@SuperBuilder
+public class DidAuth extends RequestProof {
     @NotNull(message = "didAuth.id cannot be null")
     private String did;
     @NotNull(message = "didAuth.authNonce cannot be null")
     private String authNonce;
-    @Valid
-    private Proof proof;
 }

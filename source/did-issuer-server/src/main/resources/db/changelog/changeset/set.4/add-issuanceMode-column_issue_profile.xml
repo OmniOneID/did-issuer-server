@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet id="add-issuanceMode-column_issue_profile" author="gwnam">
+        <addColumn tableName="issue_profile">
+            <column name="issuance_mode" type="varchar(20)" defaultValue="DIRECT">
+                <constraints nullable="false" unique="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+
+</databaseChangeLog>

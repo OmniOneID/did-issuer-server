@@ -43,4 +43,7 @@
   <include file="set.6/add-user-query-type-to-issue-profile.xml" relativeToChangelogFile="true"/>
   <include file="set.6/add-unique-constraint-user-did-vc-schema.xml" relativeToChangelogFile="true"/>
 
+  <include file="./set.4/add-issuanceMode-column_issue_profile.xml" relativeToChangelogFile="true"/>
+  <include file="./set.4/drop-nullable-did-column_vc_profile.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

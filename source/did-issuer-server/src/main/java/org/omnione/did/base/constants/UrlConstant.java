@@ -24,8 +24,10 @@ public class UrlConstant {
         public static final String V1 = "/issuer/api/v1";
         public static final String REQUEST_OFFER = "/request-offer";
         public static final String ISSUE_VC = "/issue-vc";
+        public static final String ISSUE_VC_PROXY = "/issue-vc/proxy";
         public static final String INSPECT_PROPOSE_ISSUE = "/inspect-propose-issue";
         public static final String GENERATE_ISSUE_PROFILE = "/generate-issue-profile";
+        public static final String GENERATE_ISSUE_PROFILE_PROXY = "/generate-issue-profile/proxy";
         public static final String COMPLETE_VC = "/complete-vc";
         public static final String RESULT = "/result";
         public static final String VC = "/vc";
@@ -50,13 +52,13 @@ public class UrlConstant {
 
         public static final String ISSUED_VCS = "/issued-vcs";
 
-        public static final String ZKP_NAMESPACE  = "/zkp/namespaces";
+        public static final String ZKP_NAMESPACE = "/zkp/namespaces";
         public static final String CHECK_NAMESPACE_ID = "/check-namespace-id";
-        public static final String ZKP_SCHEMA  = "/zkp/schemas";
+        public static final String ZKP_SCHEMA = "/zkp/schemas";
         public static final String FIND_ALL = "/all";
-        public static final String ZKP_ATTRIBUTES  = "/attributes";
+        public static final String ZKP_ATTRIBUTES = "/attributes";
 
-        public static final String ZKP_CREDENTIAL_DEFINITION  = "/zkp/definitions";
+        public static final String ZKP_CREDENTIAL_DEFINITION = "/zkp/definitions";
         public static final String CHECK_CREDENTIAL_DEFINITION_ALIAS = "/check-credential-definition-alias";
         public static final String RE_REGISTER = "/re-register";
 
