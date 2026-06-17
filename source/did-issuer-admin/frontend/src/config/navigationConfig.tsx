@@ -15,6 +15,15 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
       title: 'Issuer Management', 
     },
     {
+        segment: 'oid4vci-management',
+        title: 'OID4VCI Management',
+        children: [
+            { segment: 'metadata', title: 'Issuer Metadata', },
+            { segment: 'credential-config', title: 'Credential Config', },
+            { segment: 'property', title: 'Property', },
+        ],
+    },
+    {
       segment: 'vc-management',
       title: 'VC Management',
       children: [

@@ -36,6 +36,8 @@ public class UrlConstant {
         public static final String REVOKE_VC = "/revoke-vc";
         public static final String COMPLETE_REVOKE = "/complete-revoke";
         public static final String SCHEMA = "/vcschema";
+        public static final String WELL_KNOWN_PREFIX = "/.well-known";
+        public static final String OPENID_CREDENTIAL_ISSUER = "/openid-credential-issuer";
     }
 
     public static class Admin {
@@ -62,6 +64,8 @@ public class UrlConstant {
         public static final String CHECK_CREDENTIAL_DEFINITION_ALIAS = "/check-credential-definition-alias";
         public static final String RE_REGISTER = "/re-register";
 
+        public static final String SERVER_CONFIG = "/server-configs";
+        public static final String OID4VCI = "/oid4vci";
     }
 
     public static class Tas {

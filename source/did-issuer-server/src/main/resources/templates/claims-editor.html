@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Claims Editor</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 35px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+        }
+
+        .header {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eaeaea;
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .list-section {
+            border-right: 1px solid #eaeaea;
+            padding-right: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-section {
+            /* Right section */
+        }
+
+        h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d2d6dc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background-color: #fff;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-control:read-only {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .claims-section {
+            margin-top: 30px;
+            background: #fcfcfc;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .claims-section>label {
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 10px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .claim-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .portrait-preview {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #d2d6dc;
+            border-radius: 6px;
+            margin-left: auto;
+            display: block;
+        }
+
+        .claim-row .claim-key {
+            flex: 1;
+        }
+
+        .claim-row .claim-value {
+            flex: 2;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-add {
+            background-color: #f8f9fa;
+            color: #4a5568;
+            border: 1px dashed #cbd5e0;
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+        }
+
+        .btn-add:hover {
+            background-color: #edf2f7;
+            border-color: #a0aec0;
+        }
+
+        .btn-remove {
+            background-color: #fff;
+            color: #e53e3e;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border: 1px solid #fed7d7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-remove:hover {
+            background-color: #fff5f5;
+        }
+
+        .btn-placeholder {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+        }
+
+        .btn-save {
+            background-color: #3b82f6;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 1.05rem;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-save:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-back {
+            background-color: #fff;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-back:hover {
+            background-color: #f7fafc;
+        }
+
+        .saved-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .saved-item {
+            padding: 15px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #fff;
+        }
+
+        .saved-item:hover {
+            background-color: #f8fafc;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .saved-item .id-type {
+            font-weight: 600;
+            color: #1a202c;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        .saved-item .claim-count {
+            color: #718096;
+            font-size: 0.85rem;
+            background: #edf2f7;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #1a202c;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #10b981;
+        }
+
+        .toast.error {
+            background-color: #ef4444;
+        }
+
+        @media (max-width: 860px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 25px;
+            }
+
+            .header {
+                grid-column: span 1;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .list-section {
+                order: 2;
+                border-right: none;
+                border-top: 1px solid #eaeaea;
+                padding-right: 0;
+                padding-top: 25px;
+            }
+
+            .editor-section {
+                order: 1;
+            }
+
+            .claim-row {
+                flex-wrap: wrap;
+            }
+
+            .claim-row .claim-key,
+            .claim-row .claim-value {
+                flex: 1 1 100%;
+            }
+
+            .btn-remove {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>User Claims Editor</h2>
+            <!-- <button class="btn btn-back" onclick="window.location.href='/oid4vci/test'">Back</button> -->
+        </div>
+
+        <div class="list-section">
+            <h3>Saved Claims</h3>
+            <div id="savedListContainer" class="saved-list">
+                <div style="color: #a0aec0; text-align: center; padding: 30px 20px;">Loading saved claims...</div>
+            </div>
+        </div>
+
+        <div class="editor-section">
+            <h3>Edit Claims</h3>
+            <div class="form-group">
+                <label for="userId">User ID (sub)</label>
+                <input type="text" id="userId" class="form-control" placeholder="e.g., user123">
+            </div>
+            <div class="form-group">
+                <label for="credentialConfig">Credential Configuration</label>
+                <select id="credentialConfig" class="form-control">
+                    <option value="">-- Select Configuration --</option>
+                    <option th:each="entry : ${credentialConfigs}" th:value="${entry.key}" th:text="${entry.key}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="credentialType">Credential Type</label>
+                <select id="credentialType" class="form-control">
+                    <option value="">-- Select Credential Type --</option>
+                </select>
+            </div>
+
+            <div class="claims-section">
+                <label>Claims Data (Key-Value Pairs)</label>
+                <div id="claimsContainer">
+                    <!-- Rows will be added here -->
+                </div>
+                <button class="btn btn-add" onclick="addRow()">+ Add Claim</button>
+            </div>
+
+            <button class="btn btn-save" onclick="saveClaims()">Save Claims</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Saved Successfully</div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const mdocDefaults = /*[[${mdocDefaults}]]*/ {};
+        const credentialConfigs = /*[[${credentialConfigs}]]*/ {};
+        /*]]>*/
+
+        let serverMetadata = null;
+
+        function generateClaimsForConfig(configId, existingClaims = null, credentialType = null) {
+            const container = document.getElementById('claimsContainer');
+            container.innerHTML = '';
+            let claimsGenerated = false;
+
+            if (serverMetadata && serverMetadata.credential_configurations_supported && serverMetadata.credential_configurations_supported[configId]) {
+                const configData = serverMetadata.credential_configurations_supported[configId];
+                const format = configData.format;
+                let claimsList = null;
+
+                if (configData.credential_metadata && configData.credential_metadata.claims) {
+                    claimsList = configData.credential_metadata.claims;
+                } else if (configData.claims) {
+                    claimsList = configData.claims;
+                }
+
+                if (Array.isArray(claimsList)) {
+                    claimsList.forEach(claim => {
+                        let pathArr = claim.path || [];
+                        if (pathArr.length === 0) return;
+
+                        let keyPath = '';
+                        if (format === 'mso_mdoc' || format === 'mso-mdoc') {
+                            // For mso-mdoc, first element is usually namespace
+                            keyPath = pathArr[pathArr.length - 1];
+                        } else {
+                            // For SD-JWT or others, path is JSON hierarchy. We join with dot.
+                            keyPath = pathArr.join('.');
+                        }
+
+                        const valueType = claim.value_type || 'string';
+                        const isMandatory = claim.mandatory || false;
+
+                        // Determine label
+                        let label = keyPath;
+                        if (Array.isArray(claim.display) && claim.display.length > 0) {
+                            label = claim.display[0].name || keyPath;
+                        }
+
+                        let value = '';
+                        if (existingClaims && existingClaims[keyPath] !== undefined) {
+                            value = existingClaims[keyPath];
+                            delete existingClaims[keyPath]; // Remove so we know what's left
+                        } else if (!existingClaims) {
+                            if ((credentialType === 'mDL' || credentialType === 'mDocPID' || format === 'mso_mdoc' || format === 'mso-mdoc') && mdocDefaults[keyPath] !== undefined) {
+                                value = mdocDefaults[keyPath];
+                            } else if (keyPath === 'family_name') {
+                                value = 'Kim';
+                            } else if (keyPath === 'given_name') {
+                                value = 'Raon';
+                            }
+                        }
+
+                        addRow(keyPath, value, isMandatory, valueType, label);
+                    });
+                    claimsGenerated = true;
+                }
+            }
+            return claimsGenerated;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedList();
+
+            // Pre-fill User ID if 'users' query parameter is provided
+            const urlParams = new URLSearchParams(window.location.search);
+            const usersParam = urlParams.get('userId');
+            if (usersParam) {
+                document.getElementById('userId').value = usersParam;
+            }
+
+            // Fetch metadata from the issuer to get the claims structures
+            fetch('/.well-known/openid-credential-issuer')
+                .then(res => res.json())
+                .then(data => {
+                    serverMetadata = data;
+                })
+                .catch(err => console.error('Failed to load server metadata:', err));
+
+            const configSelect = document.getElementById('credentialConfig');
+            const typeSelect = document.getElementById('credentialType');
+
+            // Handle configuration selection change
+            configSelect.addEventListener('change', (e) => {
+                const selectedConfig = e.target.value;
+                typeSelect.innerHTML = '<option value="">-- Select Credential Type --</option>';
+
+                // Clear the claims container when config changes
+                document.getElementById('claimsContainer').innerHTML = '';
+
+                if (selectedConfig && credentialConfigs[selectedConfig]) {
+                    const identifiers = credentialConfigs[selectedConfig].identifiers;
+                    identifiers.forEach(id => {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = id;
+                        typeSelect.appendChild(option);
+                    });
+                }
+            });
+
+            // Handle credential type selection change
+            typeSelect.addEventListener('change', (e) => {
+                const selectedType = e.target.value;
+                const selectedConfig = configSelect.value;
+
+                if (!selectedType) {
+                    document.getElementById('claimsContainer').innerHTML = '';
+                    return;
+                }
+
+                let claimsGenerated = generateClaimsForConfig(selectedConfig, null, selectedType);
+
+                if (!claimsGenerated) {
+                    document.getElementById('claimsContainer').innerHTML = '';
+                    if (selectedType === 'mDL' || selectedType === 'mDocPID') {
+                        Object.entries(mdocDefaults).forEach(([k, v]) => {
+                            addRow(k, v, true, 'string', k);
+                        });
+                    } else if (selectedType) {
+                        addRow('family_name', 'Kim', false, 'string', 'Family Name');
+                        addRow('given_name', 'Raon', false, 'string', 'Given Name');
+                    }
+                }
+            });
+
+            // Initial default row
+            addRow('family_name', 'Kim', false, 'string', 'Family Name');
+            addRow('given_name', 'Raon', false, 'string', 'Given Name');
+        });
+
+        function addRow(key = '', value = '', isFixed = false, valueType = 'string', label = null) {
+            const container = document.getElementById('claimsContainer');
+            const row = document.createElement('div');
+            row.className = 'claim-row' + (isFixed ? ' fixed-row' : '');
+
+            let displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
+
+            const keyInput = document.createElement('input');
+            keyInput.type = 'text';
+            keyInput.className = 'form-control claim-key';
+            keyInput.placeholder = 'Key';
+            keyInput.value = key;
+            if (label) {
+                keyInput.title = label; // Tooltip for display name
+                if (!keyInput.value && isFixed) keyInput.value = label;
+            }
+            if (isFixed) keyInput.readOnly = true;
+
+            const valueInput = document.createElement('input');
+            valueInput.className = 'form-control claim-value';
+            valueInput.placeholder = 'Value (' + valueType + ')';
+
+            // Map value_type to HTML input type
+            if (valueType === 'full-date' || valueType === 'date') {
+                valueInput.type = 'date';
+            } else if (valueType === 'uint' || valueType === 'number') {
+                valueInput.type = 'number';
+                valueInput.min = '0';
+            } else {
+                valueInput.type = 'text';
+            }
+
+            valueInput.value = displayValue;
+
+            if (key === 'portrait') {
+                valueInput.style.display = 'none';
+            }
+
+            row.appendChild(keyInput);
+            row.appendChild(valueInput);
+
+            if (!isFixed) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-remove';
+                removeBtn.textContent = 'X';
+                removeBtn.onclick = () => removeRow(removeBtn);
+                row.appendChild(removeBtn);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'btn-placeholder';
+                row.appendChild(placeholder);
+            }
+
+            if (key === 'portrait' && displayValue !== 'IMAGE_NOT_FOUND' && displayValue !== '') {
+                const img = document.createElement('img');
+                img.className = 'portrait-preview';
+                img.src = 'data:image/jpeg;base64,' + displayValue;
+                row.appendChild(img);
+            }
+
+            container.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            btn.parentElement.remove();
+        }
+
+        function loadSavedList() {
+            fetch('/api/claims/list')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('savedListContainer');
+                    container.innerHTML = '';
+
+                    const keys = Object.keys(data);
+                    if (keys.length === 0) {
+                        const emptyMsg = document.createElement('div');
+                        emptyMsg.style.cssText = 'color: #a0aec0; text-align: center; padding: 30px 20px;';
+                        emptyMsg.textContent = 'No saved claims found in memory.';
+                        container.appendChild(emptyMsg);
+                        return;
+                    }
+
+                    keys.forEach(key => {
+                        const [userId, type] = key.split(':');
+                        const claims = data[key];
+                        const count = Object.keys(claims).length;
+
+                        const item = document.createElement('div');
+                        item.className = 'saved-item';
+                        item.onclick = () => loadClaims(userId, type);
+
+                        const idTypeSpan = document.createElement('span');
+                        idTypeSpan.className = 'id-type';
+                        idTypeSpan.textContent = `${userId} / ${type}`;
+
+                        const countSpan = document.createElement('span');
+                        countSpan.className = 'claim-count';
+                        countSpan.textContent = `${count} claims`;
+
+                        item.appendChild(idTypeSpan);
+                        item.appendChild(countSpan);
+                        container.appendChild(item);
+                    });
+                })
+                .catch(err => console.error('Error loading list:', err));
+        }
+
+        function loadClaims(userId, type) {
+            document.getElementById('userId').value = userId;
+
+            // Find the matching configuration for this type
+            let matchedConfig = '';
+            for (const [configId, configData] of Object.entries(credentialConfigs)) {
+                if (configData.identifiers && configData.identifiers.includes(type)) {
+                    matchedConfig = configId;
+                    break;
+                }
+            }
+
+            const configSelect = document.getElementById('credentialConfig');
+            const typeSelect = document.getElementById('credentialType');
+
+            if (matchedConfig) {
+                configSelect.value = matchedConfig;
+                // Repopulate typeSelect
+                typeSelect.innerHTML = '<option value="">-- Select Credential Type --</option>';
+                credentialConfigs[matchedConfig].identifiers.forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    typeSelect.appendChild(option);
+                });
+            } else {
+                // Fallback if not found in configs
+                typeSelect.innerHTML = `<option value="${type}">${type}</option>`;
+            }
+
+            typeSelect.value = type;
+
+            fetch(`/api/claims/get?userId=${userId}&credentialType=${type}`)
+                .then(res => res.json())
+                .then(claims => {
+                    // Flatten claims to handle dot notation paths
+                    const flattenObj = (ob) => {
+                        let result = {};
+                        for (const i in ob) {
+                            if ((typeof ob[i]) === 'object' && !Array.isArray(ob[i]) && ob[i] !== null) {
+                                const temp = flattenObj(ob[i]);
+                                for (const j in temp) {
+                                    result[i + '.' + j] = temp[j];
+                                }
+                            } else {
+                                result[i] = ob[i];
+                            }
+                        }
+                        return result;
+                    };
+
+                    const flatClaims = flattenObj(claims);
+
+                    let claimsGenerated = false;
+                    if (matchedConfig) {
+                        claimsGenerated = generateClaimsForConfig(matchedConfig, flatClaims, type);
+                    }
+
+                    // Add any leftover or fallback claims
+                    if (!claimsGenerated) {
+                        const container = document.getElementById('claimsContainer');
+                        container.innerHTML = '';
+                        const isMdl = (type === 'mDL');
+                        Object.entries(flatClaims).forEach(([k, v]) => {
+                            const isEssential = isMdl && mdocDefaults.hasOwnProperty(k);
+                            addRow(k, v, isEssential, 'string', k);
+                        });
+                    } else {
+                        // claimsGenerated = true means generateClaimsForConfig already cleared and added schema claims.
+                        // Now add any extra claims that were NOT in the schema
+                        Object.entries(flatClaims).forEach(([k, v]) => {
+                            addRow(k, v, false, 'string', k);
+                        });
+                    }
+
+                    showToast('Loaded claims for ' + userId, 'success');
+                });
+        }
+
+        function saveClaims() {
+            const userId = document.getElementById('userId').value.trim();
+            const credentialType = document.getElementById('credentialType').value.trim();
+
+            if (!userId || !credentialType) {
+                showToast('User ID and Credential Type are required', 'error');
+                return;
+            }
+
+            const claims = {};
+            const keys = document.querySelectorAll('.claim-key');
+            const values = document.querySelectorAll('.claim-value');
+
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i].value.trim();
+                let value = values[i].value.trim();
+
+                if (key) {
+                    let parsedValue = value;
+
+                    if (values[i].type === 'number' && value !== '') {
+                        parsedValue = Number(value);
+                    } else if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
+                        try { parsedValue = JSON.parse(value); } catch (e) { }
+                    }
+
+                    // Handle nested paths (e.g. address.street_address)
+                    if (key.includes('.')) {
+                        const parts = key.split('.');
+                        let current = claims;
+                        for (let j = 0; j < parts.length - 1; j++) {
+                            if (!current[parts[j]]) current[parts[j]] = {};
+                            current = current[parts[j]];
+                        }
+                        current[parts[parts.length - 1]] = parsedValue;
+                    } else {
+                        claims[key] = parsedValue;
+                    }
+                }
+            }
+
+            fetch('/api/claims/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, credentialType, claims })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    showToast(data.message || 'Saved Successfully', 'success');
+                    loadSavedList();
+                })
+                .catch(err => showToast('Error saving claims', 'error'));
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+    </script>
+</body>
+
+</html>

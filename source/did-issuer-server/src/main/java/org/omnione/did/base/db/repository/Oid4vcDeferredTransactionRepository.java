@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 OmniOne.
+ * Copyright 2026 OmniOne.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnione.did.issuer.v1.admin.controller;
 
-import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+package org.omnione.did.base.db.repository;
 
+import org.omnione.did.base.db.domain.Oid4vcDeferredTransactionEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-@Controller
-public class CustomWebErrorController implements ErrorController {
+import java.util.Optional;
 
-    private final String ERROR_PATH = "/error";
-
-    @GetMapping(ERROR_PATH)
-    public String redirectRoot() {
-        return "index.html";
-    }
-
-    public String getErrorPath() {
-        return null;
-    }
+@Repository
+public interface Oid4vcDeferredTransactionRepository extends JpaRepository<Oid4vcDeferredTransactionEntity, Long> {
+    Optional<Oid4vcDeferredTransactionEntity> findByTransactionId(String transactionId);
 }

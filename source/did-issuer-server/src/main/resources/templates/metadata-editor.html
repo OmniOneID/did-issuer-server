@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata Editor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ddd;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 1px solid #95a5a6;
+            color: #bdc3c7;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .file-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #34495e;
+            transition: background 0.2s;
+        }
+
+        .file-item:hover {
+            background-color: #34495e;
+        }
+
+        .file-item.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .view-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .save-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .editor-container {
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #jsonEditor {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+
+        /* Form View Styles */
+        #formEditor {
+            height: 100%;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .form-row {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-key {
+            font-weight: 500;
+            margin-right: 10px;
+            color: #555;
+            min-width: 150px;
+        }
+
+        .form-value-input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+            font-size: 14px;
+        }
+
+        .form-indent {
+            margin-left: 20px;
+            border-left: 2px solid #eee;
+            padding-left: 10px;
+        }
+
+        .form-section-title {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2ecc71;
+        }
+
+        .toast.error {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            Files
+            <a href="/oid4vci/test" class="back-btn">Back</a>
+        </div>
+        <ul class="file-list" id="fileList">
+            <li class="file-item" style="padding: 20px; text-align: center; color: #95a5a6;">Loading...</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="editor-header">
+            <div class="file-title" id="currentFileName">Select a file to edit</div>
+            <div class="view-controls">
+                <button class="view-btn active" onclick="switchView('text')">Text View</button>
+                <button class="view-btn" onclick="switchView('form')">Form View</button>
+            </div>
+            <button class="save-btn" id="saveBtn" onclick="saveFile()">Save Changes</button>
+        </div>
+        <div class="editor-container">
+            <textarea id="jsonEditor" spellcheck="false"></textarea>
+            <div id="formEditor" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Saved Successfully</div>
+
+    <script>
+        let currentFile = null;
+        let currentView = 'text';
+
+        document.addEventListener('DOMContentLoaded', loadFileList);
+
+        function switchView(view) {
+            if (currentView === view) return;
+
+            if (view === 'form') {
+                // Determine if we can switch to form view (must be valid JSON)
+                const textContent = document.getElementById('jsonEditor').value;
+                try {
+                    const json = JSON.parse(textContent);
+                    renderForm(json, document.getElementById('formEditor'));
+                    document.getElementById('jsonEditor').style.display = 'none';
+                    document.getElementById('formEditor').style.display = 'block';
+                } catch (e) {
+                    showToast('Invalid JSON - cannot switch to Form View', 'error');
+                    return; // Abort switch
+                }
+            } else {
+                // Switching to text view: serialize form back to JSON
+                const json = serializeForm();
+                document.getElementById('jsonEditor').value = JSON.stringify(json, null, 2);
+                document.getElementById('formEditor').style.display = 'none';
+                document.getElementById('jsonEditor').style.display = 'block';
+            }
+
+            // Update UI buttons
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            // Assuming order: 0=Text, 1=Form
+            const btnIndex = view === 'text' ? 0 : 1;
+            document.querySelectorAll('.view-btn')[btnIndex].classList.add('active');
+
+            currentView = view;
+        }
+
+        function renderForm(data, container) {
+            container.innerHTML = '';
+
+            function createInput(key, value, type, parent) {
+                const row = document.createElement('div');
+                row.className = 'form-row';
+
+                const label = document.createElement('div');
+                label.className = 'form-key';
+                label.textContent = key;
+
+                const input = document.createElement('input');
+                input.className = 'form-value-input';
+                input.value = value;
+                input.dataset.key = key; // Use direct key for simplicity in flat structures, logic needed for nested
+                input.dataset.type = type;
+
+                // Simplified serialization logic requires associating input with structure. 
+                // For this POC, we will allow editing values. Re-rendering entire structure is easier.
+                input.onchange = (e) => {
+                    // In a real robust implementation, we'd binding this back to the data object
+                    // For now, simpler to reconstruct on save/switch
+                };
+
+                row.appendChild(label);
+                row.appendChild(input);
+                parent.appendChild(row);
+                return input;
+            }
+
+            function traverse(obj, parentElement) {
+                for (const key in obj) {
+                    const val = obj[key];
+                    const type = typeof val;
+
+                    if (val === null) {
+                        createInput(key, 'null', 'null', parentElement);
+                    } else if (type === 'object' && !Array.isArray(val)) {
+                        const section = document.createElement('div');
+                        section.className = 'form-section-title';
+                        section.textContent = key;
+                        parentElement.appendChild(section);
+
+                        const indentDiv = document.createElement('div');
+                        indentDiv.className = 'form-indent';
+                        indentDiv.dataset.key = key; // Mark as object container
+                        traverse(val, indentDiv);
+                        parentElement.appendChild(indentDiv);
+                    } else if (Array.isArray(val)) {
+                        // Arrays are tricky in simple forms. treat as text for now or simple list
+                        const row = document.createElement('div');
+                        row.className = 'form-row';
+                        const label = document.createElement('div');
+                        label.className = 'form-key';
+                        label.textContent = key + ' (Array)';
+
+                        const input = document.createElement('textarea'); // Use textarea for arrays/complex
+                        input.className = 'form-value-input';
+                        input.style.height = '60px';
+                        input.value = JSON.stringify(val);
+                        input.dataset.key = key;
+                        input.dataset.type = 'array'; // Special handling
+
+                        row.appendChild(label);
+                        row.appendChild(input);
+                        parentElement.appendChild(row);
+                    } else {
+                        // Primitives
+                        createInput(key, val, type, parentElement);
+                    }
+                }
+            }
+
+            traverse(data, container);
+        }
+
+        function serializeForm() {
+            const container = document.getElementById('formEditor');
+            return rebuildObjFromDom(container);
+        }
+
+        function renderForm(json, container) {
+            container.innerHTML = '';
+            buildFormRecursive(json, container);
+        }
+
+        function buildFormRecursive(obj, parent) {
+            for (const key in obj) {
+                const val = obj[key];
+
+                if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+                    // Object
+                    const wrapper = document.createElement('div');
+                    wrapper.style.marginBottom = '10px';
+                    wrapper.dataset.type = 'object';
+                    wrapper.dataset.key = key;
+
+                    const title = document.createElement('div');
+                    title.className = 'form-section-title';
+                    title.textContent = key;
+                    wrapper.appendChild(title);
+
+                    const indent = document.createElement('div');
+                    indent.className = 'form-indent';
+                    buildFormRecursive(val, indent);
+                    wrapper.appendChild(indent);
+
+                    parent.appendChild(wrapper);
+                } else {
+                    // Primitive or Array (treated as text)
+                    const row = document.createElement('div');
+                    row.className = 'form-row';
+                    row.dataset.key = key; // Store key on row
+
+                    const label = document.createElement('div');
+                    label.className = 'form-key';
+                    label.textContent = key;
+
+                    let input;
+                    if (Array.isArray(val) || (typeof val === 'object' && val !== null)) {
+                        // Array or Null Object 
+                        input = document.createElement('textarea');
+                        input.className = 'form-value-input';
+                        input.style.height = '60px';
+                        input.value = JSON.stringify(val);
+                        input.dataset.isJson = 'true'; // Flag to parse back
+                    } else {
+                        input = document.createElement('input');
+                        input.className = 'form-value-input';
+                        input.value = val;
+                        input.dataset.type = typeof val;
+                    }
+
+                    row.appendChild(label);
+                    row.appendChild(input);
+                    parent.appendChild(row);
+                }
+            }
+        }
+
+        function rebuildObjFromDom(container) {
+            const obj = {};
+
+            const children = Array.from(container.children);
+            children.forEach(child => {
+                if (child.classList.contains('form-row')) {
+                    const key = child.dataset.key;
+                    const input = child.querySelector('.form-value-input');
+                    let value = input.value;
+
+                    // Type conversion
+                    if (input.dataset.isJson === 'true') {
+                        try {
+                            value = JSON.parse(value);
+                        } catch (e) {
+                            console.error(`JSON parsing failed for input [${input.name}]:`, e);
+                            value = {};
+                        }
+                    }
+                    else if (input.dataset.type === 'number') {
+                        value = Number(value);
+                    } else if (input.dataset.type === 'boolean') {
+                        value = (value.toLowerCase() === 'true');
+                    }
+
+                    obj[key] = value;
+                } else if (child.dataset.type === 'object') {
+                    const key = child.dataset.key;
+                    const indent = child.querySelector('.form-indent');
+                    obj[key] = rebuildObjFromDom(indent);
+                }
+            });
+
+            return obj;
+        }
+
+
+        function loadFileList() {
+            fetch('/api/metadata/files')
+                .then(response => response.json())
+                .then(files => {
+                    const listEl = document.getElementById('fileList');
+                    listEl.innerHTML = '';
+
+                    if (files.length === 0) {
+                        listEl.innerHTML = '<li class="file-item" style="cursor: default;">No JSON files found</li>';
+                        return;
+                    }
+
+                    files.forEach(file => {
+                        const li = document.createElement('li');
+                        li.className = 'file-item';
+                        li.textContent = file;
+                        li.onclick = () => loadFileContent(file, li);
+                        listEl.appendChild(li);
+                    });
+                })
+                .catch(err => {
+                    console.error('Failed to load files', err);
+                    document.getElementById('fileList').innerHTML = '<li class="file-item" style="color: #e74c3c;">Error loading files</li>';
+                });
+        }
+
+        function loadFileContent(filename, element) {
+            document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            currentFile = filename;
+            document.getElementById('currentFileName').textContent = filename;
+
+            // Force reset to text view on load
+            if (currentView === 'form') {
+                document.querySelectorAll('.view-btn')[0].click();
+            }
+
+            document.getElementById('jsonEditor').value = 'Loading...';
+            document.getElementById('jsonEditor').disabled = true;
+
+            fetch(`/api/metadata/file?filename=${encodeURIComponent(filename)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(content => {
+                    try {
+                        const jsonObj = JSON.parse(content);
+                        document.getElementById('jsonEditor').value = JSON.stringify(jsonObj, null, 2);
+                    } catch (e) {
+                        document.getElementById('jsonEditor').value = content;
+                    }
+                    document.getElementById('jsonEditor').disabled = false;
+                })
+                .catch(err => {
+                    console.error('Error loading file', err);
+                    document.getElementById('jsonEditor').value = 'Error loading file content.';
+                });
+        }
+
+        function saveFile() {
+            if (!currentFile) {
+                showToast('No file selected', 'error');
+                return;
+            }
+
+            // Ensure we save what's currently active (sync form to text if needed)
+            if (currentView === 'form') {
+                const json = serializeForm();
+                document.getElementById('jsonEditor').value = JSON.stringify(json, null, 2);
+            }
+
+            const content = document.getElementById('jsonEditor').value;
+            try {
+                JSON.parse(content);
+            } catch (e) {
+                if (!confirm('The content does not appear to be valid JSON. Save anyway?')) {
+                    return;
+                }
+            }
+
+            fetch('/api/metadata/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: currentFile, content: content })
+            })
+                .then(async response => {
+                    if (response.ok) {
+                        showToast('File saved successfully!', 'success');
+                    } else {
+                        try {
+                            const errorData = await response.json();
+                            showToast(errorData.error || 'Failed to save file.', 'error');
+                        } catch (e) {
+                            showToast('Failed to save file.', 'error');
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving file', err);
+                    showToast('Error saving file.', 'error');
+                });
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

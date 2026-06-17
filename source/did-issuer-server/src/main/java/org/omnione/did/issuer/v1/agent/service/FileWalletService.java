@@ -92,6 +92,18 @@ public class FileWalletService {
         }
     }
 
+    public String getPublicKeyByKid(String kid) {
+        try {
+            if (!walletManager.isConnect()) {
+                log.info("Wallet manager disConnect. Connecting to wallet...");
+                connectToWallet();
+            }
+            return walletManager.getPublicKey(kid);
+        } catch (WalletException e) {
+            throw new OpenDidException(ErrorCode.PUBLIC_KEY_NOT_FOUND);
+        }
+    }
+
     public WalletManagerInterface initializeWalletWithKeys() {
         WalletManagerInterface walletManager = BaseWalletUtil.initializeWalletWithKeys(
                 walletProperty.getFilePath(),

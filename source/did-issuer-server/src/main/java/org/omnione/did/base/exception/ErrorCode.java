@@ -108,6 +108,7 @@ public enum ErrorCode {
     WALLET_ALREADY_EXISTS("00425", "Failed to create wallet: wallet already exists.", 500),
     INVALID_PROOF_PURPOSE("00426", "Invalid proof purpose.", 400),
     CRYPTO_KEY_PAIR_ALREADY_EXISTS("00427", "Failed to generate keys: key already exists.", 500),
+    PUBLIC_KEY_NOT_FOUND("00428", "Public key not found.", 500),
 
     // ZKP 10400~10499 = ZKP Error
     ZKP_WALLET_INFO_NOT_FOUND("10400", "ZKP Wallet is not registered.", 400),

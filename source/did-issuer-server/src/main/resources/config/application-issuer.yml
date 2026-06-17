@@ -1,0 +1,30 @@
+issuer:
+  server-ip: 10.48.17.128
+  server-port: 8091
+  base-url: http://${issuer.server-ip:127.0.0.1}:${issuer.server-port:8091}
+  sdk:
+    config-source: DB
+  data-dir: .
+  metadata-file-path: metadata/issuer_meta.json
+  wallet-file-name: ${wallet.file-path}
+
+
+oid4vc:
+  auth:
+    issuer-url: ${issuer.base-url}
+    clients:
+      issuer-server:
+        url: ${issuer.base-url}
+
+clients:
+  auth-server:
+    url: ${issuer.base-url}
+
+# Access Token을 발급한 인가서버의 JWKS 엔드포인트 주소
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${clients.auth-server.url}/oauth2/jwks
+

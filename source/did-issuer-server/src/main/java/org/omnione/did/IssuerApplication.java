@@ -16,13 +16,25 @@
 
 package org.omnione.did;
 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
-@SpringBootApplication(exclude = {JacksonAutoConfiguration.class})
-@ConfigurationPropertiesScan(basePackages = "org.omnione.did.base.property")
+@EnableEncryptableProperties
+@SpringBootApplication(exclude = {OAuth2ClientAutoConfiguration.class})
+@ComponentScan(
+        basePackages = "org.omnione.did",
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.REGEX,
+                pattern = "org\\.omnione\\.did\\.oid4vc\\.oid4vci\\.controller\\.WellKnownMetadataController"
+        )
+)
+@ConfigurationPropertiesScan(basePackages = "org.omnione.did")
 public class IssuerApplication {
 
     public static void main(String[] args) {

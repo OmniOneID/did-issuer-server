@@ -41,6 +41,8 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     implementation 'org.web3j:core:4.14.0'
 
     // DB
@@ -83,6 +85,18 @@ dependencies {
     implementation 'com.google.code.gson:gson'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // OID4VCI
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'com.google.zxing:javase:3.5.1'
+
+    // oauth
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
+    // mdoc
+    runtimeOnly 'com.augustcellars.cose:cose-java:1.1.0'
+    // mdoc
+    implementation 'com.upokecenter:cbor:4.5.2'
 }
 
 dependencyManagement {

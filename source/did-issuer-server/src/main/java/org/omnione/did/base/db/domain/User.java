@@ -32,7 +32,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "user")
 public class User extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false)

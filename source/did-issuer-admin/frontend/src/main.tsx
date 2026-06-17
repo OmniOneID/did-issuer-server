@@ -43,6 +43,10 @@ import CredentialDefinitionRegistrationPage from './pages/zkp-management/credent
 import CredentialDefinitionDetailPage from './pages/zkp-management/credential-definition-management/CredentialDefinitionDetailPage';
 import ServerConfigurationPage from './pages/server-configuration/ServerConfigurationPage';
 import PasswordPolicyManagementPage from './pages/admins/password-policy/PasswordPolicyManagementPage';
+import Oid4vciMetadataPage from './pages/oid4vci-management/Oid4vciMetadataPage';
+import CredentialConfigPage from './pages/oid4vci-management/CredentialConfigPage';
+import CredentialConfigDetailPage from './pages/oid4vci-management/CredentialConfigDetailPage';
+import Oid4vciPropertyPage from './pages/oid4vci-management/Oid4vciPropertyPage';
 
 const router = createBrowserRouter([
   {
@@ -63,6 +67,27 @@ const router = createBrowserRouter([
           {
             path: '/issuer-management',
             Component: IssuerManagementPage,
+          },
+          // OID4VCI Management
+          {
+            path: '/oid4vci-management/metadata',
+            Component: Oid4vciMetadataPage,
+          },
+          {
+            path: '/oid4vci-management/credential-config',
+            Component: CredentialConfigPage,
+          },
+          {
+            path: '/oid4vci-management/credential-config/registration',
+            Component: CredentialConfigDetailPage,
+          },
+          {
+            path: '/oid4vci-management/credential-config/:id',
+            Component: CredentialConfigDetailPage,
+          },
+          {
+            path: '/oid4vci-management/property',
+            Component: Oid4vciPropertyPage,
           },
           // Namespace
           {
@@ -245,6 +270,10 @@ const router = createBrowserRouter([
       },
       {
         path: '/sign-in',
+        Component: SignInPage,
+      },
+      {
+        path: '/login',
         Component: SignInPage,
       },
       {
