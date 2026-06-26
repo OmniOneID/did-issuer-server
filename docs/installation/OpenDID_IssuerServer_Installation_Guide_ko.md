@@ -18,7 +18,7 @@ puppeteer:
 Open DID Issuer Server Installation Guide
 ==
 
-- Date: 2025-05-29
+- Date: 2026-06-19
 - Version: v2.0.0
 
 목차
@@ -116,7 +116,7 @@ Issuer 서버는 Open DID 시스템 내에서 VC(Verifiable Credential) Schema �
 
 ## 1.3. 시스템 요구 사항
 - **Java 21** 이상
-- **Gradle 7.0** 이상
+- **Gradle 8.8** (포함된 Wrapper 버전)
 - **Docker** 및 **Docker Compose** (Docker 사용 시)
 - 최소 **2GB RAM** 및 **10GB 디스크 공간**
 
@@ -150,6 +150,8 @@ Issuer 서버를 구동하려면 데이터베이스 설치가 필요하며, Open
 
 ## 2.3. Node.js 설치
 React 기반의 Issuer Admin Console을 실행하려면 `Node.js`와 `npm`이 필요합니다.
+
+Gradle Frontend Task는 Node.js **22.9.0**을 사용하도록 설정돼 있습니다.
 
 npm(Node Package Manager)은 프론트엔드 개발에 필요한 의존성들을 설치하고 관리하는 데 사용됩니다.
 
@@ -207,7 +209,7 @@ did-issuer-server
 │   ├── errorCode
 │       └── Issuer_ErrorCode.md
 │   ├── installation
-│       └── OpenDID_IssuerServer_InstallationAndOperation_Guide.md
+│       └── OpenDID_IssuerServer_Installation_Guide.md
 │   └── db
 │       └── OpenDID_TableDefinition_Issuer.md
 └── source
@@ -422,14 +424,21 @@ Issuer 서버는 운영에 필요한 데이터를 데이터베이스에 저장�
     - 설정값 예시 및 설명:
       ```yaml
       profiles:
-        active: dev
+        active: sample
         group:
           dev:            
-            - databases   # 데이터베이스 관련 설정 (application-database.yml)
+            - database    # 데이터베이스 관련 설정 (application-database.yml)
             - wallet      # 월렛 관련 설정 (application-wallet.yml)
             - logging     # 로깅 설정 (application-logging.yml)
             - spring-docs # Swagger API 문서화 설정 (application-spring-docs.yml, 선택적)
             - blockchain  # Blockchain property 경로 설정 (application-blockchain.yml)
+            - issuer      # OID4VCI Issuer 설정 (application-issuer.yml)
+          sample:
+            - database-sample
+            - wallet
+            - logging
+            - spring-docs
+            - blockchain
       ```
 
 * `spring.jackson`: 🔒 
@@ -460,7 +469,7 @@ logging:
     org.omnione: debug
 ```
 
-## 5.3. database.yml
+## 5.3. application-database.yml
 
 ### 5.3.1. Spring Liquibase 설정 
 * `spring.liquibase.change-log`: 🔒 
@@ -514,7 +523,7 @@ logging:
     - 예시: `false`
 
 
-## 5.4. wallet.yml
+## 5.4. application-wallet.yml
 
 ### 5.4.1. 월렛 설정
 * `wallet.file-path`:  
@@ -525,7 +534,7 @@ logging:
     - 월렛 접근에 사용되는 비밀번호입니다. 월렛 파일의 접근시 사용되는 비밀번호입니다. 높은 보안이 요구되는 정보입니다.
     - 예시: `your_secure_wallet_password`
 
-## 5.5. blockchain.yml
+## 5.5. application-blockchain.yml
 ## 5.5.1. Blockchain 설정
  * `blockchain.file-path`:
     - [5.6. blockchain.properties](#56-blockchainproperties) 파일의 위치를 설정합니다.
@@ -571,6 +580,21 @@ logging:
   - 예시: 0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63
 
 <br/>
+
+## 5.7. application-issuer.yml
+
+`issuer` Profile은 OID4VCI 발급 기능을 설정하며 `dev` Profile Group에 포함됩니다.
+
+| Property | 설명 |
+|----------|------|
+| `issuer.base-url` | Issuer Metadata와 Credential Offer URI에 사용하는 공개 URL |
+| `issuer.data-dir` | Metadata 및 관련 Data File의 기준 Directory |
+| `issuer.metadata-file-path` | `data-dir` 기준 Issuer Metadata JSON 경로 |
+| `issuer.wallet-file-name` | `wallet.file-path`에서 가져오는 Issuer Wallet 경로 |
+| `issuer.sdk.config-source` | Credential Configuration 원본. 현재 개발 설정은 `DB` 사용 |
+| `oid4vc.auth.issuer-url` | Authorization Server Issuer URL |
+| `clients.auth-server.url` | Authorization Server Base URL |
+| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint |
 
 # 6. 프로파일 설정 및 사용
 

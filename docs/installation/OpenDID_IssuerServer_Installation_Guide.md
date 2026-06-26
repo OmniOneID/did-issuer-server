@@ -18,7 +18,7 @@ puppeteer:
 Open DID Issuer Server Installation Guide
 ==
 
-- Date: 2025-05-29
+- Date: 2026-06-19
 - Version: v2.0.0
 
 Table of Contents
@@ -115,7 +115,7 @@ The Issuer server provides functions such as VC (Verifiable Credential) Schema d
 
 ## 1.3. System Requirements
 - **Java 21** or higher
-- **Gradle 7.0** or higher
+- **Gradle 8.8** (the included Wrapper version)
 - **Docker** and **Docker Compose** (when using Docker)
 - Minimum **2GB RAM** and **10GB disk space**
 
@@ -149,6 +149,8 @@ To run the Issuer server, database installation is required, and Open DID uses P
 
 ## 2.3. Node.js Installation
 To run the React-based Issuer Admin Console, `Node.js` and `npm` are required.
+
+The Gradle frontend task is configured for Node.js **22.9.0**.
 
 npm (Node Package Manager) is used to install and manage dependencies needed for frontend development.
 
@@ -206,7 +208,7 @@ did-issuer-server
 │   ├── errorCode
 │       └── Issuer_ErrorCode.md
 │   ├── installation
-│       └── OpenDID_IssuerServer_InstallationAndOperation_Guide.md
+│       └── OpenDID_IssuerServer_Installation_Guide.md
 │   └── db
 │       └── OpenDID_TableDefinition_Issuer.md
 └── source
@@ -420,14 +422,21 @@ Settings with the 🔒 icon are values that are fixed by default or generally do
    - Configuration value examples and explanations:
      ```yaml
      profiles:
-       active: dev
+       active: sample
        group:
          dev:            
-           - databases   # Database related settings (application-database.yml)
+           - database    # Database related settings (application-database.yml)
            - wallet      # Wallet related settings (application-wallet.yml)
            - logging     # Logging settings (application-logging.yml)
            - spring-docs # Swagger API documentation settings (application-spring-docs.yml, optional)
            - blockchain  # Blockchain property path settings (application-blockchain.yml)
+           - issuer      # OID4VCI Issuer settings (application-issuer.yml)
+         sample:
+           - database-sample
+           - wallet
+           - logging
+           - spring-docs
+           - blockchain
      ```
 
 * `spring.jackson`: 🔒 
@@ -458,7 +467,7 @@ logging:
    org.omnione: debug
 ```
 
-## 5.3. database.yml
+## 5.3. application-database.yml
 
 ### 5.3.1. Spring Liquibase Configuration 
 * `spring.liquibase.change-log`: 🔒 
@@ -512,7 +521,7 @@ logging:
    - Example: `false`
 
 
-## 5.4. wallet.yml
+## 5.4. application-wallet.yml
 
 ### 5.4.1. Wallet Configuration
 * `wallet.file-path`:  
@@ -523,7 +532,7 @@ logging:
    - Password used for wallet access. Password used when accessing the wallet file. Information that requires high security.
    - Example: `your_secure_wallet_password`
 
-## 5.5. blockchain.yml
+## 5.5. application-blockchain.yml
 ## 5.5.1. Blockchain Configuration
 * `blockchain.file-path`:
    - Sets the location of the [5.6. blockchain.properties](#56-blockchainproperties) file.
@@ -568,6 +577,21 @@ logging:
   - Example: 0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63
 
 <br/><br/>
+
+## 5.7. application-issuer.yml
+
+The `issuer` profile configures OID4VCI issuance and is included in the `dev` profile group.
+
+| Property | Description |
+|----------|-------------|
+| `issuer.base-url` | Public URL used in Issuer Metadata and Credential Offer URIs |
+| `issuer.data-dir` | Base directory for metadata and related data files |
+| `issuer.metadata-file-path` | Issuer Metadata JSON path relative to `data-dir` |
+| `issuer.wallet-file-name` | Issuer wallet path derived from `wallet.file-path` |
+| `issuer.sdk.config-source` | Credential configuration source; current development configuration uses `DB` |
+| `oid4vc.auth.issuer-url` | Authorization Server issuer URL |
+| `clients.auth-server.url` | Authorization Server base URL |
+| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens |
 
 # 6. Profile Configuration and Usage
 

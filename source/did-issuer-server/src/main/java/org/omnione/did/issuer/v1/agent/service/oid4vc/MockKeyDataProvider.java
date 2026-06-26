@@ -54,7 +54,7 @@ public class MockKeyDataProvider implements KeyDataProvider {
 
         // Add server wallet integration
         CompactSigner signer = (keyId, hash) -> {
-                byte[] signature = fileWalletService.generateCompactSignature(keyId, hash);
+                byte[] signature = fileWalletService.generateCompactSignatureByHash(keyId, hash);
                 System.out.println("signature length : " + signature.length);
                 //65 -> 64 (open did wallet의 개인키 필수)
                 byte[] convertSignature = SignatureUtil.convertSignature(signature);

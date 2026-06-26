@@ -7,19 +7,12 @@ Welcome to the Issuer Server source code repository. This directory contains the
 Here's an overview of the directory structure.
 
 ```
-issuer
+did-issuer-server
 ├── gradle
 ├── libs
-    └── did-sdk-common-2.0.0.jar
-    └── did-blockchain-sdk-server-2.0.0.jar
-    └── did-core-sdk-server-2.0.0.jar
-    └── did-crypto-sdk-server-2.0.0.jar
-    └── did-datamodel-server-2.0.0.jar
-    └── did-wallet-sdk-server-2.0.0.jar
-    └── did-zkp-sdk-server-2.0.0.jar
-├── sample
-└── src
-└── build.gradle
+├── metadata
+├── src
+├── build.gradle
 └── README.md
 ```
 
@@ -29,10 +22,10 @@ Below is a description of each folder and file in the directory:
 
 | Name                    | Description                                     |
 | ----------------------- | ----------------------------------------------- |
-| issuer                  | Issuer Server source code and build files       |
+| did-issuer-server       | Issuer Server source code and build files       |
 | ┖ gradle                | Gradle build configurations and scripts         |
 | ┖ libs                  | External libraries and dependencies             |
-| ┖ sample                | Sample files                                    |
+| ┖ metadata              | OID4VCI Issuer Metadata files                   |
 | ┖ src                   | Main source code directory                      |
 | ┖ build.gradle          | Gradle build configuration file                 |
 | ┖ README.md             | Overview and instructions for the source code   |
@@ -48,22 +41,31 @@ Libraries used in this project are organized into two main categories:
     - `did-blockchain-sdk-server-2.0.0.jar`
     - `did-core-sdk-server-2.0.0.jar`
     - `did-crypto-sdk-server-2.0.0.jar`
-    - `did-datamodel-server-2.0.0.jar`
+    - `did-datamodel-sdk-server-2.0.0.jar`
     - `did-wallet-sdk-server-2.0.0.jar`
     - `did-zkp-sdk-server-2.0.0.jar`
+    - `did-oid4vci-sdk-server-3.0.0.jar`
+    - `did-oid4vc-authorization-sdk-server-3.0.0.jar`
+    - `did-oid4vc-formatter-sdk-server-3.0.0.jar`
+    - `did-sd-jwt-vc-sdk-server-3.0.0.jar`
+    - `did-mso-mdoc-sdk-server-3.0.0.jar`
 
-2. **Third-Party Libraries**: These libraries are open-source dependencies managed via the [build.gradle](build.gradle) file. For a detailed list of third-party libraries and their licenses, please refer to the [LICENSE-dependencies.md](../../LICENSE-dependencies.md) file.
+2. **Third-Party Libraries**: These libraries are managed via [build.gradle](build.gradle). Their licenses are listed in [dependencies-license.md](../../dependencies-license.md).
 
 
-## Documenttation
+## Documentation
 
 Refer to the following documents for more detailed information:
 
 - [API Reference](../../docs/api/Issuer_API.md)  
   Detailed reference for the Issuer Server's API endpoints.
 
-- [OpenDID Issuer Server Installation and Operation Guide](../../docs/installation/OpenDID_IssuerServer_InstallationAndOperation_Guide.md)  
+- [OpenDID Issuer Server Installation Guide](../../docs/installation/OpenDID_IssuerServer_Installation_Guide.md)
   Installation and configuration instructions.
+
+- [Issuer Server Error Codes](../../docs/errorCode/Issuer_ErrorCode.md)
+
+- [Issuer Database Table Definition](../../docs/db/OpenDID_TableDefinition_Issuer.md)
 
 ## Contributing
 

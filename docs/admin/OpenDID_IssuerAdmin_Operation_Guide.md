@@ -18,7 +18,7 @@ puppeteer:
 OpenDID IssuerAdmin Operation Guide
 ==
 
-- Date: 2025-05-29
+- Date: 2026-06-19
 - Version: v2.0.0
 
 Revision History
@@ -28,6 +28,7 @@ Revision History
 | v1.0.0 | 2025-03-31 | Initial version                  |
 | v1.0.1 | 2025-04-25 | Added `3.1. Issuer Registration` chapter <br> Modified `3.5. Issued VC Management` chapter |
 | v2.0.0 | 2025-05-29 |  Added `3.4. ZKP Management` chapter |
+| v2.0.0 | 2026-06-19 | Added OID4VCI, Server Configuration, and Password Policy sections |
 
 Table of Contents
 ==
@@ -1053,5 +1054,25 @@ Clicking the **REGISTER** button on the `Admin Management` screen moves to the r
 | 7    | **RESET Button**              | Initializes all input values.                                         |
 | 8    | **CANCEL Button**             | Cancels registration and returns to the previous screen.                           |
 
+
+## 3.8. OID4VCI Management
+
+This menu is available after the Issuer is activated and contains three configuration screens.
+
+| Menu | Route | Managed Data |
+|------|-------|--------------|
+| Issuer Metadata | `/oid4vci-management/metadata` | Issuer URL, Authorization Servers, Offer/Credential/Nonce/Deferred/Notification endpoints, and encryption capabilities |
+| Credential Config | `/oid4vci-management/credential-config` | Configuration ID, format, credential identifiers, and metadata JSON |
+| Property | `/oid4vci-management/property` | Issuer URL and client settings for common, Android, iOS, Android OpenID, and iOS OpenID platforms |
+
+Saving these screens calls `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, or `/properties`. Endpoint changes affect the public metadata and dynamically registered issuance endpoints, so validate all URLs before saving.
+
+## 3.9. Server Configuration
+
+The `/server-configuration` screen manages runtime key/value settings exposed by `/issuer/admin/v1/server-configs`. Select an existing key to inspect it and use the update action to persist a changed value. Unknown keys are rejected.
+
+## 3.10. Password Policy Settings
+
+The `Admin Management > Password Policy Settings` screen manages minimum length, uppercase, numeric, special-character, and password-expiration requirements. Updated rules apply to subsequent password validation and changes.
 
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V2.0.0.0/OepnDID_Installation_Guide-V2.0.0.0_ko.md

@@ -18,7 +18,7 @@ puppeteer:
 OpenDID IssuerAdmin Operation Guide
 ==
 
-- Date: 2025-05-29
+- Date: 2026-06-19
 - Version: v2.0.0
 
 개정 이력
@@ -28,6 +28,7 @@ OpenDID IssuerAdmin Operation Guide
 | v1.0.0 | 2025-03-31 | 최초 작성                  |
 | v1.0.1 | 2025-04-25 | `3.1. Issuer Registration` 장 추가 <br> `3.5. Issued VC Management` 장 수정 |
 | v2.0.0 | 2025-05-29 |  `3.4. ZKP Management` 장 추가 |
+| v2.0.0 | 2026-06-19 | OID4VCI, Server Configuration, Password Policy 절 추가 |
 
 목차
 ==
@@ -1063,5 +1064,25 @@ ROOT 계정은 `Admin Management` 메뉴에서 모든 기능을 수행할 수 �
 | 7    | **RESET 버튼**              | 모든 입력값을 초기화합니다.                                         |
 | 8    | **CANCEL 버튼**             | 등록을 취소하고 이전 화면으로 돌아갑니다.                           |
 
+
+## 3.8. OID4VCI Management
+
+Issuer가 활성화되면 표시되며 세 개의 설정 화면으로 구성된다.
+
+| 메뉴 | Route | 관리 데이터 |
+|------|-------|-------------|
+| Issuer Metadata | `/oid4vci-management/metadata` | Issuer URL, Authorization Server, Offer/Credential/Nonce/Deferred/Notification Endpoint 및 암호화 기능 |
+| Credential Config | `/oid4vci-management/credential-config` | Configuration ID, Format, Credential Identifier 및 Metadata JSON |
+| Property | `/oid4vci-management/property` | 공통, Android, iOS, Android OpenID, iOS OpenID Platform의 Issuer URL 및 Client 설정 |
+
+저장 시 `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, `/properties` API를 호출한다. Endpoint 변경은 공개 Metadata와 동적으로 등록되는 발급 Endpoint에 영향을 주므로 저장 전 URL을 검증해야 한다.
+
+## 3.9. Server Configuration
+
+`/server-configuration` 화면은 `/issuer/admin/v1/server-configs`가 제공하는 Runtime Key/Value 설정을 관리한다. 기존 Key를 선택해 조회하고 Update 기능으로 값을 저장한다. 등록되지 않은 Key는 거부된다.
+
+## 3.10. Password Policy Settings
+
+`Admin Management > Password Policy Settings`에서 최소 길이, 대문자, 숫자, 특수문자 및 Password 만료 기간을 설정한다. 변경된 규칙은 이후 Password 검증과 변경에 적용된다.
 
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V2.0.0.0/OepnDID_Installation_Guide-V2.0.0.0_ko.md

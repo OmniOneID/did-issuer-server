@@ -2,8 +2,8 @@
 Open DID Issuer Database Table Definition
 ==
 
-- Date: 2025-03-31
-- Version: v1.0.1 (dev)
+- Date: 2026-06-19
+- Version: v2.0.0
 
 Contents
 --
@@ -341,3 +341,24 @@ Access the [ERD](https://www.erdcloud.com/d/d6N5gSY5C4TATnxNR) site to view the 
 |      | created_by             | VARCHAR   | 50     | NO       | N/A     | creator login ID or system user   |
 |      | created_at             | TIMESTAMP |        | NO       | NOW()   | created date                      |
 |      | updated_at             | TIMESTAMP |        | YES      | N/A     | updated date                      |
+
+## 3. OID4VCI and Server Configuration Tables
+
+The current schema contains the following additional tables. Unless noted otherwise, entities extending `BaseEntity` also contain `created_at` and `updated_at` timestamps.
+
+| Table | Main Columns | Purpose |
+|-------|--------------|---------|
+| `credential_config` | `id`, `format`, `identifiers`, `metadata_json`, `enabled` | Credential configuration registry |
+| `server_config` | `id`, `config_key`, `config_value`, `description` | Runtime server settings |
+| `admin_password_policy` | `id`, `min_length`, `require_uppercase`, `require_number`, `require_special`, `password_expiry_days` | Admin password policy |
+| `t_oid4vc_client` | `id`, `client_id`, `client_secret`, `redirect_uri`, `client_name` | OAuth/OID4VC client registration |
+| `t_oid4vc_cnonce` | `id`, `cnonce`, `expires_at` | Proof nonce storage |
+| `t_oid4vc_deferred_transaction` | `id`, `transaction_id`, `request_json`, `expires_at` | Deferred issuance request storage |
+| `t_oid4vc_notification` | `id`, `notification_id`, `transaction_id`, `event_type`, `event_description` | Wallet notification storage |
+| `t_oid4vc_offer` | `id`, `offer_id`, `pre_auth_code`, `user_pin`, `status`, `expires_at` | Credential Offer state |
+| `t_oid4vc_pre_auth_code` | `id`, `code`, `user_id`, `user_pin`, `scopes`, `consumed`, `expires_at` | Pre-authorized code state |
+| `t_oid4vc_session_map` | `id`, `session_key`, `session_type`, `user_id`, `expires_at` | Issuance session mapping |
+| `t_oid4vc_user_claims` | `id`, `user_id`, `credential_type`, `claims` | User claims JSON storage |
+| `t_oid4vc_user_credential_map` | `id`, `user_id`, `config_id`, `credential_id` | User-to-credential mapping |
+
+Column constraints are defined by Liquibase changesets and the corresponding JPA entities. Liquibase is the authoritative source for deployed database schemas.

@@ -163,6 +163,15 @@ public class BaseWalletUtil {
             throw new OpenDidException(ErrorCode.SIGNATURE_GENERATION_FAILED);
         }
     }
+
+    public static byte[] generateCompactSignatureByHash(WalletManagerInterface walletManager, String keyId, byte[] hash) {
+        try {
+            return walletManager.generateCompactSignatureFromHash(keyId, hash);
+        } catch (WalletException e) {
+            log.error("Failed to generate compact signature: {}", e.getMessage());
+            throw new OpenDidException(ErrorCode.SIGNATURE_GENERATION_FAILED);
+        }
+    }
     /**
      * Creates a file-based wallet if not exists. Ignores if already exists.
      */

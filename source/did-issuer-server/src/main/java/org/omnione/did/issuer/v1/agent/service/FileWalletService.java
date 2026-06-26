@@ -92,6 +92,31 @@ public class FileWalletService {
         }
     }
 
+    /**
+     * Generates a compact signature for the given key and binary data.
+     *
+     * @param keyId Key ID.
+     * @param hash Hash data.
+     * @return Generated signature.
+     * @throws OpenDidException if signature generation fails.
+     */
+    public byte[] generateCompactSignatureByHash(String keyId, byte[] hash) {
+        try {
+            if (!walletManager.isConnect()) {
+                log.info("Wallet manager disConnect. Connecting to wallet...");
+                connectToWallet();
+            }
+
+            byte[] signature = BaseWalletUtil.generateCompactSignatureByHash(walletManager, keyId, hash);
+            log.info("Compact signature generated for keyId: {}", keyId);
+            return signature;
+        } catch (OpenDidException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new OpenDidException(ErrorCode.SIGNATURE_GENERATION_FAILED);
+        }
+    }
+
     public String getPublicKeyByKid(String kid) {
         try {
             if (!walletManager.isConnect()) {

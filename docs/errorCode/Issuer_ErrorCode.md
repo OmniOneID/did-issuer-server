@@ -18,7 +18,7 @@ puppeteer:
 Issuer Server Error
 ==
 
-- Date: 2025-05-30
+- Date: 2026-06-19
 - Version: v2.0.0
 
 | Version          | Date       | Changes                  |
@@ -276,3 +276,24 @@ public class ErrorResponse {
 | Error Code   | Error Message                                                       | Description | Action Required                            |
 |--------------|---------------------------------------------------------------------|-------------|--------------------------------------------|
 | SSRVISS90000 | Failed to process response: received unknown data from the Tas.     | -           | Check TAS response format and content.     |
+
+### 1.12. Supplemental Codes
+
+The following codes are present in the current `ErrorCode` enum and were missing from earlier revisions.
+
+| Error Code | Error Message |
+|------------|---------------|
+| `SSRVISS000100` | Failed to find DID Document. |
+| `SSRVISS00301` | The User dose not exist. |
+| `SSRVISS00428` | Public key not found. |
+| `SSRVISS00502` | User Query API mode is not currently supported. |
+| `SSRVISS00607` | Failed to register VC schema on the blockchain. |
+| `SSRVISS00811` | Failed to find Issuer DID Document: o registration request has been made. |
+| `SSRVISS00833` | Failed to register VC Schema. (Blockchain or List Provider) |
+| `SSRVISS00834` | Cannot update namespace: it is referenced by a VC schema. |
+| `SSRVISS01000` | Failed to find VC Meta. |
+| `SSRVISS01101` | Server configuration key not found. |
+| `SSRVISS000900` | Failed to process response: received unknown data from the Tas. |
+| `SSRVISS15505` | Failed to communicate with KYC server: unknown error occurred. |
+
+> The enum currently assigns `SSRVISS10407` to three constants. Consumers must treat the wire code as non-unique until distinct values are assigned. The earlier `SSRVISS90000` entry is retained for compatibility, but the current enum produces `SSRVISS000900`.

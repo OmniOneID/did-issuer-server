@@ -18,7 +18,7 @@ puppeteer:
 Issuer Server 에러
 ==
 
-- Date: 2025-05-30
+- Date: 2026-06-19
 - Version: v2.0.0
 
 | 버전   | 일자       | 변경 내용       |
@@ -274,3 +274,24 @@ public class ErrorResponse {
 | 에러 코드    | 에러 메시지                                                     | 설명 | 필요 조치 사항                         |
 | ------------ | --------------------------------------------------------------- | ---- | -------------------------------------- |
 | SSRVISS90000 | Failed to process response: received unknown data from the Tas. | -    | Check TAS response format and content. |
+
+### 1.12. 추가 오류 코드
+
+다음 코드는 현재 `ErrorCode` Enum에 존재하지만 이전 문서에 누락돼 있었다.
+
+| 오류 코드 | 오류 메시지 |
+|-----------|-------------|
+| `SSRVISS000100` | Failed to find DID Document. |
+| `SSRVISS00301` | The User dose not exist. |
+| `SSRVISS00428` | Public key not found. |
+| `SSRVISS00502` | User Query API mode is not currently supported. |
+| `SSRVISS00607` | Failed to register VC schema on the blockchain. |
+| `SSRVISS00811` | Failed to find Issuer DID Document: o registration request has been made. |
+| `SSRVISS00833` | Failed to register VC Schema. (Blockchain or List Provider) |
+| `SSRVISS00834` | Cannot update namespace: it is referenced by a VC schema. |
+| `SSRVISS01000` | Failed to find VC Meta. |
+| `SSRVISS01101` | Server configuration key not found. |
+| `SSRVISS000900` | Failed to process response: received unknown data from the Tas. |
+| `SSRVISS15505` | Failed to communicate with KYC server: unknown error occurred. |
+
+> 현재 Enum은 세 개의 상수에 `SSRVISS10407`을 중복 할당한다. 고유한 값이 부여되기 전까지 Wire Code를 고유 식별자로 사용할 수 없다. 기존 `SSRVISS90000` 항목은 호환성을 위해 유지하지만 현재 Enum이 생성하는 코드는 `SSRVISS000900`이다.

@@ -24,6 +24,8 @@ did-issuer-admin/frontend
 │   │   ├── auth
 │   │   ├── issued-vcs
 │   │   ├── issuer
+│   │   ├── oid4vci-management
+│   │   ├── server-configuration
 │   │   ├── users
 │   ├── utils
 │   ├── App.tsx
@@ -54,6 +56,8 @@ Below is a description of each folder and file in the `src` directory:
 | ┖ auth                 | Pages related to login and authentication         |
 | ┖ issued-vcs           | Pages related to the VC Management menu           |
 | ┖ issuer               | Pages related to the Issuer Management menu       |
+| ┖ oid4vci-management   | Issuer Metadata, Credential Config, and property pages |
+| ┖ server-configuration | Runtime server configuration page                |
 | ┖ users                | Pages related to the User Management menu         |
 | src/utils              | Utility functions and helpers                     |
 | src/App.tsx            | Root component of the React application           |
@@ -66,7 +70,7 @@ Below is a description of each folder and file in the `src` directory:
 Libraries used in this project are third-party open-source dependencies managed via the [package.json](./package.json) file. Major frameworks and tools include:
 
 - `React` (v19)
-- `Vite` (v5)
+- `Vite` (v6)
 - `TypeScript`
 - `MUI` (Material UI v6, including X-DataGrid and X-Charts)
 - `Styled-Components`
@@ -79,7 +83,7 @@ For a detailed list of third-party libraries and their licenses, please refer to
 ## Documentation
 
 Refer to the following documents for more detailed information:
-- [OpenDID Issuer Admin Console Operation Guide](../../../docs/admin/OpenDID_IssuerAdmin_Operation_Guide_ko.md)
+- [OpenDID Issuer Admin Console Operation Guide](../../../docs/admin/OpenDID_IssuerAdmin_Operation_Guide.md)
 
 ## Contributing
 

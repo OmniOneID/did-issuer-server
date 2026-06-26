@@ -18,8 +18,8 @@ puppeteer:
 Issuer API
 ==
 
-- Date: 2024-08-19
-- Version: v1.0.0
+- Date: 2026-06-19
+- Version: v2.0.0
   
 Table of Contents
 --
@@ -1124,6 +1124,42 @@ Content-Type: application/json;charset=utf-8
    "txId":"6886a9d2-0b77-4ff5-bfdd-f6fb87c95fa0"
 }
 ```
+
+## 7. OID4VCI APIs
+
+The Issuer Server also exposes OpenID for Verifiable Credential Issuance endpoints. The credential endpoints are registered at startup from Issuer Metadata; therefore their paths can be changed without recompiling the server.
+
+### 7.1. Protocol endpoints
+
+| Method | Path | Description | Authentication |
+|--------|------|-------------|----------------|
+| GET | `/.well-known/openid-credential-issuer` | Public Issuer Metadata | No |
+| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | Credential Offer referenced by URI | No |
+| POST | `{credential_endpoint}` | Issue a credential | Bearer access token |
+| POST | `{nonce_endpoint}` | Create a proof nonce | No |
+| POST | `{deferred_credential_endpoint}` | Retrieve a deferred credential | Bearer access token |
+| POST | `{notification_endpoint}` | Receive a Wallet notification | Configured security policy |
+
+The values in braces are read from the active Issuer Metadata. An endpoint whose metadata value is blank is not registered. `credential_configuration_id` and `credential_identifier` must not be sent together in a credential request.
+
+### 7.2. Issuance support endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/oid4vci/test` | Test issuance page |
+| POST | `/qr-data/generate-qr` | Generate an embedded Offer or `credential_offer_uri` QR payload |
+| GET | `/get-credential-identifier?credentialConfigurationId={id}` | List credential identifiers for a configuration |
+| GET | `/credential-offer/test` | Generate a test pre-authorized Offer |
+| GET | `/claims-page` | User Claims editor page |
+| POST | `/api/claims/save` | Save claims by user and credential type |
+| GET | `/api/claims/list` | List saved claims |
+| GET | `/api/claims/get` | Retrieve saved claims |
+| GET | `/metadata-page` | Issuer Metadata editor page |
+| GET | `/api/metadata/files` | List metadata JSON files |
+| GET | `/api/metadata/file` | Read a metadata JSON file |
+| POST | `/api/metadata/save` | Save a metadata JSON file |
+
+The editor and test endpoints are operational utilities. Production deployments should restrict them with the server security configuration.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 

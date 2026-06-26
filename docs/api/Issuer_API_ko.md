@@ -18,8 +18,8 @@ puppeteer:
 Issuer API
 ==
 
-- 일자: 2024-08-19
-- 버전: v1.0.0
+- 일자: 2026-06-19
+- 버전: v2.0.0
   
 목차
 --
@@ -1126,6 +1126,42 @@ Content-Type: application/json;charset=utf-8
     "txId":"6886a9d2-0b77-4ff5-bfdd-f6fb87c95fa0"
 }
 ```
+
+## 7. OID4VCI API
+
+Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한다. Credential Endpoint는 시작 시 Issuer Metadata를 기준으로 동적 등록되므로 서버를 다시 컴파일하지 않고 경로를 변경할 수 있다.
+
+### 7.1. Protocol Endpoint
+
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| GET | `/.well-known/openid-credential-issuer` | 공개 Issuer Metadata | 없음 |
+| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | URI로 참조되는 Credential Offer | 없음 |
+| POST | `{credential_endpoint}` | Credential 발급 | Bearer Access Token |
+| POST | `{nonce_endpoint}` | Proof Nonce 생성 | 없음 |
+| POST | `{deferred_credential_endpoint}` | 지연 Credential 조회 | Bearer Access Token |
+| POST | `{notification_endpoint}` | Wallet Notification 수신 | 설정된 보안 정책 |
+
+중괄호로 표시한 값은 활성 Issuer Metadata에서 읽는다. Metadata 값이 비어 있는 Endpoint는 등록되지 않는다. Credential 요청에서 `credential_configuration_id`와 `credential_identifier`를 동시에 전송하면 안 된다.
+
+### 7.2. 발급 지원 Endpoint
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/oid4vci/test` | 테스트 발급 화면 |
+| POST | `/qr-data/generate-qr` | Embedded Offer 또는 `credential_offer_uri` QR Payload 생성 |
+| GET | `/get-credential-identifier?credentialConfigurationId={id}` | Configuration의 Credential Identifier 목록 조회 |
+| GET | `/credential-offer/test` | 테스트용 Pre-Authorized Offer 생성 |
+| GET | `/claims-page` | User Claims 편집 화면 |
+| POST | `/api/claims/save` | 사용자와 Credential Type별 Claims 저장 |
+| GET | `/api/claims/list` | 저장된 Claims 목록 조회 |
+| GET | `/api/claims/get` | 저장된 Claims 조회 |
+| GET | `/metadata-page` | Issuer Metadata 편집 화면 |
+| GET | `/api/metadata/files` | Metadata JSON 파일 목록 조회 |
+| GET | `/api/metadata/file` | Metadata JSON 파일 조회 |
+| POST | `/api/metadata/save` | Metadata JSON 파일 저장 |
+
+편집 및 테스트 Endpoint는 운영 지원 기능이다. 운영 환경에서는 Server Security 설정으로 접근을 제한해야 한다.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 

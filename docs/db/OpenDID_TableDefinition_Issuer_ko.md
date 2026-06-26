@@ -2,7 +2,7 @@
 Open DID Issuer Database Table Definition
 ==
 
-- Date: 2025-05-30
+- Date: 2026-06-19
 - Version: v2.0.0
 
 Contents
@@ -341,3 +341,24 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |      | created_by             | VARCHAR   | 50     | NO       | N/A     | creator login ID or system user   |
 |      | created_at             | TIMESTAMP |        | NO       | NOW()   | created date                      |
 |      | updated_at             | TIMESTAMP |        | YES      | N/A     | updated date                      |
+
+## 3. OID4VCI 및 Server 설정 테이블
+
+현재 Schema에는 다음 테이블도 포함된다. 별도 표기가 없는 `BaseEntity` 상속 Entity에는 `created_at`, `updated_at` Timestamp가 포함된다.
+
+| 테이블 | 주요 Column | 용도 |
+|--------|-------------|------|
+| `credential_config` | `id`, `format`, `identifiers`, `metadata_json`, `enabled` | Credential Configuration Registry |
+| `server_config` | `id`, `config_key`, `config_value`, `description` | Runtime Server 설정 |
+| `admin_password_policy` | `id`, `min_length`, `require_uppercase`, `require_number`, `require_special`, `password_expiry_days` | Admin Password 정책 |
+| `t_oid4vc_client` | `id`, `client_id`, `client_secret`, `redirect_uri`, `client_name` | OAuth/OID4VC Client 등록 |
+| `t_oid4vc_cnonce` | `id`, `cnonce`, `expires_at` | Proof Nonce 저장 |
+| `t_oid4vc_deferred_transaction` | `id`, `transaction_id`, `request_json`, `expires_at` | 지연 발급 요청 저장 |
+| `t_oid4vc_notification` | `id`, `notification_id`, `transaction_id`, `event_type`, `event_description` | Wallet Notification 저장 |
+| `t_oid4vc_offer` | `id`, `offer_id`, `pre_auth_code`, `user_pin`, `status`, `expires_at` | Credential Offer 상태 |
+| `t_oid4vc_pre_auth_code` | `id`, `code`, `user_id`, `user_pin`, `scopes`, `consumed`, `expires_at` | Pre-Authorized Code 상태 |
+| `t_oid4vc_session_map` | `id`, `session_key`, `session_type`, `user_id`, `expires_at` | 발급 Session Mapping |
+| `t_oid4vc_user_claims` | `id`, `user_id`, `credential_type`, `claims` | User Claims JSON 저장 |
+| `t_oid4vc_user_credential_map` | `id`, `user_id`, `config_id`, `credential_id` | 사용자-Credential Mapping |
+
+Column 제약조건은 Liquibase Changeset과 JPA Entity에 정의된다. 실제 배포 Database Schema의 기준은 Liquibase이다.
