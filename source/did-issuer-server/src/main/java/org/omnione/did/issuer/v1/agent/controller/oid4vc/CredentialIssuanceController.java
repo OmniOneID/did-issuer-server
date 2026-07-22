@@ -68,7 +68,7 @@ public class CredentialIssuanceController {
         }
     }
 
-    public CredentialResponse getDeferredCredential(@RequestBody DeferredCredentialRequest request,
+    public Object getDeferredCredential(@RequestBody DeferredCredentialRequest request,
             @AuthenticationPrincipal Jwt accessToken) throws OID4VCIException {
         return credentialService.getDeferredCredential(request.getTransactionId(), accessToken);
     }

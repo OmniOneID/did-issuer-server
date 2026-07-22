@@ -54,6 +54,7 @@ public class UserManagementService {
      * @param request DTO containing user creation data
      */
     public void createUserInfo(CreateUserInfoReqDto request) {
+        String did = normalizeBlankToNull(request.getDid());
         String pii = JsonUtil.serializeAndSort(SerializeUserInfoData.builder()
                 .firstname(request.getFirstName())
                 .lastname(request.getLastName())
@@ -61,12 +62,13 @@ public class UserManagementService {
         byte[] hashedDataBytes = BaseDigestUtil.generateHash(pii.getBytes(StandardCharsets.UTF_8));
         String hexStringPii = HexUtil.toHexString(hashedDataBytes);
 
-        userQueryService.save(User.builder()
-                .did(request.getDid())
-                .pii(hexStringPii) // TODO: Trans PII
-                .data(request.getUserInfo())
-                .vcSchemaId(request.getVcSchemaId())
-                .build());
+        User user = findExistingUserOrNew(did, hexStringPii, request.getVcSchemaId());
+        user.setDid(did);
+        user.setPii(hexStringPii); // TODO: Trans PII
+        user.setData(request.getUserInfo());
+        user.setVcSchemaId(request.getVcSchemaId());
+
+        userQueryService.save(user);
     }
 
     public void createUserInfo(CreateUserInfoFromDemoReqDto request) {
@@ -74,25 +76,33 @@ public class UserManagementService {
             throw new OpenDidException(ErrorCode.HOLDER_INVALID);
         }
 
+        String did = normalizeBlankToNull(request.getDid());
         String vcSchemaInput = request.getVcSchemaId();
         String vcSchemaName = extractNameOrUseAsIs(vcSchemaInput);
 
         Long vcSchemaId = vcSchemaQueryService.findByVcSchemaId(vcSchemaName).getId();
-        User existedUser;
+        User existedUser = findExistingUserOrNew(did, request.getPii(), vcSchemaId);
 
-        if (request.getDid() != null && !request.getDid().isEmpty()) {
-            existedUser = userQueryService.findByDidAndVcSchemaIdOrNew(request.getDid(), vcSchemaId);
-        } else {
-            existedUser = userQueryService.findByPiiAndVcSchemaIdOrNew(request.getPii(), vcSchemaId);
+        existedUser.setDid(did);
+        existedUser.setPii(request.getPii());
+        existedUser.setData(request.getUserInfo());
+        existedUser.setVcSchemaId(vcSchemaId);
+
+        userQueryService.save(existedUser);
+    }
+
+    private User findExistingUserOrNew(String did, String pii, Long vcSchemaId) {
+        if (did != null && !did.isEmpty()) {
+            User user = userQueryService.findByDidAndVcSchemaIdOrNew(did, vcSchemaId);
+            if (user.getId() != null || pii == null || pii.isEmpty()) {
+                return user;
+            }
         }
+        return userQueryService.findByPiiAndVcSchemaIdOrNew(pii, vcSchemaId);
+    }
 
-        userQueryService.save(User.builder()
-                .id(existedUser.getId())
-                .did(request.getDid())
-                .pii(request.getPii())
-                .data(request.getUserInfo())
-                .vcSchemaId(vcSchemaId)
-                .build());
+    private String normalizeBlankToNull(String value) {
+        return value == null || value.isBlank() ? null : value;
     }
 
     private String extractNameOrUseAsIs(String input) {
@@ -132,9 +142,8 @@ public class UserManagementService {
      */
     public void updateUserInfo(CreateUserInfoReqDto request) {
         User user = userQueryService.findById(request.getId());
-        user.setDid(request.getDid());
+        user.setDid(normalizeBlankToNull(request.getDid()));
         user.setPii(request.getPii());
         user.setData(request.getUserInfo());
     }
 }
-
