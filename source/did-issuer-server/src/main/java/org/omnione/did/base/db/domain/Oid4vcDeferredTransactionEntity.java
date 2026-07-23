@@ -20,7 +20,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -39,5 +39,5 @@ public class Oid4vcDeferredTransactionEntity extends BaseEntity {
     private String requestJson;
 
     @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 }

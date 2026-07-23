@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.db.domain;
+package org.omnione.did.issuer.v1.agent.service.oid4vc.status;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIException;
+import org.omnione.did.oid4vc.oid4vci.spi.CredentialStatusAllocation;
 
 import java.time.Instant;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "t_oid4vc_cnonce")
-public class Oid4vcCnonceEntity extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "cnonce", unique = true, nullable = false, length = 128)
-    private String cnonce;
-
-    @Column(name = "expires_at")
-    private Instant expiresAt;
+public interface StatusIndexAllocator {
+    CredentialStatusAllocation allocate(
+            String userId,
+            String configId,
+            String format,
+            Instant expiresAt) throws OID4VCIException;
 }

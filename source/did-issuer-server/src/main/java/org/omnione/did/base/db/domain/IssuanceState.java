@@ -16,25 +16,8 @@
 
 package org.omnione.did.base.db.domain;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.Instant;
-
-@Getter
-@Setter
-@Entity
-@Table(name = "t_oid4vc_cnonce")
-public class Oid4vcCnonceEntity extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "cnonce", unique = true, nullable = false, length = 128)
-    private String cnonce;
-
-    @Column(name = "expires_at")
-    private Instant expiresAt;
+public enum IssuanceState {
+    ALLOCATED,
+    ISSUED,
+    FAILED
 }

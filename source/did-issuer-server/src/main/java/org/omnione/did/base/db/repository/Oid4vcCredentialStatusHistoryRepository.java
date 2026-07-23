@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package org.omnione.did.base.db.domain;
+package org.omnione.did.base.db.repository;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import org.omnione.did.base.db.domain.Oid4vcCredentialStatusHistoryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.util.List;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "t_oid4vc_cnonce")
-public class Oid4vcCnonceEntity extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "cnonce", unique = true, nullable = false, length = 128)
-    private String cnonce;
-
-    @Column(name = "expires_at")
-    private Instant expiresAt;
+@Repository
+public interface Oid4vcCredentialStatusHistoryRepository
+        extends JpaRepository<Oid4vcCredentialStatusHistoryEntity, Long> {
+    List<Oid4vcCredentialStatusHistoryEntity> findAllByCredentialIssuanceIdOrderByChangedAtAsc(
+            Long credentialIssuanceId);
 }

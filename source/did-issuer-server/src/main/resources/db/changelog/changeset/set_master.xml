@@ -48,5 +48,6 @@
 
   <include file="./set.7/create-table_credential_config.xml" relativeToChangelogFile="true"/>
   <include file="./set.7/create-table_oid4vc.xml" relativeToChangelogFile="true"/>
+  <include file="./set.7/create-table_status-list.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -24,7 +24,7 @@ import org.omnione.did.oid4vc.oid4vci.service.store.CredentialOfferStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class JpaCredentialOfferStore implements CredentialOfferStore {
         entity.setStatus("CREATED");
         // expiresIn is seconds.
         if (response.getExpiresIn() > 0) {
-            entity.setExpiresAt(LocalDateTime.now().plusSeconds(response.getExpiresIn()));
+            entity.setExpiresAt(Instant.now().plusSeconds(response.getExpiresIn()));
         }
 
         repository.save(entity);
@@ -56,7 +56,7 @@ public class JpaCredentialOfferStore implements CredentialOfferStore {
                     response.setPreAuthorizedCode(entity.getPreAuthCode());
                     response.setUserPin(entity.getUserPin());
                     if (entity.getExpiresAt() != null) {
-                        long diff = java.time.Duration.between(LocalDateTime.now(), entity.getExpiresAt()).getSeconds();
+                        long diff = java.time.Duration.between(Instant.now(), entity.getExpiresAt()).getSeconds();
                         response.setExpiresIn(diff > 0 ? (int) diff : 0);
                     }
 

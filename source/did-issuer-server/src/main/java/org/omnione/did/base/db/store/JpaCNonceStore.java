@@ -23,7 +23,7 @@ import org.omnione.did.oid4vc.oid4vci.service.store.CNonceStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class JpaCNonceStore implements CNonceStore {
     public void save(String cNonce) {
         Oid4vcCnonceEntity entity = new Oid4vcCnonceEntity();
         entity.setCnonce(cNonce);
-        entity.setExpiresAt(LocalDateTime.now().plusMinutes(10)); 
+        entity.setExpiresAt(Instant.now().plusSeconds(10 * 60));
         
         repository.save(entity);
     }

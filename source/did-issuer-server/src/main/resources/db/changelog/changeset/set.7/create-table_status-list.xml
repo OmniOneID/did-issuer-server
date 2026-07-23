@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="create-t_oid4vc_status_list" author="oid4vc-team">
+        <createTable tableName="t_oid4vc_status_list">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="list_uri" type="VARCHAR(512)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="format" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bits" type="INTEGER" defaultValueNumeric="2">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capacity" type="BIGINT" defaultValueNumeric="100000">
+                <constraints nullable="false"/>
+            </column>
+            <column name="next_index" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="signing_key_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ttl_seconds" type="BIGINT" defaultValueNumeric="300">
+                <constraints nullable="false"/>
+            </column>
+            <column name="list_version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex tableName="t_oid4vc_status_list" indexName="idx_oid4vc_status_list_format_enabled">
+            <column name="format"/>
+            <column name="enabled"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-t_oid4vc_credential_issuance" author="oid4vc-team">
+        <createTable tableName="t_oid4vc_credential_issuance">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issuance_id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="config_id" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="format" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_list_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_list_index" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_status" type="VARCHAR(20)" defaultValue="VALID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issuance_state" type="VARCHAR(20)" defaultValue="ALLOCATED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issued_at" type="TIMESTAMP"/>
+            <column name="expires_at" type="TIMESTAMP"/>
+            <column name="status_changed_at" type="TIMESTAMP"/>
+            <column name="token_hash" type="VARCHAR(64)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="t_oid4vc_credential_issuance"
+                columnNames="issuance_id"
+                constraintName="uk_oid4vc_issuance_id"/>
+        <addUniqueConstraint
+                tableName="t_oid4vc_credential_issuance"
+                columnNames="status_list_id, status_list_index"
+                constraintName="uk_oid4vc_status_list_index"/>
+        <addForeignKeyConstraint
+                baseTableName="t_oid4vc_credential_issuance"
+                baseColumnNames="status_list_id"
+                referencedTableName="t_oid4vc_status_list"
+                referencedColumnNames="id"
+                constraintName="fk_oid4vc_issuance_status_list"/>
+        <createIndex tableName="t_oid4vc_credential_issuance" indexName="idx_oid4vc_issuance_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="t_oid4vc_credential_issuance" indexName="idx_oid4vc_issuance_expiry">
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-t_oid4vc_credential_status_history" author="oid4vc-team">
+        <createTable tableName="t_oid4vc_credential_status_history">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="credential_issuance_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="previous_status" type="VARCHAR(20)"/>
+            <column name="new_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason" type="VARCHAR(512)"/>
+            <column name="changed_by" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_oid4vc_credential_status_history"
+                baseColumnNames="credential_issuance_id"
+                referencedTableName="t_oid4vc_credential_issuance"
+                referencedColumnNames="id"
+                constraintName="fk_oid4vc_status_history_issuance"/>
+        <createIndex
+                tableName="t_oid4vc_credential_status_history"
+                indexName="idx_oid4vc_status_history_issuance_changed">
+            <column name="credential_issuance_id"/>
+            <column name="changed_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add-issuance-failure-details" author="oid4vc-team">
+        <addColumn tableName="t_oid4vc_credential_issuance">
+            <column name="failed_at" type="TIMESTAMP"/>
+            <column name="failure_code" type="VARCHAR(64)"/>
+            <column name="failure_message" type="VARCHAR(512)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="create-t_oid4vc_status_list_bootstrap_lock" author="oid4vc-team">
+        <createTable tableName="t_oid4vc_status_list_bootstrap_lock">
+            <column name="lock_id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+        <insert tableName="t_oid4vc_status_list_bootstrap_lock">
+            <column name="lock_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

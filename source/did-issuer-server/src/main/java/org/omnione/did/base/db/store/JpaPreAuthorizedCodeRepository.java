@@ -27,7 +27,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,7 +48,7 @@ public class JpaPreAuthorizedCodeRepository implements PreAuthorizedCodeReposito
         entity.setConsumed(preAuthorizedCode.isConsumed());
         
         if (preAuthorizedCode.getExpiresAt() != null) {
-            entity.setExpiresAt(preAuthorizedCode.getExpiresAt().atZone(ZoneId.systemDefault()).toLocalDateTime());
+            entity.setExpiresAt(preAuthorizedCode.getExpiresAt());
         }
 
         if (preAuthorizedCode.getScopes() != null) {
@@ -82,7 +81,7 @@ public class JpaPreAuthorizedCodeRepository implements PreAuthorizedCodeReposito
         return new PreAuthorizedCode(
                 entity.getCode(),
                 entity.getUserId(),
-                entity.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant(),
+                entity.getExpiresAt(),
                 scopes,
                 entity.getUserPin(),
                 null 

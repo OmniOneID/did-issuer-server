@@ -27,7 +27,7 @@ import org.omnione.did.oid4vc.oid4vci.service.store.SessionStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -66,7 +66,7 @@ public class JpaSessionStore implements SessionStore {
         Oid4vcDeferredTransactionEntity entity = new Oid4vcDeferredTransactionEntity();
         entity.setTransactionId(transactionId);
         entity.setRequestJson(gson.toJson(request));
-        entity.setExpiresAt(LocalDateTime.now().plusHours(1)); // Default 1 hour expiry
+        entity.setExpiresAt(Instant.now().plusSeconds(60 * 60)); // Default 1 hour expiry
 
         deferredTransactionRepository.save(entity);
     }
@@ -87,7 +87,7 @@ public class JpaSessionStore implements SessionStore {
         entity.setSessionKey(key);
         entity.setSessionType(type);
         entity.setUserId(userId);
-        entity.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // Default 10 min
+        entity.setExpiresAt(Instant.now().plusSeconds(10 * 60)); // Default 10 min
 
         sessionMapRepository.save(entity);
     }
