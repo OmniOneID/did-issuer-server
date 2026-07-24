@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enter credential information</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f4f6f9; color: #182230; font-family: system-ui, sans-serif; }
+        main { width: min(100%, 560px); margin: 0 auto; padding: 24px 18px 40px; }
+        .card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px #1b263b12; }
+        h1 { margin: 0 0 8px; font-size: 24px; }
+        .subtitle { color: #667085; margin: 0 0 22px; }
+        .meta { display: grid; grid-template-columns: 110px 1fr; gap: 8px; padding: 14px; background: #f8fafc; border-radius: 10px; margin-bottom: 22px; }
+        .meta dt { color: #667085; } .meta dd { margin: 0; overflow-wrap: anywhere; }
+        label { display: block; font-weight: 650; margin: 16px 0 7px; }
+        .required { color: #d92d20; }
+        input { width: 100%; min-height: 46px; border: 1px solid #d0d5dd; border-radius: 9px; padding: 10px 12px; font: inherit; }
+        input:focus { outline: 2px solid #84adff; border-color: #3974db; }
+        .error { color: #b42318; background: #fef3f2; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
+        button { min-height: 48px; border: 0; border-radius: 9px; font: inherit; font-weight: 700; cursor: pointer; }
+        .ok { color: #fff; background: #175cd3; } .cancel { color: #344054; background: #eaecf0; }
+    </style>
+</head>
+<body>
+<main>
+    <section class="card">
+        <h1 th:text="${page.credentialName}">Credential</h1>
+        <p class="subtitle">Enter the information to include in your credential.</p>
+        <dl class="meta">
+            <dt>Issuer</dt><dd th:text="${page.issuerName}">Credential Issuer</dd>
+            <dt>Format</dt><dd th:text="${page.credentialFormat}">format</dd>
+        </dl>
+        <p class="error" th:if="${page.error != null}" th:text="${page.error}">Validation error</p>
+
+        <form th:action="@{/oid4vci/issuance/sessions/{token}/confirm(token=${page.sessionToken})}" method="post">
+            <input type="hidden" name="_form_token" th:value="${page.csrfToken}">
+            <div th:each="claim : ${page.claims}">
+                <label th:for="${'claim-' + claim.name}">
+                    <span th:text="${claim.label}">Claim</span>
+                    <span class="required" th:if="${claim.mandatory}">*</span>
+                </label>
+                <input th:id="${'claim-' + claim.name}"
+                       th:name="${'claim.' + claim.name}"
+                       th:value="${claim.value}"
+                       th:type="${claim.valueType == 'full-date' || claim.valueType == 'date' ? 'date' : 'text'}"
+                       th:required="${claim.mandatory}"
+                       maxlength="2048"
+                       autocomplete="off">
+            </div>
+            <div class="actions">
+                <button class="ok" type="submit">OK</button>
+                <button class="cancel" type="submit"
+                        th:formaction="@{/oid4vci/issuance/sessions/{token}/cancel(token=${page.sessionToken})}"
+                        formnovalidate>Cancel</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

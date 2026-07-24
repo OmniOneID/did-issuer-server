@@ -61,6 +61,22 @@ export interface Oid4vcProperty {
     clients: Clients;
 }
 
+export interface ListProviderRegistration {
+    registrationId: number | null;
+    status: string | null;
+    listProviderUrl: string;
+    credentialIssuer: string;
+    credentialIssuerMetadataUri: string;
+    userInitiationUri: string;
+    requestedAt: string | null;
+}
+
+export interface ListProviderRegistrationRequest {
+    credentialIssuer: string;
+    credentialIssuerMetadataUri: string;
+    userInitiationUri: string;
+}
+
 export const DEFAULT_METADATA: IssuerMetadata = {
     credentialIssuer: '',
     authorizationServer: [''],
@@ -123,3 +139,9 @@ export const updateCredentialConfigs = (configs: Record<string, SdkCredentialCon
 
 export const getProperties = () => getData(API_BASE_URL, 'properties');
 export const updateProperties = (properties: Oid4vcProperty) => postData(API_BASE_URL, 'properties', properties);
+
+export const getListProviderRegistration = () =>
+    getData(API_BASE_URL, 'list-provider-registration');
+
+export const requestListProviderRegistration = (request: ListProviderRegistrationRequest) =>
+    postData(API_BASE_URL, 'list-provider-registration', request);

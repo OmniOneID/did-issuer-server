@@ -8,6 +8,9 @@ import org.omnione.did.base.datamodel.data.oid4vci.Oid4vcProperty;
 import org.omnione.did.base.datamodel.data.oid4vci.SdkCredentialConfig;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
 import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
+import org.omnione.did.issuer.v1.admin.dto.oid4vci.ListProviderRegistrationDto;
+import org.omnione.did.issuer.v1.admin.dto.oid4vci.ListProviderRegistrationReqDto;
+import org.omnione.did.issuer.v1.admin.service.Oid4vciListProviderRegistrationService;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,6 +22,7 @@ import java.util.Map;
 @RequestMapping(value = UrlConstant.Admin.V1 + UrlConstant.Admin.OID4VCI)
 public class Oid4vciConfigController {
     private final Oid4vciConfigService oid4vciConfigService;
+    private final Oid4vciListProviderRegistrationService listProviderRegistrationService;
 
     @GetMapping("/metadata")
     public IssuerMetadata getMetadata() throws IOException {
@@ -52,5 +56,16 @@ public class Oid4vciConfigController {
     public EmptyResDto updateProperties(@RequestBody Oid4vcProperty properties) throws IOException {
         oid4vciConfigService.updateProperties(properties);
         return new EmptyResDto();
+    }
+
+    @GetMapping("/list-provider-registration")
+    public ListProviderRegistrationDto getListProviderRegistration() {
+        return listProviderRegistrationService.getRegistration();
+    }
+
+    @PostMapping("/list-provider-registration")
+    public ListProviderRegistrationDto registerWithListProvider(
+            @RequestBody ListProviderRegistrationReqDto request) {
+        return listProviderRegistrationService.register(request);
     }
 }

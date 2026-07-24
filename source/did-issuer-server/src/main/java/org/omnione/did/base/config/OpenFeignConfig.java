@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableFeignClients(basePackages = {
         "org.omnione.did.issuer.v1.agent.api",
+        "org.omnione.did.issuer.v1.admin.api",
         "org.omnione.did.oid4vc.oid4vci.api"
 })
 public class OpenFeignConfig {

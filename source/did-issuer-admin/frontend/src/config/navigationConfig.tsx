@@ -21,6 +21,7 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
             { segment: 'metadata', title: 'Issuer Metadata', },
             { segment: 'credential-config', title: 'Credential Config', },
             { segment: 'property', title: 'Property', },
+            { segment: 'list-provider-registration', title: 'List Provider Registration', },
         ],
     },
     {

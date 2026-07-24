@@ -7,6 +7,9 @@ issuer:
   data-dir: .
   metadata-file-path: metadata/issuer_meta.json
   wallet-file-name: ${wallet.file-path}
+  status-list:
+    bootstrap:
+      ttl-seconds: 1800
 
 
 oid4vc:
@@ -19,6 +22,8 @@ oid4vc:
 clients:
   auth-server:
     url: ${issuer.base-url}
+
+
 
 # Access Token을 발급한 인가서버의 JWKS 엔드포인트 주소
 spring:

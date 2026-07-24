@@ -192,4 +192,38 @@
         <addUniqueConstraint tableName="t_oid4vc_user_claims" columnNames="user_id, credential_type" constraintName="uk_user_claims_id_type"/>
     </changeSet>
 
+    <changeSet id="create-t_oid4vc_webview_issuance_session" author="oid4vc-team">
+        <createTable tableName="t_oid4vc_webview_issuance_session">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="session_token" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="csrf_token" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_configuration_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_type" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(24)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_offer_uri" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
     </databaseChangeLog>

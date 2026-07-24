@@ -182,6 +182,8 @@ public enum ErrorCode {
     CREDENTIAL_DEFINITION_SCHEMA_ALREADY_IN_USE("00832", "ZKP Credential schema is already in use.", 400),
     VC_SCHEMA_REGISTRATION_FAILED("00833", "Failed to register VC Schema. (Blockchain or List Provider)", 500),
     NAMESPACE_UPDATE_CONFLICT("00834", "Cannot update namespace: it is referenced by a VC schema.", 400),
+    OID4VCI_LIST_REGISTRATION_FAILED("00835", "Failed to request OID4VCI Issuer registration from List Provider.", 502),
+    OID4VCI_LIST_ISSUER_ALREADY_REGISTERED("00836", "OID4VCI Credential Issuer is already registered with List Provider.", 409),
 
 
     // 1000~ 10999 = Ledger Service Server

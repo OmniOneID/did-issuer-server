@@ -47,6 +47,7 @@ import Oid4vciMetadataPage from './pages/oid4vci-management/Oid4vciMetadataPage'
 import CredentialConfigPage from './pages/oid4vci-management/CredentialConfigPage';
 import CredentialConfigDetailPage from './pages/oid4vci-management/CredentialConfigDetailPage';
 import Oid4vciPropertyPage from './pages/oid4vci-management/Oid4vciPropertyPage';
+import ListProviderRegistrationPage from './pages/oid4vci-management/ListProviderRegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
           {
             path: '/oid4vci-management/property',
             Component: Oid4vciPropertyPage,
+          },
+          {
+            path: '/oid4vci-management/list-provider-registration',
+            Component: ListProviderRegistrationPage,
           },
           // Namespace
           {
