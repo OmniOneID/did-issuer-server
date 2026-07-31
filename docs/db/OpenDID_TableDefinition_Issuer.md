@@ -360,5 +360,10 @@ The current schema contains the following additional tables. Unless noted otherw
 | `t_oid4vc_session_map` | `id`, `session_key`, `session_type`, `user_id`, `expires_at` | Issuance session mapping |
 | `t_oid4vc_user_claims` | `id`, `user_id`, `credential_type`, `claims` | User claims JSON storage |
 | `t_oid4vc_user_credential_map` | `id`, `user_id`, `config_id`, `credential_id` | User-to-credential mapping |
+| `t_oid4vc_webview_issuance_session` | `id`, `session_token`, `csrf_token`, `user_id`, `credential_configuration_id`, `credential_type`, `status`, `expires_at`, `credential_offer_uri` | User-initiated webview issuance session |
+| `t_oid4vc_status_list` | `id`, `list_uri`, `format`, `bits`, `capacity`, `next_index`, `signing_key_id`, `ttl_seconds`, `list_version`, `enabled` | Status List metadata and index allocation state |
+| `t_oid4vc_credential_issuance` | `id`, `issuance_id`, `user_id`, `config_id`, `format`, `status_list_id`, `status_list_index`, `credential_status`, `issuance_state` | Issued credential lifecycle and allocated Status List index |
+| `t_oid4vc_credential_status_history` | `id`, `credential_issuance_id`, `previous_status`, `new_status`, `reason`, `changed_by`, `changed_at` | Credential status change audit history |
+| `t_oid4vc_status_list_bootstrap_lock` | `lock_id` | Singleton lock used when bootstrapping Status Lists |
 
 Column constraints are defined by Liquibase changesets and the corresponding JPA entities. Liquibase is the authoritative source for deployed database schemas.

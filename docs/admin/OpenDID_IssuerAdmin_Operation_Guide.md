@@ -97,6 +97,13 @@ Table of Contents
   - [3.7. Admin Management](#37-admin-management)
     - [3.7.1 Admin List Inquiry](#371-admin-list-inquiry)
     - [3.7.2. Admin Registration](#372-admin-registration)
+  - [3.8. OID4VCI Management](#38-oid4vci-management)
+    - [3.8.1. Issuer Metadata](#381-issuer-metadata)
+    - [3.8.2. Credential Config](#382-credential-config)
+    - [3.8.3. Property](#383-property)
+    - [3.8.4. List Provider Registration](#384-list-provider-registration)
+  - [3.9. Server Configuration](#39-server-configuration)
+  - [3.10. Password Policy Settings](#310-password-policy-settings)
 
 ---
 
@@ -1057,22 +1064,106 @@ Clicking the **REGISTER** button on the `Admin Management` screen moves to the r
 
 ## 3.8. OID4VCI Management
 
-This menu is available after the Issuer is activated and contains three configuration screens.
+This menu is available after the Issuer is activated and contains four configuration screens.
 
 | Menu | Route | Managed Data |
 |------|-------|--------------|
 | Issuer Metadata | `/oid4vci-management/metadata` | Issuer URL, Authorization Servers, Offer/Credential/Nonce/Deferred/Notification endpoints, and encryption capabilities |
 | Credential Config | `/oid4vci-management/credential-config` | Configuration ID, format, credential identifiers, and metadata JSON |
 | Property | `/oid4vci-management/property` | Issuer URL and client settings for common, Android, iOS, Android OpenID, and iOS OpenID platforms |
+| List Provider Registration | `/oid4vci-management/list-provider-registration` | List Provider URL and registration state used for user-initiated webview issuance |
 
-Saving these screens calls `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, or `/properties`. Endpoint changes affect the public metadata and dynamically registered issuance endpoints, so validate all URLs before saving.
+### 3.8.1. Issuer Metadata
+
+This screen displays and updates the endpoints published in the OID4VCI Issuer Metadata and the supported encryption settings for credential requests and responses.
+
+<img src="./images/3-8-1.oid4vci-metadata.png" width="700"/>
+
+| Number | Item | Description |
+| ------ | ---- | ----------- |
+| 1 | **EDIT Button** | Switches the Issuer Metadata screen to edit mode. |
+| 2 | **Credential Request Encryption** | Configures the supported content-encryption methods and whether encryption is required for credential requests. |
+| 3 | **Credential Response Encryption** | Configures the supported key- and content-encryption methods and whether encryption is required for credential responses. |
+| 4 | **Credential Issuer (Main Endpoint)** | Base URL of the OID4VCI Credential Issuer. |
+| 5 | **Authorization Servers** | List of OIDC Authorization Server URLs that handle authentication and authorization. |
+| 6 | **Credential Offer Endpoint** | Endpoint that provides credential offers. |
+| 7 | **Credential Endpoint** | Endpoint that processes credential issuance requests. |
+| 8 | **Nonce Endpoint** | Endpoint used to request a new nonce. |
+| 9 | **Deferred Credential Endpoint** | Endpoint that processes deferred credential requests. |
+| 10 | **Notification Endpoint** | Endpoint that processes credential issuance result notifications. |
+
+> **Note:** In edit mode, click **SAVE** to save the changes or **CANCEL** to discard them.
+
+---
+
+### 3.8.2. Credential Config
+
+This screen displays, registers, updates, and deletes credential configurations available for OID4VCI issuance.
+
+<img src="./images/3-8-2.oid4vci-credential-config.png" width="700"/>
+
+| Number | Item | Description |
+| ------ | ---- | ----------- |
+| 1 | **REGISTER Button** | Opens the screen for registering a new credential configuration. |
+| 2 | **EDIT Button** | Opens the detail screen for the selected credential configuration so that it can be updated. |
+| 3 | **DELETE Button** | Deletes the selected credential configuration. |
+| 4 | **ID** | Unique identifier of the credential configuration. Click the ID to open its detail screen. |
+| 5 | **Format** | Format of the credential to be issued. (e.g., `mso-mdoc-did`, `dc+sd-jwt-did`) |
+| 6 | **Identifiers** | List of identifiers used by the SDK to identify the credential. |
+| 7 | **Registered Date** | Date and time when the credential configuration was registered. |
+| 8 | **Modified Date** | Date and time when the credential configuration was last modified. |
+
+> **Note:** On the registration and detail screens, enter the **Configuration ID**, **Format**, **Identifiers (SDK)**, and **Metadata JSON**, and then save the configuration.
+
+---
+
+### 3.8.3. Property
+
+This screen manages the common and platform-specific client settings used during OID4VCI issuance.
+
+<img src="./images/3-8-3.oid4vci-property.png" width="700"/>
+
+| Number | Item | Description |
+| ------ | ---- | ----------- |
+| 1 | **SAVE Button** | Saves the property settings entered on the screen. |
+| 2 | **Main Client Settings** | Configures the common Client ID, Client Secret, Redirect URL, Redirect URIs, and scopes. |
+| 3 | **Android Client** | Configures the Client ID, Redirect URIs, and scopes used by the Android client. |
+| 4 | **iOS Client** | Configures the Client ID, Redirect URIs, and scopes used by the iOS client. |
+| 5 | **Android OpenID Client** | Configures the Client ID, Redirect URIs, and scopes used by the Android OpenID client. |
+| 6 | **iOS OpenID Client** | Configures the Client ID, Redirect URIs, and scopes used by the iOS OpenID client. |
+
+---
+
+### 3.8.4. List Provider Registration
+
+This screen registers Issuer information with the List Provider for user-initiated webview issuance and displays the registration status.
+
+<img src="./images/3-8-4.list-provider-registration.png" width="700"/>
+
+| Number | Item | Description |
+| ------ | ---- | ----------- |
+| 1 | **Registration Status** | Displays the registration request status returned by the List Provider. |
+| 2 | **List Provider URL** | URL of the List Provider to which the registration request is sent. |
+| 3 | **Credential Issuer** | Credential Issuer identifier loaded from the Issuer DID information. |
+| 4 | **Credential Issuer Metadata URI** | URI from which the List Provider can retrieve the Issuer Metadata. |
+| 5 | **User Initiation URI** | URI used by a user to start the webview issuance flow. |
+| 6 | **REFRESH Button** | Reloads the List Provider registration information and current status. |
+| 7 | **REQUEST REGISTRATION Button** | Requests registration with the List Provider using the entered information. |
+
+Saving these screens calls `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, `/properties`, or `/list-provider-registration`. Endpoint changes affect the public metadata and dynamically registered issuance endpoints, so validate all URLs before saving.
+
+---
 
 ## 3.9. Server Configuration
 
 The `/server-configuration` screen manages runtime key/value settings exposed by `/issuer/admin/v1/server-configs`. Select an existing key to inspect it and use the update action to persist a changed value. Unknown keys are rejected.
 
+<img src="./images/3-9-1.server-configuration.png" width="700"/>
+
 ## 3.10. Password Policy Settings
 
 The `Admin Management > Password Policy Settings` screen manages minimum length, uppercase, numeric, special-character, and password-expiration requirements. Updated rules apply to subsequent password validation and changes.
+
+<img src="./images/3-10-1.password-policy-settings.png" width="700"/>
 
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V2.0.0.0/OepnDID_Installation_Guide-V2.0.0.0_ko.md

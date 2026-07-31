@@ -360,5 +360,10 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 | `t_oid4vc_session_map` | `id`, `session_key`, `session_type`, `user_id`, `expires_at` | 발급 Session Mapping |
 | `t_oid4vc_user_claims` | `id`, `user_id`, `credential_type`, `claims` | User Claims JSON 저장 |
 | `t_oid4vc_user_credential_map` | `id`, `user_id`, `config_id`, `credential_id` | 사용자-Credential Mapping |
+| `t_oid4vc_webview_issuance_session` | `id`, `session_token`, `csrf_token`, `user_id`, `credential_configuration_id`, `credential_type`, `status`, `expires_at`, `credential_offer_uri` | 사용자 주도 Webview 발급 Session |
+| `t_oid4vc_status_list` | `id`, `list_uri`, `format`, `bits`, `capacity`, `next_index`, `signing_key_id`, `ttl_seconds`, `list_version`, `enabled` | Status List Metadata 및 Index 할당 상태 |
+| `t_oid4vc_credential_issuance` | `id`, `issuance_id`, `user_id`, `config_id`, `format`, `status_list_id`, `status_list_index`, `credential_status`, `issuance_state` | 발급 Credential Lifecycle 및 할당된 Status List Index |
+| `t_oid4vc_credential_status_history` | `id`, `credential_issuance_id`, `previous_status`, `new_status`, `reason`, `changed_by`, `changed_at` | Credential 상태 변경 감사 이력 |
+| `t_oid4vc_status_list_bootstrap_lock` | `lock_id` | Status List 초기화 시 사용하는 단일 Lock |
 
 Column 제약조건은 Liquibase Changeset과 JPA Entity에 정의된다. 실제 배포 Database Schema의 기준은 Liquibase이다.

@@ -48,6 +48,11 @@ Issuer API
     - [6.4. Get Certificate Vc](#64-get-certificate-vc)
     - [6.5. Get Vc Schema](#65-get-vc-schema)
     - [6.6. Update Vc Status](#66-update-vc-status)
+  - [7. OID4VCI API](#7-oid4vci-api)
+    - [7.1. Protocol Endpoint](#71-protocol-endpoint)
+    - [7.2. 발급 지원 Endpoint](#72-발급-지원-endpoint)
+    - [7.3. 사용자 주도 Webview 발급](#73-사용자-주도-webview-발급)
+    - [7.4. Status List 데모 Endpoint](#74-status-list-데모-endpoint)
 
 ## 1. 개요
 
@@ -91,6 +96,11 @@ Issuer API
 | 4   | `issue-vc`               | /api/v1/issue-vc               | VC 발급                 | Y       |
 | 5   | `complete-vc`            | /api/v1/complete-vc            | VC 발급 완료            | Y       |
 | 6   | `issue-vc-result`        | /api/v1/issue-vc/result        | VC 발급 결과 확인       | N       |
+
+Issue Profile의 `issuanceMode`가 `PROXY`이면 일반 Profile 생성 및 발급
+Endpoint 대신 `/api/v1/generate-issue-profile/proxy`와
+`/api/v1/issue-vc/proxy`를 사용한다. Proxy Mode에서는 설정된 KYC 조회
+API를 통해 Credential Subject 데이터를 조회한다.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 
@@ -1127,44 +1137,6 @@ Content-Type: application/json;charset=utf-8
 }
 ```
 
-## 7. OID4VCI API
-
-Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한다. Credential Endpoint는 시작 시 Issuer Metadata를 기준으로 동적 등록되므로 서버를 다시 컴파일하지 않고 경로를 변경할 수 있다.
-
-### 7.1. Protocol Endpoint
-
-| Method | Path | 설명 | 인증 |
-|--------|------|------|------|
-| GET | `/.well-known/openid-credential-issuer` | 공개 Issuer Metadata | 없음 |
-| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | URI로 참조되는 Credential Offer | 없음 |
-| POST | `{credential_endpoint}` | Credential 발급 | Bearer Access Token |
-| POST | `{nonce_endpoint}` | Proof Nonce 생성 | 없음 |
-| POST | `{deferred_credential_endpoint}` | 지연 Credential 조회 | Bearer Access Token |
-| POST | `{notification_endpoint}` | Wallet Notification 수신 | 설정된 보안 정책 |
-
-중괄호로 표시한 값은 활성 Issuer Metadata에서 읽는다. Metadata 값이 비어 있는 Endpoint는 등록되지 않는다. Credential 요청에서 `credential_configuration_id`와 `credential_identifier`를 동시에 전송하면 안 된다.
-
-### 7.2. 발급 지원 Endpoint
-
-| Method | Path | 설명 |
-|--------|------|------|
-| GET | `/oid4vci/test` | 테스트 발급 화면 |
-| POST | `/qr-data/generate-qr` | Embedded Offer 또는 `credential_offer_uri` QR Payload 생성 |
-| GET | `/get-credential-identifier?credentialConfigurationId={id}` | Configuration의 Credential Identifier 목록 조회 |
-| GET | `/credential-offer/test` | 테스트용 Pre-Authorized Offer 생성 |
-| GET | `/claims-page` | User Claims 편집 화면 |
-| POST | `/api/claims/save` | 사용자와 Credential Type별 Claims 저장 |
-| GET | `/api/claims/list` | 저장된 Claims 목록 조회 |
-| GET | `/api/claims/get` | 저장된 Claims 조회 |
-| GET | `/metadata-page` | Issuer Metadata 편집 화면 |
-| GET | `/api/metadata/files` | Metadata JSON 파일 목록 조회 |
-| GET | `/api/metadata/file` | Metadata JSON 파일 조회 |
-| POST | `/api/metadata/save` | Metadata JSON 파일 저장 |
-
-편집 및 테스트 Endpoint는 운영 지원 기능이다. 운영 환경에서는 Server Security 설정으로 접근을 제한해야 한다.
-
-<div style="page-break-after: always; margin-top: 40px;"></div>
-
 ### 5.3. Complete Revoke
 
 VC를 발급 완료한다.
@@ -1980,3 +1952,68 @@ Content-Type: application/json;charset=utf-8
     "txId":"6886a9d2-0b77-4ff5-bfdd-f6fb87c95fa0"
 }
 ```
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+## 7. OID4VCI API
+
+Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한다. Credential Endpoint는 시작 시 Issuer Metadata를 기준으로 동적 등록되므로 서버를 다시 컴파일하지 않고 경로를 변경할 수 있다.
+
+### 7.1. Protocol Endpoint
+
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| GET | `/.well-known/openid-credential-issuer` | 공개 Issuer Metadata | 없음 |
+| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | URI로 참조되는 Credential Offer | 없음 |
+| POST | `{credential_endpoint}` | Credential 발급 | Bearer Access Token |
+| POST | `{nonce_endpoint}` | Proof Nonce 생성 | 없음 |
+| POST | `{deferred_credential_endpoint}` | 지연 Credential 조회 | Bearer Access Token |
+| POST | `{notification_endpoint}` | Wallet Notification 수신 | 설정된 보안 정책 |
+
+중괄호로 표시한 값은 활성 Issuer Metadata에서 읽는다. Metadata 값이 비어 있는 Endpoint는 등록되지 않는다. Credential 요청에서 `credential_configuration_id`와 `credential_identifier`를 동시에 전송하면 안 된다.
+
+### 7.2. 발급 지원 Endpoint
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/oid4vci/test` | 테스트 발급 화면 |
+| POST | `/qr-data/generate-qr` | Embedded Offer 또는 `credential_offer_uri` QR Payload 생성 |
+| GET | `/get-credential-identifier?credentialConfigurationId={id}` | Configuration의 Credential Identifier 목록 조회 |
+| GET | `/credential-offer/test` | 테스트용 Pre-Authorized Offer 생성 |
+| GET | `/claims-page` | User Claims 편집 화면 |
+| POST | `/api/claims/save` | 사용자와 Credential Type별 Claims 저장 |
+| GET | `/api/claims/list` | 저장된 Claims 목록 조회 |
+| GET | `/api/claims/get` | 저장된 Claims 조회 |
+| GET | `/metadata-page` | Issuer Metadata 편집 화면 |
+| GET | `/api/metadata/files` | Metadata JSON 파일 목록 조회 |
+| GET | `/api/metadata/file` | Metadata JSON 파일 조회 |
+| POST | `/api/metadata/save` | Metadata JSON 파일 저장 |
+
+편집 및 테스트 Endpoint는 운영 지원 기능이다. 운영 환경에서는 Server Security 설정으로 접근을 제한해야 한다.
+
+### 7.3. 사용자 주도 Webview 발급
+
+`OID4VCI Management > List Provider Registration`에 등록을 저장한 뒤 List
+Provider가 사용자를 발급 시작 Endpoint로 이동시킬 수 있다.
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/oid4vci/issuance/start` | 발급 Session을 생성하고 Claims Webview를 연다 |
+| GET | `/oid4vci/issuance/sessions/{sessionToken}` | 활성 Webview 발급 Session을 조회한다 |
+| POST | `/oid4vci/issuance/sessions/{sessionToken}/confirm` | Claims를 확정하고 Credential Offer를 생성한다 |
+| POST | `/oid4vci/issuance/sessions/{sessionToken}/cancel` | 활성 발급 Session을 취소한다 |
+
+Session Token은 유효 기간이 짧은 값이다. Confirm 및 Cancel 요청에는 해당
+Session의 `_form_token` CSRF 값도 필요하다.
+
+### 7.4. Status List 데모 Endpoint
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/oid4vci/status-list-demo` | Status List 데모 화면을 연다 |
+| GET | `/oid4vci/status-list-demo/api/credentials` | 발급 Credential과 현재 상태를 조회한다 |
+| PATCH | `/oid4vci/status-list-demo/api/credentials/{issuanceId}/status` | Credential 상태를 변경하고 이력을 기록한다 |
+
+이 Endpoint들은 OID4VCI Protocol Endpoint가 아닌 데모·운영 지원
+기능이며 `local` Profile에서는 비활성화된다. 그 외 운영 Profile에서도
+접근을 제한하거나 비활성화해야 한다.

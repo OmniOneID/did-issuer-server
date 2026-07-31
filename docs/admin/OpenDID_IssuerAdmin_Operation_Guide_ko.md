@@ -97,6 +97,13 @@ OpenDID IssuerAdmin Operation Guide
   - [3.7. Admin Management](#37-admin-management)
     - [3.7.1 Admin 목록 조회](#371-admin-목록-조회)
     - [3.7.2. Admin 등록](#372-admin-등록)
+  - [3.8. OID4VCI Management](#38-oid4vci-management)
+    - [3.8.1. Issuer Metadata](#381-issuer-metadata)
+    - [3.8.2. Credential Config](#382-credential-config)
+    - [3.8.3. Property](#383-property)
+    - [3.8.4. List Provider Registration](#384-list-provider-registration)
+  - [3.9. Server Configuration](#39-server-configuration)
+  - [3.10. Password Policy Settings](#310-password-policy-settings)
 
 ---
 
@@ -1067,22 +1074,106 @@ ROOT 계정은 `Admin Management` 메뉴에서 모든 기능을 수행할 수 �
 
 ## 3.8. OID4VCI Management
 
-Issuer가 활성화되면 표시되며 세 개의 설정 화면으로 구성된다.
+Issuer가 활성화되면 표시되며 네 개의 설정 화면으로 구성됩니다.
 
 | 메뉴 | Route | 관리 데이터 |
 |------|-------|-------------|
 | Issuer Metadata | `/oid4vci-management/metadata` | Issuer URL, Authorization Server, Offer/Credential/Nonce/Deferred/Notification Endpoint 및 암호화 기능 |
 | Credential Config | `/oid4vci-management/credential-config` | Configuration ID, Format, Credential Identifier 및 Metadata JSON |
 | Property | `/oid4vci-management/property` | 공통, Android, iOS, Android OpenID, iOS OpenID Platform의 Issuer URL 및 Client 설정 |
+| List Provider Registration | `/oid4vci-management/list-provider-registration` | 사용자 주도 Webview 발급에 사용하는 List Provider URL 및 등록 상태 |
 
-저장 시 `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, `/properties` API를 호출한다. Endpoint 변경은 공개 Metadata와 동적으로 등록되는 발급 Endpoint에 영향을 주므로 저장 전 URL을 검증해야 한다.
+### 3.8.1. Issuer Metadata
+
+OID4VCI 발급자 Metadata에 공개되는 Endpoint와 Credential 요청·응답 암호화 지원 정보를 조회하고 수정하는 화면입니다.
+
+<img src="./images/3-8-1.oid4vci-metadata.png" width="700"/>
+
+| 번호 | 항목 | 설명 |
+| ---- | ---- | ---- |
+| 1 | **EDIT 버튼** | Issuer Metadata를 수정할 수 있는 편집 모드로 전환합니다. |
+| 2 | **Credential Request Encryption** | Credential 요청에 사용할 콘텐츠 암호화 방식과 암호화 필수 여부를 설정합니다. |
+| 3 | **Credential Response Encryption** | Credential 응답에 사용할 키 암호화 및 콘텐츠 암호화 방식과 암호화 필수 여부를 설정합니다. |
+| 4 | **Credential Issuer (Main Endpoint)** | OID4VCI Credential Issuer의 기준 URL입니다. |
+| 5 | **Authorization Servers** | 인증 및 인가를 처리하는 OIDC Authorization Server URL 목록입니다. |
+| 6 | **Credential Offer Endpoint** | Credential Offer를 제공하는 Endpoint입니다. |
+| 7 | **Credential Endpoint** | Credential 발급 요청을 처리하는 Endpoint입니다. |
+| 8 | **Nonce Endpoint** | 새로운 Nonce를 요청하는 Endpoint입니다. |
+| 9 | **Deferred Credential Endpoint** | 지연 발급 Credential 요청을 처리하는 Endpoint입니다. |
+| 10 | **Notification Endpoint** | Credential 발급 결과 알림을 처리하는 Endpoint입니다. |
+
+> **참고:** 편집 모드에서는 **SAVE** 버튼으로 변경 사항을 저장하거나 **CANCEL** 버튼으로 수정을 취소할 수 있습니다.
+
+---
+
+### 3.8.2. Credential Config
+
+OID4VCI로 발급할 Credential의 Configuration을 조회하고 등록·수정·삭제하는 화면입니다.
+
+<img src="./images/3-8-2.oid4vci-credential-config.png" width="700"/>
+
+| 번호 | 항목 | 설명 |
+| ---- | ---- | ---- |
+| 1 | **REGISTER 버튼** | 새로운 Credential Configuration을 등록하는 화면으로 이동합니다. |
+| 2 | **EDIT 버튼** | 선택한 Credential Configuration의 상세 화면으로 이동하여 설정을 수정합니다. |
+| 3 | **DELETE 버튼** | 선택한 Credential Configuration을 삭제합니다. |
+| 4 | **ID** | Credential Configuration의 고유 식별자입니다. ID를 클릭하면 상세 화면으로 이동합니다. |
+| 5 | **Format** | 발급할 Credential 형식입니다. (예: `mso-mdoc-did`, `dc+sd-jwt-did`) |
+| 6 | **Identifiers** | SDK에서 Credential을 식별할 때 사용하는 Identifier 목록입니다. |
+| 7 | **Registered Date** | Credential Configuration이 등록된 일시입니다. |
+| 8 | **Modified Date** | Credential Configuration이 마지막으로 수정된 일시입니다. |
+
+> **참고:** 등록 및 상세 화면에서는 **Configuration ID**, **Format**, **Identifiers (SDK)**, **Metadata JSON**을 입력한 후 저장합니다.
+
+---
+
+### 3.8.3. Property
+
+OID4VCI 발급 과정에서 사용하는 공통 및 Platform별 Client 설정을 관리하는 화면입니다.
+
+<img src="./images/3-8-3.oid4vci-property.png" width="700"/>
+
+| 번호 | 항목 | 설명 |
+| ---- | ---- | ---- |
+| 1 | **SAVE 버튼** | 화면에 입력한 Property 설정을 저장합니다. |
+| 2 | **Main Client Settings** | 공통으로 사용하는 Client ID, Client Secret, Redirect URL, Redirect URI 및 Scope를 설정합니다. |
+| 3 | **Android Client** | Android 환경에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
+| 4 | **iOS Client** | iOS 환경에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
+| 5 | **Android OpenID Client** | Android OpenID 방식에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
+| 6 | **iOS OpenID Client** | iOS OpenID 방식에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
+
+---
+
+### 3.8.4. List Provider Registration
+
+사용자 주도 Webview 발급에 사용할 Issuer 정보를 List Provider에 등록하고 처리 상태를 확인하는 화면입니다.
+
+<img src="./images/3-8-4.list-provider-registration.png" width="700"/>
+
+| 번호 | 항목 | 설명 |
+| ---- | ---- | ---- |
+| 1 | **Registration Status** | List Provider가 반환한 등록 요청의 처리 상태를 표시합니다. |
+| 2 | **List Provider URL** | 등록 요청을 전송할 List Provider의 URL입니다. |
+| 3 | **Credential Issuer** | Issuer DID 정보에서 불러온 Credential Issuer 식별자입니다. |
+| 4 | **Credential Issuer Metadata URI** | List Provider가 Issuer Metadata를 조회할 수 있는 URI입니다. |
+| 5 | **User Initiation URI** | 사용자가 Webview 발급 절차를 시작할 때 사용하는 URI입니다. |
+| 6 | **REFRESH 버튼** | List Provider 등록 정보와 현재 상태를 다시 조회합니다. |
+| 7 | **REQUEST REGISTRATION 버튼** | 입력한 정보를 사용하여 List Provider에 등록을 요청합니다. |
+
+저장 시 `/issuer/admin/v1/oid4vci/metadata`, `/credential-configs`, `/properties`, `/list-provider-registration` API를 호출합니다. Endpoint 변경은 공개 Metadata와 동적으로 등록되는 발급 Endpoint에 영향을 주므로 저장 전 URL을 검증해야 합니다.
+
+---
 
 ## 3.9. Server Configuration
 
 `/server-configuration` 화면은 `/issuer/admin/v1/server-configs`가 제공하는 Runtime Key/Value 설정을 관리한다. 기존 Key를 선택해 조회하고 Update 기능으로 값을 저장한다. 등록되지 않은 Key는 거부된다.
 
+<img src="./images/3-9-1.server-configuration.png" width="700"/>
+
 ## 3.10. Password Policy Settings
 
 `Admin Management > Password Policy Settings`에서 최소 길이, 대문자, 숫자, 특수문자 및 Password 만료 기간을 설정한다. 변경된 규칙은 이후 Password 검증과 변경에 적용된다.
+
+<img src="./images/3-10-1.password-policy-settings.png" width="700"/>
 
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/unrelease-V2.0.0.0/OepnDID_Installation_Guide-V2.0.0.0_ko.md

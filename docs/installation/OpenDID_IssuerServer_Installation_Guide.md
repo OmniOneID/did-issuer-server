@@ -75,6 +75,8 @@ Table of Contents
     - [5.6.1. Blockchain Integration Configuration](#561-blockchain-integration-configuration)
       - [EVM Network Configuration](#evm-network-configuration)
       - [EVM Contract Configuration](#evm-contract-configuration)
+  - [5.7. application-issuer.yml](#57-application-issueryml)
+  - [5.8. application-lss.yml](#58-application-lssyml)
 - [6. Profile Configuration and Usage](#6-profile-configuration-and-usage)
   - [6.1. Profile Overview (`sample`, `dev`)](#61-profile-overview-sample-dev)
     - [6.1.1. `sample` Profile](#611-sample-profile)
@@ -589,9 +591,19 @@ The `issuer` profile configures OID4VCI issuance and is included in the `dev` pr
 | `issuer.metadata-file-path` | Issuer Metadata JSON path relative to `data-dir` |
 | `issuer.wallet-file-name` | Issuer wallet path derived from `wallet.file-path` |
 | `issuer.sdk.config-source` | Credential configuration source; current development configuration uses `DB` |
+| `issuer.status-list.bootstrap.ttl-seconds` | Cache lifetime in seconds for Status List bootstrap data |
 | `oid4vc.auth.issuer-url` | Authorization Server issuer URL |
 | `clients.auth-server.url` | Authorization Server base URL |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens |
+
+## 5.8. application-lss.yml
+
+The `lss` profile configures the List Service Server used by user-initiated
+OID4VCI issuance.
+
+| Property | Description |
+|----------|-------------|
+| `lss.url` | Base URL of the List Service Server (default local port: `8098`) |
 
 # 6. Profile Configuration and Usage
 

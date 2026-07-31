@@ -75,6 +75,8 @@ Open DID Issuer Server Installation Guide
     - [5.6.1. 블록체인 연동 설정](#561-블록체인-연동-설정)
       - [EVM Network Configuration](#evm-network-configuration)
       - [EVM Contract Configuration](#evm-contract-configuration)
+  - [5.7. application-issuer.yml](#57-application-issueryml)
+  - [5.8. application-lss.yml](#58-application-lssyml)
 - [6. 프로파일 설정 및 사용](#6-프로파일-설정-및-사용)
   - [6.1. 프로파일 개요 (`sample`, `dev`)](#61-프로파일-개요-sample-dev)
     - [6.1.1. `sample` 프로파일](#611-sample-프로파일)
@@ -592,9 +594,19 @@ logging:
 | `issuer.metadata-file-path` | `data-dir` 기준 Issuer Metadata JSON 경로 |
 | `issuer.wallet-file-name` | `wallet.file-path`에서 가져오는 Issuer Wallet 경로 |
 | `issuer.sdk.config-source` | Credential Configuration 원본. 현재 개발 설정은 `DB` 사용 |
+| `issuer.status-list.bootstrap.ttl-seconds` | Status List 초기화 Data의 Cache 유지 시간(초) |
 | `oid4vc.auth.issuer-url` | Authorization Server Issuer URL |
 | `clients.auth-server.url` | Authorization Server Base URL |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint |
+
+## 5.8. application-lss.yml
+
+`lss` Profile은 사용자 주도 OID4VCI 발급에서 사용하는 List Service
+Server를 설정합니다.
+
+| Property | 설명 |
+|----------|------|
+| `lss.url` | List Service Server Base URL (Local 기본 Port: `8098`) |
 
 # 6. 프로파일 설정 및 사용
 

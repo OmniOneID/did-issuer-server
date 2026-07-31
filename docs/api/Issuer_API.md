@@ -48,6 +48,11 @@ Table of Contents
     - [6.4. Get Certificate Vc](#64-get-certificate-vc)
     - [6.5. Get Vc Schema](#65-get-vc-schema)
     - [6.6. Update Vc Status](#66-update-vc-status)
+  - [7. OID4VCI APIs](#7-oid4vci-apis)
+    - [7.1. Protocol endpoints](#71-protocol-endpoints)
+    - [7.2. Issuance support endpoints](#72-issuance-support-endpoints)
+    - [7.3. User-initiated webview issuance](#73-user-initiated-webview-issuance)
+    - [7.4. Status List demonstration endpoints](#74-status-list-demonstration-endpoints)
 
 ## 1. Overview
 
@@ -91,6 +96,11 @@ This document defines the APIs provided by the Issuer Service.
 | 4   | `issue-vc`               | /api/v1/issue-vc               | VC Issuance | Y       |
 | 5   | `complete-vc`            | /api/v1/complete-vc            | VC Issuance Completion | Y       |
 | 6   | `issue-vc-result`        | /api/v1/issue-vc/result        | VC Issuance Result Verification | N       |
+
+For an Issue Profile whose `issuanceMode` is `PROXY`, use
+`/api/v1/generate-issue-profile/proxy` and `/api/v1/issue-vc/proxy` instead of
+the standard profile-generation and issuance endpoints. Proxy mode retrieves
+subject data through the configured KYC query API.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 
@@ -1125,42 +1135,6 @@ Content-Type: application/json;charset=utf-8
 }
 ```
 
-## 7. OID4VCI APIs
-
-The Issuer Server also exposes OpenID for Verifiable Credential Issuance endpoints. The credential endpoints are registered at startup from Issuer Metadata; therefore their paths can be changed without recompiling the server.
-
-### 7.1. Protocol endpoints
-
-| Method | Path | Description | Authentication |
-|--------|------|-------------|----------------|
-| GET | `/.well-known/openid-credential-issuer` | Public Issuer Metadata | No |
-| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | Credential Offer referenced by URI | No |
-| POST | `{credential_endpoint}` | Issue a credential | Bearer access token |
-| POST | `{nonce_endpoint}` | Create a proof nonce | No |
-| POST | `{deferred_credential_endpoint}` | Retrieve a deferred credential | Bearer access token |
-| POST | `{notification_endpoint}` | Receive a Wallet notification | Configured security policy |
-
-The values in braces are read from the active Issuer Metadata. An endpoint whose metadata value is blank is not registered. `credential_configuration_id` and `credential_identifier` must not be sent together in a credential request.
-
-### 7.2. Issuance support endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/oid4vci/test` | Test issuance page |
-| POST | `/qr-data/generate-qr` | Generate an embedded Offer or `credential_offer_uri` QR payload |
-| GET | `/get-credential-identifier?credentialConfigurationId={id}` | List credential identifiers for a configuration |
-| GET | `/credential-offer/test` | Generate a test pre-authorized Offer |
-| GET | `/claims-page` | User Claims editor page |
-| POST | `/api/claims/save` | Save claims by user and credential type |
-| GET | `/api/claims/list` | List saved claims |
-| GET | `/api/claims/get` | Retrieve saved claims |
-| GET | `/metadata-page` | Issuer Metadata editor page |
-| GET | `/api/metadata/files` | List metadata JSON files |
-| GET | `/api/metadata/file` | Read a metadata JSON file |
-| POST | `/api/metadata/save` | Save a metadata JSON file |
-
-The editor and test endpoints are operational utilities. Production deployments should restrict them with the server security configuration.
-
 <div style="page-break-after: always; margin-top: 40px;"></div>
 
 ### 5.3. Complete Revoke
@@ -1978,3 +1952,68 @@ Content-Type: application/json;charset=utf-8
    "txId":"6886a9d2-0b77-4ff5-bfdd-f6fb87c95fa0"
 }
 ```
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+## 7. OID4VCI APIs
+
+The Issuer Server also exposes OpenID for Verifiable Credential Issuance endpoints. The credential endpoints are registered at startup from Issuer Metadata; therefore their paths can be changed without recompiling the server.
+
+### 7.1. Protocol endpoints
+
+| Method | Path | Description | Authentication |
+|--------|------|-------------|----------------|
+| GET | `/.well-known/openid-credential-issuer` | Public Issuer Metadata | No |
+| GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | Credential Offer referenced by URI | No |
+| POST | `{credential_endpoint}` | Issue a credential | Bearer access token |
+| POST | `{nonce_endpoint}` | Create a proof nonce | No |
+| POST | `{deferred_credential_endpoint}` | Retrieve a deferred credential | Bearer access token |
+| POST | `{notification_endpoint}` | Receive a Wallet notification | Configured security policy |
+
+The values in braces are read from the active Issuer Metadata. An endpoint whose metadata value is blank is not registered. `credential_configuration_id` and `credential_identifier` must not be sent together in a credential request.
+
+### 7.2. Issuance support endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/oid4vci/test` | Test issuance page |
+| POST | `/qr-data/generate-qr` | Generate an embedded Offer or `credential_offer_uri` QR payload |
+| GET | `/get-credential-identifier?credentialConfigurationId={id}` | List credential identifiers for a configuration |
+| GET | `/credential-offer/test` | Generate a test pre-authorized Offer |
+| GET | `/claims-page` | User Claims editor page |
+| POST | `/api/claims/save` | Save claims by user and credential type |
+| GET | `/api/claims/list` | List saved claims |
+| GET | `/api/claims/get` | Retrieve saved claims |
+| GET | `/metadata-page` | Issuer Metadata editor page |
+| GET | `/api/metadata/files` | List metadata JSON files |
+| GET | `/api/metadata/file` | Read a metadata JSON file |
+| POST | `/api/metadata/save` | Save a metadata JSON file |
+
+The editor and test endpoints are operational utilities. Production deployments should restrict them with the server security configuration.
+
+### 7.3. User-initiated webview issuance
+
+The List Provider can direct a user to the start endpoint after its registration
+has been saved in `OID4VCI Management > List Provider Registration`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/oid4vci/issuance/start` | Create an issuance session and open the claims webview |
+| GET | `/oid4vci/issuance/sessions/{sessionToken}` | Retrieve an active webview issuance session |
+| POST | `/oid4vci/issuance/sessions/{sessionToken}/confirm` | Confirm claims and create the Credential Offer |
+| POST | `/oid4vci/issuance/sessions/{sessionToken}/cancel` | Cancel an active issuance session |
+
+Session tokens are short-lived values. Confirm and cancel requests also require
+the session's `_form_token` CSRF value.
+
+### 7.4. Status List demonstration endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/oid4vci/status-list-demo` | Open the Status List demonstration page |
+| GET | `/oid4vci/status-list-demo/api/credentials` | List issued credentials and their current status |
+| PATCH | `/oid4vci/status-list-demo/api/credentials/{issuanceId}/status` | Change a credential status and record its history |
+
+These endpoints are demonstration/operation utilities, not OID4VCI protocol
+endpoints. They are disabled by the `local` profile; restrict or disable access
+in other production profiles.
