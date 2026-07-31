@@ -18,6 +18,7 @@ package org.omnione.did.base.db.repository;
 
 import jakarta.persistence.LockModeType;
 import org.omnione.did.base.db.domain.Oid4vcCredentialIssuanceEntity;
+import org.omnione.did.base.db.domain.IssuanceState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -36,6 +37,10 @@ public interface Oid4vcCredentialIssuanceRepository extends JpaRepository<Oid4vc
     Optional<Oid4vcCredentialIssuanceEntity> findByIssuanceIdForUpdate(String issuanceId);
 
     List<Oid4vcCredentialIssuanceEntity> findAllByUserIdOrderByCreatedAtDesc(String userId);
+    List<Oid4vcCredentialIssuanceEntity> findAllByIssuanceStateOrderByCreatedAtDesc(
+            IssuanceState issuanceState);
+    List<Oid4vcCredentialIssuanceEntity> findAllByUserIdAndIssuanceStateOrderByCreatedAtDesc(
+            String userId, IssuanceState issuanceState);
     List<Oid4vcCredentialIssuanceEntity> findAllByStatusListIdOrderByStatusListIndexAsc(Long statusListId);
 
     @Query("""

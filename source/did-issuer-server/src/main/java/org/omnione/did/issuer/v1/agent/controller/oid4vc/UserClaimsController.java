@@ -19,6 +19,7 @@ package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.oid4vc.oid4vci.config.IssuerSdkProperties;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
+import org.omnione.did.issuer.v1.agent.service.oid4vc.ClaimValueFilter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -79,7 +80,8 @@ public class UserClaimsController {
     @PostMapping("/api/claims/save")
     @ResponseBody
     public ResponseEntity<Map<String, String>> saveClaims(@RequestBody ClaimsRequest request) {
-        userClaimsStore.saveClaims(request.getUserId(), request.getCredentialType(), request.getClaims());
+        userClaimsStore.saveClaims(request.getUserId(), request.getCredentialType(),
+                ClaimValueFilter.removeEmptyValues(request.getClaims()));
         return ResponseEntity.ok(Map.of("message", "Claims saved successfully"));
     }
 

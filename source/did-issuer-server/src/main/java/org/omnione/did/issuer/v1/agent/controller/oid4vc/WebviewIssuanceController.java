@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.omnione.did.issuer.v1.agent.dto.oid4vc.WebviewIssuancePage;
 import org.omnione.did.issuer.v1.agent.service.oid4vc.WebviewIssuanceException;
 import org.omnione.did.issuer.v1.agent.service.oid4vc.WebviewIssuanceService;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,13 +31,14 @@ public class WebviewIssuanceController {
 
     @GetMapping("/start")
     public String start(
-            @RequestParam("userId") String userId,
+            @RequestParam("did") String did,
+            @RequestParam("userName") String userName,
             @RequestParam("credential_configuration_id") String configurationId,
             @RequestParam(value = "credential_type", required = false) String credentialType,
             Model model, HttpServletResponse response) {
         securityHeaders(response);
         try {
-            model.addAttribute("page", service.start(userId, configurationId, credentialType));
+            model.addAttribute("page", service.start(did, configurationId, credentialType));
             return "oid4vci-issuance";
         } catch (WebviewIssuanceException e) {
             response.setStatus(e.getStatus().value());
@@ -108,8 +108,10 @@ public class WebviewIssuanceController {
 
     private HttpHeaders securityHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setCacheControl(CacheControl.noStore());
+        headers.setCacheControl("private, no-store, no-cache, must-revalidate, max-age=0");
         headers.setPragma("no-cache");
+        headers.setExpires(0);
+        headers.set("Surrogate-Control", "no-store");
         headers.set("Referrer-Policy", "no-referrer");
         headers.set("Content-Security-Policy",
                 "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'self'");

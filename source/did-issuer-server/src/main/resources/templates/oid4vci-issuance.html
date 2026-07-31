@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Enter credential information</title>
     <style>
         * { box-sizing: border-box; }
@@ -34,7 +37,8 @@
         </dl>
         <p class="error" th:if="${page.error != null}" th:text="${page.error}">Validation error</p>
 
-        <form th:action="@{/oid4vci/issuance/sessions/{token}/confirm(token=${page.sessionToken})}" method="post">
+        <form th:action="@{/oid4vci/issuance/sessions/{token}/confirm(token=${page.sessionToken})}"
+              method="post" autocomplete="off">
             <input type="hidden" name="_form_token" th:value="${page.csrfToken}">
             <div th:each="claim : ${page.claims}">
                 <label th:for="${'claim-' + claim.name}">

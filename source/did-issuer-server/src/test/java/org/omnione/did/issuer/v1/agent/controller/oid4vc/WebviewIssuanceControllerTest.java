@@ -31,11 +31,14 @@ class WebviewIssuanceControllerTest {
         ExtendedModelMap model = new ExtendedModelMap();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String view = controller.start("user123", "UniversityDegreeCredential", null, model, response);
+        String view = controller.start("user123", null,"UniversityDegreeCredential", null, model, response);
 
         assertEquals("oid4vci-issuance", view);
         assertEquals(page(), model.get("page"));
-        assertTrue(response.getHeader("Cache-Control").contains("no-store"));
+        assertEquals("private, no-store, no-cache, must-revalidate, max-age=0",
+                response.getHeader("Cache-Control"));
+        assertEquals(0, response.getDateHeader("Expires"));
+        assertEquals("no-store", response.getHeader("Surrogate-Control"));
         assertEquals("no-referrer", response.getHeader("Referrer-Policy"));
     }
 

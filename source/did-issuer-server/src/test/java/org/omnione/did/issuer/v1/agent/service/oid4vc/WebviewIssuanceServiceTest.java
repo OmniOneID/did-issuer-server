@@ -84,6 +84,32 @@ class WebviewIssuanceServiceTest {
     }
 
     @Test
+    void removesExistingOptionalClaimWhenSubmittedEmpty() throws Exception {
+        CredentialConfig config = config();
+        Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
+        when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
+        when(credentialConfigRepository.findAllByIdAndEnabledTrue("UniversityDegreeCredential"))
+                .thenReturn(List.of(config));
+        when(userClaimsStore.getClaims("user123", "UniversityDegree"))
+                .thenReturn(Map.of("given_name", "Gilwoo", "birth_date", "2000-01-01"));
+        when(issuanceGatewayService.generateCredentialOfferUri(
+                "user123", "pre-authorized_code", "reference",
+                "openid-credential-offer://", "UniversityDegreeCredential", false))
+                .thenReturn(Map.of("qrData",
+                        "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer"));
+
+        service.confirm("session", "csrf", Map.of(
+                "claim.given_name", "Gilwoo",
+                "claim.birth_date", ""));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> claims = ArgumentCaptor.forClass(Map.class);
+        verify(userClaimsStore).saveClaims(eq("user123"), eq("UniversityDegree"), claims.capture());
+        assertFalse(claims.getValue().containsKey("birth_date"));
+        assertEquals("Gilwoo", claims.getValue().get("given_name"));
+    }
+
+    @Test
     void duplicateConfirmReturnsExistingOfferWithoutCreatingAnother() throws Exception {
         Oid4vcWebviewIssuanceSessionEntity session = session("OFFER_CREATED");
         session.setCredentialOfferUri("openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer");

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Status List Demo</title>
+    <style>
+        :root { color-scheme: light; font-family: Inter, Pretendard, system-ui, sans-serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f4f7fb; color: #172033; }
+        main { max-width: 1400px; margin: 0 auto; padding: 36px 24px 64px; }
+        h1 { margin: 0 0 8px; font-size: 28px; }
+        .description { margin: 0 0 26px; color: #64748b; }
+        .toolbar, .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .toolbar { display: flex; gap: 10px; padding: 16px; margin-bottom: 18px; }
+        input, select, button { min-height: 38px; border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px 10px; font: inherit; }
+        input { flex: 1; min-width: 180px; }
+        button { border-color: #2563eb; background: #2563eb; color: white; cursor: pointer; font-weight: 600; }
+        button:disabled { cursor: wait; opacity: .55; }
+        .card { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 13px 12px; border-bottom: 1px solid #edf2f7; text-align: left; white-space: nowrap; }
+        th { background: #f8fafc; color: #475569; }
+        td.uri { min-width: 280px; max-width: 420px; white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+        td.uri a { color: #2563eb; text-decoration: none; }
+        td.uri a:hover { text-decoration: underline; }
+        td.index { text-align: center; font-size: 16px; font-weight: 700; color: #0f172a; }
+        .status { display: inline-block; border-radius: 999px; padding: 4px 9px; background: #e0e7ff; color: #3730a3; font-weight: 700; }
+        .actions { display: flex; gap: 7px; }
+        .actions input { width: 150px; min-width: 130px; }
+        .empty { padding: 50px; text-align: center; color: #64748b; }
+        #notice { min-height: 24px; margin: 10px 2px; color: #166534; }
+        #notice.error { color: #b91c1c; }
+        @media (max-width: 720px) { .toolbar { flex-direction: column; } main { padding: 24px 12px; } }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Status List 테스트</h1>
+    <p class="description">발급 완료된 Credential을 조회하고 Status List 상태를 변경합니다.</p>
+    <div class="toolbar">
+        <input id="userId" placeholder="사용자 ID (비워두면 전체 조회)" autocomplete="off">
+        <button id="search" type="button">조회</button>
+    </div>
+    <div id="notice" role="status"></div>
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>사용자</th><th>설정</th><th>Format</th>
+                <th>Status List URL</th><th>Index</th><th>현재 상태</th><th>발급 시각</th><th>상태 변경</th>
+            </tr>
+            </thead>
+            <tbody id="credentials"></tbody>
+        </table>
+        <div id="empty" class="empty" hidden>발급 완료된 Credential이 없습니다.</div>
+    </div>
+</main>
+<script>
+    const apiBase = '/oid4vci/status-list-demo/api/credentials';
+    const tbody = document.getElementById('credentials');
+    const empty = document.getElementById('empty');
+    const notice = document.getElementById('notice');
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,
+        char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+
+    async function loadCredentials() {
+        setNotice('');
+        const userId = document.getElementById('userId').value.trim();
+        const response = await fetch(apiBase + (userId ? '?userId=' + encodeURIComponent(userId) : ''));
+        if (!response.ok) throw new Error('목록 조회에 실패했습니다.');
+        render(await response.json());
+    }
+
+    function render(items) {
+        empty.hidden = items.length !== 0;
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td>${escapeHtml(item.userId)}</td>
+                <td>${escapeHtml(item.configId)}</td>
+                <td>${escapeHtml(item.format)}</td>
+                <td class="uri"><a href="${escapeHtml(item.statusListUri)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.statusListUri)}</a></td>
+                <td class="index">${item.statusListIndex}</td>
+                <td><span class="status">${escapeHtml(item.credentialStatus)}</span></td>
+                <td>${item.issuedAt ? new Date(item.issuedAt).toLocaleString() : '-'}</td>
+                <td>
+                    <div class="actions">
+                        <select aria-label="새 상태">
+                            ${allowedStatuses(item.credentialStatus).map(status =>
+                                `<option value="${status}" ${status === item.credentialStatus ? 'selected' : ''}>${status}</option>`).join('')}
+                        </select>
+                        <input aria-label="변경 사유" placeholder="변경 사유" value="demo test">
+                        <button type="button" onclick="changeStatus(this, '${escapeHtml(item.issuanceId)}')">변경</button>
+                    </div>
+                </td>
+            </tr>`).join('');
+    }
+
+    function allowedStatuses(current) {
+        const transitions = {
+            VALID: ['VALID', 'SUSPENDED', 'INVALID'],
+            SUSPENDED: ['SUSPENDED', 'VALID', 'INVALID'],
+            INVALID: ['INVALID'],
+            RESERVED: ['RESERVED']
+        };
+        return transitions[current] || [current];
+    }
+
+    async function changeStatus(button, issuanceId) {
+        const actions = button.closest('.actions');
+        const status = actions.querySelector('select').value;
+        const reason = actions.querySelector('input').value.trim();
+        if (!reason) return setNotice('변경 사유를 입력해 주세요.', true);
+        button.disabled = true;
+        try {
+            const response = await fetch(`${apiBase}/${encodeURIComponent(issuanceId)}/status`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status, reason})
+            });
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.reason || body.message || '상태 변경에 실패했습니다.');
+            setNotice(`${issuanceId} 상태를 ${status}(으)로 변경했습니다.`);
+            await loadCredentials();
+        } catch (error) {
+            setNotice(error.message, true);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function setNotice(message, error = false) {
+        notice.textContent = message;
+        notice.className = error ? 'error' : '';
+    }
+
+    document.getElementById('search').addEventListener('click',
+        () => loadCredentials().catch(error => setNotice(error.message, true)));
+    document.getElementById('userId').addEventListener('keydown', event => {
+        if (event.key === 'Enter') document.getElementById('search').click();
+    });
+    loadCredentials().catch(error => setNotice(error.message, true));
+</script>
+</body>
+</html>

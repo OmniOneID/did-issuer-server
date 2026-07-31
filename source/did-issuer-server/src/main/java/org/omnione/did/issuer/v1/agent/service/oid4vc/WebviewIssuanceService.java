@@ -109,8 +109,10 @@ public class WebviewIssuanceService {
         if (existing != null) {
             merged.putAll(existing);
         }
+        definitions.forEach(definition -> ClaimValueFilter.removeValue(merged, definition.name()));
         merged.putAll(accepted);
-        userClaimsStore.saveClaims(session.getUserId(), session.getCredentialType(), merged);
+        userClaimsStore.saveClaims(session.getUserId(), session.getCredentialType(),
+                ClaimValueFilter.removeEmptyValues(merged));
         session.setStatus("CLAIMS_SAVED");
 
         try {

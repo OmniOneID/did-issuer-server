@@ -19,6 +19,7 @@ package org.omnione.did.issuer.v1.agent.service.oid4vc.status;
 import org.omnione.did.base.db.domain.Oid4vcCredentialIssuanceEntity;
 import org.omnione.did.base.db.domain.Oid4vcCredentialStatusHistoryEntity;
 import org.omnione.did.base.db.domain.Oid4vcStatusListEntity;
+import org.omnione.did.base.db.domain.IssuanceState;
 import org.omnione.did.base.db.repository.Oid4vcCredentialIssuanceRepository;
 import org.omnione.did.base.db.repository.Oid4vcCredentialStatusHistoryRepository;
 import org.omnione.did.base.db.repository.Oid4vcStatusListRepository;
@@ -50,6 +51,18 @@ public class JpaCredentialManagementService implements CredentialManagementServi
     @Transactional(readOnly = true)
     public CredentialIssuanceView findByIssuanceId(String issuanceId) throws OID4VCIException {
         return toView(findIssuance(issuanceId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CredentialIssuanceView> findAllIssued(String userId) {
+        List<Oid4vcCredentialIssuanceEntity> issuances =
+                userId == null || userId.isBlank()
+                        ? issuanceRepository.findAllByIssuanceStateOrderByCreatedAtDesc(
+                                IssuanceState.ISSUED)
+                        : issuanceRepository.findAllByUserIdAndIssuanceStateOrderByCreatedAtDesc(
+                                userId.trim(), IssuanceState.ISSUED);
+        return issuances.stream().map(this::toView).toList();
     }
 
     @Override

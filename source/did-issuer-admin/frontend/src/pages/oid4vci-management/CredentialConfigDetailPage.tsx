@@ -36,6 +36,15 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
 }));
 
+const MSO_MDOC_DISPLAY_FORMAT = 'mso-mdoc-did';
+const MSO_MDOC_STORED_FORMAT = 'mso_mdoc-did';
+
+const toDisplayFormat = (format: string) =>
+    format === MSO_MDOC_STORED_FORMAT ? MSO_MDOC_DISPLAY_FORMAT : format;
+
+const toStoredFormat = (format: string) =>
+    format === MSO_MDOC_DISPLAY_FORMAT ? MSO_MDOC_STORED_FORMAT : format;
+
 export default function CredentialConfigDetailPage() {
     const theme = useTheme();
     const { id } = useParams<{ id: string }>();
@@ -48,7 +57,7 @@ export default function CredentialConfigDetailPage() {
     const [metadata, setMetadata] = useState<IssuerMetadata | null>(null);
 
     const [configId, setConfigId] = useState(id || '');
-    const [format, setFormat] = useState('mso-mdoc-did');
+    const [format, setFormat] = useState(MSO_MDOC_DISPLAY_FORMAT);
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const [metadataJson, setMetadataJson] = useState('');
 
@@ -68,7 +77,7 @@ export default function CredentialConfigDetailPage() {
 
             if (isEdit && id && allConfigs[id]) {
                 const config = allConfigs[id];
-                setFormat(config.format || '');
+                setFormat(toDisplayFormat(config.format || ''));
                 setIdentifiers(config.identifiers || []);
                 
                 // Fetch from metadata if available, otherwise use stored metadataJson
@@ -133,7 +142,7 @@ export default function CredentialConfigDetailPage() {
             const updatedConfigs = { ...configs };
             updatedConfigs[configId] = {
                 id: configId,
-                format,
+                format: toStoredFormat(format),
                 identifiers: identifiers.filter(i => i.trim() !== ''),
                 metadataJson: metadataJson
             };

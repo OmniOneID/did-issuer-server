@@ -719,7 +719,7 @@
                 const key = keys[i].value.trim();
                 let value = values[i].value.trim();
 
-                if (key) {
+                if (key && value !== '') {
                     let parsedValue = value;
 
                     if (values[i].type === 'number' && value !== '') {

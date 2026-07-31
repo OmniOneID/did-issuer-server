@@ -26,6 +26,7 @@ import java.util.List;
 
 public interface CredentialManagementService {
     CredentialIssuanceView findByIssuanceId(String issuanceId) throws OID4VCIException;
+    List<CredentialIssuanceView> findAllIssued(String userId);
     List<CredentialIssuanceView> findAllByUserId(String userId) throws OID4VCIException;
     List<CredentialStatusHistoryView> findStatusHistory(String issuanceId) throws OID4VCIException;
     CredentialIssuanceView changeStatus(
