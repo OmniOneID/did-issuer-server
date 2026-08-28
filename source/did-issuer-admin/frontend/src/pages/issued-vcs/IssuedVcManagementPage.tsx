@@ -172,7 +172,7 @@ const IssuedVcManagementPage = (props: Props) => {
       <FullscreenLoader open={loading} />
 
       <StyledContainer>
-        <StyledSubTitle>Issued VC Management</StyledSubTitle>
+        <StyledSubTitle>OpenDID Credentials</StyledSubTitle>
         <CustomDataGrid
           rows={rows}
           columns={[
@@ -184,7 +184,7 @@ const IssuedVcManagementPage = (props: Props) => {
                 <Link
                   component="button"
                   variant='body2'
-                  onClick={() => navigate(`/issued-vcs/issued-vc-management/${params.row.id}`)}
+                  onClick={() => navigate(`/issued-credentials/opendid/${params.row.id}`)}
                   sx={{ cursor: 'pointer', color: 'primary.main' }}
                 >
                   {params.value}

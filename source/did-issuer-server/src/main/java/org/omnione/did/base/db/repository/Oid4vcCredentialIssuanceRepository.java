@@ -20,6 +20,7 @@ import jakarta.persistence.LockModeType;
 import org.omnione.did.base.db.domain.Oid4vcCredentialIssuanceEntity;
 import org.omnione.did.base.db.domain.IssuanceState;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -29,12 +30,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface Oid4vcCredentialIssuanceRepository extends JpaRepository<Oid4vcCredentialIssuanceEntity, Long> {
+public interface Oid4vcCredentialIssuanceRepository extends JpaRepository<Oid4vcCredentialIssuanceEntity, Long>,
+        JpaSpecificationExecutor<Oid4vcCredentialIssuanceEntity> {
     Optional<Oid4vcCredentialIssuanceEntity> findByIssuanceId(String issuanceId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Oid4vcCredentialIssuanceEntity i where i.issuanceId = :issuanceId")
     Optional<Oid4vcCredentialIssuanceEntity> findByIssuanceIdForUpdate(String issuanceId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select i from Oid4vcCredentialIssuanceEntity i where i.id = :id")
+    Optional<Oid4vcCredentialIssuanceEntity> findByIdForUpdate(Long id);
 
     List<Oid4vcCredentialIssuanceEntity> findAllByUserIdOrderByCreatedAtDesc(String userId);
     List<Oid4vcCredentialIssuanceEntity> findAllByIssuanceStateOrderByCreatedAtDesc(

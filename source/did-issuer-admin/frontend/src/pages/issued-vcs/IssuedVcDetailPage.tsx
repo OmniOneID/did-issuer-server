@@ -28,7 +28,7 @@ const IssuedVcDetailPage = (props: Props) => {
           message: 'Invalid Path.',
           isModal: true
         }, {
-          onClose: async () => navigate('/issued-vcs/issued-vc-management', { replace: true }),
+          onClose: async () => navigate('/issued-credentials/opendid', { replace: true }),
         });
         return;
       }
@@ -80,7 +80,7 @@ const IssuedVcDetailPage = (props: Props) => {
   return (
     <>
       <FullscreenLoader open={isLoading} />
-      <Typography variant="h4">Issued VC Management</Typography>
+      <Typography variant="h4">OpenDID Credentials</Typography>
       <StyledContainer>
         <StyledTitle>Issued VC Detail Information</StyledTitle>
 

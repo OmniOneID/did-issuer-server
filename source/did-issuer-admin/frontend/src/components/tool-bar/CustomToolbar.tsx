@@ -14,6 +14,7 @@ interface CustomToolbarProps {
   onSearch?: (searchField: string, searchText: string) => void;
   onRegister?: () => void;
   onEdit?: () => void;
+  editLabel?: string;
   onDelete?: () => void;
   onRefresh?: () => void;
   disableEdit: boolean;
@@ -37,6 +38,7 @@ const CustomToolbar = React.memo(({
                                     onSearch,
                                     onRegister,
                                     onEdit,
+                                    editLabel = 'Update',
                                     onDelete,
                                     onRefresh,
                                     disableEdit,
@@ -103,7 +105,7 @@ const CustomToolbar = React.memo(({
                     )}
                     {onEdit && (
                         <Button variant="contained" color="primary" onClick={onEdit} disabled={disableEdit} size="small">
-                          Update
+                          {editLabel}
                         </Button>
                     )}
                     {onDelete && (

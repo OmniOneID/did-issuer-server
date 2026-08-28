@@ -48,6 +48,8 @@ import CredentialConfigPage from './pages/oid4vci-management/CredentialConfigPag
 import CredentialConfigDetailPage from './pages/oid4vci-management/CredentialConfigDetailPage';
 import Oid4vciPropertyPage from './pages/oid4vci-management/Oid4vciPropertyPage';
 import ListProviderRegistrationPage from './pages/oid4vci-management/ListProviderRegistrationPage';
+import Oid4vciIssuedCredentialPage from './pages/issued-credentials/Oid4vciIssuedCredentialPage';
+import Oid4vciIssuedCredentialDetailPage from './pages/issued-credentials/Oid4vciIssuedCredentialDetailPage';
 
 const router = createBrowserRouter([
   {
@@ -93,6 +95,32 @@ const router = createBrowserRouter([
           {
             path: '/oid4vci-management/list-provider-registration',
             Component: ListProviderRegistrationPage,
+          },
+          // OpenDID menu aliases. Existing routes are retained for bookmarked URLs
+          // and for links within the current management pages.
+          {
+            path: '/opendid/vc/namespaces',
+            Component: NamespaceManagementPage,
+          },
+          {
+            path: '/opendid/vc/vc-schemas',
+            Component: VcSchemaManagementPage,
+          },
+          {
+            path: '/opendid/vc/issuance-profiles',
+            Component: IssueProfileManagementPage,
+          },
+          {
+            path: '/opendid/zkp/namespaces',
+            Component: ZkpNamespaceManagementPage,
+          },
+          {
+            path: '/opendid/zkp/credential-schemas',
+            Component: CredentialSchemaManagementPage,
+          },
+          {
+            path: '/opendid/zkp/credential-definitions',
+            Component: CredentialDefinitionManagementPage,
           },
           // Namespace
           {
@@ -177,6 +205,22 @@ const router = createBrowserRouter([
           {
             path: '/issued-vcs/issued-vc-management',
             Component: IssuedVcManagementPage,
+          },
+          {
+            path: '/issued-credentials/opendid',
+            Component: IssuedVcManagementPage,
+          },
+          {
+            path: '/issued-credentials/opendid/:id',
+            Component: IssuedVcDetailPage,
+          },
+          {
+            path: '/issued-credentials/oid4vci',
+            Component: Oid4vciIssuedCredentialPage,
+          },
+          {
+            path: '/issued-credentials/oid4vci/:id',
+            Component: Oid4vciIssuedCredentialDetailPage,
           },
           {
             path: 'admins/admin-management/admin-registration',

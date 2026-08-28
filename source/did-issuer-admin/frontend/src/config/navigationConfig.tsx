@@ -16,30 +16,36 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
     },
     {
         segment: 'oid4vci-management',
-        title: 'OID4VCI Management',
+        title: 'OID4VCI',
         children: [
             { segment: 'metadata', title: 'Issuer Metadata', },
-            { segment: 'credential-config', title: 'Credential Config', },
-            { segment: 'property', title: 'Property', },
-            { segment: 'list-provider-registration', title: 'List Provider Registration', },
+            { segment: 'credential-config', title: 'Credential Configurations', },
+            { segment: 'property', title: 'Client Settings', },
+            { segment: 'list-provider-registration', title: 'List Provider', },
         ],
     },
     {
-      segment: 'vc-management',
-      title: 'VC Management',
+      segment: 'opendid',
+      title: 'OpenDID',
       children: [
-        { segment: 'namespace-management', title: 'Namespace Management',},
-        { segment: 'vc-schema-management', title: 'VC Schema Management', },
-        { segment: 'issue-profile-management', title: 'Issue Profile Management',},
-      ],
-    },
-    {
-      segment: 'zkp-management',
-      title: 'ZKP Management',
-      children: [
-        { segment: 'zkp-namespace-management', title: 'ZKP Namespace Management',},
-        { segment: 'credential-schema-management', title: 'Credential Schema Management', },
-        { segment: 'credential-definition-management', title: 'Credential Definition Management',},
+        {
+          segment: 'vc',
+          title: 'VC',
+          children: [
+            { segment: 'namespaces', title: 'Namespaces', },
+            { segment: 'vc-schemas', title: 'VC Schemas', },
+            { segment: 'issuance-profiles', title: 'Issuance Profiles', },
+          ],
+        },
+        {
+          segment: 'zkp',
+          title: 'ZKP',
+          children: [
+            { segment: 'namespaces', title: 'Namespaces', },
+            { segment: 'credential-schemas', title: 'Credential Schemas', },
+            { segment: 'credential-definitions', title: 'Credential Definitions', },
+          ],
+        },
       ],
     },
     {
@@ -47,8 +53,12 @@ export const getNavigationByStatus = (serverStatus: string | null): Navigation=>
       title: 'User Management',
     },
     {
-      segment: 'issued-vcs/issued-vc-management',
-      title: 'Issued VC Management',
+      segment: 'issued-credentials',
+      title: 'Issued Credentials',
+      children: [
+        { segment: 'oid4vci', title: 'OID4VCI Credentials', },
+        { segment: 'opendid', title: 'OpenDID Credentials', },
+      ],
     },
     {
       segment: 'server-configuration',

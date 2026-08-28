@@ -343,7 +343,8 @@ public class WebviewIssuanceService {
     }
 
     private boolean isMdoc(String format) {
-        return "mso_mdoc".equals(format) || "mso-mdoc".equals(format);
+        return format != null
+                && (format.startsWith("mso_mdoc") || format.startsWith("mso-mdoc"));
     }
 
     private String normalizeOfferRedirect(String rawRedirect) {

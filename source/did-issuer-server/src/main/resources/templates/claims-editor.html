@@ -384,6 +384,11 @@
 
         let serverMetadata = null;
 
+        function isMdocFormat(format) {
+            return typeof format === 'string'
+                && (format.startsWith('mso_mdoc') || format.startsWith('mso-mdoc'));
+        }
+
         function generateClaimsForConfig(configId, existingClaims = null, credentialType = null) {
             const container = document.getElementById('claimsContainer');
             container.innerHTML = '';
@@ -406,7 +411,7 @@
                         if (pathArr.length === 0) return;
 
                         let keyPath = '';
-                        if (format === 'mso_mdoc' || format === 'mso-mdoc') {
+                        if (isMdocFormat(format)) {
                             // For mso-mdoc, first element is usually namespace
                             keyPath = pathArr[pathArr.length - 1];
                         } else {
@@ -428,7 +433,7 @@
                             value = existingClaims[keyPath];
                             delete existingClaims[keyPath]; // Remove so we know what's left
                         } else if (!existingClaims) {
-                            if ((credentialType === 'mDL' || credentialType === 'mDocPID' || format === 'mso_mdoc' || format === 'mso-mdoc') && mdocDefaults[keyPath] !== undefined) {
+                            if ((credentialType === 'mDL' || credentialType === 'mDocPID' || isMdocFormat(format)) && mdocDefaults[keyPath] !== undefined) {
                                 value = mdocDefaults[keyPath];
                             } else if (keyPath === 'family_name') {
                                 value = 'Kim';

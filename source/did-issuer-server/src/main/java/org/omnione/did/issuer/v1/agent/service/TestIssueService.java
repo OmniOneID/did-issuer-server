@@ -151,20 +151,25 @@ public class TestIssueService extends IssueServiceBase {
     }
 
     /**
-     * Finds the user by userId stored in VcProfile, then enriches data with ZKP attributes if applicable.
+     * Finds the user by userId stored in VcProfile and regenerates all dummy claim data immediately
+     * before issuance. TEST mode must not depend on user data that may have been registered or updated
+     * after the issue profile was generated.
      */
     @Override
     protected User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId) {
         log.debug("[TEST] findUserByVcProfileAndVcSchemaId userId={}", vcProfile.getUserId());
 
         User user = userQueryService.findByIdAndVcSchemaId(vcProfile.getUserId(), vcSchemaId);
+        String dummyData = generateVcClaimDummyData(vcSchemaId);
 
         String definitionId = resolveDefinitionId(vcProfile.getTransactionId());
         if (definitionId != null) {
-            String enrichedData = generateFullDummyData(vcSchemaId, definitionId, user.getData());
-            return updateUserData(user, enrichedData);
+            dummyData = generateFullDummyData(vcSchemaId, definitionId, dummyData);
         }
-        return user;
+
+        // Persist the exact data used for issuance so TEST mode behaves identically in
+        // direct and proxy flows, regardless of any intervening user-info update.
+        return updateUserData(user, dummyData);
     }
 
     @Override

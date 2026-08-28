@@ -66,6 +66,7 @@ public class UrlConstant {
 
         public static final String SERVER_CONFIG = "/server-configs";
         public static final String OID4VCI = "/oid4vci";
+        public static final String OID4VCI_ISSUED_CREDENTIALS = "/issued-credentials";
     }
 
     public static class Tas {

@@ -9,6 +9,7 @@ interface CustomDataGridProps {
   onSearch?: (searchField: string, searchText: string) => void;
   onRegister?: () => void;
   onEdit?: () => void;
+  editLabel?: string;
   onDelete?: () => void;
   onRefresh?: () => void;
   selectedRow: string | number | null;
@@ -39,6 +40,7 @@ export default function CustomDataGrid({
                                          onSearch,
                                          onRegister,
                                          onEdit,
+                                         editLabel = 'Update',
                                          onDelete,
                                          onRefresh,
                                          selectedRow,
@@ -108,6 +110,7 @@ export default function CustomDataGrid({
     onSearch,
     onRegister,
     onEdit,
+    editLabel,
     onDelete,
     onRefresh,
     disableEdit: !selectedRow,
@@ -117,7 +120,7 @@ export default function CustomDataGrid({
     additionalButtons,
   }), [
     enableSearch, searchText, setSearchText, selectedSearch, setSelectedSearch,
-    onSearch, onRegister, onEdit, onDelete, selectedRow, searchOptions, selectableFields, additionalButtons
+    onSearch, onRegister, onEdit, editLabel, onDelete, onRefresh, selectedRow, searchOptions, selectableFields, additionalButtons
   ]);
 
   return (

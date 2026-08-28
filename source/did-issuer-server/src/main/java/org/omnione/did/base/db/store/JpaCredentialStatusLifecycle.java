@@ -100,7 +100,7 @@ public class JpaCredentialStatusLifecycle implements CredentialStatusLifecycle {
 
     private boolean isStatusEnabledFormat(String format) {
         return format != null
-                && (format.startsWith("dc+sd-jwt") || format.startsWith("mso-mdoc"));
+                && (format.startsWith("dc+sd-jwt") || format.startsWith("mso_mdoc"));
     }
 
     private OID4VCIException credentialNotFound(String issuanceId) {

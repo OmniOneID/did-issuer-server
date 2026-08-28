@@ -55,6 +55,40 @@ class WebviewIssuanceServiceTest {
     }
 
     @Test
+    void msoMdocDidUsesElementIdentifierWithoutNamespace() {
+        CredentialConfig config = CredentialConfig.builder()
+                .id("mDocPID")
+                .format("mso_mdoc-did")
+                .identifiers(List.of("mDocPID"))
+                .enabled(true)
+                .metadataJson("""
+                        {
+                          "credential_metadata": {
+                            "claims": [
+                              {
+                                "path":["eu.europa.ec.eudi.pid.1","family_name"],
+                                "mandatory":true,
+                                "value_type":"string",
+                                "display":[{"name":"Family name"}]
+                              }
+                            ]
+                          }
+                        }
+                        """)
+                .build();
+        when(credentialConfigRepository.findAllByIdAndEnabledTrue("mDocPID"))
+                .thenReturn(List.of(config));
+        when(userClaimsStore.getClaims("user123", "mDocPID"))
+                .thenReturn(Map.of("family_name", "Hong"));
+
+        WebviewIssuancePage page = service.start("user123", "mDocPID", null);
+
+        assertEquals("family_name", page.claims().get(0).name());
+        assertEquals("Hong", page.claims().get(0).value());
+        assertFalse(page.claims().get(0).name().contains("eu.europa.ec.eudi.pid.1"));
+    }
+
+    @Test
     void rejectsUnknownClaimAndPreservesExistingClaim() throws Exception {
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");

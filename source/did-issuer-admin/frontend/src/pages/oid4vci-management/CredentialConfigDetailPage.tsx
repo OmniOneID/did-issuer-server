@@ -36,14 +36,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
 }));
 
-const MSO_MDOC_DISPLAY_FORMAT = 'mso-mdoc-did';
-const MSO_MDOC_STORED_FORMAT = 'mso_mdoc-did';
-
-const toDisplayFormat = (format: string) =>
-    format === MSO_MDOC_STORED_FORMAT ? MSO_MDOC_DISPLAY_FORMAT : format;
-
-const toStoredFormat = (format: string) =>
-    format === MSO_MDOC_DISPLAY_FORMAT ? MSO_MDOC_STORED_FORMAT : format;
+const MSO_MDOC_FORMAT = 'mso_mdoc-did';
 
 export default function CredentialConfigDetailPage() {
     const theme = useTheme();
@@ -57,7 +50,7 @@ export default function CredentialConfigDetailPage() {
     const [metadata, setMetadata] = useState<IssuerMetadata | null>(null);
 
     const [configId, setConfigId] = useState(id || '');
-    const [format, setFormat] = useState(MSO_MDOC_DISPLAY_FORMAT);
+    const [format, setFormat] = useState(MSO_MDOC_FORMAT);
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const [metadataJson, setMetadataJson] = useState('');
 
@@ -77,7 +70,7 @@ export default function CredentialConfigDetailPage() {
 
             if (isEdit && id && allConfigs[id]) {
                 const config = allConfigs[id];
-                setFormat(toDisplayFormat(config.format || ''));
+                setFormat(config.format || '');
                 setIdentifiers(config.identifiers || []);
                 
                 // Fetch from metadata if available, otherwise use stored metadataJson
@@ -90,7 +83,7 @@ export default function CredentialConfigDetailPage() {
             } else {
                 // Initialize default for new registration
                 setMetadataJson(JSON.stringify({
-                    format: 'mso-mdoc-did'
+                    format: MSO_MDOC_FORMAT
                 }, null, 2));
             }
             setError(null);
@@ -142,7 +135,7 @@ export default function CredentialConfigDetailPage() {
             const updatedConfigs = { ...configs };
             updatedConfigs[configId] = {
                 id: configId,
-                format: toStoredFormat(format),
+                format,
                 identifiers: identifiers.filter(i => i.trim() !== ''),
                 metadataJson: metadataJson
             };
@@ -197,13 +190,13 @@ export default function CredentialConfigDetailPage() {
                             select
                             label="Format"
                             fullWidth
-                            value={format || 'mso-mdoc-did'}
+                            value={format || MSO_MDOC_FORMAT}
                             onChange={(e) => setFormat(e.target.value)}
                             variant="standard"
                         >
-                            <MenuItem value="mso-mdoc-did">mso-mdoc-did</MenuItem>
+                            <MenuItem value={MSO_MDOC_FORMAT}>{MSO_MDOC_FORMAT}</MenuItem>
                             <MenuItem value="dc+sd-jwt-did">dc+sd-jwt-did</MenuItem>
-                            {format && format !== 'mso-mdoc-did' && format !== 'dc+sd-jwt-did' && (
+                            {format && format !== MSO_MDOC_FORMAT && format !== 'dc+sd-jwt-did' && (
                                 <MenuItem value={format} style={{ display: 'none' }}>{format}</MenuItem>
                             )}
                         </TextField>
