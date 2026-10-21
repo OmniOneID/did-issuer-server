@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, styled, Alert, IconButton, useTheme } from '@mui/material';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { getCredentialConfigs, updateCredentialConfigs, SdkCredentialConfig, getMetadata, updateMetadata, IssuerMetadata } from '../../apis/oid4vci-api';
+import { getCredentialConfigs, updateCredentialConfigs, SdkCredentialConfig } from '../../apis/oid4vci-api';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EditIcon from '@mui/icons-material/Edit';
@@ -17,7 +17,6 @@ export default function CredentialConfigPage() {
     const navigate = useNavigate();
     const dialogs = useDialogs();
     const [configs, setConfigs] = useState<Record<string, SdkCredentialConfig>>({});
-    const [metadata, setMetadata] = useState<IssuerMetadata | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
@@ -104,9 +103,8 @@ export default function CredentialConfigPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [configsRes, metadataRes] = await Promise.all([getCredentialConfigs(), getMetadata()]);
+            const configsRes = await getCredentialConfigs();
             setConfigs(configsRes.data);
-            setMetadata(metadataRes.data);
             setError(null);
         } catch (err) {
             console.error('Failed to fetch data:', err);
@@ -133,7 +131,7 @@ export default function CredentialConfigPage() {
     // handleSave removed as it's moved to CredentialConfigDetailPage.tsx
 
     const handleDelete = async () => {
-        if (!selectedRow || !metadata) return;
+        if (!selectedRow) return;
 
         const confirmed = await dialogs.open(CustomConfirmDialog, {
             title: 'Confirmation',
@@ -149,15 +147,7 @@ export default function CredentialConfigPage() {
             const newConfigs = { ...configs };
             delete newConfigs[id];
 
-            const newMetadata = { ...metadata };
-            const newMetaConfigs = { ...newMetadata.credentialConfigurationsSupported };
-            delete newMetaConfigs[id];
-            newMetadata.credentialConfigurationsSupported = newMetaConfigs;
-
-            await Promise.all([
-                updateCredentialConfigs(newConfigs),
-                updateMetadata(newMetadata)
-            ]);
+            await updateCredentialConfigs(newConfigs);
 
             setSelectedRow(null);
             fetchData();

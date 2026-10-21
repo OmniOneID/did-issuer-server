@@ -16,8 +16,11 @@
 
 package org.omnione.did.base.db.repository;
 
+import jakarta.persistence.LockModeType;
 import org.omnione.did.base.db.domain.Oid4vcCnonceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -25,4 +28,8 @@ import java.util.Optional;
 @Repository
 public interface Oid4vcCnonceRepository extends JpaRepository<Oid4vcCnonceEntity, Long> {
     Optional<Oid4vcCnonceEntity> findByCnonce(String cnonce);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select n from Oid4vcCnonceEntity n where n.cnonce = :cnonce")
+    Optional<Oid4vcCnonceEntity> findByCnonceForUpdate(String cnonce);
 }

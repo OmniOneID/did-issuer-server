@@ -17,7 +17,6 @@
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
 import com.google.zxing.WriterException;
-import com.nimbusds.jose.shaded.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIErrorCode;
@@ -83,7 +82,7 @@ public class IssuanceGatewayController {
     public List<String> getCredentialIdentifier(
             @RequestParam("credentialConfigurationId") String credentialConfigurationId) {
         List<String> response = issuanceGatewayService.getCredentialIdentifier(credentialConfigurationId);
-        log.info("getCredentialIdentifier response : {}", new Gson().toJson(response));
+        log.debug("getCredentialIdentifier response: {}", response);
         return response;
     }
 

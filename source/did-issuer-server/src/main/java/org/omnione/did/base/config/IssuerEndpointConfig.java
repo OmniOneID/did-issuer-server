@@ -24,6 +24,7 @@ import org.omnione.did.oid4vc.oid4vci.dto.credential.CredentialRequest;
 import org.omnione.did.oid4vc.oid4vci.dto.credential.DeferredCredentialRequest;
 import org.omnione.did.oid4vc.oid4vci.dto.metadata.IssuerMetadataResponse;
 import org.omnione.did.oid4vc.oid4vci.dto.notification.NotificationRequest;
+import org.omnione.did.oid4vc.oid4vci.dto.revocation.CredentialRevocationRequest;
 import org.omnione.did.oid4vc.oid4vci.service.CredentialService;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +56,8 @@ public class IssuerEndpointConfig {
             registerEndpoint(metadata.getCredentialOfferEndpoint(), RequestMethod.GET, "getCredentialOffer", String.class, String.class);
             registerEndpoint(metadata.getCredentialEndpoint(), RequestMethod.POST, "issueCredential", CredentialRequest.class, Jwt.class);
             registerEndpoint(metadata.getNonceEndpoint(), RequestMethod.POST, "handleNonce");
+            registerEndpoint(Oid4vciConfigService.CREDENTIAL_REVOCATION_PATH, RequestMethod.POST,
+                    "revokeCredential", CredentialRevocationRequest.class);
             registerEndpoint(metadata.getDeferredCredentialEndpoint(), RequestMethod.POST, "getDeferredCredential", DeferredCredentialRequest.class, Jwt.class);
             registerEndpoint(metadata.getNotificationEndpoint(), RequestMethod.POST, "handleNotification", NotificationRequest.class);
 

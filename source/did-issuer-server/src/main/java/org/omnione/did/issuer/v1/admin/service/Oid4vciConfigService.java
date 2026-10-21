@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class Oid4vciConfigService {
+
+    public static final String CREDENTIAL_REVOCATION_PATH = "/credential-lifecycle/revoke";
 
     private final ServerConfigRepository serverConfigRepository;
     private final CredentialConfigRepository credentialConfigRepository;
@@ -199,9 +203,11 @@ public class Oid4vciConfigService {
         Optional<ServerConfig> config = serverConfigRepository.findByConfigKey(key);
         try {
             if (config.isPresent()) {
-                return new Gson().fromJson(config.get().getConfigValue(), IssuerMetadata.class);
+                return applyFixedCredentialRevocationEndpoint(
+                        new Gson().fromJson(config.get().getConfigValue(), IssuerMetadata.class));
             } else {
-                IssuerMetadata metadata = JsonUtil.deserializeFromJson(metadataPath, IssuerMetadata.class);
+                IssuerMetadata metadata = applyFixedCredentialRevocationEndpoint(
+                        JsonUtil.deserializeFromJson(metadataPath, IssuerMetadata.class));
                 saveToDb(key, metadata, "OID4VCI Issuer Metadata");
                 return metadata;
             }
@@ -215,9 +221,11 @@ public class Oid4vciConfigService {
         Optional<ServerConfig> config = serverConfigRepository.findByConfigKey(key);
         try {
             if (config.isPresent()) {
-                return new Gson().fromJson(config.get().getConfigValue(), IssuerMetadataResponse.class);
+                return applyFixedCredentialRevocationEndpoint(
+                        new Gson().fromJson(config.get().getConfigValue(), IssuerMetadataResponse.class));
             } else {
-                IssuerMetadataResponse metadata = JsonUtil.deserializeFromJson(metadataPath, IssuerMetadataResponse.class);
+                IssuerMetadataResponse metadata = applyFixedCredentialRevocationEndpoint(
+                        JsonUtil.deserializeFromJson(metadataPath, IssuerMetadataResponse.class));
                 saveToDb(key, metadata, "OID4VCI Issuer Metadata");
                 return metadata;
             }
@@ -227,42 +235,76 @@ public class Oid4vciConfigService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateMetadata(IssuerMetadata metadata) throws IOException {
+        applyFixedCredentialRevocationEndpoint(metadata);
+        metadata.setCredentialConfigurationsSupported(loadCredentialConfigurationsFromDb());
         saveToDb(ConfigType.OID4VCI_METADATA.name(), metadata, "OID4VCI Issuer Metadata");
-        // Synchronize with SDK config if needed
-        syncMetadataToSdk(metadata);
-        
-        // 동기화 요구사항 처리: 파일에 metadata.json 동기화 적용
-        syncMetadataToFile();
+
+        syncMetadataToFileAfterCommit(metadata);
     }
 
-    private void syncMetadataToFile() {
+    private void syncMetadataToFileAfterCommit(IssuerMetadata metadata) {
         if (metadataPath == null || metadataPath.isEmpty()) {
             log.warn("Metadata file path is not configured. Skipping file synchronization.");
             return;
         }
 
-        fileWriteLock.lock();
-        try {
-            IssuerMetadata currentMetadata = getMetadata();
-            java.nio.file.Path path = java.nio.file.Paths.get(metadataPath);
-            java.io.File parentDir = path.getParent().toFile();
-            
-            if (parentDir != null && !parentDir.exists()) {
-                parentDir.mkdirs();
-            }
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    writeCurrentMetadataFile();
+                }
+            });
+        } else {
+            writeMetadataFile(serializeMetadata(metadata));
+        }
+    }
 
-            Gson snakeCaseGson = new com.google.gson.GsonBuilder()
+    private void writeCurrentMetadataFile() {
+        writeMetadataFile(serializeMetadata(getMetadata()));
+    }
+
+    private String serializeMetadata(IssuerMetadata metadata) {
+        return new com.google.gson.GsonBuilder()
                 .setFieldNamingPolicy(com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .setPrettyPrinting()
-                .create();
-            String jsonContent = snakeCaseGson.toJson(currentMetadata);
-            java.nio.file.Files.writeString(path, jsonContent, java.nio.charset.StandardCharsets.UTF_8);
+                .create()
+                .toJson(metadata);
+    }
+
+    private void writeMetadataFile(String jsonContent) {
+        fileWriteLock.lock();
+        java.nio.file.Path tempFile = null;
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get(metadataPath).toAbsolutePath().normalize();
+            java.nio.file.Path parentDir = path.getParent();
+
+            if (parentDir != null) {
+                java.nio.file.Files.createDirectories(parentDir);
+            }
+
+            tempFile = java.nio.file.Files.createTempFile(parentDir, path.getFileName().toString(), ".tmp");
+            java.nio.file.Files.writeString(tempFile, jsonContent, java.nio.charset.StandardCharsets.UTF_8);
+            try {
+                java.nio.file.Files.move(tempFile, path,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException exception) {
+                java.nio.file.Files.move(tempFile, path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
             log.info("Successfully synchronized OID4VCI Issuer Metadata to file: {}", metadataPath);
         } catch (Exception e) {
             log.error("Failed to synchronize metadata to file: [{}]. Reason: {}", metadataPath, e.getMessage(), e);
         } finally {
+            if (tempFile != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(tempFile);
+                } catch (IOException exception) {
+                    log.warn("Failed to clean up temporary metadata file: {}", tempFile, exception);
+                }
+            }
             fileWriteLock.unlock();
         }
     }
@@ -289,6 +331,7 @@ public class Oid4vciConfigService {
                 .credentialOfferEndpoint(adminMetadata.getCredentialOfferEndpoint())
                 .credentialEndpoint(adminMetadata.getCredentialEndpoint())
                 .nonceEndpoint(adminMetadata.getNonceEndpoint())
+                .credentialRevocationEndpoint(adminMetadata.getCredentialRevocationEndpoint())
                 .deferredCredentialEndpoint(adminMetadata.getDeferredCredentialEndpoint())
                 .notificationEndpoint(adminMetadata.getNotificationEndpoint())
                 .credentialRequestEncryption(Oid4vciMetadataResponse.CredentialRequestEncryptionResponse.builder()
@@ -302,6 +345,28 @@ public class Oid4vciConfigService {
                         .build())
                 .credentialConfigurationsSupported(credentialConfigurationsSupported)
                 .build();
+    }
+
+    private IssuerMetadata applyFixedCredentialRevocationEndpoint(IssuerMetadata metadata) {
+        metadata.setCredentialRevocationEndpoint(buildCredentialRevocationEndpoint(metadata.getCredentialIssuer()));
+        return metadata;
+    }
+
+    private IssuerMetadataResponse applyFixedCredentialRevocationEndpoint(IssuerMetadataResponse metadata) {
+        metadata.setCredentialRevocationEndpoint(buildCredentialRevocationEndpoint(metadata.getCredentialIssuer()));
+        return metadata;
+    }
+
+    private String buildCredentialRevocationEndpoint(String credentialIssuer) {
+        if (!StringUtils.hasText(credentialIssuer)) {
+            return CREDENTIAL_REVOCATION_PATH;
+        }
+
+        String baseUrl = credentialIssuer.trim();
+        while (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl + CREDENTIAL_REVOCATION_PATH;
     }
 
     public Map<String, SdkCredentialConfig> getSdkCredentialConfigs() throws IOException {
@@ -336,8 +401,9 @@ public class Oid4vciConfigService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateSdkCredentialConfigs(Map<String, SdkCredentialConfig> configs) throws IOException {
+        validateCredentialConfigurations(configs);
         List<CredentialConfig> existingEntities = credentialConfigRepository.findAll();
         
         // Save or Update
@@ -358,6 +424,75 @@ public class Oid4vciConfigService {
         }
 
         syncProperties(configs);
+
+        credentialConfigRepository.flush();
+        Map<String, Object> credentialConfigurations = loadCredentialConfigurationsFromDb();
+        IssuerMetadata metadata = loadMetadataForSynchronization();
+        metadata.setCredentialConfigurationsSupported(credentialConfigurations);
+        saveToDb(ConfigType.OID4VCI_METADATA.name(), metadata, "OID4VCI Issuer Metadata");
+        syncMetadataToFileAfterCommit(metadata);
+    }
+
+    private IssuerMetadata loadMetadataForSynchronization() {
+        String key = ConfigType.OID4VCI_METADATA.name();
+        try {
+            IssuerMetadata metadata = serverConfigRepository.findByConfigKey(key)
+                    .map(config -> gson.fromJson(config.getConfigValue(), IssuerMetadata.class))
+                    .orElseGet(() -> JsonUtil.deserializeFromJson(metadataPath, IssuerMetadata.class));
+            if (metadata == null) {
+                throw new IllegalStateException("Issuer metadata is empty.");
+            }
+            return applyFixedCredentialRevocationEndpoint(metadata);
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Credential configurations were not saved because issuer metadata could not be loaded.",
+                    exception);
+        }
+    }
+
+    private Map<String, Object> loadCredentialConfigurationsFromDb() {
+        Map<String, Object> credentialConfigurations = new LinkedHashMap<>();
+        for (CredentialConfig config : credentialConfigRepository.findAll()) {
+            if (Boolean.TRUE.equals(config.getEnabled())) {
+                credentialConfigurations.put(config.getId(), parseCredentialMetadata(config.getId(), config.getMetadataJson()));
+            }
+        }
+        return credentialConfigurations;
+    }
+
+    private void validateCredentialConfigurations(Map<String, SdkCredentialConfig> configs) {
+        if (configs == null) {
+            throw new IllegalArgumentException("Credential configurations must not be null.");
+        }
+
+        for (Map.Entry<String, SdkCredentialConfig> entry : configs.entrySet()) {
+            String id = entry.getKey();
+            SdkCredentialConfig config = entry.getValue();
+            if (!StringUtils.hasText(id) || config == null) {
+                throw new IllegalArgumentException("Credential configuration ID and value must not be empty.");
+            }
+            if (!StringUtils.hasText(config.getFormat())) {
+                throw new IllegalArgumentException("Credential configuration format must not be empty: " + id);
+            }
+            parseCredentialMetadata(id, config.getMetadataJson());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseCredentialMetadata(String id, String metadataJson) {
+        if (!StringUtils.hasText(metadataJson)) {
+            throw new IllegalArgumentException("Credential metadata JSON must not be empty: " + id);
+        }
+
+        try {
+            Object parsed = gson.fromJson(metadataJson, Object.class);
+            if (!(parsed instanceof Map<?, ?>)) {
+                throw new IllegalArgumentException("Credential metadata JSON must be an object: " + id);
+            }
+            return (Map<String, Object>) parsed;
+        } catch (com.google.gson.JsonParseException exception) {
+            throw new IllegalArgumentException("Invalid credential metadata JSON: " + id, exception);
+        }
     }
 
     public Oid4vcProperty getProperties() throws IOException {
@@ -452,30 +587,4 @@ public class Oid4vciConfigService {
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
-    private void syncMetadataToSdk(IssuerMetadata metadata) throws IOException {
-        if (metadata == null) return;
-        Map<String, Object> metadataConfigs = metadata.getCredentialConfigurationsSupported();
-        if (metadataConfigs == null) return;
-
-        Map<String, SdkCredentialConfig> sdkConfigs = getSdkCredentialConfigs();
-        boolean changed = false;
-
-        for (String id : metadataConfigs.keySet()) {
-            if (!sdkConfigs.containsKey(id)) {
-                Map<String, Object> config = (Map<String, Object>) metadataConfigs.get(id);
-                sdkConfigs.put(id, SdkCredentialConfig.builder()
-                        .id(id)
-                        .format((String) config.get("format"))
-                        .metadataJson(JsonUtil.serializeToJson(config))
-                        .identifiers(new java.util.ArrayList<>())
-                        .build());
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            updateSdkCredentialConfigs(sdkConfigs);
-        }
-    }
 }

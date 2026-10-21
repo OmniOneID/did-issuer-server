@@ -23,6 +23,7 @@ import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIException;
 import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
 import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WebviewIssuanceService {
     private static final int MAX_VALUE_LENGTH = 2048;
+    private static final int MAX_JPEG_SIZE_BYTES = 2 * 1024 * 1024;
+    private static final String PORTRAIT_SAMPLE_PATH = "templates/images/portrait-sample.jpg";
     private static final Set<String> SERVER_MANAGED_CLAIMS = Set.of(
             "iss", "sub", "iat", "nbf", "exp", "jti", "vct", "status",
             "credentialStatus", "credential_status", "cnf");
@@ -104,15 +107,8 @@ public class WebviewIssuanceService {
         List<ClaimDefinition> definitions = readClaimDefinitions(config);
         Map<String, Object> accepted = validateClaims(definitions, submitted);
 
-        Map<String, Object> merged = new LinkedHashMap<>();
-        Map<String, Object> existing = userClaimsStore.getClaims(session.getUserId(), session.getCredentialType());
-        if (existing != null) {
-            merged.putAll(existing);
-        }
-        definitions.forEach(definition -> ClaimValueFilter.removeValue(merged, definition.name()));
-        merged.putAll(accepted);
         userClaimsStore.saveClaims(session.getUserId(), session.getCredentialType(),
-                ClaimValueFilter.removeEmptyValues(merged));
+                ClaimValueFilter.removeEmptyValues(accepted));
         session.setStatus("CLAIMS_SAVED");
 
         try {
@@ -148,12 +144,10 @@ public class WebviewIssuanceService {
 
     private WebviewIssuancePage page(Oid4vcWebviewIssuanceSessionEntity session, CredentialConfig config,
                                      List<ClaimDefinition> definitions, String errorMessage) {
-        Map<String, Object> existing = userClaimsStore.getClaims(session.getUserId(), session.getCredentialType());
-        Map<String, Object> values = existing == null ? Map.of() : existing;
         List<WebviewClaimField> fields = definitions.stream()
                 .map(definition -> new WebviewClaimField(
                         definition.name(), definition.label(), definition.valueType(), definition.mandatory(),
-                        displayValue(values.get(definition.name()))))
+                        defaultClaimValue(definition)))
                 .toList();
         Display display = readDisplay(config);
         return new WebviewIssuancePage(session.getSessionToken(), session.getCsrfToken(),
@@ -170,7 +164,7 @@ public class WebviewIssuanceService {
             if (raw == null || raw.isBlank()) {
                 continue;
             }
-            if (raw.length() > MAX_VALUE_LENGTH) {
+            if (!isJpeg(definition) && raw.length() > MAX_VALUE_LENGTH) {
                 throw error(HttpStatus.BAD_REQUEST, definition.label() + " is too long.");
             }
             accepted.put(definition.name(), convertValue(definition, raw));
@@ -205,6 +199,13 @@ public class WebviewIssuanceService {
                 }
                 return objectMapper.convertValue(node, List.class);
             }
+            if ("jpeg".equals(type)) {
+                byte[] jpeg = Base64.getDecoder().decode(raw);
+                if (jpeg.length == 0 || jpeg.length > MAX_JPEG_SIZE_BYTES || !isJpeg(jpeg)) {
+                    throw new IllegalArgumentException();
+                }
+                return raw;
+            }
             if (!definition.enumValues().isEmpty() && !definition.enumValues().contains(raw)) {
                 throw new IllegalArgumentException();
             }
@@ -212,6 +213,31 @@ public class WebviewIssuanceService {
         } catch (DateTimeParseException | JsonProcessingException | IllegalArgumentException e) {
             throw error(HttpStatus.BAD_REQUEST, definition.label() + " has an invalid value.");
         }
+    }
+
+    private String defaultClaimValue(ClaimDefinition definition) {
+        if (!"portrait".equals(definition.name()) || !isJpeg(definition)) {
+            return "";
+        }
+
+        try {
+            byte[] portrait = new ClassPathResource(PORTRAIT_SAMPLE_PATH).getContentAsByteArray();
+            return Base64.getEncoder().encodeToString(portrait);
+        } catch (IOException exception) {
+            throw error(HttpStatus.INTERNAL_SERVER_ERROR, "The sample portrait could not be loaded.");
+        }
+    }
+
+    private boolean isJpeg(ClaimDefinition definition) {
+        return "jpeg".equals(definition.valueType());
+    }
+
+    private boolean isJpeg(byte[] value) {
+        return value.length >= 4
+                && (value[0] & 0xff) == 0xff
+                && (value[1] & 0xff) == 0xd8
+                && (value[value.length - 2] & 0xff) == 0xff
+                && (value[value.length - 1] & 0xff) == 0xd9;
     }
 
     private List<ClaimDefinition> readClaimDefinitions(CredentialConfig config) {
@@ -326,20 +352,6 @@ public class WebviewIssuanceService {
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-
-    private String displayValue(Object value) {
-        if (value == null) {
-            return "";
-        }
-        if (value instanceof String || value instanceof Number || value instanceof Boolean) {
-            return value.toString();
-        }
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            return "";
-        }
     }
 
     private boolean isMdoc(String format) {

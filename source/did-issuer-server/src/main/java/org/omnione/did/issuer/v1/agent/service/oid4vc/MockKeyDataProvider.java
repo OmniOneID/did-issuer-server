@@ -19,6 +19,7 @@ package org.omnione.did.issuer.v1.agent.service.oid4vc;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.crypto.exception.CryptoException;
 import org.omnione.did.crypto.util.MultiBaseUtils;
 import org.omnione.did.base.datamodel.data.oid4vci.SdkCredentialConfig;
@@ -37,6 +38,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MockKeyDataProvider implements KeyDataProvider {
 
     private final FileWalletService fileWalletService;
@@ -55,10 +57,10 @@ public class MockKeyDataProvider implements KeyDataProvider {
         // Add server wallet integration
         CompactSigner signer = (keyId, hash) -> {
                 byte[] signature = fileWalletService.generateCompactSignatureByHash(keyId, hash);
-                System.out.println("signature length : " + signature.length);
+                log.debug("Signature length: {}", signature.length);
                 //65 -> 64 (open did wallet의 개인키 필수)
                 byte[] convertSignature = SignatureUtil.convertSignature(signature);
-                System.out.println("convert signature length : " + convertSignature.length);
+                log.debug("Converted signature length: {}", convertSignature.length);
 
                 return convertSignature;
         };

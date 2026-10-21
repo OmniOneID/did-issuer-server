@@ -17,6 +17,7 @@
 package org.omnione.did.issuer.v1.agent.service.oid4vc;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
 import org.omnione.did.oid4vc.oid4vci.service.UserDataProvider;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MockUserDataProvider implements UserDataProvider {
 
     private final UserClaimsStore userClaimsStore;
@@ -35,10 +37,10 @@ public class MockUserDataProvider implements UserDataProvider {
     @Override
     public Map<String, Object> getUserClaims(String userId, String credentialType) {
         // Try to get dynamic claims first
-        System.out.println("getUserClaims - userId : " + userId + " / credentialType : " + credentialType);
+        log.debug("Loading user claims: userId={}, credentialType={}", userId, credentialType);
         Map<String, Object> dynamicClaims = userClaimsStore.getClaims(userId, credentialType);
         if (dynamicClaims != null && !dynamicClaims.isEmpty()) {
-            System.out.println("dynamicClaims load");
+            log.debug("Loaded dynamic user claims: credentialType={}", credentialType);
             
             // Create a mutable copy to modify if necessary
             Map<String, Object> claims = new HashMap<>(dynamicClaims);
@@ -52,7 +54,7 @@ public class MockUserDataProvider implements UserDataProvider {
                         claims.put("portrait", portraitBytes);
                     }
                 } catch (IllegalArgumentException e) {
-                    System.err.println("Failed to decode portrait Base64: " + e.getMessage());
+                    log.warn("Failed to decode portrait Base64: {}", e.getMessage());
                 }
             }
             return claims;

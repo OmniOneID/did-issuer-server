@@ -78,8 +78,7 @@ public class ServerConfigManagementService {
             ServerConfig savedConfig = serverConfigRepository.save(config);
             updatedConfigs.add(ServerConfigDto.fromServerConfig(savedConfig));
 
-            log.info("Server config updated: key={}, value={}",
-                    savedConfig.getConfigKey(), savedConfig.getConfigValue());
+            log.info("Server config updated: key={}", savedConfig.getConfigKey());
         }
 
         UpdateServerConfigResDto result = UpdateServerConfigResDto.builder()

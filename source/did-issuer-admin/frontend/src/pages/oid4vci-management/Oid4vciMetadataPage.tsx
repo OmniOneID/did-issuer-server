@@ -74,6 +74,7 @@ export default function Oid4vciMetadataPage() {
                 credentialOfferEndpoint: `${base}/credential-offer`,
                 credentialEndpoint: `${base}/credential`,
                 nonceEndpoint: `${base}/nonce`,
+                credentialRevocationEndpoint: `${base}/credential-lifecycle/revoke`,
                 deferredCredentialEndpoint: `${base}/deferred_credential`,
                 notificationEndpoint: `${base}/notification`,
                 credentialConfigurationsSupported: data.credentialConfigurationsSupported || data.credential_configurations_supported || {},
@@ -175,6 +176,7 @@ export default function Oid4vciMetadataPage() {
             newMetadata.credentialOfferEndpoint = `${base}/credential-offer`;
             newMetadata.credentialEndpoint = `${base}/credential`;
             newMetadata.nonceEndpoint = `${base}/nonce`;
+            newMetadata.credentialRevocationEndpoint = `${base}/credential-lifecycle/revoke`;
             newMetadata.deferredCredentialEndpoint = `${base}/deferred_credential`;
             newMetadata.notificationEndpoint = `${base}/notification`;
         }
@@ -431,6 +433,18 @@ export default function Oid4vciMetadataPage() {
                                         variant={isEditing ? 'outlined' : 'standard'}
                                         size="small"
                                         helperText="Fixed endpoint to request a fresh nonce"
+                                        disabled
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Credential Revocation Endpoint"
+                                        value={metadata.credentialRevocationEndpoint}
+                                        slotProps={{ input: { readOnly: true } }}
+                                        variant={isEditing ? 'outlined' : 'standard'}
+                                        size="small"
+                                        helperText="Fixed endpoint for credential revocation"
                                         disabled
                                     />
                                 </Grid>

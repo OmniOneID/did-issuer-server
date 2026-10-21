@@ -16,6 +16,7 @@ import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
 
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,23 +40,22 @@ class WebviewIssuanceServiceTest {
     }
 
     @Test
-    void startsSessionAndPrefillsExistingClaims() {
+    void startsSessionWithEmptyClaimValues() {
         CredentialConfig config = config();
         when(credentialConfigRepository.findAllByIdAndEnabledTrue("UniversityDegreeCredential"))
                 .thenReturn(List.of(config));
-        when(userClaimsStore.getClaims("user123", "UniversityDegree"))
-                .thenReturn(Map.of("given_name", "Gilwoo"));
 
         WebviewIssuancePage page = service.start("user123", "UniversityDegreeCredential", null);
 
-        assertEquals("Gilwoo", page.claims().get(0).value());
+        assertEquals("", page.claims().get(0).value());
         assertEquals("dc+sd-jwt", page.credentialFormat());
         assertFalse(page.sessionToken().isBlank());
         verify(sessionRepository).save(any(Oid4vcWebviewIssuanceSessionEntity.class));
+        verify(userClaimsStore, never()).getClaims(anyString(), anyString());
     }
 
     @Test
-    void msoMdocDidUsesElementIdentifierWithoutNamespace() {
+    void msoMdocDidUsesElementIdentifierWithoutNamespaceAndLoadsSamplePortrait() {
         CredentialConfig config = CredentialConfig.builder()
                 .id("mDocPID")
                 .format("mso_mdoc-did")
@@ -70,6 +70,12 @@ class WebviewIssuanceServiceTest {
                                 "mandatory":true,
                                 "value_type":"string",
                                 "display":[{"name":"Family name"}]
+                              },
+                              {
+                                "path":["eu.europa.ec.eudi.pid.1","portrait"],
+                                "mandatory":true,
+                                "value_type":"jpeg",
+                                "display":[{"name":"Portrait"}]
                               }
                             ]
                           }
@@ -78,25 +84,48 @@ class WebviewIssuanceServiceTest {
                 .build();
         when(credentialConfigRepository.findAllByIdAndEnabledTrue("mDocPID"))
                 .thenReturn(List.of(config));
-        when(userClaimsStore.getClaims("user123", "mDocPID"))
-                .thenReturn(Map.of("family_name", "Hong"));
-
         WebviewIssuancePage page = service.start("user123", "mDocPID", null);
 
         assertEquals("family_name", page.claims().get(0).name());
-        assertEquals("Hong", page.claims().get(0).value());
+        assertEquals("", page.claims().get(0).value());
         assertFalse(page.claims().get(0).name().contains("eu.europa.ec.eudi.pid.1"));
+        assertEquals("portrait", page.claims().get(1).name());
+        byte[] portrait = Base64.getDecoder().decode(page.claims().get(1).value());
+        assertEquals(0xff, portrait[0] & 0xff);
+        assertEquals(0xd8, portrait[1] & 0xff);
     }
 
     @Test
-    void rejectsUnknownClaimAndPreservesExistingClaim() throws Exception {
+    void acceptsSamplePortraitLargerThanRegularClaimLimit() throws Exception {
+        CredentialConfig config = mdocPortraitConfig();
+        Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
+        session.setCredentialConfigurationId("mDocPID");
+        session.setCredentialType("mDocPID");
+        when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
+        when(credentialConfigRepository.findAllByIdAndEnabledTrue("mDocPID"))
+                .thenReturn(List.of(config));
+        when(issuanceGatewayService.generateCredentialOfferUri(
+                "user123", "pre-authorized_code", "reference",
+                "openid-credential-offer://", "mDocPID", false))
+                .thenReturn(Map.of("qrData",
+                        "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer"));
+        String portrait = service.start("user123", "mDocPID", null).claims().get(0).value();
+
+        service.confirm("session", "csrf", Map.of("claim.portrait", portrait));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> claims = ArgumentCaptor.forClass(Map.class);
+        verify(userClaimsStore).saveClaims(eq("user123"), eq("mDocPID"), claims.capture());
+        assertEquals(portrait, claims.getValue().get("portrait"));
+    }
+
+    @Test
+    void rejectsUnknownClaimAndOverwritesStoredClaimsWithSubmittedClaims() throws Exception {
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
         when(credentialConfigRepository.findAllByIdAndEnabledTrue("UniversityDegreeCredential"))
                 .thenReturn(List.of(config));
-        when(userClaimsStore.getClaims("user123", "UniversityDegree"))
-                .thenReturn(Map.of("server_only", "keep"));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
                 "openid-credential-offer://", "UniversityDegreeCredential", false))
@@ -111,21 +140,20 @@ class WebviewIssuanceServiceTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> claims = ArgumentCaptor.forClass(Map.class);
         verify(userClaimsStore).saveClaims(eq("user123"), eq("UniversityDegree"), claims.capture());
-        assertEquals("keep", claims.getValue().get("server_only"));
+        verify(userClaimsStore, never()).getClaims(anyString(), anyString());
+        assertFalse(claims.getValue().containsKey("server_only"));
         assertEquals("New", claims.getValue().get("given_name"));
         assertFalse(claims.getValue().containsKey("not_allowed"));
         assertEquals("OFFER_CREATED", session.getStatus());
     }
 
     @Test
-    void removesExistingOptionalClaimWhenSubmittedEmpty() throws Exception {
+    void excludesOptionalClaimWhenSubmittedEmpty() throws Exception {
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
         when(credentialConfigRepository.findAllByIdAndEnabledTrue("UniversityDegreeCredential"))
                 .thenReturn(List.of(config));
-        when(userClaimsStore.getClaims("user123", "UniversityDegree"))
-                .thenReturn(Map.of("given_name", "Gilwoo", "birth_date", "2000-01-01"));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
                 "openid-credential-offer://", "UniversityDegreeCredential", false))
@@ -228,6 +256,25 @@ class WebviewIssuanceServiceTest {
                                "display":[{"name":"Given name"}]},
                               {"path":["birth_date"],"mandatory":false,"value_type":"full-date",
                                "display":[{"name":"Birth date"}]}
+                            ]
+                          }
+                        }
+                        """)
+                .build();
+    }
+
+    private CredentialConfig mdocPortraitConfig() {
+        return CredentialConfig.builder()
+                .id("mDocPID")
+                .format("mso_mdoc-did")
+                .identifiers(List.of("mDocPID"))
+                .enabled(true)
+                .metadataJson("""
+                        {
+                          "credential_metadata": {
+                            "claims": [
+                              {"path":["org.omnione.pid.1","portrait"],"mandatory":true,
+                               "value_type":"jpeg","display":[{"name":"Portrait"}]}
                             ]
                           }
                         }

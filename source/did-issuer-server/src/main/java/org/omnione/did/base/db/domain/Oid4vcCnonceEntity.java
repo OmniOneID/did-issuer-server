@@ -37,4 +37,7 @@ public class Oid4vcCnonceEntity extends BaseEntity {
 
     @Column(name = "expires_at")
     private Instant expiresAt;
+
+    @Column(name = "consumed_at")
+    private Instant consumedAt;
 }

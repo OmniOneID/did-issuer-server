@@ -8,6 +8,7 @@ package org.omnione.did.issuer.v1.admin.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.issuer.v1.admin.dto.PageResponse;
 import org.omnione.did.issuer.v1.admin.dto.oid4vci.Oid4vciIssuedCredentialDto;
 import org.omnione.did.issuer.v1.admin.dto.oid4vci.ChangeOid4vciCredentialStatusReqDto;
 import org.omnione.did.issuer.v1.admin.service.Oid4vciIssuedCredentialService;
@@ -32,11 +33,12 @@ public class Oid4vciIssuedCredentialAdminController {
     private final Oid4vciIssuedCredentialService service;
 
     @GetMapping
-    public Page<Oid4vciIssuedCredentialDto> search(
+    public PageResponse<Oid4vciIssuedCredentialDto> search(
             @RequestParam(required = false) String searchKey,
             @RequestParam(required = false) String searchValue,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return service.search(searchKey, searchValue, pageable);
+        Page<Oid4vciIssuedCredentialDto> result = service.search(searchKey, searchValue, pageable);
+        return new PageResponse<>(result);
     }
 
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)

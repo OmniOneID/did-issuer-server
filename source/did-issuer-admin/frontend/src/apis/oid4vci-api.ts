@@ -19,6 +19,7 @@ export interface IssuerMetadata {
     credentialOfferEndpoint: string;
     credentialEndpoint: string;
     nonceEndpoint: string;
+    credentialRevocationEndpoint: string;
     deferredCredentialEndpoint: string;
     notificationEndpoint: string;
     credentialRequestEncryption: CredentialRequestEncryption;
@@ -83,6 +84,7 @@ export const DEFAULT_METADATA: IssuerMetadata = {
     credentialOfferEndpoint: '',
     credentialEndpoint: '',
     nonceEndpoint: '',
+    credentialRevocationEndpoint: '',
     deferredCredentialEndpoint: '',
     notificationEndpoint: '',
     credentialRequestEncryption: {

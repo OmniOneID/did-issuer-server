@@ -471,7 +471,7 @@ public abstract class IssueServiceBase implements IssueService {
             log.debug("\t--> Parse Request VC");
             ReqVc reqVc = parseRequestVc(decryptedRequestVc);
             validateRequestVc(transaction, reqVc);
-            System.out.println("reqVc.toJson() = " + reqVc.toJson());
+            log.debug("reqVc: {}", reqVc.toJson());
             log.debug("\t--> Find User By VC Profile");
             Long vcSchemaId = issueProfileQueryService.findById(transaction.getIssueProfileId()).getVcSchemaId();
             User user = findUserByVcProfileAndVcSchemaId(vcProfile, vcSchemaId); // @@

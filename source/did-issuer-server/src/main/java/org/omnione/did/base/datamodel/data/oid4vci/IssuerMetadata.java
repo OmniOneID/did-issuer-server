@@ -18,6 +18,7 @@ public class IssuerMetadata {
     private String credentialOfferEndpoint;
     private String credentialEndpoint;
     private String nonceEndpoint;
+    private String credentialRevocationEndpoint;
     private String deferredCredentialEndpoint;
     private String notificationEndpoint;
     private CredentialRequestEncryption credentialRequestEncryption;

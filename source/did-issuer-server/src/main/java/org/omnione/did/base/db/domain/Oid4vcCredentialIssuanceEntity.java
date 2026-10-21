@@ -44,6 +44,9 @@ public class Oid4vcCredentialIssuanceEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false, length = 128)
     private String userId;
 
+    @Column(name = "subject_did", length = 512)
+    private String subjectDid;
+
     @Column(name = "config_id", nullable = false, length = 128)
     private String configId;
 

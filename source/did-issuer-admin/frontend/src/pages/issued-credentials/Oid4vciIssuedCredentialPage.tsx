@@ -46,8 +46,9 @@ export default function Oid4vciIssuedCredentialPage() {
         searchText.trim() ? selectedSearch : null,
         searchText.trim() || null,
       );
-      setRows(response.data.content);
-      setTotalRows(response.data.totalElements ?? response.data.total ?? 0);
+      const content = Array.isArray(response.data?.content) ? response.data.content : [];
+      setRows(content);
+      setTotalRows(response.data?.totalElements ?? response.data?.total ?? content.length);
     } catch (error) {
       navigate('/error', { state: { message: formatErrorMessage(error, 'Failed to retrieve OID4VCI credentials.') } });
     } finally {

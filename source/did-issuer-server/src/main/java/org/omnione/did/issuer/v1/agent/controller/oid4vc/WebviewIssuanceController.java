@@ -114,7 +114,8 @@ public class WebviewIssuanceController {
         headers.set("Surrogate-Control", "no-store");
         headers.set("Referrer-Policy", "no-referrer");
         headers.set("Content-Security-Policy",
-                "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'self'");
+                "default-src 'none'; style-src 'unsafe-inline'; img-src data:; "
+                        + "form-action 'self'; base-uri 'none'; frame-ancestors 'self'");
         headers.set("X-Content-Type-Options", "nosniff");
         return headers;
     }

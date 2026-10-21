@@ -71,7 +71,8 @@ public class SecurityConfig {
                         "/get-credential-identifier", "/metadata-page",
                         "/api/metadata/**", "/claims-page", "/api/claims/**",
                         "/credential/**", "/credential-offer/**", 
-                        "/deferred_credential", "/nonce", "/notification")
+                        "/deferred_credential", "/nonce", "/notification",
+                        "/credential-lifecycle/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize

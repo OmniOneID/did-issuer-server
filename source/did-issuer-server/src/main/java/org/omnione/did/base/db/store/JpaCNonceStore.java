@@ -22,6 +22,7 @@ import org.omnione.did.base.db.repository.Oid4vcCnonceRepository;
 import org.omnione.did.oid4vc.oid4vci.service.store.CNonceStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -43,11 +44,29 @@ public class JpaCNonceStore implements CNonceStore {
 
     @Override
     public boolean contains(String cNonce) {
-        return repository.findByCnonce(cNonce).isPresent();
+        Instant now = Instant.now();
+        return repository.findByCnonce(cNonce)
+                .filter(entity -> entity.getConsumedAt() == null)
+                .filter(entity -> entity.getExpiresAt() == null || entity.getExpiresAt().isAfter(now))
+                .isPresent();
     }
 
     @Override
     public void remove(String cNonce) {
-        repository.findByCnonce(cNonce).ifPresent(repository::delete);
+        consume(cNonce);
+    }
+
+    @Override
+    @Transactional
+    public boolean consume(String cNonce) {
+        Instant now = Instant.now();
+        return repository.findByCnonceForUpdate(cNonce)
+                .filter(entity -> entity.getConsumedAt() == null)
+                .filter(entity -> entity.getExpiresAt() == null || entity.getExpiresAt().isAfter(now))
+                .map(entity -> {
+                    entity.setConsumedAt(now);
+                    return true;
+                })
+                .orElse(false);
     }
 }

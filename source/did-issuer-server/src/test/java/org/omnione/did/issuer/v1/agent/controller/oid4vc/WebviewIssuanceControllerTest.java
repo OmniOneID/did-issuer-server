@@ -40,6 +40,9 @@ class WebviewIssuanceControllerTest {
         assertEquals(0, response.getDateHeader("Expires"));
         assertEquals("no-store", response.getHeader("Surrogate-Control"));
         assertEquals("no-referrer", response.getHeader("Referrer-Policy"));
+        assertEquals("default-src 'none'; style-src 'unsafe-inline'; img-src data:; "
+                        + "form-action 'self'; base-uri 'none'; frame-ancestors 'self'",
+                response.getHeader("Content-Security-Policy"));
     }
 
     @Test

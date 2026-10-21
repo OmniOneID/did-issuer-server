@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, TextField, Typography, styled, Alert, useTheme, Divider, Breadcrumbs, Link, Paper, MenuItem } from '@mui/material';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { getCredentialConfigs, updateCredentialConfigs, SdkCredentialConfig, getMetadata, updateMetadata, IssuerMetadata } from '../../apis/oid4vci-api';
+import { getCredentialConfigs, updateCredentialConfigs, SdkCredentialConfig } from '../../apis/oid4vci-api';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -47,7 +47,6 @@ export default function CredentialConfigDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [configs, setConfigs] = useState<Record<string, SdkCredentialConfig>>({});
-    const [metadata, setMetadata] = useState<IssuerMetadata | null>(null);
 
     const [configId, setConfigId] = useState(id || '');
     const [format, setFormat] = useState(MSO_MDOC_FORMAT);
@@ -61,25 +60,16 @@ export default function CredentialConfigDetailPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [configsRes, metadataRes] = await Promise.all([getCredentialConfigs(), getMetadata()]);
+            const configsRes = await getCredentialConfigs();
             const allConfigs = configsRes.data;
-            const allMetadata = metadataRes.data;
             
             setConfigs(allConfigs);
-            setMetadata(allMetadata);
 
             if (isEdit && id && allConfigs[id]) {
                 const config = allConfigs[id];
                 setFormat(config.format || '');
                 setIdentifiers(config.identifiers || []);
-                
-                // Fetch from metadata if available, otherwise use stored metadataJson
-                const metaConfig = allMetadata.credentialConfigurationsSupported?.[id];
-                if (metaConfig) {
-                    setMetadataJson(JSON.stringify(metaConfig, null, 2));
-                } else {
-                    setMetadataJson(config.metadataJson || '{}');
-                }
+                setMetadataJson(config.metadataJson || '{}');
             } else {
                 // Initialize default for new registration
                 setMetadataJson(JSON.stringify({
@@ -122,9 +112,11 @@ export default function CredentialConfigDetailPage() {
 
         try {
             setLoading(true);
-            let parsedMetadata;
             try {
-                parsedMetadata = JSON.parse(metadataJson);
+                const parsedMetadata = JSON.parse(metadataJson);
+                if (parsedMetadata === null || Array.isArray(parsedMetadata) || typeof parsedMetadata !== 'object') {
+                    throw new Error('Metadata must be a JSON object.');
+                }
             } catch (e) {
                 setError('Invalid Metadata JSON format.');
                 setLoading(false);
@@ -140,18 +132,7 @@ export default function CredentialConfigDetailPage() {
                 metadataJson: metadataJson
             };
 
-            // 2. Prepare Metadata Config
-            const updatedMetadata = { ...metadata } as IssuerMetadata;
-            updatedMetadata.credentialConfigurationsSupported = {
-                ...updatedMetadata.credentialConfigurationsSupported,
-                [configId]: parsedMetadata
-            };
-
-            // 3. Update both
-            await Promise.all([
-                updateCredentialConfigs(updatedConfigs),
-                updateMetadata(updatedMetadata)
-            ]);
+            await updateCredentialConfigs(updatedConfigs);
 
             navigate('/oid4vci-management/credential-config');
         } catch (err) {

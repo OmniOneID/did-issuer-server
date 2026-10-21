@@ -35,6 +35,10 @@ public class Oid4vciMetadataResponse {
     @SerializedName("nonce_endpoint")
     private String nonceEndpoint;
 
+    @JsonProperty("credential_revocation_endpoint")
+    @SerializedName("credential_revocation_endpoint")
+    private String credentialRevocationEndpoint;
+
     @JsonProperty("deferred_credential_endpoint")
     @SerializedName("deferred_credential_endpoint")
     private String deferredCredentialEndpoint;

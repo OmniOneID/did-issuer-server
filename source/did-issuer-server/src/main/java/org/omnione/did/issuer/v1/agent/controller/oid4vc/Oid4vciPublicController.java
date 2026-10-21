@@ -19,7 +19,7 @@ public class Oid4vciPublicController {
 
     @GetMapping(UrlConstant.Issuer.WELL_KNOWN_PREFIX + UrlConstant.Issuer.OPENID_CREDENTIAL_ISSUER)
     public Oid4vciMetadataResponse getIssuerMetadata() throws IOException {
-        log.info("getIssuerMetadata request (overridden)");
+        log.debug("getIssuerMetadata request (overridden)");
         return oid4vciConfigService.getPublicMetadata();
     }
 }

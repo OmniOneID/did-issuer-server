@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="add-oid4vc-credential-subject-did" author="oid4vc-team">
+        <addColumn tableName="t_oid4vc_credential_issuance">
+            <column name="subject_did" type="VARCHAR(512)"/>
+        </addColumn>
+        <createIndex tableName="t_oid4vc_credential_issuance"
+                     indexName="idx_oid4vc_issuance_subject_did">
+            <column name="subject_did"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add-oid4vc-cnonce-consumed-at" author="oid4vc-team">
+        <addColumn tableName="t_oid4vc_cnonce">
+            <column name="consumed_at" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

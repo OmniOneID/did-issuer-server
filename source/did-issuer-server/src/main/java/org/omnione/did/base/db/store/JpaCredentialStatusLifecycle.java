@@ -45,12 +45,29 @@ public class JpaCredentialStatusLifecycle implements CredentialStatusLifecycle {
     }
 
     @Override
+    @Transactional
     public Optional<CredentialStatusAllocation> allocate(
             String userId, String configId, String format) throws OID4VCIException {
+        return allocate(userId, null, configId, format);
+    }
+
+    @Override
+    @Transactional
+    public Optional<CredentialStatusAllocation> allocate(
+            String userId, String subjectDid, String configId, String format)
+            throws OID4VCIException {
         if (!isStatusEnabledFormat(format)) {
             return Optional.empty();
         }
-        return Optional.of(statusIndexAllocator.allocate(userId, configId, format, null));
+        CredentialStatusAllocation allocation =
+                statusIndexAllocator.allocate(userId, configId, format, null);
+        if (subjectDid != null && !subjectDid.isBlank()) {
+            Oid4vcCredentialIssuanceEntity issuance = issuanceRepository
+                    .findByIssuanceIdForUpdate(allocation.issuanceId())
+                    .orElseThrow(() -> credentialNotFound(allocation.issuanceId()));
+            issuance.setSubjectDid(subjectDid);
+        }
+        return Optional.of(allocation);
     }
 
     @Override

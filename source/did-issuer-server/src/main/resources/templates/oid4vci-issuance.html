@@ -20,6 +20,8 @@
         .required { color: #d92d20; }
         input { width: 100%; min-height: 46px; border: 1px solid #d0d5dd; border-radius: 9px; padding: 10px 12px; font: inherit; }
         input:focus { outline: 2px solid #84adff; border-color: #3974db; }
+        .portrait-preview { display: block; width: 100px; height: 120px; object-fit: cover; border: 1px solid #d0d5dd; border-radius: 9px; }
+        .field-hint { color: #667085; font-size: 13px; margin: 7px 0 0; }
         .error { color: #b42318; background: #fef3f2; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
         button { min-height: 48px; border: 0; border-radius: 9px; font: inherit; font-weight: 700; cursor: pointer; }
@@ -45,7 +47,18 @@
                     <span th:text="${claim.label}">Claim</span>
                     <span class="required" th:if="${claim.mandatory}">*</span>
                 </label>
-                <input th:id="${'claim-' + claim.name}"
+                <div th:if="${claim.name == 'portrait' && claim.valueType == 'jpeg'}">
+                    <input type="hidden"
+                           th:id="${'claim-' + claim.name}"
+                           th:name="${'claim.' + claim.name}"
+                           th:value="${claim.value}">
+                    <img class="portrait-preview"
+                         th:src="${'data:image/jpeg;base64,' + claim.value}"
+                         th:alt="${claim.label}">
+                    <p class="field-hint">The sample portrait will be included in the credential.</p>
+                </div>
+                <input th:unless="${claim.name == 'portrait' && claim.valueType == 'jpeg'}"
+                       th:id="${'claim-' + claim.name}"
                        th:name="${'claim.' + claim.name}"
                        th:value="${claim.value}"
                        th:type="${claim.valueType == 'full-date' || claim.valueType == 'date' ? 'date' : 'text'}"

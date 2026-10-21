@@ -42,6 +42,15 @@ public interface Oid4vcCredentialIssuanceRepository extends JpaRepository<Oid4vc
     @Query("select i from Oid4vcCredentialIssuanceEntity i where i.id = :id")
     Optional<Oid4vcCredentialIssuanceEntity> findByIdForUpdate(Long id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select i from Oid4vcCredentialIssuanceEntity i
+             where i.statusList.listUri = :listUri
+               and i.statusListIndex = :statusListIndex
+            """)
+    Optional<Oid4vcCredentialIssuanceEntity> findByStatusReferenceForUpdate(
+            String listUri, long statusListIndex);
+
     List<Oid4vcCredentialIssuanceEntity> findAllByUserIdOrderByCreatedAtDesc(String userId);
     List<Oid4vcCredentialIssuanceEntity> findAllByIssuanceStateOrderByCreatedAtDesc(
             IssuanceState issuanceState);

@@ -69,6 +69,10 @@ public class ControllerLogAspects {
     @Around("execution(* org.omnione.did..*Controller.*(..))"
             + " && !execution(* org.omnione.did.issuer.v1.agent.controller.oid4vc.Oid4vciPublicController.getIssuerMetadata(..))")
     public Object requestChecker(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (!log.isDebugEnabled()) {
+            return joinPoint.proceed();
+        }
+
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 

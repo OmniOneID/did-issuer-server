@@ -112,6 +112,30 @@ tasks.named('test') {
     }
 }
 
+tasks.register('credentialNonceRevocationFlowTest', Test) {
+    group = 'verification'
+    description = 'Runs the c_nonce issuance and signed credential revocation flow test.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.agent.service.oid4vc.CredentialNonceRevocationFlowTest'
+    }
+}
+
+tasks.register('holderDidIssuanceProofTest', Test) {
+    group = 'verification'
+    description = 'Runs Holder DID proof key resolution tests for OID4VCI issuance.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.agent.service.oid4vc.DidProofKeyResolverTest'
+    }
+}
+
 import com.github.jk1.license.render.*
 import com.github.jk1.license.filter.LicenseBundleNormalizer
 import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
