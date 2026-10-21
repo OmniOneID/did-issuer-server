@@ -18,8 +18,8 @@ puppeteer:
 Open DID Issuer Server Installation Guide
 ==
 
-- Date: 2026-06-19
-- Version: v2.0.0
+- Date: 2026-10-21
+- Version: v2.0.1
 
 Table of Contents
 ==
@@ -61,15 +61,16 @@ Table of Contents
   - [5.1. application.yml](#51-applicationyml)
     - [5.1.1. Spring Basic Configuration](#511-spring-basic-configuration)
     - [5.1.2. Server Configuration](#512-server-configuration)
+    - [5.1.3. External Service Configuration](#513-external-service-configuration)
   - [5.2. application-logging.yml](#52-application-loggingyml)
     - [5.2.1. Logging Configuration](#521-logging-configuration)
-  - [5.3. database.yml](#53-databaseyml)
+  - [5.3. application-database.yml](#53-application-databaseyml)
     - [5.3.1. Spring Liquibase Configuration](#531-spring-liquibase-configuration)
     - [5.3.2. Datasource Configuration](#532-datasource-configuration)
     - [5.3.3. JPA Configuration](#533-jpa-configuration)
-  - [5.4. wallet.yml](#54-walletyml)
+  - [5.4. application-wallet.yml](#54-application-walletyml)
     - [5.4.1. Wallet Configuration](#541-wallet-configuration)
-  - [5.5. blockchain.yml](#55-blockchainyml)
+  - [5.5. application-blockchain.yml](#55-application-blockchainyml)
   - [5.5.1. Blockchain Configuration](#551-blockchain-configuration)
   - [5.6. blockchain.properties](#56-blockchainproperties)
     - [5.6.1. Blockchain Integration Configuration](#561-blockchain-integration-configuration)
@@ -205,6 +206,8 @@ did-issuer-server
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
 ├── docs
+│   ├── admin
+│       └── OpenDID_IssuerAdmin_Operation_Guide.md
 │   ├── api
 │       └── Issuer_API.md
 │   ├── errorCode
@@ -221,9 +224,17 @@ did-issuer-server
            └── did-blockchain-sdk-server-2.0.0.jar
            └── did-core-sdk-server-2.0.0.jar
            └── did-crypto-sdk-server-2.0.0.jar
-           └── did-datamodel-server-2.0.0.jar
+           └── did-datamodel-sdk-server-2.0.0.jar
            └── did-wallet-sdk-server-2.0.0.jar
            └── did-zkp-sdk-server-2.0.0.jar
+           └── did-oid4vci-sdk-server-3.0.0.jar
+           └── did-oid4vc-authorization-sdk-server-3.0.0.jar
+           └── did-oid4vc-formatter-sdk-server-3.0.0.jar
+           └── did-sd-jwt-vc-sdk-server-3.0.0.jar
+           └── did-mso-mdoc-sdk-server-3.0.0.jar
+           └── opendid-vc-sdk-1.0.0.jar
+       ├── metadata
+           └── issuer_meta.json
        ├── sample
        └── src
        └── build.gradle
@@ -242,6 +253,7 @@ did-issuer-server
 | RELEASE-PROCESS.md      | Procedures for releasing new versions            |
 | SECURITY.md             | Security policies and vulnerability reporting methods            |
 | docs                    | Documentation                                     |
+| ┖ admin                 | Admin console operation guide                     |
 | ┖ api                   | API guide documentation                          |
 | ┖ errorCode             | Error codes and troubleshooting guides            |
 | ┖ installation          | Installation and configuration guides                      |
@@ -249,6 +261,7 @@ did-issuer-server
 | source/did-issuer-server| Issuer server source code and build files |
 | ┖ gradle                | Gradle build configuration and scripts             |
 | ┖ libs                  | External libraries and dependencies                |
+| ┖ metadata              | Initial OID4VCI Issuer Metadata file (`issuer_meta.json`) |
 | ┖ sample                | Sample files                                |
 | ┖ src                   | Main source code directory                  |
 | ┖ build.gradle          | Gradle build configuration file                    |
@@ -363,6 +376,15 @@ This section provides guidance on running the Open DID server using console comm
  > Note: If frontend build is not needed (e.g., when testing only the backend or when frontend artifacts are already included), you can skip frontend build by adding the following option: 
  > - `./gradlew clean build -DskipFrontendBuild=true`
 
+- The default `test` task excludes the test classes. OID4VCI verification tests can be run with the following Gradle tasks (group `verification`):
+ ```shell
+   # c_nonce issuance and signed credential revocation flow
+   ./gradlew credentialNonceRevocationFlowTest -DskipFrontendBuild=true
+
+   # Holder DID proof key resolution for OID4VCI issuance
+   ./gradlew holderDidIssuanceProofTest -DskipFrontendBuild=true
+ ```
+
 
 - Navigate to the built folder and confirm that the JAR file has been created.
    ```shell
@@ -399,7 +421,7 @@ Since the Issuer server stores data necessary for operation in a database, a dat
 <br/>
 
 ## 4.3. Running with Docker
-- For Docker image building, configuration, execution, and other processes, please refer to [7. Building and Running with Docker](#7-building-and-running-with-docker) below.
+- For Docker image building, configuration, execution, and other processes, please refer to [7. Running After Building with Docker](#7-running-after-building-with-docker) below.
 
 <br/>
 
@@ -439,6 +461,8 @@ Settings with the 🔒 icon are values that are fixed by default or generally do
            - logging
            - spring-docs
            - blockchain
+         lss:
+           - lss         # Ledger Service Server settings (application-lss.yml)
      ```
 
 * `spring.jackson`: 🔒 
@@ -455,6 +479,19 @@ Settings with the 🔒 icon are values that are fixed by default or generally do
    - Port number where the application will run. The default value for Issuer server port configuration is 8091.
    - Value: 8091
 
+### 5.1.3. External Service Configuration
+* `tas.url`:  
+   - Base URL of the TA server. Used for Issuer registration and enrollment (certificate VC) and for VC Schema registration through the TAS List API.
+   - Example: `http://127.0.0.1:8090`
+
+* `list.url`:  
+   - Base URL of the List Provider used to register the OID4VCI Credential Issuer (`POST /list/api/v1/oid4vci/issuers`).
+   - Example: `http://127.0.0.1:8090`
+
+* `kyc.url`:  
+   - Base URL of the KYC server. In `PROXY` issuance mode, the Issuer server requests user PII from `{kyc.url}/api/v1/retrieve-pii`.
+   - Example: `http://127.0.0.1:8091`
+
 ## 5.2. application-logging.yml
 
 ### 5.2.1. Logging Configuration
@@ -462,11 +499,18 @@ Settings with the 🔒 icon are values that are fixed by default or generally do
    - Sets the log level.
    - By setting the level to debug, you can see all log messages at DEBUG level and above (INFO, WARN, ERROR, FATAL) for the specified package.
 
+* `logging.file.name`: 
+   - Sets the log file path.
+   - Example: `./logs/server.log`
+
 Complete example:
 ```yaml
 logging:
  level:
    org.omnione: debug
+
+ file:
+   name: ./logs/server.log
 ```
 
 ## 5.3. application-database.yml
@@ -534,6 +578,14 @@ logging:
    - Password used for wallet access. Password used when accessing the wallet file. Information that requires high security.
    - Example: `your_secure_wallet_password`
 
+* `zkp-wallet.file-path`:  
+   - Specifies the path of the ZKP wallet file used for ZKP Credential issuance. *Must be entered as an absolute path*
+   - Example: `/path/to/your/issuer.zkp.wallet`
+
+* `zkp-wallet.password`:  
+   - Password used to access the ZKP wallet file. Information that requires high security.
+   - Example: `your_secure_zkp_wallet_password`
+
 ## 5.5. application-blockchain.yml
 ## 5.5.1. Blockchain Configuration
 * `blockchain.file-path`:
@@ -586,24 +638,32 @@ The `issuer` profile configures OID4VCI issuance and is included in the `dev` pr
 
 | Property | Description |
 |----------|-------------|
-| `issuer.base-url` | Public URL used in Issuer Metadata and Credential Offer URIs |
-| `issuer.data-dir` | Base directory for metadata and related data files |
-| `issuer.metadata-file-path` | Issuer Metadata JSON path relative to `data-dir` |
-| `issuer.wallet-file-name` | Issuer wallet path derived from `wallet.file-path` |
-| `issuer.sdk.config-source` | Credential configuration source; current development configuration uses `DB` |
-| `issuer.status-list.bootstrap.ttl-seconds` | Cache lifetime in seconds for Status List bootstrap data |
-| `oid4vc.auth.issuer-url` | Authorization Server issuer URL |
-| `clients.auth-server.url` | Authorization Server base URL |
-| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens |
+| `issuer.server-ip` | IP address or host name of the Issuer server that Wallets can reach. Used to compose `issuer.base-url` (fallback: `127.0.0.1`) |
+| `issuer.server-port` | Issuer server port used to compose `issuer.base-url` (fallback: `8091`) |
+| `issuer.base-url` | Public URL of the Issuer server (default: `http://${issuer.server-ip}:${issuer.server-port}`). Used in Credential Offer URIs, OID4VCI List Provider registration, and the Authorization Server URLs below |
+| `issuer.data-dir` | Base directory for metadata and related data files (default: `.`) |
+| `issuer.metadata-file-path` | Initial Issuer Metadata JSON file (default: `metadata/issuer_meta.json`, relative to the working directory). If the `server_config` table has no `OID4VCI_METADATA` entry, the file is loaded and stored in the DB. Metadata updated in the Admin Console is written back to this file |
+| `issuer.wallet-file-name` | Issuer wallet path; references `wallet.file-path` |
+| `issuer.sdk.config-source` | Credential Configuration source; the default configuration uses `DB` (`credential_config` table) |
+| `issuer.status-list.endpoint-enabled` | (Optional) Enables the Status List endpoint `GET /status-lists/{listId}` provided by the OID4VCI SDK (default: `true`) |
+| `issuer.status-list.bootstrap.ttl-seconds` | Defined in the default file (`1800`) but not read by the current server or SDK code. The Status List token TTL is stored per list in `t_oid4vc_status_list.ttl_seconds` (default: `300`) |
+| `oid4vc.auth.issuer-url` | Authorization Server issuer URL (default: `${issuer.base-url}`) |
+| `oid4vc.auth.clients.issuer-server.url` | Issuer server URL used by the Authorization Server client configuration (default: `${issuer.base-url}`) |
+| `clients.auth-server.url` | Authorization Server base URL (default: `${issuer.base-url}`) |
+| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens (default: `${clients.auth-server.url}/oauth2/jwks`) |
+
+> - The committed `application-issuer.yml` sets `issuer.server-ip` to a development IP address. Change it to an address that Wallets can reach in your environment.
+> - The Docker image does not include the `metadata` directory. When running with Docker, mount it (for example, `{metadata_directory}:/app/metadata`) or register the Issuer Metadata in the Admin Console.
 
 ## 5.8. application-lss.yml
 
-The `lss` profile configures the List Service Server used by user-initiated
-OID4VCI issuance.
+The `lss` profile replaces the blockchain integration with the Ledger Service Server (LSS). When the `lss` profile is active, the Issuer server uses the LSS API (`{lss.url}/lss/api/v1`) instead of the blockchain to look up DID Documents and to register and look up VC Meta, VC Schemas, and ZKP Credential Schemas/Definitions. Activate it together with the `dev` profile (for example, `--spring.profiles.active=dev,lss`).
 
 | Property | Description |
 |----------|-------------|
-| `lss.url` | Base URL of the List Service Server (default local port: `8098`) |
+| `lss.url` | Base URL of the Ledger Service Server (default: `http://127.0.0.1:8098`) |
+
+> Every LSS request includes the `X-API-Key` header. The value is read from the `API_KEY_LSS` key of the `server_config` table (initial value: `enter_lss_api_key_here`) and can be changed in the Admin Console Server Configuration menu. If the key is missing or empty, the request fails with `SSRVISS01101`.
 
 # 6. Profile Configuration and Usage
 
@@ -664,7 +724,7 @@ Build the Docker image with the following command:
 
 ```bash
 cd {source_directory}
-docker build -t did-issuer-server -f did-issuer-server/Dockerfile .
+docker build -t did-issuer-server -f Dockerfile .
 ```
 
 <br/>
@@ -783,4 +843,4 @@ This command runs the PostgreSQL container in the background. The PostgreSQL ser
 <!-- References -->
 [Open DID Installation Guide]: https://github.com/OmniOneID/did-release/blob/develop/release-V2.0.0.0/OpenDID_Installation_Guide-V2.0.0.0_ko.md
 [DID Besu Contract]: https://github.com/OmniOneID/did-besu-contract
-[Open DID Admin Console Guide]: ../admin/OpenDID_IssuerAdmin_Operation_Guide_ko.md
+[Open DID Admin Console Guide]: ../admin/OpenDID_IssuerAdmin_Operation_Guide.md

@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issuer Admin 화면 설계서</title>
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   Unified Verifier — Interactive Spec Template
+   Base: designtemplate/style.css + aos-ca-wallet-mock.html
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  --primary: #FF8400;
+  --primary-hover: #ed8202;
+  --primary-soft: #FFF3E0;
+  --primary-tint: #FFF8F0;
+  --success: #4CAF50;
+  --danger: #c62828;
+  --warning: #FF8400;
+  --bg-main: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-light: #f5f5f5;
+  --text-main: #334155;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 8px 24px rgba(255,132,0,0.15);
+  --radius: 8px;
+  --sidebar-width: 260px;
+  --help-panel-width: 320px;
+  --header-height: 56px;
+  --flow-guide-height: 44px;
+
+  --highlight: #fef3c7;
+  --highlight-border: #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ── Header ── */
+.header {
+  height: var(--header-height);
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-weight: 800; font-size: 20px; color: var(--primary); letter-spacing: -0.5px; }
+.project-name { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.version-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+}
+.settings-icon {
+  width: 32px; height: 32px;
+  background: var(--primary-soft);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--primary);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.settings-icon:hover { background: #ffe4c4; transform: rotate(15deg); }
+
+/* ── Body (sidebar + main + help) ── */
+.body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding: 12px 0;
+}
+.scenario-group { margin-bottom: 4px; }
+.scenario-title {
+  padding: 10px 20px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.screen-item {
+  padding: 8px 20px 8px 36px;
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+.screen-item:hover { background: #f1f5f9; }
+.screen-item.active {
+  background: var(--primary-tint);
+  color: var(--primary);
+  font-weight: 600;
+  border-left-color: var(--primary);
+}
+.screen-item.highlight {
+  background: var(--highlight);
+  border-left-color: var(--highlight-border);
+}
+
+/* ── Main (viewport + flow-guide) ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.viewport {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-main);
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.viewport.mobile-mode { background: #1a1a2e; }
+
+/* desktop frame */
+.content-area {
+  width: 100%;
+  max-width: 1100px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid var(--border);
+  min-height: 100%;
+  transition: box-shadow 0.2s ease;
+}
+.content-area:hover { box-shadow: var(--shadow-hover); }
+
+/* mobile frame (from aos mock) */
+.phone-frame {
+  width: 375px;
+  height: 720px;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  overflow: hidden;
+  position: relative;
+  border: 8px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+.phone-notch {
+  width: 150px; height: 28px;
+  background: #333;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+.phone-body { flex: 1; overflow-y: auto; }
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: #333;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.status-bar .time { font-size: 14px; font-weight: 700; }
+
+/* flow guide */
+.flow-guide {
+  display: none;
+}
+.flow-step {
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  white-space: nowrap;
+}
+.flow-step.current {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+.flow-sep { color: #475569; }
+
+/* code ref (aos mock) */
+.code-ref {
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-top: 1px solid #eee;
+  font-size: 10px;
+  color: #aaa;
+  font-family: 'SF Mono', Menlo, monospace;
+  line-height: 1.5;
+}
+.code-ref strong { color: #888; }
+
+/* ── Help Panel ── */
+.help-panel {
+  width: var(--help-panel-width);
+  background: white;
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px;
+  flex-shrink: 0;
+}
+.help-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+.help-meta {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.help-subtitle {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.help-item {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 4px;
+  padding-left: 12px;
+  position: relative;
+}
+.help-item::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+}
+.help-action {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.help-action:hover {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+}
+.help-action.hover {
+  border-color: var(--highlight-border);
+  background: var(--highlight);
+}
+.help-action-title {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.help-action-desc {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.4;
+}
+.help-action-target {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.help-action-target::before { content: "→ "; }
+
+/* ── Generic UI primitives (usable inside screen html) ── */
+.btn {
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease, color 0.2s ease,
+              box-shadow 0.2s ease, transform 0.12s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 14px rgba(255,132,0,0.35);
+}
+.btn-danger {
+  background: #fff; color: var(--danger);
+  border: 2px solid var(--danger);
+}
+.btn-danger:hover { background: #fce4ec; }
+.btn-outline {
+  background: #fff;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+.btn-outline:hover { background: var(--primary-soft); }
+
+.page-title {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 22px; font-weight: 800; color: #1e293b;
+  position: relative; padding-bottom: 6px;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 36px; height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.content-area:hover .section-title::after { width: 72px; }
+
+.form-group { margin-bottom: 18px; display: flex; align-items: center; }
+.form-label {
+  width: 180px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #334155;
+}
+.form-control {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 132, 0, 0.18);
+}
+
+.data-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.data-table th {
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--primary);
+  border-top: 1px solid var(--border);
+}
+.data-table td {
+  padding: 12px;
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 13px;
+}
+.data-table tr { cursor: pointer; transition: background 0.15s ease; }
+.data-table tr:hover { background: var(--primary-tint); }
+.data-table a { color: var(--primary); }
+
+/* protocol badges */
+.proto-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.proto-badge.didvp   { background: #e8f5e9; color: #2e7d32; }
+.proto-badge.oid4vp  { background: #e3f2fd; color: #1565c0; }
+.proto-badge.sd-jwt  { background: #f3e5f5; color: #6a1b9a; }
+
+.hidden { display: none !important; }
+
+/* ── State Tabs ── */
+.viewport-inner { width: 100%; max-width: 1100px; }
+.state-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: var(--bg-light);
+  border-radius: 8px;
+  width: fit-content;
+}
+.state-tab {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.state-tab:hover { color: var(--text-main); background: white; }
+.state-tab.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255,132,0,0.25);
+}
+
+/* ── Status Badges ── */
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.status-badge.active { background: #e8f5e9; color: #2e7d32; }
+.status-badge.inactive { background: #fafafa; color: #9e9e9e; }
+.required { color: var(--danger); margin-left: 2px; }
+.input-error { border-color: var(--danger) !important; box-shadow: 0 0 0 2px rgba(198,40,40,0.15) !important; }
+.field-error { font-size: 11px; color: var(--danger); margin-top: 4px; margin-left: 4px; }
+
+/* ── Empty / Error / Loading States ── */
+.empty-state, .error-state, .verify-waiting {
+  text-align: center;
+  padding: 48px 24px;
+}
+.empty-icon, .error-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-title, .error-title { font-size: 16px; font-weight: 700; color: #1e293b; }
+.empty-desc, .error-desc { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.error-title { color: var(--danger); }
+.skeleton-row {
+  height: 44px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── QR Placeholder ── */
+.qr-placeholder {
+  width: 200px; height: 200px;
+  border: 3px dashed var(--primary);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: var(--primary);
+  background: var(--primary-soft);
+}
+.qr-placeholder.expired {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #fce4ec;
+}
+
+/* ── Info Cards (결과 화면) ── */
+.info-card {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.info-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+.info-value { font-size: 14px; color: #1e293b; margin-top: 2px; }
+.result-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.result-badge.success { background: #e8f5e9; color: #2e7d32; }
+.result-badge.failed { background: #fce4ec; color: var(--danger); }
+.result-section { margin-top: 16px; }
+
+/* ── API Spec (help panel) ── */
+.api-block {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.api-endpoint {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+.api-method {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  background: var(--primary);
+  margin-right: 4px;
+}
+.api-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  background: #fef3c7;
+  border-radius: 4px;
+}
+.api-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 10px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.api-sub-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.param-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.param-table th {
+  background: var(--primary-tint);
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.param-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+}
+.param-table code { font-size: 11px; color: var(--primary-hover); }
+.param-default {
+  display: inline-block;
+  padding: 0 4px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  font-size: 10px;
+  color: #475569;
+  margin-left: 4px;
+}
+.api-json {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'SF Mono', Menlo, monospace;
+  overflow-x: auto;
+  margin-top: 4px;
+  white-space: pre-wrap;
+}
+.api-error {
+  padding: 4px 0;
+  font-size: 11px;
+  color: #475569;
+}
+.api-error code {
+  font-size: 10px;
+  color: var(--danger);
+  background: #fce4ec;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+
+/* ── Sequence Diagram ── */
+.sequence-diagram {
+  margin-top: 8px;
+  border-left: 3px solid var(--primary);
+  padding-left: 12px;
+}
+.seq-step {
+  padding: 6px 0;
+  font-size: 11px;
+  position: relative;
+}
+.seq-step::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 12px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.seq-step.seq-response::before { background: var(--success); }
+.seq-step.seq-event::before { background: #7c3aed; }
+.seq-step.seq-action::before { background: var(--text-muted); }
+.seq-actor {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #334155;
+}
+.seq-arrow {
+  display: inline-block;
+  margin: 0 4px;
+  font-size: 10px;
+  color: var(--primary);
+  font-weight: 700;
+}
+.seq-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #475569;
+  padding-left: 2px;
+}
+
+/* ── Screen Map ── */
+.screen-map-container {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+  overflow: auto;
+}
+.screen-map-svg { width: 100%; height: auto; }
+.map-node {
+  fill: white;
+  stroke: var(--primary);
+  stroke-width: 2;
+  transition: fill 0.15s;
+}
+.map-node:hover { fill: var(--primary-soft); }
+.map-node-label {
+  font-size: 13px;
+  font-weight: 600;
+  fill: #1e293b;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.map-edge-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--primary-hover);
+  text-anchor: middle;
+  pointer-events: none;
+  /* White halo so labels stay readable over lines/other labels */
+  stroke: #ffffff;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
+/* ── Animations ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes sweep { 0%,100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,132,0,0.25);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+.btn .spinner { margin-right: 6px; }
+
+.content-area > * { animation: slideUp 0.3s ease-out; }
+
+/* ── Print / PDF layout ── */
+@media print {
+  body, html { overflow: visible !important; height: auto !important; }
+  .header, .sidebar, .help-panel, .flow-guide, .version-select { display: none !important; }
+  .body { display: block; }
+  .main, .viewport { overflow: visible !important; display: block; padding: 0; background: white; }
+  .content-area, .phone-frame {
+    page-break-after: always;
+    box-shadow: none;
+    border: 1px solid #ccc;
+    margin: 20px auto;
+  }
+  .print-block { display: block !important; }
+}
+.print-block { display: none; }
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- ══════ Header ══════ -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">OMN</div>
+      <div class="project-name" id="projectName">Issuer Admin 화면 설계서</div>
+    </div>
+    <div class="header-right">
+      <select class="version-select" id="versionSelect"></select>
+      <div class="settings-icon" title="Settings">⚙</div>
+    </div>
+  </header>
+
+  <!-- ══════ Body ══════ -->
+  <div class="body">
+    <!-- ── Sidebar (시나리오/화면 트리) ── -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <!-- ── Main ── -->
+    <main class="main">
+      <div class="viewport" id="viewport">
+        <!-- desktop 또는 mobile 프레임이 동적으로 삽입됨 -->
+      </div>
+      <div class="flow-guide" id="flowGuide"></div>
+    </main>
+
+    <!-- ── Help Panel ── -->
+    <aside class="help-panel" id="helpPanel">
+      <div style="font-size:13px;color:var(--text-muted)">화면을 선택하세요.</div>
+    </aside>
+  </div>
+</div>
+
+<script>window.__SPECS = [];</script>
+<script>
+window.__SPECS = window.__SPECS || [];
+
+/* ── Issuer Admin 사이드바 (theme.ts 색상 기준) ── */
+const SIDEBAR = `
+<nav style="width:220px;min-width:220px;background:#202B45;border-radius:8px;margin:4px 0 4px 4px;display:flex;flex-direction:column;font-size:14px;font-family:SUIT,Roboto,sans-serif;color:#ffffff">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #4E546B">
+    <div style="width:30px;height:30px;background:#FF8400;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700">IS</div>
+    <span style="font-weight:600;font-size:14px;color:#fff">Issuer Admin</span>
+  </div>
+  <div style="flex:1;padding:8px;overflow:auto">
+    <div style="padding:8px 12px;color:#fff;cursor:pointer;border-radius:6px">Issuer Management</div>
+    <div style="padding:8px 12px;color:#fff;display:flex;align-items:center;cursor:pointer;border-radius:6px"><span style="flex:1">VC Management</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">▼</span></div>
+    <div style="padding:6px 12px 6px 28px;font-size:13px;color:rgba(255,255,255,0.75);cursor:pointer;border-radius:6px">Namespace Management</div>
+    <div style="padding:6px 12px 6px 28px;font-size:13px;color:rgba(255,255,255,0.75);cursor:pointer;border-radius:6px">VC Schema Management</div>
+    <div style="padding:6px 12px 6px 28px;font-size:13px;background:#4E546B;color:#fff;font-weight:700;cursor:pointer;border-radius:6px">Issue Profile Management</div>
+    <div style="padding:8px 12px;color:#fff;display:flex;align-items:center;cursor:pointer;border-radius:6px"><span style="flex:1">ZKP Management</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">▶</span></div>
+    <div style="margin-top:16px;border-top:1px solid #4E546B;margin-bottom:4px"></div>
+    <div style="padding:8px 12px;color:#fff;cursor:pointer;border-radius:6px">User Management</div>
+    <div style="padding:8px 12px;color:#fff;cursor:pointer;border-radius:6px">Issued VC Management</div>
+    <div style="padding:8px 12px;color:#fff;cursor:pointer;border-radius:6px">Server Configuration</div>
+    <div style="padding:8px 12px;color:#fff;display:flex;align-items:center;cursor:pointer;border-radius:6px"><span style="flex:1">Admin Management</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">▶</span></div>
+  </div>
+</nav>`;
+
+const WRAP = (breadcrumb, content) => `
+<div style="display:flex;height:100%;min-height:480px;font-family:Roboto,sans-serif">
+  ${SIDEBAR}
+  <div style="flex:1;background:#f5f5f5;overflow:auto;display:flex;flex-direction:column">
+    <div style="background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 24px;display:flex;align-items:center;min-height:44px">
+      <span style="font-size:13px;color:#666">${breadcrumb}</span>
+    </div>
+    <div style="padding:20px;flex:1">
+      ${content}
+    </div>
+  </div>
+</div>`;
+
+window.__SPECS.push({
+  "version": "v1.0.0",
+  "project": "Issue Profile TEST 모드 화면 기획서",
+
+  "scenarios": [
+    {
+      "id": "issuer-admin",
+      "label": "Issuer Admin — Issue Profile 관리",
+      "description": "Issue Profile 화면에서 사용자 정보 조회 방식을 선택할 수 있도록 변경"
+    },
+    {
+      "id": "demo-popup",
+      "label": "Demo 서버 — VC 정보 입력 팝업",
+      "description": "VC 정보 입력 팝업에 저장 없이 돌아갈 수 있는 Skip 링크 추가"
+    }
+  ],
+
+  "screens": [
+
+    /* ──────────────────────────────────────────────
+       1. Issue Profile 목록
+    ────────────────────────────────────────────── */
+    {
+      "id": "issue-profile-list",
+      "scenarioId": "issuer-admin",
+      "title": "Issue Profile 목록",
+      "type": "desktop",
+      "entry": [
+        "사이드바 'VC Management > Issue Profile Management' 클릭"
+      ],
+      "changes": [
+        "목록에 User Query Type 컬럼이 추가됩니다.",
+        "각 Issue Profile이 DB 방식인지 TEST 방식인지 목록에서 바로 확인할 수 있습니다.",
+        "기존 Issue Profile은 기본적으로 DB로 표시되어 기존 사용 방식이 유지됩니다.",
+        "TEST로 등록된 프로파일은 목록에서 별도 배지로 구분됩니다."
+      ],
+      "initial": [
+        "등록된 Issue Profile 목록을 DataGrid로 출력",
+        "컬럼: VC Plan ID / Title (링크) / VC Schema ID / User Query Type [신규] / Registered At",
+        "Register · Edit · Delete · Refresh 버튼, 검색(VC Plan ID / Title) 제공"
+      ],
+      "actions": [
+        {
+          "id": "btn-register",
+          "label": "Register 버튼",
+          "description": "Issue Profile 등록 화면으로 이동",
+          "target": "issue-profile-register"
+        },
+        {
+          "id": "title-link",
+          "label": "Title 링크 클릭",
+          "description": "해당 Issue Profile 상세/수정 화면으로 이동",
+          "target": "issue-profile-register"
+        }
+      ],
+      "api": {
+        "method": "GET",
+        "endpoint": "/issuer/admin/v1/issue-profiles",
+        "note": "응답에 userQueryType 필드 포함 (DB | TEST). 기존 컬럼(vcPlanId, title, vcSchemaId, createdAt)에 userQueryType 추가.",
+        "response": {
+          "body": {
+            "content": [
+              {
+                "id": "number",
+                "vcPlanId": "string",
+                "title": "string",
+                "vcSchemaId": "string",
+                "userQueryType": "DB | TEST",
+                "createdAt": "ISO 8601"
+              }
+            ],
+            "total": "number"
+          }
+        }
+      },
+      "html": WRAP("Issue Profile Management", `
+<div style="background:#fff;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:20px">
+  <div style="font-size:22px;font-weight:700;margin-bottom:16px">Issue Profile Management</div>
+
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+    <select style="border:1px solid #ccc;border-radius:4px;padding:6px 8px;font-size:13px">
+      <option>VC Plan ID</option>
+      <option>Title</option>
+    </select>
+    <input style="border:1px solid #ccc;border-radius:4px;padding:6px 10px;font-size:13px;flex:1" placeholder="Search..." />
+    <button style="background:#FF8400;color:#fff;border:none;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer">Search</button>
+    <button style="background:#fff;color:#444;border:1px solid #ccc;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer">↺</button>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button style="background:#FF8400;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:13px;cursor:pointer" data-action="btn-register">Register</button>
+    <button style="background:#000000;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:13px;cursor:pointer">Edit</button>
+    <button style="background:#ED207B;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:13px;cursor:pointer">Delete</button>
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead>
+      <tr style="background:#f5f5f5;border-bottom:2px solid #e0e0e0">
+        <th style="padding:10px 12px;text-align:left;font-weight:600;color:#555">VC Plan ID</th>
+        <th style="padding:10px 12px;text-align:left;font-weight:600;color:#555">Title</th>
+        <th style="padding:10px 12px;text-align:left;font-weight:600;color:#555">VC Schema ID</th>
+        <th style="padding:10px 12px;text-align:left;font-weight:600;color:#555">User Query Type</th>
+        <th style="padding:10px 12px;text-align:left;font-weight:600;color:#555">Registered At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #e0e0e0">
+        <td style="padding:10px 12px">plan-student-001</td>
+        <td style="padding:10px 12px"><span style="color:#FF8400;cursor:pointer;text-decoration:underline" data-action="title-link">학생증 VC</span></td>
+        <td style="padding:10px 12px">student-id-v1</td>
+        <td style="padding:10px 12px"><span class="status-badge active">DB</span></td>
+        <td style="padding:10px 12px">2026-04-10 09:00:00</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e0e0e0;background:#f9f9f9">
+        <td style="padding:10px 12px">plan-enrollment-001</td>
+        <td style="padding:10px 12px"><span style="color:#FF8400;cursor:pointer;text-decoration:underline" data-action="title-link">재학증명서 VC</span></td>
+        <td style="padding:10px 12px">enrollment-v1</td>
+        <td style="padding:10px 12px"><span class="status-badge active">DB</span></td>
+        <td style="padding:10px 12px">2026-04-12 14:30:00</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e0e0e0">
+        <td style="padding:10px 12px">plan-student-test</td>
+        <td style="padding:10px 12px"><span style="color:#FF8400;cursor:pointer;text-decoration:underline" data-action="title-link">학생증 VC (테스트용)</span></td>
+        <td style="padding:10px 12px">student-id-v1</td>
+        <td style="padding:10px 12px"><span class="proto-badge sd-jwt">TEST</span></td>
+        <td style="padding:10px 12px">2026-04-15 11:00:00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:12px;font-size:13px;color:#666">
+    <span>1–3 of 3</span>
+    <button style="background:none;border:1px solid #ccc;border-radius:4px;padding:4px 10px;margin-left:8px;cursor:pointer;font-size:12px">＜</button>
+    <button style="background:none;border:1px solid #ccc;border-radius:4px;padding:4px 10px;margin-left:4px;cursor:pointer;font-size:12px">＞</button>
+  </div>
+</div>`)
+    },
+
+    /* ──────────────────────────────────────────────
+       2. Issue Profile 등록
+    ────────────────────────────────────────────── */
+    {
+      "id": "issue-profile-register",
+      "scenarioId": "issuer-admin",
+      "title": "Issue Profile 등록",
+      "type": "desktop",
+      "entry": [
+        "목록에서 'Register' 버튼 클릭 (신규)",
+        "목록에서 Title 링크 클릭 → Edit 화면 (동일 폼)"
+      ],
+      "changes": [
+        "Issue Profile 등록/수정 화면에 User Query Method 항목이 추가됩니다.",
+        "선택지는 DB와 TEST 두 가지로 제공됩니다.",
+        "기본 선택값은 DB이므로 기존처럼 사전에 입력한 사용자 정보를 사용할 수 있습니다.",
+        "TEST를 선택하면 사용자 정보를 미리 입력하지 않아도 테스트용 VC 발급 흐름을 진행할 수 있습니다.",
+        "외부 조회 방식은 이번 화면에서는 노출하지 않습니다."
+      ],
+      "initial": [
+        "폼 초기값: userQueryType = DB",
+        "Initiate Type이 issuer_init 선택 시 ZKP 발급 여부 토글 노출",
+        "User Query Method 섹션: DB / TEST 라디오 — 설명 텍스트 없음"
+      ],
+      "actions": [
+        {
+          "id": "btn-register",
+          "label": "Register 버튼",
+          "description": "Confirmation 다이얼로그 → 확인 시 POST /issuer/admin/v1/issue-profile → 성공 시 목록 복귀"
+        },
+        {
+          "id": "btn-cancel",
+          "label": "Cancel 버튼",
+          "description": "목록으로 복귀"
+        }
+      ],
+      "api": {
+        "method": "POST",
+        "endpoint": "/issuer/admin/v1/issue-profiles",
+        "note": "수정 시 PATCH /issuer/admin/v1/issue-profiles",
+        "request": {
+          "body": {
+            "vcPlanId": { "type": "string", "required": true, "desc": "4~20자" },
+            "title": { "type": "string", "required": true, "desc": "4~64자" },
+            "description": { "type": "string" },
+            "vcSchemaId": { "type": "string", "required": true },
+            "initiateType": { "type": "enum", "required": true, "desc": "user_init | issuer_init" },
+            "language": { "type": "string", "required": true, "desc": "2~64자" },
+            "endpoints": { "type": "string[]", "required": true },
+            "cipher": { "type": "string", "required": true, "desc": "AES-256-CBC" },
+            "curve": { "type": "string", "required": true, "desc": "Secp256r1" },
+            "padding": { "type": "string", "required": true, "desc": "PKCS5" },
+            "tags": { "type": "string[]", "required": true },
+            "userQueryType": { "type": "enum", "required": true, "default": "DB", "desc": "DB | TEST" },
+            "zkpEnabled": { "type": "boolean", "default": false },
+            "definitionId": { "type": "string", "desc": "issuer_init + zkpEnabled=true 시 필수" }
+          }
+        },
+        "errors": [
+          { "code": "ISSUER-04001", "desc": "필수 필드 누락" }
+        ]
+      },
+      "states": [
+        {
+          "id": "default",
+          "label": "기본 (DB 선택, User Init)",
+          "html": WRAP("Issue Profile Management", `
+<div style="font-size:28px;font-weight:700;margin-bottom:16px">Issue Profile Management</div>
+<div style="width:600px;background:#fff;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:24px;margin:0 auto">
+  <div style="font-size:22px;font-weight:700;margin-bottom:8px">Issue Profile Registration</div>
+
+  <div style="margin-top:16px">
+    <label style="font-size:12px;color:#666">VC Plan ID *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="VC Plan ID" />
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Title *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Title" />
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Description</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Description" />
+  </div>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+    <div style="flex:1">
+      <label style="font-size:12px;color:#666">VC Schema ID *</label>
+      <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box;background:#f5f5f5" disabled placeholder="(선택 필요)" />
+    </div>
+    <button style="margin-top:20px;background:none;border:none;color:#FF8400;cursor:pointer;font-size:20px">🔍</button>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Initiate Type *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option value="user_init">User Initiate</option>
+      <option value="issuer_init">Issuer Initiate</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Language *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Language" />
+  </div>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">Endpoints *</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <input style="flex:1;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;box-sizing:border-box" placeholder="Endpoint URL" />
+    <button style="background:none;border:none;cursor:pointer;color:#FF8400;font-size:20px">➖</button>
+  </div>
+  <button style="color:#FF8400;background:none;border:none;cursor:pointer;font-size:13px;margin-top:6px;display:flex;align-items:center;gap:4px">➕ Add Endpoint</button>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">E2E</div>
+  <div style="margin-top:8px">
+    <label style="font-size:12px;color:#666">Cipher *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>AES-256-CBC</option>
+      <option disabled style="color:#aaa">AES-128-CBC</option>
+      <option disabled style="color:#aaa">AES-128-ECB</option>
+      <option disabled style="color:#aaa">AES-256-ECB</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Curve *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>Secp256r1</option>
+      <option disabled style="color:#aaa">Secp256k1</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Padding *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>PKCS5</option>
+      <option disabled style="color:#aaa">NOPAD</option>
+    </select>
+  </div>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">Tags *</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <input style="flex:1;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;box-sizing:border-box" placeholder="Tag" />
+    <button style="background:none;border:none;cursor:pointer;color:#FF8400;font-size:20px">➖</button>
+  </div>
+  <button style="color:#FF8400;background:none;border:none;cursor:pointer;font-size:13px;margin-top:6px;display:flex;align-items:center;gap:4px">➕ Add Tag</button>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">User Query Method</div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+      <input type="radio" name="uqm" checked /> DB
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+      <input type="radio" name="uqm" /> TEST
+    </label>
+  </div>
+
+  <div style="display:flex;justify-content:center;gap:12px;margin-top:28px">
+    <button style="background:#FF8400;color:#fff;border:none;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer" data-action="btn-register">Register</button>
+    <button style="background:#000000;color:#fff;border:none;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer">Reset</button>
+    <button style="background:#fff;color:#666;border:1px solid #ccc;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer" data-action="btn-cancel">Cancel</button>
+  </div>
+</div>`)
+        },
+        {
+          "id": "test-selected",
+          "label": "TEST 선택",
+          "html": WRAP("Issue Profile Management", `
+<div style="font-size:28px;font-weight:700;margin-bottom:16px">Issue Profile Management</div>
+<div style="width:600px;background:#fff;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:24px;margin:0 auto">
+  <div style="font-size:22px;font-weight:700;margin-bottom:8px">Issue Profile Registration</div>
+
+  <div style="margin-top:16px">
+    <label style="font-size:12px;color:#666">VC Plan ID *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="VC Plan ID" />
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Title *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Title" />
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Description</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Description" />
+  </div>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+    <div style="flex:1">
+      <label style="font-size:12px;color:#666">VC Schema ID *</label>
+      <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box;background:#f5f5f5" disabled placeholder="(선택 필요)" />
+    </div>
+    <button style="margin-top:20px;background:none;border:none;color:#FF8400;cursor:pointer;font-size:20px">🔍</button>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Initiate Type *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option value="user_init">User Initiate</option>
+      <option value="issuer_init">Issuer Initiate</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Language *</label>
+    <input style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box" placeholder="Language" />
+  </div>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">Endpoints *</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <input style="flex:1;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;box-sizing:border-box" placeholder="Endpoint URL" />
+    <button style="background:none;border:none;cursor:pointer;color:#FF8400;font-size:20px">➖</button>
+  </div>
+  <button style="color:#FF8400;background:none;border:none;cursor:pointer;font-size:13px;margin-top:6px;display:flex;align-items:center;gap:4px">➕ Add Endpoint</button>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">E2E</div>
+  <div style="margin-top:8px">
+    <label style="font-size:12px;color:#666">Cipher *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>AES-256-CBC</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Curve *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>Secp256r1</option>
+    </select>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:12px;color:#666">Padding *</label>
+    <select style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;margin-top:4px;box-sizing:border-box">
+      <option>PKCS5</option>
+    </select>
+  </div>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">Tags *</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <input style="flex:1;border:1px solid #ccc;border-radius:4px;padding:8px 10px;font-size:14px;box-sizing:border-box" placeholder="Tag" />
+    <button style="background:none;border:none;cursor:pointer;color:#FF8400;font-size:20px">➖</button>
+  </div>
+  <button style="color:#FF8400;background:none;border:none;cursor:pointer;font-size:13px;margin-top:6px;display:flex;align-items:center;gap:4px">➕ Add Tag</button>
+
+  <div style="font-size:16px;font-weight:600;margin-top:20px;margin-bottom:8px">User Query Method</div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+      <input type="radio" name="uqm2" /> DB
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+      <input type="radio" name="uqm2" checked /> TEST
+    </label>
+  </div>
+
+  <div style="display:flex;justify-content:center;gap:12px;margin-top:28px">
+    <button style="background:#FF8400;color:#fff;border:none;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer" data-action="btn-register">Register</button>
+    <button style="background:#000000;color:#fff;border:none;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer">Reset</button>
+    <button style="background:#fff;color:#666;border:1px solid #ccc;border-radius:4px;padding:8px 24px;font-size:14px;cursor:pointer" data-action="btn-cancel">Cancel</button>
+  </div>
+</div>`)
+        }
+      ],
+      "html": ""
+    },
+
+    /* ──────────────────────────────────────────────
+       3. Demo 서버 — VC 정보 입력 팝업
+    ────────────────────────────────────────────── */
+    {
+      "id": "demo-popup",
+      "scenarioId": "demo-popup",
+      "title": "VC 정보 입력 팝업",
+      "type": "mobile",
+      "codeRef": "did-demo-server / addVcInfo.html",
+      "entry": [
+        "VC 발급 과정에서 Demo 팝업이 열림",
+        "VC 발급 전 사용자 정보를 입력하는 기존 팝업"
+      ],
+      "changes": [
+        "기존 사용자 정보 입력 폼은 그대로 유지됩니다.",
+        "입력 폼 하단에 'Skip — the issuer will auto-generate claim data' 링크가 추가됩니다.",
+        "해당 링크는 입력을 생략하는 기능일 뿐, TEST 방식 전용 화면은 아닙니다.",
+        "TEST 방식에서는 발급 시 필요한 정보가 자동 준비되므로 Skip 후에도 발급을 계속 진행할 수 있습니다.",
+        "DB 방식에서 Skip을 누르면 사용자 정보가 저장되지 않아 이후 발급 단계에서 실패할 수 있습니다.",
+        "앱의 이동 방식은 바뀌지 않고, 팝업 하단에 돌아가기 선택지가 추가됩니다."
+      ],
+      "initial": [
+        "VC Schema를 기준으로 사용자 정보 입력 폼 표시",
+        "Save 버튼으로 입력한 정보를 저장",
+        "하단 'Skip — the issuer will auto-generate claim data' 링크로 저장 없이 팝업 종료"
+      ],
+      "actions": [
+        {
+          "id": "btn-save",
+          "label": "Save 버튼",
+          "description": "입력한 사용자 정보를 저장하고 기존 발급 진행 화면으로 돌아감"
+        },
+        {
+          "id": "skip-link",
+          "label": "Skip — the issuer will auto-generate claim data",
+          "description": "저장하지 않고 기존 발급 진행 화면으로 돌아감"
+        }
+      ],
+      "sequence": [
+        { "from": "발급 진행 화면", "to": "Demo 팝업", "label": "VC 정보 화면 열림", "type": "request" },
+        { "from": "Demo 팝업", "to": "사용자", "label": "입력 폼과 Skip 링크 표시", "type": "event" },
+        { "from": "사용자", "to": "Demo 팝업", "label": "Save 또는 Skip 선택", "type": "action" },
+        { "from": "Demo 팝업", "to": "발급 진행 화면", "label": "이전 발급 흐름으로 복귀", "type": "event" }
+      ],
+      "html": `
+<div style="padding:16px;font-family:sans-serif">
+  <div style="font-size:16px;font-weight:700;margin-bottom:4px">Identification Information</div>
+  <div style="border-bottom:1px solid #e0e0e0;margin:8px 0 14px"></div>
+
+  <div class="form-group">
+    <label class="form-label">Name <span class="required">*</span></label>
+    <input class="form-control" placeholder="Enter Name" />
+  </div>
+  <div class="form-group">
+    <label class="form-label">Birthdate <span class="required">*</span></label>
+    <input class="form-control" placeholder="YYYY-MM-DD" />
+  </div>
+  <div class="form-group">
+    <label class="form-label">Student ID <span class="required">*</span></label>
+    <input class="form-control" placeholder="Enter Student ID" />
+  </div>
+  <div class="form-group">
+    <label class="form-label">Photo <span class="required">*</span></label>
+    <input class="form-control" type="file" />
+  </div>
+
+  <p style="font-size:11px;color:#888;margin:4px 0 12px">* Indicates required input.</p>
+
+  <div style="margin-top:8px">
+    <button class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;text-align:center" data-action="btn-save">Save</button>
+  </div>
+  <span data-action="skip-link" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:#888;text-decoration:underline;cursor:pointer">
+    Skip — the issuer will auto-generate claim data
+  </span>
+</div>`
+    }
+
+  ]
+});
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   공통: 버전 이력 / 실제 화면 캡처 / 개편 후 사이드바
+═══════════════════════════════════════════════════════════ */
+const VERSION_HISTORY = [
+  { version: "v1.0.0", date: "2026-04-23", title: "Issue Profile TEST 모드", scope: "Issue Profile 사용자 정보 조회 방식(DB/TEST) 선택, Demo 팝업 Skip 링크" },
+  { version: "v1.1.0", date: "2026-08-31", title: "Admin 콘솔 메뉴 개편 · OID4VCI 관리", scope: "OID4VCI 설정 메뉴, OID4VCI Credential 발급 이력/상태 변경, Issuance Mode(Direct/Proxy), 메뉴 재구성" },
+  { version: "v1.2.0", date: "2026-10-21", title: "OID4VCI Credential 폐기 · 설정 저장 방식 정리", scope: "Credential Revocation Endpoint, Credential Configuration 저장 방식, Webview 발급 화면 개선" }
+];
+
+const VERSION_TABLE = (current) => `
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+  <thead><tr style="background:#f5f5f5;border-bottom:2px solid #e0e0e0">
+    <th style="padding:8px 10px;text-align:left">버전</th><th style="padding:8px 10px;text-align:left">일자</th>
+    <th style="padding:8px 10px;text-align:left">제목</th><th style="padding:8px 10px;text-align:left">범위</th></tr></thead>
+  <tbody>${VERSION_HISTORY.map(v => `
+    <tr style="border-bottom:1px solid #e0e0e0;${v.version === current ? 'background:#FFF8F0;font-weight:600' : ''}">
+      <td style="padding:8px 10px"><a href="#${v.version}/screen-map" style="color:#FF8400">${v.version}</a></td>
+      <td style="padding:8px 10px">${v.date}</td><td style="padding:8px 10px">${v.title}</td>
+      <td style="padding:8px 10px;color:#555">${v.scope}</td></tr>`).join('')}
+  </tbody>
+</table>`;
+
+const OVERVIEW = (version, summary, points) => `
+<div style="background:#fff;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.08);padding:24px">
+  <div style="font-size:12px;font-weight:700;color:#FF8400;letter-spacing:.05em">${version} 변경 개요</div>
+  <div style="font-size:20px;font-weight:700;margin:6px 0 10px">${summary}</div>
+  <ul style="margin:0 0 18px 18px;font-size:13px;line-height:1.8;color:#444">${points.map(p => `<li>${p}</li>`).join('')}</ul>
+  <div style="font-size:14px;font-weight:700;margin:18px 0 6px">화면 이동 맵</div>
+  <div id="screen-map-auto"></div>
+  <div style="font-size:14px;font-weight:700;margin:18px 0 6px">버전 이력</div>
+  ${VERSION_TABLE(version)}
+</div>`;
+
+/* 실제 Admin 콘솔(127.0.0.1:8091) 캡처 이미지 — 운영 가이드와 같은 images 폴더 사용 */
+const SHOT = (file, caption) => `
+<figure style="margin:0">
+  <img src="images/${file}" alt="${caption}" style="display:block;max-width:100%;border:1px solid #e2e8f0;border-radius:6px;background:#fff" />
+  <figcaption style="font-size:12px;color:#64748b;margin-top:8px">실제 화면 · ${caption} <code style="font-size:11px">images/${file}</code></figcaption>
+</figure>`;
+
+const NAV = (label, active, depth) => {
+  const pad = [12, 28, 44][depth || 0];
+  const base = `padding:${depth ? 6 : 8}px 12px ${depth ? 6 : 8}px ${pad}px;border-radius:6px;cursor:pointer;font-size:${depth ? 13 : 14}px`;
+  return active
+    ? `<div style="${base};background:#4E546B;color:#fff;font-weight:700">${label}</div>`
+    : `<div style="${base};color:${depth ? 'rgba(255,255,255,0.78)' : '#fff'}">${label}</div>`;
+};
+const GROUP = (label, open) => `<div style="padding:8px 12px;color:#fff;display:flex;align-items:center;border-radius:6px"><span style="flex:1">${label}</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">${open ? '▼' : '▶'}</span></div>`;
+
+/* Issuer Admin 사이드바 (v1.1.0 이후 메뉴 구성) */
+const SIDEBAR2 = (active) => `
+<nav style="width:230px;min-width:230px;background:#202B45;border-radius:8px;margin:4px 0 4px 4px;display:flex;flex-direction:column;font-size:14px;font-family:SUIT,Roboto,sans-serif;color:#fff">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #4E546B">
+    <div style="width:30px;height:30px;background:#FF8400;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">IS</div>
+    <span style="font-weight:600">Issuer Admin</span>
+  </div>
+  <div style="flex:1;padding:8px;overflow:auto">
+    ${NAV('Issuer Management', active === 'issuer')}
+    ${GROUP('OID4VCI', true)}
+    ${NAV('Issuer Metadata', active === 'metadata', 1)}
+    ${NAV('Credential Configurations', active === 'config', 1)}
+    ${NAV('Client Settings', active === 'client', 1)}
+    ${NAV('List Provider', active === 'provider', 1)}
+    ${GROUP('OpenDID', true)}
+    <div style="padding:6px 12px 6px 28px;font-size:13px;color:rgba(255,255,255,0.6)">VC ▼</div>
+    ${NAV('Namespaces', false, 2)}
+    ${NAV('VC Schemas', false, 2)}
+    ${NAV('Issuance Profiles', active === 'profile', 2)}
+    <div style="padding:6px 12px 6px 28px;font-size:13px;color:rgba(255,255,255,0.6)">ZKP ▶</div>
+    ${NAV('User Management', false)}
+    ${GROUP('Issued Credentials', true)}
+    ${NAV('OID4VCI Credentials', active === 'oid4vci-issued', 1)}
+    ${NAV('OpenDID Credentials', active === 'opendid-issued', 1)}
+    ${NAV('Server Configuration', false)}
+    ${GROUP('Admin Management', false)}
+  </div>
+</nav>`;
+
+const WRAP2 = (active, title, content) => `
+<div style="display:flex;height:100%;min-height:520px;font-family:Roboto,sans-serif">
+  ${SIDEBAR2(active)}
+  <div style="flex:1;background:#f5f5f5;overflow:auto;padding:20px 24px">
+    <div style="font-size:26px;font-weight:700;margin-bottom:16px">${title}</div>
+    ${content}
+  </div>
+</div>`;
+
+const FIELD = (label, value, opts = {}) => `
+<div style="margin-top:12px;${opts.half ? 'flex:1;min-width:0' : ''}">
+  <div style="font-size:11px;color:${opts.fixed ? '#aaa' : '#666'}">${label}</div>
+  <div style="border-bottom:1px ${opts.fixed ? 'dotted #bbb' : 'solid #999'};padding:4px 0;font-size:14px;color:${opts.fixed ? '#999' : '#222'};${opts.hl ? 'background:#fef3c7;outline:2px solid #f59e0b;outline-offset:2px' : ''}">${value}</div>
+  ${opts.hint ? `<div style="font-size:11px;color:#999;margin-top:3px">${opts.hint}</div>` : ''}
+</div>`;
+
+/* Issuer Metadata 목업 (v1.1.0 시점 — Revocation Endpoint 없음) */
+const METADATA_MOCK = (withRevocation) => WRAP2('metadata', 'Issuer Metadata', `
+<div style="background:#fff;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div style="font-size:11px;color:#1976d2;font-weight:600">OID4VCI MANAGEMENT</div><div style="font-size:20px;font-weight:700">Issuer Metadata</div></div>
+    <button style="background:#FF8400;color:#fff;border:none;border-radius:4px;padding:6px 14px;font-size:13px" data-action="btn-edit">✎ EDIT</button>
+  </div>
+  <div style="display:flex;gap:16px;margin-top:14px;font-size:13px">
+    <div style="flex:1;border:1px solid #e0e0e0;border-radius:4px;padding:12px;background:#fafbfc"><b>Credential Request Encryption</b><div style="margin-top:6px">Enc values supported: A128GCM, A256GCM</div><div style="margin-top:6px">Encryption Required: OFF ◯— ON</div></div>
+    <div style="flex:1;border:1px solid #e0e0e0;border-radius:4px;padding:12px;background:#fafbfc"><b>Credential Response Encryption</b><div style="margin-top:6px">Alg values supported: RSA1_5, RSA-OAEP</div><div>Enc values supported: A128GCM, A256GCM</div><div style="margin-top:6px">Encryption Required: OFF ◯— ON</div></div>
+  </div>
+  <div style="font-weight:600;margin-top:18px">Endpoints</div>
+  ${FIELD('Credential Issuer (Main Endpoint)', 'https://issuer.example.com')}
+  ${FIELD('Authorization Servers', 'https://issuer.example.com', { hint: 'URL of the OIDC Authorization Server' })}
+  <div style="display:flex;gap:16px">
+    ${FIELD('Credential Offer Endpoint', 'https://issuer.example.com/credential-offer', { fixed: true, half: true, hint: 'Fixed endpoint for the credential offer' })}
+    ${FIELD('Credential Endpoint', 'https://issuer.example.com/credential', { fixed: true, half: true, hint: 'Fixed endpoint to request credentials' })}
+  </div>
+  <div style="display:flex;gap:16px">
+    ${FIELD('Nonce Endpoint', 'https://issuer.example.com/nonce', { fixed: true, half: true, hint: 'Fixed endpoint to request a fresh nonce' })}
+    ${withRevocation
+      ? FIELD('Credential Revocation Endpoint', 'https://issuer.example.com/credential-lifecycle/revoke', { fixed: true, half: true, hl: true, hint: 'Fixed endpoint for credential revocation' })
+      : FIELD('Deferred Credential Endpoint', 'https://issuer.example.com/deferred_credential', { fixed: true, half: true, hint: 'Fixed endpoint for deferred issuance' })}
+  </div>
+  ${withRevocation ? `<div style="display:flex;gap:16px">${FIELD('Deferred Credential Endpoint', 'https://issuer.example.com/deferred_credential', { fixed: true, half: true, hint: 'Fixed endpoint for deferred issuance' })}<div style="flex:1"></div></div>` : ''}
+  ${FIELD('Notification Endpoint', 'https://issuer.example.com/notification', { fixed: true, hint: 'Fixed endpoint for transaction notifications' })}
+</div>`);
+
+const STATUS_TRANSITION = `
+<table style="border-collapse:collapse;font-size:13px;margin-top:14px;background:#fff">
+  <thead><tr style="background:#f5f5f5"><th style="padding:6px 12px;text-align:left">현재 상태</th><th style="padding:6px 12px;text-align:left">변경 가능 상태</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 12px">VALID</td><td style="padding:6px 12px">SUSPENDED, INVALID</td></tr>
+    <tr><td style="padding:6px 12px">SUSPENDED</td><td style="padding:6px 12px">VALID, INVALID</td></tr>
+    <tr><td style="padding:6px 12px">INVALID</td><td style="padding:6px 12px;color:#999">변경 불가</td></tr>
+  </tbody>
+</table>`;
+
+/* v1.0.0 — 원본 기획서에 개요 화면 추가 */
+window.__SPECS[0].screens.unshift({
+  "id": "screen-map",
+  "scenarioId": "issuer-admin",
+  "title": "변경 개요",
+  "type": "desktop",
+  "changes": [
+    "Issue Profile에 사용자 정보 조회 방식(User Query Method: DB / TEST)을 추가합니다.",
+    "Demo 서버의 VC 정보 입력 팝업에 Skip 링크를 추가합니다.",
+    "이 버전의 사이드바는 메뉴 개편(v1.1.0) 이전 구성입니다."
+  ],
+  "html": OVERVIEW("v1.0.0", "Issue Profile TEST 모드", [
+    "Issue Profile 등록/수정 화면에 User Query Method(DB / TEST) 선택 추가 — 기본값 DB",
+    "Issue Profile 목록에 User Query Type 컬럼 추가",
+    "Demo 서버 VC 정보 입력 팝업에 Skip 링크 추가"
+  ])
+});
+
+/* ═══════════════════════════════════════════════════════════
+   v1.1.0 — Admin 콘솔 메뉴 개편 · OID4VCI 관리
+═══════════════════════════════════════════════════════════ */
+window.__SPECS.push({
+  "version": "v1.1.0",
+  "project": "Issuer Admin 화면 설계서",
+  "scenarios": [
+    { "id": "overview", "label": "개요", "description": "변경 범위와 메뉴 구조" },
+    { "id": "oid4vci", "label": "OID4VCI", "description": "OID4VCI 발급 설정 메뉴" },
+    { "id": "opendid", "label": "OpenDID", "description": "OpenDID VC 발급 프로파일" },
+    { "id": "issued", "label": "Issued Credentials", "description": "프로토콜별 발급 이력" }
+  ],
+  "screens": [
+    {
+      "id": "screen-map",
+      "scenarioId": "overview",
+      "title": "변경 개요",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI 최상위 메뉴와 설정 화면 4종(Issuer Metadata, Credential Configurations, Client Settings, List Provider)을 추가합니다.",
+        "OID4VCI Credential 발급 이력 조회와 Status List 상태 변경 화면을 추가합니다.",
+        "Issuance Profile에 Issuance Mode(Direct / Proxy)를 추가합니다.",
+        "사이드 메뉴를 OID4VCI / OpenDID / Issued Credentials 중심으로 재구성합니다."
+      ],
+      "html": OVERVIEW("v1.1.0", "Admin 콘솔 메뉴 개편 · OID4VCI 관리", [
+        "OID4VCI 메뉴 신설: Issuer Metadata, Credential Configurations, Client Settings, List Provider",
+        "VC Management · ZKP Management를 OpenDID 하위(VC / ZKP)로 통합",
+        "Issued VC Management를 Issued Credentials로 변경하고 OID4VCI / OpenDID 발급 이력 분리",
+        "OID4VCI Credential 상태 변경(VALID ↔ SUSPENDED, → INVALID)과 사유 입력",
+        "Issuance Profile 등록/수정/상세에 Issuance Mode(Direct / Proxy) 추가"
+      ]),
+      "actions": [
+        { "id": "go-menu", "label": "메뉴 구조 변경", "description": "개편된 사이드 메뉴", "target": "menu" },
+        { "id": "go-metadata", "label": "Issuer Metadata", "description": "OID4VCI 설정 시작 화면", "target": "metadata" },
+        { "id": "go-issued", "label": "OID4VCI Credentials", "description": "발급 이력 조회", "target": "issued" },
+        { "id": "go-profile", "label": "Issuance Profiles", "description": "Direct / Proxy 지정", "target": "profile-list" }
+      ]
+    },
+    {
+      "id": "menu",
+      "scenarioId": "overview",
+      "title": "메뉴 구조 변경",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI 최상위 메뉴를 신규 추가합니다.",
+        "VC Management · ZKP Management를 OpenDID > VC / ZKP로 통합합니다.",
+        "Issued VC Management를 Issued Credentials로 변경하고 OID4VCI / OpenDID 발급 이력을 분리합니다.",
+        "목록 화면은 새 경로(/opendid/..., /issued-credentials/...)를 사용하고, 등록·상세·수정 화면은 기존 경로(/vc-management/..., /zkp-management/...)를 유지합니다."
+      ],
+      "initial": [
+        "Issuer 등록 완료(ACTIVATE) 상태에서만 전체 메뉴 노출",
+        "navigationConfig.tsx 기준 메뉴 구성"
+      ],
+      "html": `
+<div style="display:flex;gap:24px;align-items:flex-start">
+  <div style="width:260px">${SHOT('2-3-2.issuer-menu-after-registration.png', '메뉴 전체 펼침')}</div>
+  <table style="flex:1;border-collapse:collapse;font-size:13px;background:#fff">
+    <thead><tr style="background:#f5f5f5;border-bottom:2px solid #e0e0e0"><th style="padding:8px 10px;text-align:left">변경 전</th><th style="padding:8px 10px;text-align:left">변경 후</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:8px 10px">OID4VCI Management</td><td style="padding:8px 10px">OID4VCI › Issuer Metadata / Credential Configurations / Client Settings / List Provider</td></tr>
+      <tr><td style="padding:8px 10px">VC Management › Namespace / VC Schema / Issue Profile Management</td><td style="padding:8px 10px">OpenDID › VC › Namespaces / VC Schemas / Issuance Profiles</td></tr>
+      <tr><td style="padding:8px 10px">ZKP Management › ZKP Namespace / Credential Schema / Credential Definition Management</td><td style="padding:8px 10px">OpenDID › ZKP › Namespaces / Credential Schemas / Credential Definitions</td></tr>
+      <tr><td style="padding:8px 10px">Issued VC Management</td><td style="padding:8px 10px">Issued Credentials › OID4VCI Credentials (신규) / OpenDID Credentials</td></tr>
+      <tr><td style="padding:8px 10px">Admin Management, Server Configuration, User Management</td><td style="padding:8px 10px">변경 없음 (Admin Management › Password Policy Settings 포함)</td></tr>
+    </tbody>
+  </table>
+</div>`
+    },
+    {
+      "id": "metadata",
+      "scenarioId": "oid4vci",
+      "title": "Issuer Metadata",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI Issuer Metadata의 암호화 지원 정보와 Endpoint를 조회·수정하는 화면을 추가합니다.",
+        "초기에는 읽기 전용이며 EDIT 클릭 시 편집 모드로 전환되고 SAVE / CANCEL을 제공합니다.",
+        "Credential Issuer와 Authorization Servers만 편집할 수 있고, Offer/Credential/Nonce/Deferred/Notification Endpoint는 고정값으로 비활성 표시합니다.",
+        "저장 결과는 성공·실패 Alert로 안내합니다."
+      ],
+      "entry": ["사이드바 'OID4VCI > Issuer Metadata' 클릭"],
+      "api": {
+        "method": "GET / POST",
+        "endpoint": "/issuer/admin/v1/oid4vci/metadata",
+        "note": "POST로 전체 Metadata를 저장합니다. 저장 시 metadata 파일도 동기화합니다."
+      },
+      "actions": [
+        { "id": "btn-edit", "label": "EDIT 버튼", "description": "편집 모드 전환 (SAVE / CANCEL 노출)" }
+      ],
+      "html": METADATA_MOCK(false)
+    },
+    {
+      "id": "config-list",
+      "scenarioId": "oid4vci",
+      "title": "Credential Configurations",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI로 발급할 Credential Configuration을 목록으로 관리합니다.",
+        "컬럼: ID(링크) / Format / Identifiers / Registered Date / Modified Date",
+        "REGISTER, UPDATE, DELETE 버튼과 검색·새로고침을 제공합니다.",
+        "행 선택 후 UPDATE / DELETE 버튼이 활성화됩니다."
+      ],
+      "entry": ["사이드바 'OID4VCI > Credential Configurations' 클릭"],
+      "api": { "method": "GET / POST", "endpoint": "/issuer/admin/v1/oid4vci/credential-configs", "note": "Configuration 전체 Map을 POST로 저장합니다." },
+      "actions": [
+        { "id": "btn-register", "label": "REGISTER 버튼", "description": "등록 화면 이동", "target": "config-detail" },
+        { "id": "id-link", "label": "ID 링크", "description": "상세/수정 화면 이동", "target": "config-detail" }
+      ],
+      "html": SHOT('3-3-2-1.oid4vci-credential-config.png', 'Credential Configurations 목록')
+    },
+    {
+      "id": "config-detail",
+      "scenarioId": "oid4vci",
+      "title": "Configuration 등록 / 상세",
+      "type": "desktop",
+      "changes": [
+        "Configuration ID는 신규 등록 시에만 입력하고 상세 화면에서는 비활성화합니다.",
+        "Format: mso_mdoc-did(기본값) / dc+sd-jwt-did",
+        "Identifiers (SDK)를 ADD 버튼으로 여러 개 등록합니다.",
+        "Metadata JSON 문법을 검증합니다.",
+        "v1.1.0에서는 저장 시 SDK Credential Configuration과 Issuer Metadata의 credential_configurations_supported를 함께 갱신합니다. (v1.2.0에서 변경)"
+      ],
+      "api": { "method": "POST", "endpoint": "/issuer/admin/v1/oid4vci/credential-configs", "note": "v1.1.0: credential-configs 저장 후 metadata도 함께 POST" },
+      "actions": [
+        { "id": "btn-cancel", "label": "CANCEL 버튼", "description": "목록 복귀", "target": "config-list" }
+      ],
+      "html": SHOT('3-3-2-2.oid4vci-credential-config-registration.png', 'Register New Configuration')
+    },
+    {
+      "id": "client",
+      "scenarioId": "oid4vci",
+      "title": "Client Settings",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI 발급에 사용하는 Client 설정 화면을 추가합니다.",
+        "Main Client Settings: Client ID, Client Secret, Redirect URL, Redirect URIs, Scopes",
+        "Platform별 Client: Android, iOS, Android OpenID, iOS OpenID (Client ID, Redirect URIs, Scopes)",
+        "SAVE 버튼으로 저장하고 성공·실패 Alert를 제공합니다."
+      ],
+      "entry": ["사이드바 'OID4VCI > Client Settings' 클릭"],
+      "api": { "method": "GET / POST", "endpoint": "/issuer/admin/v1/oid4vci/properties", "note": "server_config의 OID4VCI_AUTH_PROPERTIES에 저장" },
+      "html": SHOT('3-3-3.oid4vci-client-settings.png', 'Client Settings')
+    },
+    {
+      "id": "provider",
+      "scenarioId": "oid4vci",
+      "title": "List Provider",
+      "type": "desktop",
+      "changes": [
+        "사용자 주도 Webview 발급을 위해 Issuer를 List Provider에 등록 요청하는 화면을 추가합니다.",
+        "List Provider URL과 Credential Issuer(Issuer DID에서 조회)는 읽기 전용입니다.",
+        "Credential Issuer Metadata URI와 User Initiation URI는 HTTP(S) 형식을 검증합니다.",
+        "요청 전 확인 Dialog를 띄우고, 요청 후에는 입력과 요청 버튼을 비활성화합니다.",
+        "등록 상태(PENDING / ACTIVE / REJECTED / REVOKED)를 배지로 표시합니다."
+      ],
+      "entry": ["사이드바 'OID4VCI > List Provider' 클릭"],
+      "api": { "method": "GET / POST", "endpoint": "/issuer/admin/v1/oid4vci/list-provider-registration" },
+      "html": SHOT('3-3-4.oid4vci-list-provider.png', 'List Provider Registration')
+    },
+    {
+      "id": "profile-list",
+      "scenarioId": "opendid",
+      "title": "Issuance Profiles",
+      "type": "desktop",
+      "changes": [
+        "메뉴가 OpenDID > VC > Issuance Profiles로 이동합니다. (목록 경로 /opendid/vc/issuance-profiles)",
+        "목록 컬럼은 VC Plan ID / Title(링크) / VC Schema ID / User Query Type / Registered At입니다.",
+        "Issuance Mode는 목록에 표시하지 않고 상세 화면에서 확인합니다.",
+        "REGISTER 버튼으로 등록, 행 선택 후 UPDATE 버튼으로 수정 화면에 진입합니다. 사이드 메뉴에는 등록·수정 항목을 노출하지 않습니다."
+      ],
+      "entry": ["사이드바 'OpenDID > VC > Issuance Profiles' 클릭"],
+      "api": { "method": "GET", "endpoint": "/issuer/admin/v1/issue-profiles", "note": "응답에 issuanceMode, userQueryType 포함" },
+      "actions": [
+        { "id": "btn-register", "label": "REGISTER 버튼", "description": "등록 화면 이동", "target": "profile" }
+      ],
+      "html": SHOT('3-4-3-1.issuance-profile-management.png', 'Issuance Profiles 목록')
+    },
+    {
+      "id": "profile",
+      "scenarioId": "opendid",
+      "title": "Issuance Profile 등록 / 수정",
+      "type": "desktop",
+      "changes": [
+        "Issuance Mode 필수 항목을 추가합니다. (Direct / Proxy)",
+        "Direct: Wallet이 Issuer에 직접 발급 요청 / Proxy: 중계 서버를 거쳐 발급 (KYC 서버에서 PII 조회, Holder DID Auth 검증)",
+        "등록·수정·상세 화면에 동일한 필드를 반영합니다.",
+        "CANCEL 시 Issuance Profiles 목록으로 복귀합니다."
+      ],
+      "api": {
+        "method": "POST",
+        "endpoint": "/issuer/admin/v1/issue-profiles",
+        "note": "수정은 PATCH /issuer/admin/v1/issue-profiles",
+        "request": { "body": { "issuanceMode": { "type": "enum", "required": true, "desc": "DIRECT | PROXY" }, "userQueryType": { "type": "enum", "required": true, "default": "DB", "desc": "DB | TEST" } } }
+      },
+      "actions": [
+        { "id": "btn-cancel", "label": "CANCEL 버튼", "description": "목록 복귀", "target": "profile-list" }
+      ],
+      "html": SHOT('3-4-3-2.issuance-profile-registration.png', 'Issue Profile Registration')
+    },
+    {
+      "id": "issued",
+      "scenarioId": "issued",
+      "title": "OID4VCI Credentials",
+      "type": "desktop",
+      "changes": [
+        "OID4VCI 발급 이력을 조회하는 화면을 신규 추가합니다.",
+        "컬럼: Issuance ID(링크) / User ID / Configuration ID / Format / Issuance State / Credential Status / Issued At",
+        "검색 조건: Issuance ID, User ID, Configuration ID, Format, Issuance State, Credential Status (Format·State·Status는 선택형)",
+        "서버 페이지네이션으로 조회하고, 행 선택 후 CHANGE STATUS를 실행합니다."
+      ],
+      "entry": ["사이드바 'Issued Credentials > OID4VCI Credentials' 클릭"],
+      "api": {
+        "method": "GET",
+        "endpoint": "/issuer/admin/v1/oid4vci/issued-credentials",
+        "request": { "query": { "page": { "type": "number" }, "size": { "type": "number" }, "searchKey": { "type": "string" }, "searchValue": { "type": "string" } } }
+      },
+      "actions": [
+        { "id": "btn-status", "label": "CHANGE STATUS 버튼", "description": "상태 변경 Dialog", "target": "status" },
+        { "id": "id-link", "label": "Issuance ID 링크", "description": "상세 화면 이동", "target": "issued-detail" }
+      ],
+      "html": SHOT('3-7-1-1.oid4vci-credentials.png', 'OID4VCI Credentials 목록')
+    },
+    {
+      "id": "status",
+      "scenarioId": "issued",
+      "title": "Credential Status 변경",
+      "type": "desktop",
+      "changes": [
+        "선택한 OID4VCI Credential의 Status List 상태를 변경합니다.",
+        "Issuance State가 ISSUED이고 현재 상태가 VALID 또는 SUSPENDED인 경우에만 변경할 수 있습니다.",
+        "Reason은 필수이며 최대 512자, 공백만 입력할 수 없습니다.",
+        "변경 후 Status List 값과 version을 갱신하고 변경 이력을 저장한 뒤 목록을 다시 조회합니다."
+      ],
+      "api": {
+        "method": "PATCH",
+        "endpoint": "/issuer/admin/v1/oid4vci/issued-credentials/{id}/status",
+        "request": { "body": { "status": { "type": "enum", "required": true, "desc": "VALID | SUSPENDED | INVALID" }, "reason": { "type": "string", "required": true, "desc": "최대 512자" } } },
+        "errors": [ { "code": "400", "desc": "ISSUED가 아니거나 허용되지 않는 상태 전이" }, { "code": "404", "desc": "Credential 또는 Status List 없음" } ]
+      },
+      "html": SHOT('3-7-1-2.oid4vci-credential-status-change.png', 'Change Credential Status') + STATUS_TRANSITION
+    },
+    {
+      "id": "issued-detail",
+      "scenarioId": "issued",
+      "title": "OID4VCI Credential 상세",
+      "type": "desktop",
+      "changes": [
+        "발급 및 Status List 연결 정보를 읽기 전용으로 표시합니다.",
+        "Issuance ID, User ID, Configuration ID, Format, Issuance State, Credential Status, Issued At, Expires At, Status Changed At",
+        "Status List URI / Index, Token Hash, 실패 시 Failed At / Failure Code / Failure Message",
+        "BACK으로 목록에 복귀합니다."
+      ],
+      "api": { "method": "GET", "endpoint": "/issuer/admin/v1/oid4vci/issued-credentials/{id}" },
+      "actions": [ { "id": "btn-back", "label": "BACK 버튼", "description": "목록 복귀", "target": "issued" } ],
+      "html": SHOT('3-7-1-3.oid4vci-credential-detail.png', 'OID4VCI Credential 상세')
+    },
+    {
+      "id": "opendid-issued",
+      "scenarioId": "issued",
+      "title": "OpenDID Credentials",
+      "type": "desktop",
+      "changes": [
+        "기존 Issued VC Management 화면을 Issued Credentials > OpenDID Credentials로 이동합니다.",
+        "목록·상세·상태 변경(ACTIVE / INACTIVE / REVOKED) 기능은 기존과 같습니다."
+      ],
+      "api": { "method": "GET", "endpoint": "/issuer/admin/v1/issued-vcs" },
+      "html": SHOT('3-7-2-1.opendid-credentials.png', 'OpenDID Credentials 목록')
+    }
+  ]
+});
+
+/* ═══════════════════════════════════════════════════════════
+   v1.2.0 — OID4VCI Credential 폐기 · 설정 저장 방식 정리
+═══════════════════════════════════════════════════════════ */
+window.__SPECS.push({
+  "version": "v1.2.0",
+  "project": "Issuer Admin 화면 설계서",
+  "scenarios": [
+    { "id": "overview", "label": "개요", "description": "변경 범위" },
+    { "id": "oid4vci", "label": "OID4VCI", "description": "OID4VCI 설정" },
+    { "id": "revocation", "label": "Credential 폐기", "description": "Wallet 주도 폐기" },
+    { "id": "webview", "label": "Webview 발급", "description": "사용자 주도 Webview 발급 화면" }
+  ],
+  "screens": [
+    {
+      "id": "screen-map",
+      "scenarioId": "overview",
+      "title": "변경 개요",
+      "type": "desktop",
+      "changes": [
+        "Issuer Metadata에 Credential Revocation Endpoint(고정값)를 표시합니다.",
+        "Credential Configuration 저장 시 Issuer Metadata를 함께 수정하지 않습니다.",
+        "Wallet이 Holder DID 서명으로 Credential 폐기를 요청하면 OID4VCI Credentials에 INVALID로 반영됩니다.",
+        "Webview 발급 화면이 저장된 Claim을 미리 채우지 않고, portrait 샘플 이미지를 표시합니다."
+      ],
+      "html": OVERVIEW("v1.2.0", "OID4VCI Credential 폐기 · 설정 저장 방식 정리", [
+        "Issuer Metadata: Credential Revocation Endpoint(<code>{credential_issuer}/credential-lifecycle/revoke</code>) 고정 표시",
+        "Credential Configurations: 저장 시 Configuration만 저장, 공개 Metadata의 credential_configurations_supported는 조회 시 Configuration으로 구성",
+        "Credential 폐기: c_nonce 일회성 소비, Holder DID(subject_did) 일치 확인 후 INVALID 전환",
+        "Webview 발급: 기존 Claim 미리 채우기 제거, portrait(jpeg) 샘플 이미지 표시"
+      ]),
+      "actions": [
+        { "id": "go-metadata", "label": "Issuer Metadata", "description": "Revocation Endpoint 추가", "target": "metadata" },
+        { "id": "go-config", "label": "Configuration 상세", "description": "저장 방식 변경", "target": "config-detail" },
+        { "id": "go-revocation", "label": "Credential 폐기 흐름", "description": "Wallet → Issuer", "target": "revocation" },
+        { "id": "go-webview", "label": "Webview 발급 화면", "description": "Claim 입력 화면", "target": "webview" }
+      ]
+    },
+    {
+      "id": "metadata",
+      "scenarioId": "oid4vci",
+      "title": "Issuer Metadata",
+      "type": "desktop",
+      "changes": [
+        "Endpoints 영역에 Credential Revocation Endpoint를 추가합니다. (Nonce Endpoint 오른쪽)",
+        "값은 Credential Issuer URL 뒤에 /credential-lifecycle/revoke를 붙인 고정값이며 편집할 수 없습니다. (끝의 / 는 제거)",
+        "공개 Metadata(/.well-known/openid-credential-issuer)에 credential_revocation_endpoint로 노출됩니다.",
+        "저장된 값과 관계없이 조회 시 고정값으로 대체됩니다."
+      ],
+      "states": [
+        { "id": "shot", "label": "실제 화면", "html": SHOT('3-3-1.oid4vci-issuer-metadata.png', 'Issuer Metadata') },
+        { "id": "mock", "label": "변경 위치", "html": METADATA_MOCK(true) }
+      ],
+      "api": {
+        "method": "GET",
+        "endpoint": "/issuer/admin/v1/oid4vci/metadata",
+        "response": { "body": { "credential_issuer": "https://issuer.example.com", "nonce_endpoint": "https://issuer.example.com/nonce", "credential_revocation_endpoint": "https://issuer.example.com/credential-lifecycle/revoke" } }
+      },
+      "html": ""
+    },
+    {
+      "id": "config-detail",
+      "scenarioId": "oid4vci",
+      "title": "Configuration 등록 / 상세",
+      "type": "desktop",
+      "changes": [
+        "상세 화면의 Metadata JSON을 Issuer Metadata가 아니라 저장된 Configuration(metadataJson)에서 불러옵니다.",
+        "저장 시 Credential Configuration만 저장하고 Issuer Metadata는 수정하지 않습니다. 삭제도 동일합니다.",
+        "Metadata JSON은 JSON 객체여야 하며, 배열·문자열 등은 'Metadata must be a JSON object.' 오류로 막습니다.",
+        "공개 Metadata의 credential_configurations_supported는 조회 시 저장된 Configuration으로 구성되며, metadata 파일은 트랜잭션 커밋 후 원자적으로 기록됩니다."
+      ],
+      "api": { "method": "POST", "endpoint": "/issuer/admin/v1/oid4vci/credential-configs", "note": "v1.2.0부터 metadata API를 함께 호출하지 않음" },
+      "states": [
+        { "id": "detail", "label": "상세 / 수정", "html": SHOT('3-3-2-3.oid4vci-credential-config-detail.png', 'Credential Config Detail') },
+        { "id": "register", "label": "등록", "html": SHOT('3-3-2-2.oid4vci-credential-config-registration.png', 'Register New Configuration') }
+      ],
+      "html": ""
+    },
+    {
+      "id": "revocation",
+      "scenarioId": "revocation",
+      "title": "Credential 폐기 흐름",
+      "type": "desktop",
+      "changes": [
+        "Wallet이 보유한 SD-JWT VC / mdoc 한 건을 Holder DID 서명 JWT로 폐기 요청합니다. (Access Token, TAS 미사용)",
+        "Wallet은 nonce_endpoint에서 c_nonce를 받고, Status List URI·index와 함께 서명해 credential_revocation_endpoint로 전송합니다.",
+        "Issuer는 서명·Holder DID(subject_did)·c_nonce를 확인하고 상태를 INVALID로 변경합니다. c_nonce는 한 번만 사용할 수 있습니다.",
+        "변경 이력은 사유 USER_REQUEST, 변경자 Holder DID로 저장되며 Admin의 OID4VCI Credentials 목록에 INVALID로 표시됩니다.",
+        "이미 INVALID인 Credential은 이력을 추가하지 않고 성공으로 응답합니다."
+      ],
+      "sequence": [
+        { "from": "Wallet", "to": "Issuer", "label": "POST {nonce_endpoint}", "type": "request" },
+        { "from": "Issuer", "to": "Wallet", "label": "c_nonce (10분, 1회용)", "type": "response" },
+        { "from": "Wallet", "to": "Wallet", "label": "revocation_token 서명 (ES256, Holder DID authentication 키)", "type": "action" },
+        { "from": "Wallet", "to": "Issuer", "label": "POST {credential_revocation_endpoint}", "type": "request" },
+        { "from": "Issuer", "to": "Issuer", "label": "서명·subject_did·c_nonce 검증 → INVALID", "type": "action" },
+        { "from": "Issuer", "to": "Wallet", "label": "credential_status, revoked_at", "type": "response" }
+      ],
+      "api": {
+        "method": "POST",
+        "endpoint": "/credential-lifecycle/revoke",
+        "note": "JWT Header: alg=ES256, typ=opendid-credential-revocation+jwt, kid=Holder DID URL / Payload: iss, iat, exp(iat+5분 이내), nonce, credential_status.status_list{uri, idx}",
+        "request": { "body": { "revocation_token": { "type": "string", "required": true, "desc": "JWS Compact Serialization" } } },
+        "response": { "body": { "credential_status": { "status_list": { "uri": "https://issuer.example.com/status-lists/1", "idx": 42 }, "status": "INVALID" }, "revoked_at": "2026-10-21T02:00:00Z" } },
+        "errors": [
+          { "code": "SSRVISS00206", "desc": "발급 Credential 없음 또는 ISSUED 아님" },
+          { "code": "SSRVISS00210", "desc": "nonce 없음·만료·재사용" },
+          { "code": "SSRVISS00302", "desc": "토큰 형식·Claim·유효시간 또는 Holder DID 불일치" },
+          { "code": "SSRVISS00413", "desc": "서명 검증 또는 공개키 디코딩 실패" }
+        ]
+      },
+      "states": [
+        { "id": "admin", "label": "Admin 반영", "html": SHOT('3-7-1-1.oid4vci-credentials.png', 'OID4VCI Credentials — 폐기 시 Credential Status가 INVALID로 표시') + STATUS_TRANSITION }
+      ],
+      "html": ""
+    },
+    {
+      "id": "webview",
+      "scenarioId": "webview",
+      "title": "Webview 발급 - Claim 입력",
+      "type": "mobile",
+      "codeRef": "did-issuer-server / templates/oid4vci-issuance.html",
+      "changes": [
+        "Claim 입력 폼을 이전에 저장된 Claim 값으로 미리 채우지 않습니다. 확인 시 입력한 값으로 저장된 Claim을 대체합니다.",
+        "Claim 이름이 portrait이고 값 형식이 jpeg인 경우 입력란 대신 샘플 이미지 미리보기와 안내 문구를 표시하고, 샘플 이미지가 Credential에 포함됩니다.",
+        "jpeg 값은 Base64, 최대 2MB, JPEG 시그니처를 검증합니다.",
+        "화면 CSP에 img-src data: 를 허용해 미리보기 이미지를 표시합니다."
+      ],
+      "entry": ["List Provider에 등록된 User Initiation URI로 Wallet Webview 진입"],
+      "html": `
+<div style="padding:16px;font-family:sans-serif">
+  <div style="font-size:16px;font-weight:700;margin-bottom:4px">Mobile ID (mDocPID)</div>
+  <div style="border-bottom:1px solid #e0e0e0;margin:8px 0 14px"></div>
+  <div class="form-group"><label class="form-label">Family Name <span class="required">*</span></label><input class="form-control" placeholder="" /></div>
+  <div class="form-group"><label class="form-label">Given Name <span class="required">*</span></label><input class="form-control" placeholder="" /></div>
+  <div class="form-group"><label class="form-label">Birth Date <span class="required">*</span></label><input class="form-control" placeholder="YYYY-MM-DD" /></div>
+  <div class="form-group">
+    <label class="form-label">Portrait</label>
+    <div style="width:100px;height:120px;border:1px solid #d0d5dd;border-radius:9px;background:linear-gradient(#e5e7eb,#cbd5e1);display:flex;align-items:center;justify-content:center;color:#64748b;font-size:11px">sample.jpg</div>
+    <p style="color:#667085;font-size:13px;margin:7px 0 0">The sample portrait will be included in the credential.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary" style="flex:1">OK</button><button class="btn" style="flex:1;border:1px solid #d0d5dd;background:#fff">Cancel</button></div>
+</div>`
+    }
+  ]
+});
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   Unified Verifier — Spec Renderer v2
+   Hash scheme: #<version>/<screenId>  e.g. #v1.0.0/policy-list
+   No server required — works with file:// protocol
+═══════════════════════════════════════════════════════════ */
+
+const state = {
+  specs: {},
+  versions: [],
+  version: null,
+  spec: null,
+  screenId: null,
+  currentStateId: null,
+};
+
+const $ = (sel) => document.querySelector(sel);
+const $id = (id) => document.getElementById(id);
+
+/* ── Init ── */
+function init() {
+  const raw = window.__SPECS || [];
+  if (!raw.length) {
+    renderError('등록된 Spec이 없습니다. versions/vX.Y.Z/spec.js 를 확인하세요.');
+    return;
+  }
+  raw.forEach(s => { state.specs[s.version] = s; });
+  state.versions = Object.keys(state.specs).sort();
+
+  const select = $id('versionSelect');
+  select.innerHTML = '';
+  state.versions.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    select.appendChild(opt);
+  });
+  select.addEventListener('change', () => navigateTo(select.value, null));
+  window.addEventListener('hashchange', onHashChange);
+  onHashChange();
+}
+
+function onHashChange() {
+  const { version, screenId } = parseHash();
+  const v = version && state.specs[version] ? version : state.versions[state.versions.length - 1];
+  loadVersion(v);
+  showScreen(screenId || defaultScreenId());
+}
+
+function parseHash() {
+  const h = location.hash.replace(/^#/, '');
+  if (!h) return {};
+  const [version, screenId] = h.split('/');
+  return { version, screenId };
+}
+
+function defaultScreenId() {
+  return state.spec && state.spec.screens[0] ? state.spec.screens[0].id : null;
+}
+
+function loadVersion(version) {
+  const spec = state.specs[version];
+  if (!spec) return;
+  state.spec = spec;
+  state.version = version;
+  $id('versionSelect').value = version;
+  if (spec.project) $id('projectName').textContent = spec.project;
+  renderSidebar();
+}
+
+/* ── Sidebar ── */
+function renderSidebar() {
+  const sidebar = $id('sidebar');
+  sidebar.innerHTML = '';
+  const { scenarios = [], screens = [] } = state.spec;
+
+  const grouped = new Map();
+  scenarios.forEach(s => grouped.set(s.id, { scenario: s, screens: [] }));
+  grouped.set('__ungrouped', { scenario: { id: '__ungrouped', label: '기타' }, screens: [] });
+
+  screens.forEach(scr => {
+    const key = scr.scenarioId && grouped.has(scr.scenarioId) ? scr.scenarioId : '__ungrouped';
+    grouped.get(key).screens.push(scr);
+  });
+
+  grouped.forEach((grp) => {
+    if (!grp.screens.length) return;
+    const g = document.createElement('div');
+    g.className = 'scenario-group';
+    const title = document.createElement('div');
+    title.className = 'scenario-title';
+    title.textContent = grp.scenario.label || grp.scenario.id;
+    g.appendChild(title);
+    grp.screens.forEach(scr => {
+      const item = document.createElement('div');
+      item.className = 'screen-item';
+      item.dataset.screenId = scr.id;
+      item.textContent = scr.title || scr.id;
+      item.addEventListener('click', () => navigateTo(state.version, scr.id));
+      g.appendChild(item);
+    });
+    sidebar.appendChild(g);
+  });
+}
+
+/* ── Show Screen ── */
+function showScreen(screenId) {
+  if (!state.spec) return;
+  const screen = state.spec.screens.find(s => s.id === screenId) || state.spec.screens[0];
+  if (!screen) return;
+  state.screenId = screen.id;
+  state.currentStateId = null;
+
+  document.querySelectorAll('.screen-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.screenId === screen.id);
+    el.classList.remove('highlight');
+  });
+
+  renderViewport(screen);
+  renderHelpPanel(screen);
+  renderFlowGuide(screen);
+  bindActionHighlight(screen);
+}
+
+/* ── Viewport (states 탭 + html) ── */
+function renderViewport(screen) {
+  const viewport = $id('viewport');
+  viewport.innerHTML = '';
+  viewport.classList.toggle('mobile-mode', screen.type === 'mobile');
+
+  const hasStates = Array.isArray(screen.states) && screen.states.length > 0;
+  const html = hasStates ? screen.states[0].html : (screen.html || '');
+  if (hasStates) state.currentStateId = screen.states[0].id;
+
+  if (screen.type === 'mobile') {
+    viewport.appendChild(buildPhoneFrame(html, screen.codeRef));
+  } else {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'viewport-inner';
+
+    // State tabs
+    if (hasStates) {
+      const tabs = document.createElement('div');
+      tabs.className = 'state-tabs';
+      screen.states.forEach((st, i) => {
+        const tab = document.createElement('button');
+        tab.className = 'state-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = st.label || st.id;
+        tab.addEventListener('click', () => switchState(screen, st.id));
+        tabs.appendChild(tab);
+      });
+      wrapper.appendChild(tabs);
+    }
+
+    const frame = document.createElement('div');
+    frame.className = 'content-area';
+    frame.id = 'contentFrame';
+    frame.innerHTML = html;
+    wrapper.appendChild(frame);
+    viewport.appendChild(wrapper);
+  }
+
+  // Screen map auto-render
+  if (screen.id === 'screen-map') {
+    setTimeout(() => renderScreenMap(), 0);
+  }
+}
+
+function switchState(screen, stateId) {
+  const st = screen.states.find(s => s.id === stateId);
+  if (!st) return;
+  state.currentStateId = stateId;
+
+  document.querySelectorAll('.state-tab').forEach(t => t.classList.remove('active'));
+  const tabs = document.querySelectorAll('.state-tab');
+  const idx = screen.states.findIndex(s => s.id === stateId);
+  if (tabs[idx]) tabs[idx].classList.add('active');
+
+  const frame = $id('contentFrame');
+  if (frame) {
+    frame.style.opacity = '0';
+    frame.style.transform = 'translateY(8px)';
+    setTimeout(() => {
+      frame.innerHTML = st.html;
+      frame.style.opacity = '1';
+      frame.style.transform = 'translateY(0)';
+    }, 120);
+  }
+}
+
+function buildPhoneFrame(html, codeRef) {
+  const frame = document.createElement('div');
+  frame.className = 'phone-frame';
+  frame.innerHTML = `
+    <div class="phone-notch"></div>
+    <div class="status-bar"><span class="time">9:41</span><span>● ● ● ●</span></div>
+    <div class="phone-body">${html}</div>
+    ${codeRef ? `<div class="code-ref"><strong>CODE:</strong> ${codeRef}</div>` : ''}
+  `;
+  return frame;
+}
+
+/* ── Help Panel (진입조건 + API + 시퀀스 + 액션) ── */
+function renderHelpPanel(screen) {
+  const panel = $id('helpPanel');
+  const parts = [];
+  parts.push(`<div class="help-meta">${screen.type || 'desktop'}</div>`);
+  parts.push(`<div class="help-title">${esc(screen.title || screen.id)}</div>`);
+
+  if (arr(screen.changes)) {
+    parts.push(`<div class="help-subtitle">이번 변경점</div>`);
+    screen.changes.forEach(t => parts.push(`<div class="help-item">${esc(t)}</div>`));
+  }
+
+  // 진입 조건
+  if (arr(screen.entry)) {
+    parts.push(`<div class="help-subtitle">진입 조건</div>`);
+    screen.entry.forEach(t => parts.push(`<div class="help-item">${esc(t)}</div>`));
+  }
+  // 초기 화면
+  if (arr(screen.initial)) {
+    parts.push(`<div class="help-subtitle">초기 화면</div>`);
+    screen.initial.forEach(t => parts.push(`<div class="help-item">${esc(t)}</div>`));
+  }
+
+  // API 스펙
+  if (screen.api) {
+    parts.push(renderApiSpec(screen.api));
+  }
+
+  // 시퀀스 다이어그램
+  if (arr(screen.sequence)) {
+    parts.push(renderSequence(screen.sequence));
+  }
+
+  // 버튼 · 액션
+  if (arr(screen.actions)) {
+    parts.push(`<div class="help-subtitle">버튼 · 액션</div>`);
+    screen.actions.forEach(a => {
+      parts.push(`
+        <div class="help-action" data-target="${a.target || ''}">
+          <div class="help-action-title">${esc(a.label || a.id || '')}</div>
+          <div class="help-action-desc">${esc(a.description || '')}</div>
+          ${a.target ? `<div class="help-action-target">${esc(a.target)}</div>` : ''}
+        </div>
+      `);
+    });
+  }
+  panel.innerHTML = parts.join('');
+}
+
+/* ── API Spec Renderer ── */
+function renderApiSpec(api) {
+  const p = [];
+  p.push(`<div class="help-subtitle">API</div>`);
+  p.push(`<div class="api-block">`);
+  p.push(`<div class="api-endpoint"><span class="api-method">${esc(api.method || 'GET')}</span> <code>${esc(api.endpoint)}</code></div>`);
+
+  if (api.note) {
+    p.push(`<div class="api-note">${esc(api.note)}</div>`);
+  }
+
+  // Request
+  const req = api.request;
+  if (req) {
+    p.push(`<div class="api-section-title">Request</div>`);
+    if (req.query) {
+      p.push(`<div class="api-sub-title">Query Parameters</div>`);
+      p.push(renderParamTable(req.query));
+    }
+    if (req.body) {
+      p.push(`<div class="api-sub-title">Body</div>`);
+      p.push(renderParamTable(req.body));
+    }
+  }
+
+  // Response
+  if (api.response && api.response.body) {
+    p.push(`<div class="api-section-title">Response</div>`);
+    p.push(`<pre class="api-json">${esc(JSON.stringify(api.response.body, null, 2))}</pre>`);
+  }
+
+  // Errors
+  if (arr(api.errors)) {
+    p.push(`<div class="api-section-title">Errors</div>`);
+    api.errors.forEach(e => {
+      p.push(`<div class="api-error"><code>${esc(e.code)}</code> ${esc(e.desc)}</div>`);
+    });
+  }
+  p.push(`</div>`);
+  return p.join('');
+}
+
+function renderParamTable(params) {
+  const rows = Object.entries(params).map(([key, val]) => {
+    if (typeof val === 'object' && val !== null && val.type) {
+      const req = val.required ? '<span class="required">*</span>' : '';
+      const def = val.default !== undefined ? `<span class="param-default">${val.default}</span>` : '';
+      return `<tr><td><code>${esc(key)}</code>${req}</td><td>${esc(val.type)}</td><td>${esc(val.desc || '')} ${def}</td></tr>`;
+    } else {
+      const display = typeof val === 'object' ? JSON.stringify(val) : String(val);
+      return `<tr><td><code>${esc(key)}</code></td><td colspan="2">${esc(display)}</td></tr>`;
+    }
+  });
+  return `<table class="param-table"><thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+
+/* ── Sequence Diagram ── */
+function renderSequence(steps) {
+  const p = [];
+  p.push(`<div class="help-subtitle">시퀀스</div>`);
+  p.push(`<div class="sequence-diagram">`);
+  steps.forEach(s => {
+    const typeClass = s.type || 'request';
+    const arrow = typeClass === 'response' ? '◄──' : (typeClass === 'event' ? '◄╌╌' : '──►');
+    const isSelf = s.from === s.to;
+    if (isSelf) {
+      p.push(`<div class="seq-step seq-${typeClass}"><span class="seq-actor">${esc(s.from)}</span> <span class="seq-arrow">↻</span> <span class="seq-label">${esc(s.label)}</span></div>`);
+    } else {
+      p.push(`<div class="seq-step seq-${typeClass}"><span class="seq-actor">${esc(s.from)}</span> <span class="seq-arrow">${arrow}</span> <span class="seq-actor">${esc(s.to)}</span><div class="seq-label">${esc(s.label)}</div></div>`);
+    }
+  });
+  p.push(`</div>`);
+  return p.join('');
+}
+
+/* ── Screen Map (auto-generated from all actions) ── */
+function renderScreenMap() {
+  const container = $id('screen-map-auto');
+  if (!container || !state.spec) return;
+
+  const screens = state.spec.screens.filter(s => s.id !== 'screen-map');
+  const nodes = new Map();
+  const edges = [];
+
+  screens.forEach(s => {
+    nodes.set(s.id, { id: s.id, title: s.title || s.id, scenario: s.scenarioId || '' });
+    if (arr(s.actions)) {
+      s.actions.forEach(a => {
+        if (a.target && a.target !== s.id) {
+          edges.push({ from: s.id, to: a.target, label: a.label || a.id });
+        }
+      });
+    }
+  });
+
+  // Simple grid layout
+  const nodeArr = Array.from(nodes.values());
+  const cols = Math.min(3, nodeArr.length);
+  const cellW = 220, cellH = 120, padX = 40, padY = 40;
+  const svgW = cols * cellW + padX * 2;
+  const rows = Math.ceil(nodeArr.length / cols);
+  const svgH = rows * cellH + padY * 2;
+
+  const positions = new Map();
+  nodeArr.forEach((n, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    positions.set(n.id, {
+      x: padX + col * cellW + cellW / 2,
+      y: padY + row * cellH + cellH / 2
+    });
+  });
+
+  // Group edges by from→to pair so multiple labels stack cleanly
+  const edgeMap = new Map();
+  edges.forEach(e => {
+    const key = `${e.from}→${e.to}`;
+    if (!edgeMap.has(key)) edgeMap.set(key, { from: e.from, to: e.to, labels: [] });
+    edgeMap.get(key).labels.push(e.label);
+  });
+
+  // Track how many edges connect each node pair (in either direction) for lateral offset
+  const pairCount = new Map();
+  const pairIndex = new Map();
+  edgeMap.forEach(e => {
+    const key = [e.from, e.to].sort().join('|');
+    pairCount.set(key, (pairCount.get(key) || 0) + 1);
+  });
+
+  let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" class="screen-map-svg">`;
+  svg += `<defs><marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="var(--primary)"/></marker></defs>`;
+
+  const nodeW = 180, nodeH = 52;
+
+  // Edges — line ends clipped to node border, arrow offset, labels grouped + outlined
+  edgeMap.forEach(e => {
+    const from = positions.get(e.from);
+    const to = positions.get(e.to);
+    if (!from || !to) return;
+
+    // Clip endpoints to node rectangle borders so arrow meets the node edge, not its center
+    const { x: x1, y: y1 } = clipToRect(from, to, nodeW, nodeH);
+    const { x: x2, y: y2 } = clipToRect(to, from, nodeW, nodeH);
+
+    // Lateral offset when two edges connect the same pair (bidirectional)
+    const pairKey = [e.from, e.to].sort().join('|');
+    const cnt = pairCount.get(pairKey) || 1;
+    const idx = pairIndex.get(pairKey) || 0;
+    pairIndex.set(pairKey, idx + 1);
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.max(1, Math.sqrt(dx*dx + dy*dy));
+    const nx = -dy / len, ny = dx / len;           // unit normal
+    const offset = cnt > 1 ? (idx - (cnt - 1) / 2) * 14 : 0;
+
+    const sx = x1 + nx * offset, sy = y1 + ny * offset;
+    const ex = x2 + nx * offset, ey = y2 + ny * offset;
+
+    svg += `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrowhead)" opacity="0.65"/>`;
+
+    // Labels: stack vertically at midpoint, with white stroke outline for readability
+    const mx = (sx + ex) / 2;
+    const my = (sy + ey) / 2;
+    const lineHeight = 13;
+    const totalH = e.labels.length * lineHeight;
+    const startY = my - totalH / 2 + lineHeight - 2;
+    e.labels.forEach((label, i) => {
+      svg += `<text x="${mx}" y="${startY + i * lineHeight}" class="map-edge-label">${esc(label)}</text>`;
+    });
+  });
+
+  // Nodes (drawn last so they sit above edge lines)
+  nodeArr.forEach(n => {
+    const p = positions.get(n.id);
+    const rx = 8;
+    svg += `<rect x="${p.x - nodeW/2}" y="${p.y - nodeH/2}" width="${nodeW}" height="${nodeH}" rx="${rx}" class="map-node" data-screen-id="${n.id}"/>`;
+    svg += `<text x="${p.x}" y="${p.y + 5}" class="map-node-label">${esc(n.title)}</text>`;
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+
+  // Click to navigate
+  container.querySelectorAll('.map-node').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => navigateTo(state.version, el.dataset.screenId));
+  });
+}
+
+/* ── Flow Guide ── */
+function renderFlowGuide(screen) {
+  const guide = $id('flowGuide');
+  guide.innerHTML = '';
+  return;
+  const scenarioId = screen.scenarioId;
+  if (!scenarioId) { guide.innerHTML = ''; return; }
+  const siblings = state.spec.screens.filter(s => s.scenarioId === scenarioId);
+  if (siblings.length < 2) { guide.innerHTML = ''; return; }
+  const parts = [];
+  siblings.forEach((s, i) => {
+    if (i > 0) parts.push(`<span class="flow-sep">›</span>`);
+    const cls = s.id === screen.id ? 'flow-step current' : 'flow-step';
+    parts.push(`<span class="${cls}" data-screen-id="${s.id}" role="button">${esc(s.title || s.id)}</span>`);
+  });
+  guide.innerHTML = parts.join('');
+  guide.querySelectorAll('.flow-step').forEach(el => {
+    el.addEventListener('click', () => navigateTo(state.version, el.dataset.screenId));
+  });
+}
+
+/* ── Action Highlight ── */
+function bindActionHighlight(screen) {
+  document.querySelectorAll('.help-action').forEach(el => {
+    const target = el.dataset.target;
+    el.addEventListener('mouseenter', () => {
+      el.classList.add('hover');
+      if (target) {
+        const si = document.querySelector(`.screen-item[data-screen-id="${target}"]`);
+        if (si) si.classList.add('highlight');
+      }
+    });
+    el.addEventListener('mouseleave', () => {
+      el.classList.remove('hover');
+      if (target) {
+        const si = document.querySelector(`.screen-item[data-screen-id="${target}"]`);
+        if (si) si.classList.remove('highlight');
+      }
+    });
+    el.addEventListener('click', () => { if (target) navigateTo(state.version, target); });
+  });
+}
+
+function navigateTo(version, screenId) {
+  const v = version || state.version;
+  const s = screenId || state.screenId || defaultScreenId();
+  location.hash = s ? `${v}/${s}` : v;
+}
+
+function renderError(msg) {
+  $id('viewport').innerHTML = `<div class="content-area" style="color:var(--danger)">${esc(msg)}</div>`;
+}
+
+/* ── Clip a line from `center` towards `target` to the node rectangle border ── */
+function clipToRect(center, target, w, h) {
+  const dx = target.x - center.x;
+  const dy = target.y - center.y;
+  if (dx === 0 && dy === 0) return { x: center.x, y: center.y };
+  const hx = w / 2, hy = h / 2;
+  // Parametric t ∈ (0,1] where line from center meets rectangle edge
+  const tx = dx === 0 ? Infinity : hx / Math.abs(dx);
+  const ty = dy === 0 ? Infinity : hy / Math.abs(dy);
+  const t = Math.min(tx, ty);
+  return { x: center.x + dx * t, y: center.y + dy * t };
+}
+
+/* ── Helpers ── */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function arr(v) { return Array.isArray(v) && v.length > 0; }
+
+init();
+
+</script>
+</body>
+</html>

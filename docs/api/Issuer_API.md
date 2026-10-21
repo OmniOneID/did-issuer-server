@@ -18,8 +18,8 @@ puppeteer:
 Issuer API
 ==
 
-- Date: 2026-06-19
-- Version: v2.0.0
+- Date: 2026-10-21
+- Version: v2.0.1
   
 Table of Contents
 --
@@ -50,9 +50,10 @@ Table of Contents
     - [6.6. Update Vc Status](#66-update-vc-status)
   - [7. OID4VCI APIs](#7-oid4vci-apis)
     - [7.1. Protocol endpoints](#71-protocol-endpoints)
-    - [7.2. Issuance support endpoints](#72-issuance-support-endpoints)
-    - [7.3. User-initiated webview issuance](#73-user-initiated-webview-issuance)
-    - [7.4. Status List demonstration endpoints](#74-status-list-demonstration-endpoints)
+    - [7.2. Credential revocation endpoint](#72-credential-revocation-endpoint)
+    - [7.3. Issuance support endpoints](#73-issuance-support-endpoints)
+    - [7.4. User-initiated webview issuance](#74-user-initiated-webview-issuance)
+    - [7.5. Status List demonstration endpoints](#75-status-list-demonstration-endpoints)
 
 ## 1. Overview
 
@@ -101,6 +102,15 @@ For an Issue Profile whose `issuanceMode` is `PROXY`, use
 `/api/v1/generate-issue-profile/proxy` and `/api/v1/issue-vc/proxy` instead of
 the standard profile-generation and issuance endpoints. Proxy mode retrieves
 subject data through the configured KYC query API.
+
+- `/api/v1/generate-issue-profile/proxy`: send `userId` (the KYC lookup key) instead of
+  `holder` in `M210_GenerateIssueProfile`. The Issuer posts `userId` to
+  `{kyc.url}/api/v1/retrieve-pii` and identifies the holder with the returned `pii`.
+  The response is the same as in 4.3.
+- `/api/v1/issue-vc/proxy`: send `M210_IssueVc` together with a holder-signed `didAuth`.
+  The Issuer verifies the signature with the DID Document of `didAuth.did` and checks that
+  `didAuth.authNonce` equals the `authNonce` returned by Generate Issue Profile.
+  - A missing `didAuth.proof` returns `SSRVISS00426`; a mismatched `authNonce` returns `SSRVISS00210`.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 
@@ -423,8 +433,11 @@ def object _M210_GenerateIssueProfile: "Generate Issue Profile response message"
 
    //--- Data Part ---
    + IssueProfile "profile": "issue profile"
+   - multibase    "authNonce": "issuer nonce" // same value as profile.profile.process.issuerNonce
 }
 ```
+
+- `~/authNonce`: used as `didAuth.authNonce` in the Proxy mode `issue-vc/proxy` request.
 
 **■ Status 400 - Client error**
 
@@ -511,7 +524,8 @@ Content-Type: application/json;charset=utf-8
      "proofPurpose":"assertionMethod",
      "proofValue":"mIGTSOOl3ij...njfvPZBkJc0"
    }
- }
+ },
+ "authNonce":"mbRz+NJ7fEZEyFiAGIcfktQ"
 }
 
 ```
@@ -1957,22 +1971,203 @@ Content-Type: application/json;charset=utf-8
 
 ## 7. OID4VCI APIs
 
-The Issuer Server also exposes OpenID for Verifiable Credential Issuance endpoints. The credential endpoints are registered at startup from Issuer Metadata; therefore their paths can be changed without recompiling the server.
+The Issuer Server also exposes OpenID for Verifiable Credential Issuance endpoints. The credential endpoints are registered at startup from Issuer Metadata; therefore their paths can be changed without recompiling the server. The credential revocation endpoint, an OpenDID extension, is always registered at the fixed path `/credential-lifecycle/revoke`.
 
 ### 7.1. Protocol endpoints
 
 | Method | Path | Description | Authentication |
 |--------|------|-------------|----------------|
 | GET | `/.well-known/openid-credential-issuer` | Public Issuer Metadata | No |
+| GET | `/.well-known/jwt-vc-issuer` | JWT VC Issuer Metadata (`issuer`, `jwks`) | No |
 | GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | Credential Offer referenced by URI | No |
 | POST | `{credential_endpoint}` | Issue a credential | Bearer access token |
-| POST | `{nonce_endpoint}` | Create a proof nonce | No |
+| POST | `{nonce_endpoint}` | Create a `c_nonce` (for credential proofs and revocation requests) | No |
 | POST | `{deferred_credential_endpoint}` | Retrieve a deferred credential | Bearer access token |
 | POST | `{notification_endpoint}` | Receive a Wallet notification | Configured security policy |
+| POST | `/credential-lifecycle/revoke` (`credential_revocation_endpoint`) | Wallet credential revocation request (see 7.2) | No (JWT signed with the Holder DID) |
+| GET | `/status-lists/{listId}` | Retrieve a Status List Token (`application/statuslist+jwt`) | No |
 
 The values in braces are read from the active Issuer Metadata. An endpoint whose metadata value is blank is not registered. `credential_configuration_id` and `credential_identifier` must not be sent together in a credential request.
 
-### 7.2. Issuance support endpoints
+- The server always builds `credential_revocation_endpoint` in the public Issuer Metadata as `{credential_issuer}/credential-lifecycle/revoke` (a trailing `/` of `credential_issuer` is removed). Any other value set through the Admin Console or the metadata save API is replaced with this value when the metadata is read.
+- A `c_nonce` is 16 random bytes encoded as Base64URL without padding and, with the database store, is valid for 10 minutes. A `c_nonce` is single-use: it can be used only once across credential proofs and credential revocation requests. A used `c_nonce` is marked with `consumed_at`, and requests that reuse it or use an expired one are rejected.
+- The proof JWT header of a credential request must identify the proof key with exactly one of `kid`, `jwk`, or `x5c`. A `kid` must be a Holder DID URL with a key fragment (for example `did:omn:holder?versionId=1#auth`); the Issuer resolves the Holder DID Document and verifies the proof with the secp256r1 (P-256) key registered under `authentication`.
+- Credentials in the `dc+sd-jwt*` and `mso_mdoc*` formats, which use a Status List, require a proof identified by `kid` (Holder DID URL). The verified Holder DID is stored as `subject_did` in the issuance record and is used to verify revocation requests.
+- `/status-lists/{listId}` is disabled by the `local` profile and can be disabled with `issuer.status-list.endpoint-enabled=false`.
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+### 7.2. Credential revocation endpoint
+
+Requests revocation of one SD-JWT VC or mdoc held by the Wallet, signed with the Holder DID. When the request is accepted, the credential status is changed to `INVALID`.
+This is an OpenDID extension API and uses neither an access token nor the TAS. For the design background, see the [OID4VCI Credential Revocation API (Korean)](OID4VCI_Credential_Revocation_API_ko.md).
+
+| Item          | Description                    | Remarks |
+| ------------- | ------------------------------ | ------- |
+| Method        | `POST`                         |         |
+| Path          | `/credential-lifecycle/revoke` | `credential_revocation_endpoint` in the Issuer Metadata |
+| Authorization | -                              | JWT signed with the Holder DID (`revocation_token`) |
+
+The Wallet must not build the path itself; it must use the full `credential_revocation_endpoint` URL from the Issuer Metadata.
+
+#### 7.2.1. Request
+
+**■ HTTP Headers**
+
+| Header           | Value                            | Remarks |
+| ---------------- | -------------------------------- | ------- |
+| + `Content-Type` | `application/json;charset=utf-8` |         |
+
+**■ Path Parameters**
+
+N/A
+
+**■ Query Parameters**
+
+N/A
+
+**■ HTTP Body**
+
+```c#
+def object CredentialRevocationRequest: "Credential revocation request message"
+{
+    + string "revocation_token": "JWT Revocation Token" // JWS Compact Serialization
+}
+```
+
+`revocation_token` is a JWT with the following header and payload.
+
+| Part | Item | Required | Description |
+|------|------|:--------:|-------------|
+| Header | `alg` | Y | `ES256` |
+| Header | `typ` | Y | `opendid-credential-revocation+jwt` |
+| Header | `kid` | Y | Holder DID URL. The DID before `?` or `#` must equal `iss`. |
+| Payload | `iss` | Y | Signing Holder DID. Must equal `subject_did` of the issuance record. |
+| Payload | `iat` | Y | JWT creation time (NumericDate) |
+| Payload | `exp` | Y | JWT expiration time (NumericDate). Later than `iat` and at most 5 minutes after it |
+| Payload | `nonce` | Y | `c_nonce` returned by `{nonce_endpoint}` |
+| Payload | `credential_status.status_list.uri` | Y | Status List URI contained in the credential |
+| Payload | `credential_status.status_list.idx` | Y | Status List index contained in the credential (non-negative integer) |
+
+- The signing key must be a secp256r1 (P-256) key registered under `authentication` in the Holder DID Document.
+- Time checks allow 60 seconds of clock skew. The token is rejected if `iat` is more than 60 seconds in the future or `exp` is more than 60 seconds in the past.
+
+<div style="page-break-after: always; margin-top: 30px;"></div>
+
+#### 7.2.2. Response
+
+**■ Process**
+1. Verify the JWS format, header (`alg`, `typ`, `kid`), and payload claims of `revocation_token`
+1. Resolve the DID Document of `iss`, check that `kid` is an `authentication` key, and verify the ES256 signature
+1. Find the issuance record by `status_list.uri + idx` (row lock) and check that it is `ISSUED`
+1. Check that the verified Holder DID equals `subject_did` of the issuance record
+1. Consume the `c_nonce` once (it must exist, be unused, and be unexpired)
+1. If the credential is already `INVALID`, return success with the existing status change time
+1. Change the credential status to `INVALID`, increase the Status List version, and record the status history (reason `USER_REQUEST`, changed by the Holder DID)
+
+Nonce consumption and the status change run in one transaction. If the status change fails, the nonce consumption is rolled back as well.
+A Wallet that did not receive a response obtains a new `c_nonce` and retries. A credential that is already `INVALID` is reported as success without adding another status history record.
+
+**■ Status 200 - Success**
+
+```c#
+def object CredentialRevocationResponse: "Credential revocation response message"
+{
+    + object "credential_status": "Processed credential status"
+    {
+        + object "status_list": "Status List reference"
+        {
+            + url "uri": "Status List URI"
+            + int "idx": "Status List index"
+        }
+        + string "status": "Changed credential status", value("INVALID")
+    }
+    + utcDatetime "revoked_at": "Status change time" // ISO 8601 (UTC)
+}
+```
+
+**■ Status 400 - Client error**
+
+| Code | Description |
+|------|-------------|
+| SSRVISS00206 | No issued credential matches the Status List URI and index, or the credential is not in the issued state. |
+| SSRVISS00210 | The `nonce` does not exist, has expired, or has already been used. |
+| SSRVISS00302 | `revocation_token` format, header, claim, or lifetime validation failed, the Holder DID key check failed, or `subject_did` does not match. |
+| SSRVISS00413 | JWT signature verification or Holder public key decoding failed. |
+
+**■ Status 500 - Server error**
+
+| Code | Description |
+|------|-------------|
+| SSRVISS00103 | Failed to retrieve the Holder DID Document. |
+| SSRVISS00011 | Failed to change the credential status. |
+| SSRVISS00702 | Unable to read the request body. |
+
+<div style="page-break-after: always; margin-top: 30px;"></div>
+
+#### 7.2.3. Example
+
+**■ Request**
+
+```shell
+curl -v -X POST "http://${Host}:${Port}/credential-lifecycle/revoke" \
+-H "Content-Type: application/json;charset=utf-8" \
+-d @"data.json"
+```
+
+```json
+//data.json
+{
+    "revocation_token":"eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5kaWQtY3JlZGVudGlhbC1yZXZvY2F0aW9uK2p3dCIsImtpZCI6ImRpZDpvbW46aG9sZGVyP3ZlcnNpb25JZD0xI2F1dGgifQ.payload.signature"
+}
+```
+
+```json
+//revocation_token header (decoded)
+{
+    "alg":"ES256",
+    "typ":"opendid-credential-revocation+jwt",
+    "kid":"did:omn:holder?versionId=1#auth"
+}
+```
+
+```json
+//revocation_token payload (decoded)
+{
+    "iss":"did:omn:holder",
+    "iat":1792545300,
+    "exp":1792545600,
+    "nonce":"8qvJQO7TjZlE5M0wL8OaGA",
+    "credential_status":{
+        "status_list":{
+            "uri":"http://127.0.0.1:8091/status-lists/1",
+            "idx":42
+        }
+    }
+}
+```
+
+**■ Response**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+
+{
+    "credential_status":{
+        "status_list":{
+            "uri":"http://127.0.0.1:8091/status-lists/1",
+            "idx":42
+        },
+        "status":"INVALID"
+    },
+    "revoked_at":"2026-10-21T01:15:01.123456Z"
+}
+```
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+### 7.3. Issuance support endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -1991,7 +2186,7 @@ The values in braces are read from the active Issuer Metadata. An endpoint whose
 
 The editor and test endpoints are operational utilities. Production deployments should restrict them with the server security configuration.
 
-### 7.3. User-initiated webview issuance
+### 7.4. User-initiated webview issuance
 
 The List Provider can direct a user to the start endpoint after its registration
 has been saved in `OID4VCI Management > List Provider Registration`.
@@ -2006,7 +2201,12 @@ has been saved in `OID4VCI Management > List Provider Registration`.
 Session tokens are short-lived values. Confirm and cancel requests also require
 the session's `_form_token` CSRF value.
 
-### 7.4. Status List demonstration endpoints
+The webview does not prefill previously saved claims. On confirm, the submitted
+claims replace the saved claims for that user and credential type. A `portrait`
+claim whose `valueType` is `jpeg` is prefilled with a sample JPEG image and shown
+as a preview; the submitted value must be a Base64-encoded JPEG of at most 2 MB.
+
+### 7.5. Status List demonstration endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|

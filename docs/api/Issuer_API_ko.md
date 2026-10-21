@@ -18,8 +18,8 @@ puppeteer:
 Issuer API
 ==
 
-- 일자: 2026-06-19
-- 버전: v2.0.0
+- 일자: 2026-10-21
+- 버전: v2.0.1
   
 목차
 --
@@ -50,9 +50,10 @@ Issuer API
     - [6.6. Update Vc Status](#66-update-vc-status)
   - [7. OID4VCI API](#7-oid4vci-api)
     - [7.1. Protocol Endpoint](#71-protocol-endpoint)
-    - [7.2. 발급 지원 Endpoint](#72-발급-지원-endpoint)
-    - [7.3. 사용자 주도 Webview 발급](#73-사용자-주도-webview-발급)
-    - [7.4. Status List 데모 Endpoint](#74-status-list-데모-endpoint)
+    - [7.2. Credential 폐기 Endpoint](#72-credential-폐기-endpoint)
+    - [7.3. 발급 지원 Endpoint](#73-발급-지원-endpoint)
+    - [7.4. 사용자 주도 Webview 발급](#74-사용자-주도-webview-발급)
+    - [7.5. Status List 데모 Endpoint](#75-status-list-데모-endpoint)
 
 ## 1. 개요
 
@@ -101,6 +102,14 @@ Issue Profile의 `issuanceMode`가 `PROXY`이면 일반 Profile 생성 및 발�
 Endpoint 대신 `/api/v1/generate-issue-profile/proxy`와
 `/api/v1/issue-vc/proxy`를 사용한다. Proxy Mode에서는 설정된 KYC 조회
 API를 통해 Credential Subject 데이터를 조회한다.
+
+- `/api/v1/generate-issue-profile/proxy`: `M210_GenerateIssueProfile`의 `holder` 대신
+  `userId`(KYC 조회 키)를 전송한다. Issuer는 `{kyc.url}/api/v1/retrieve-pii`에
+  `userId`를 전달하여 받은 `pii`로 Holder를 식별하며, 응답은 4.3과 같다.
+- `/api/v1/issue-vc/proxy`: `M210_IssueVc`에 Holder가 서명한 `didAuth`를 함께 전송한다.
+  Issuer는 `didAuth.did`의 DID Document로 서명을 검증하고, `didAuth.authNonce`가
+  Generate Issue Profile 응답의 `authNonce`와 같은지 확인한다.
+  - `didAuth.proof`가 없으면 `SSRVISS00426`, `authNonce`가 다르면 `SSRVISS00210`을 응답한다.
 
 <div style="page-break-after: always; margin-top: 40px;"></div>
 
@@ -424,8 +433,11 @@ def object _M210_GenerateIssueProfile: "Generate Issue Profile 응답문"
 
     //--- Data Part ---
     + IssueProfile "profile": "issue profile"
+    - multibase    "authNonce": "issuer nonce" // profile.profile.process.issuerNonce와 같은 값
 }
 ```
+
+- `~/authNonce`: Proxy Mode의 `issue-vc/proxy` 요청에서 `didAuth.authNonce`로 사용한다.
 
 **■ Status 400 - Client error**
 
@@ -512,7 +524,8 @@ Content-Type: application/json;charset=utf-8
       "proofPurpose":"assertionMethod",
       "proofValue":"mIGTSOOl3ij...njfvPZBkJc0"
     }
-  }
+  },
+  "authNonce":"mbRz+NJ7fEZEyFiAGIcfktQ"
 }
 
 ```
@@ -1957,22 +1970,203 @@ Content-Type: application/json;charset=utf-8
 
 ## 7. OID4VCI API
 
-Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한다. Credential Endpoint는 시작 시 Issuer Metadata를 기준으로 동적 등록되므로 서버를 다시 컴파일하지 않고 경로를 변경할 수 있다.
+Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한다. Credential Endpoint는 시작 시 Issuer Metadata를 기준으로 동적 등록되므로 서버를 다시 컴파일하지 않고 경로를 변경할 수 있다. 단, OpenDID 확장인 Credential 폐기 Endpoint는 `/credential-lifecycle/revoke` 경로로 고정 등록된다.
 
 ### 7.1. Protocol Endpoint
 
 | Method | Path | 설명 | 인증 |
 |--------|------|------|------|
 | GET | `/.well-known/openid-credential-issuer` | 공개 Issuer Metadata | 없음 |
+| GET | `/.well-known/jwt-vc-issuer` | JWT VC Issuer Metadata (`issuer`, `jwks`) | 없음 |
 | GET | `{credential_offer_endpoint}/{request_id}/{configuration_id}` | URI로 참조되는 Credential Offer | 없음 |
 | POST | `{credential_endpoint}` | Credential 발급 | Bearer Access Token |
-| POST | `{nonce_endpoint}` | Proof Nonce 생성 | 없음 |
+| POST | `{nonce_endpoint}` | `c_nonce` 생성 (Credential Proof 및 폐기 요청용) | 없음 |
 | POST | `{deferred_credential_endpoint}` | 지연 Credential 조회 | Bearer Access Token |
 | POST | `{notification_endpoint}` | Wallet Notification 수신 | 설정된 보안 정책 |
+| POST | `/credential-lifecycle/revoke` (`credential_revocation_endpoint`) | Wallet의 Credential 폐기 요청 (7.2 참고) | 없음 (Holder DID 서명 JWT) |
+| GET | `/status-lists/{listId}` | Status List Token 조회 (`application/statuslist+jwt`) | 없음 |
 
 중괄호로 표시한 값은 활성 Issuer Metadata에서 읽는다. Metadata 값이 비어 있는 Endpoint는 등록되지 않는다. Credential 요청에서 `credential_configuration_id`와 `credential_identifier`를 동시에 전송하면 안 된다.
 
-### 7.2. 발급 지원 Endpoint
+- 공개 Issuer Metadata의 `credential_revocation_endpoint`는 서버가 `{credential_issuer}/credential-lifecycle/revoke`로 고정 생성한다(`credential_issuer` 끝의 `/`는 제거). Admin Console이나 Metadata 저장 API로 다른 값을 설정해도 조회 시 이 값으로 대체된다.
+- `c_nonce`는 16바이트 난수를 Base64URL(padding 없음)로 인코딩한 값이며, DB 저장소 기준 10분간 유효하다. `c_nonce`는 일회성으로, Credential 발급 Proof와 Credential 폐기 요청을 통틀어 한 번만 사용할 수 있다. 사용된 `c_nonce`는 `consumed_at`이 기록되며 재사용하거나 만료된 경우 요청이 거부된다.
+- Credential 요청의 Proof JWT Header는 `kid`, `jwk`, `x5c` 중 하나로만 Proof 키를 식별해야 한다. `kid`는 Key Fragment를 포함한 Holder DID URL(예: `did:omn:holder?versionId=1#auth`)이어야 하며, Issuer는 Holder DID Document를 조회하여 `authentication`에 등록된 secp256r1(P-256) 키로 Proof를 검증한다.
+- Status List가 적용되는 `dc+sd-jwt*`, `mso_mdoc*` 형식의 Credential은 `kid`(Holder DID URL)로 식별한 Proof가 필요하다. 확인된 Holder DID는 발급 레코드의 `subject_did`에 저장되어 폐기 요청 검증에 사용된다.
+- `/status-lists/{listId}`는 `local` Profile에서 비활성화되며, `issuer.status-list.endpoint-enabled=false`로 비활성화할 수 있다.
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+### 7.2. Credential 폐기 Endpoint
+
+Wallet이 보유한 SD-JWT VC 또는 mdoc 한 건의 폐기를 Holder DID 서명으로 요청한다. 요청이 승인되면 Credential 상태를 `INVALID`로 변경한다.
+이 API는 OpenDID 확장 API이며 Access Token과 TAS를 사용하지 않는다. 설계 배경은 [OID4VCI Credential 폐기 API](OID4VCI_Credential_Revocation_API_ko.md)를 참고한다.
+
+| Item          | Description                    | Remarks |
+| ------------- | ------------------------------ | ------- |
+| Method        | `POST`                         |         |
+| Path          | `/credential-lifecycle/revoke` | Issuer Metadata의 `credential_revocation_endpoint` |
+| Authorization | -                              | Holder DID 서명 JWT (`revocation_token`) |
+
+Wallet은 경로를 직접 조합하지 말고 Issuer Metadata의 `credential_revocation_endpoint` 전체 URL을 사용한다.
+
+#### 7.2.1. Request
+
+**■ HTTP Headers**
+
+| Header           | Value                            | Remarks |
+| ---------------- | -------------------------------- | ------- |
+| + `Content-Type` | `application/json;charset=utf-8` |         |
+
+**■ Path Parameters**
+
+N/A
+
+**■ Query Parameters**
+
+N/A
+
+**■ HTTP Body**
+
+```c#
+def object CredentialRevocationRequest: "Credential 폐기 요청문"
+{
+    + string "revocation_token": "JWT Revocation Token" // JWS Compact Serialization
+}
+```
+
+`revocation_token`은 다음 Header와 Payload로 구성된 JWT이다.
+
+| 구분 | 항목 | 필수 | 설명 |
+|------|------|:----:|------|
+| Header | `alg` | Y | `ES256` |
+| Header | `typ` | Y | `opendid-credential-revocation+jwt` |
+| Header | `kid` | Y | Holder DID URL. `?` 또는 `#` 앞의 DID가 `iss`와 같아야 한다. |
+| Payload | `iss` | Y | 서명한 Holder DID. 발급 레코드의 `subject_did`와 같아야 한다. |
+| Payload | `iat` | Y | JWT 생성 시각 (NumericDate) |
+| Payload | `exp` | Y | JWT 만료 시각 (NumericDate). `iat`보다 크고 `iat` 이후 5분 이내 |
+| Payload | `nonce` | Y | `{nonce_endpoint}`가 반환한 `c_nonce` |
+| Payload | `credential_status.status_list.uri` | Y | Credential에 포함된 Status List URI |
+| Payload | `credential_status.status_list.idx` | Y | Credential에 포함된 Status List index (0 이상의 정수) |
+
+- 서명 키는 Holder DID Document의 `authentication`에 등록된 secp256r1(P-256) 키여야 한다.
+- 시각 검증에는 60초의 Clock Skew를 허용한다. `iat`이 현재 시각보다 60초 넘게 미래이거나 `exp`가 60초 넘게 지난 경우 거부한다.
+
+<div style="page-break-after: always; margin-top: 30px;"></div>
+
+#### 7.2.2. Response
+
+**■ Process**
+1. `revocation_token`의 JWS 형식, Header(`alg`, `typ`, `kid`)와 Payload Claim을 검증
+1. `iss`의 DID Document를 조회하여 `kid`가 `authentication`에 포함된 키인지 확인하고 ES256 서명 검증
+1. `status_list.uri + idx`로 발급 레코드를 조회(행 잠금)하고 발급 완료(`ISSUED`) 상태인지 확인
+1. 검증된 Holder DID와 발급 레코드의 `subject_did`가 같은지 확인
+1. `c_nonce`를 일회성으로 소비 (존재, 미사용, 미만료 확인)
+1. 이미 `INVALID`이면 기존 상태 변경 시각으로 성공 응답
+1. Credential 상태를 `INVALID`로 변경하고 Status List version 증가 및 상태 변경 이력 기록 (사유 `USER_REQUEST`, 변경자 Holder DID)
+
+`c_nonce` 소비와 상태 변경은 하나의 트랜잭션으로 처리한다. 상태 변경이 실패하면 `c_nonce` 소비도 함께 롤백된다.
+응답을 받지 못한 Wallet은 새 `c_nonce`를 받아 다시 요청한다. 이미 `INVALID`인 Credential은 상태 변경 이력을 추가로 생성하지 않고 성공으로 응답한다.
+
+**■ Status 200 - Success**
+
+```c#
+def object CredentialRevocationResponse: "Credential 폐기 응답문"
+{
+    + object "credential_status": "처리한 Credential 상태"
+    {
+        + object "status_list": "Status List 참조"
+        {
+            + url "uri": "Status List URI"
+            + int "idx": "Status List index"
+        }
+        + string "status": "변경된 Credential 상태", value("INVALID")
+    }
+    + utcDatetime "revoked_at": "상태 변경 시각" // ISO 8601 (UTC)
+}
+```
+
+**■ Status 400 - Client error**
+
+| Code | Description |
+|------|-------------|
+| SSRVISS00206 | Status List URI와 index에 해당하는 발급 Credential이 없거나 발급 완료 상태가 아닙니다. |
+| SSRVISS00210 | `nonce`가 존재하지 않거나, 만료되었거나, 이미 사용되었습니다. |
+| SSRVISS00302 | `revocation_token` 형식·Header·Claim·유효 시간 검증 실패, Holder DID 키 확인 실패 또는 `subject_did` 불일치입니다. |
+| SSRVISS00413 | JWT 서명 검증 또는 Holder 공개키 디코딩에 실패했습니다. |
+
+**■ Status 500 - Server error**
+
+| Code | Description |
+|------|-------------|
+| SSRVISS00103 | Holder DID Document 조회에 실패했습니다. |
+| SSRVISS00011 | Credential 상태 변경 처리에 실패했습니다. |
+| SSRVISS00702 | Request Body를 읽을 수 없습니다. |
+
+<div style="page-break-after: always; margin-top: 30px;"></div>
+
+#### 7.2.3. Example
+
+**■ Request**
+
+```shell
+curl -v -X POST "http://${Host}:${Port}/credential-lifecycle/revoke" \
+-H "Content-Type: application/json;charset=utf-8" \
+-d @"data.json"
+```
+
+```json
+//data.json
+{
+    "revocation_token":"eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5kaWQtY3JlZGVudGlhbC1yZXZvY2F0aW9uK2p3dCIsImtpZCI6ImRpZDpvbW46aG9sZGVyP3ZlcnNpb25JZD0xI2F1dGgifQ.payload.signature"
+}
+```
+
+```json
+//revocation_token Header (decoded)
+{
+    "alg":"ES256",
+    "typ":"opendid-credential-revocation+jwt",
+    "kid":"did:omn:holder?versionId=1#auth"
+}
+```
+
+```json
+//revocation_token Payload (decoded)
+{
+    "iss":"did:omn:holder",
+    "iat":1792545300,
+    "exp":1792545600,
+    "nonce":"8qvJQO7TjZlE5M0wL8OaGA",
+    "credential_status":{
+        "status_list":{
+            "uri":"http://127.0.0.1:8091/status-lists/1",
+            "idx":42
+        }
+    }
+}
+```
+
+**■ Response**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+
+{
+    "credential_status":{
+        "status_list":{
+            "uri":"http://127.0.0.1:8091/status-lists/1",
+            "idx":42
+        },
+        "status":"INVALID"
+    },
+    "revoked_at":"2026-10-21T01:15:01.123456Z"
+}
+```
+
+<div style="page-break-after: always; margin-top: 40px;"></div>
+
+### 7.3. 발급 지원 Endpoint
 
 | Method | Path | 설명 |
 |--------|------|------|
@@ -1991,7 +2185,7 @@ Issuer Server는 OpenID for Verifiable Credential Issuance Endpoint도 제공한
 
 편집 및 테스트 Endpoint는 운영 지원 기능이다. 운영 환경에서는 Server Security 설정으로 접근을 제한해야 한다.
 
-### 7.3. 사용자 주도 Webview 발급
+### 7.4. 사용자 주도 Webview 발급
 
 `OID4VCI Management > List Provider Registration`에 등록을 저장한 뒤 List
 Provider가 사용자를 발급 시작 Endpoint로 이동시킬 수 있다.
@@ -2006,7 +2200,12 @@ Provider가 사용자를 발급 시작 Endpoint로 이동시킬 수 있다.
 Session Token은 유효 기간이 짧은 값이다. Confirm 및 Cancel 요청에는 해당
 Session의 `_form_token` CSRF 값도 필요하다.
 
-### 7.4. Status List 데모 Endpoint
+Webview 화면은 이전에 저장된 Claims를 미리 채우지 않는다. Confirm 시 제출한
+Claims로 해당 사용자와 Credential Type의 Claims를 대체 저장한다. `valueType`이
+`jpeg`인 `portrait` Claim은 샘플 JPEG 이미지가 값으로 채워져 미리보기로 표시되며,
+제출 값은 Base64로 인코딩한 2MB 이하의 JPEG여야 한다.
+
+### 7.5. Status List 데모 Endpoint
 
 | Method | Path | 설명 |
 |--------|------|------|

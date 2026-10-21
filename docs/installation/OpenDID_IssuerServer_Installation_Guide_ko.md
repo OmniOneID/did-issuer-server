@@ -18,8 +18,8 @@ puppeteer:
 Open DID Issuer Server Installation Guide
 ==
 
-- Date: 2026-06-19
-- Version: v2.0.0
+- Date: 2026-10-21
+- Version: v2.0.1
 
 목차
 ==
@@ -61,15 +61,16 @@ Open DID Issuer Server Installation Guide
   - [5.1. application.yml](#51-applicationyml)
     - [5.1.1. Spring 기본 설정](#511-spring-기본-설정)
     - [5.1.2. 서버 설정](#512-서버-설정)
+    - [5.1.3. 외부 서비스 연동 설정](#513-외부-서비스-연동-설정)
   - [5.2. application-logging.yml](#52-application-loggingyml)
     - [5.2.1. 로깅 설정](#521-로깅-설정)
-  - [5.3. database.yml](#53-databaseyml)
+  - [5.3. application-database.yml](#53-application-databaseyml)
     - [5.3.1. Spring Liquibase 설정](#531-spring-liquibase-설정)
     - [5.3.2. 데이터소스 설정](#532-데이터소스-설정)
     - [5.3.3. JPA 설정](#533-jpa-설정)
-  - [5.4. wallet.yml](#54-walletyml)
+  - [5.4. application-wallet.yml](#54-application-walletyml)
     - [5.4.1. 월렛 설정](#541-월렛-설정)
-  - [5.5. blockchain.yml](#55-blockchainyml)
+  - [5.5. application-blockchain.yml](#55-application-blockchainyml)
   - [5.5.1. Blockchain 설정](#551-blockchain-설정)
   - [5.6. blockchain.properties](#56-blockchainproperties)
     - [5.6.1. 블록체인 연동 설정](#561-블록체인-연동-설정)
@@ -206,6 +207,8 @@ did-issuer-server
 ├── RELEASE-PROCESS.md
 ├── SECURITY.md
 ├── docs
+│   ├── admin
+│       └── OpenDID_IssuerAdmin_Operation_Guide.md
 │   ├── api
 │       └── Issuer_API.md
 │   ├── errorCode
@@ -222,9 +225,17 @@ did-issuer-server
             └── did-blockchain-sdk-server-2.0.0.jar
             └── did-core-sdk-server-2.0.0.jar
             └── did-crypto-sdk-server-2.0.0.jar
-            └── did-datamodel-server-2.0.0.jar
+            └── did-datamodel-sdk-server-2.0.0.jar
             └── did-wallet-sdk-server-2.0.0.jar
             └── did-zkp-sdk-server-2.0.0.jar
+            └── did-oid4vci-sdk-server-3.0.0.jar
+            └── did-oid4vc-authorization-sdk-server-3.0.0.jar
+            └── did-oid4vc-formatter-sdk-server-3.0.0.jar
+            └── did-sd-jwt-vc-sdk-server-3.0.0.jar
+            └── did-mso-mdoc-sdk-server-3.0.0.jar
+            └── opendid-vc-sdk-1.0.0.jar
+        ├── metadata
+            └── issuer_meta.json
         ├── sample
         └── src
         └── build.gradle
@@ -243,6 +254,7 @@ did-issuer-server
 | RELEASE-PROCESS.md      | 새로운 버전을 릴리스하는 절차            |
 | SECURITY.md             | 보안 정책 및 취약성 보고 방법            |
 | docs                    | 문서                                     |
+| ┖ admin                 | Admin 콘솔 운영 가이드                   |
 | ┖ api                   | API 가이드 문서                          |
 | ┖ errorCode             | 오류 코드 및 문제 해결 가이드            |
 | ┖ installation          | 설치 및 설정 가이드                      |
@@ -250,6 +262,7 @@ did-issuer-server
 | source/did-issuer-server| Issuer 서버 소스 코드 및 빌드 파일 |
 | ┖ gradle                | Gradle 빌드 설정 및 스크립트             |
 | ┖ libs                  | 외부 라이브러리 및 의존성                |
+| ┖ metadata              | OID4VCI Issuer Metadata 초기 파일 (`issuer_meta.json`) |
 | ┖ sample                | 샘플 파일                                |
 | ┖ src                   | 주요 소스 코드 디렉토리                  |
 | ┖ build.gradle          | Gradle 빌드 설정 파일                    |
@@ -364,6 +377,15 @@ npm run dev
   > 참고: 프론트엔드 빌드가 필요 없는 경우(예: 백엔드만 테스트하거나 프론트엔드 결과물을 이미 포함하고 있는 경우)는 다음과 같이 옵션을 추가하여 프론트엔드 빌드를 생략할 수 있습니다. 
   > - `./gradlew clean build -DskipFrontendBuild=true`
 
+- 기본 `test` Task는 테스트 클래스를 제외하도록 설정되어 있습니다. OID4VCI 검증 테스트는 다음 Gradle Task(`verification` 그룹)로 실행할 수 있습니다.
+  ```shell
+    # c_nonce 발급 및 서명된 Credential 폐기 흐름 테스트
+    ./gradlew credentialNonceRevocationFlowTest -DskipFrontendBuild=true
+
+    # OID4VCI 발급 시 Holder DID Proof Key 해석 테스트
+    ./gradlew holderDidIssuanceProofTest -DskipFrontendBuild=true
+  ```
+
 
 - 빌드된 폴더로 이동하여 JAR 파일이 생성된 것을 확인합니다.
     ```shell
@@ -441,6 +463,8 @@ Issuer 서버는 운영에 필요한 데이터를 데이터베이스에 저장�
             - logging
             - spring-docs
             - blockchain
+          lss:
+            - lss         # Ledger Service Server 설정 (application-lss.yml)
       ```
 
 * `spring.jackson`: 🔒 
@@ -457,6 +481,19 @@ Issuer 서버는 운영에 필요한 데이터를 데이터베이스에 저장�
     - 애플리케이션이 실행될 포트 번호입니다. Issuer 서버의 포트 설정의 기본값은 8091 입니다.
     - 값 : 8091
 
+### 5.1.3. 외부 서비스 연동 설정
+* `tas.url`:  
+    - TA 서버의 Base URL입니다. Issuer 등록 및 가입증명서(Certificate VC) 발급, TAS List API를 통한 VC Schema 등록에 사용됩니다.
+    - 예시: `http://127.0.0.1:8090`
+
+* `list.url`:  
+    - OID4VCI Credential Issuer 등록(`POST /list/api/v1/oid4vci/issuers`)에 사용하는 List Provider의 Base URL입니다.
+    - 예시: `http://127.0.0.1:8090`
+
+* `kyc.url`:  
+    - KYC 서버의 Base URL입니다. `PROXY` 발급 모드에서 Issuer 서버는 `{kyc.url}/api/v1/retrieve-pii`로 사용자 PII를 요청합니다.
+    - 예시: `http://127.0.0.1:8091`
+
 ## 5.2. application-logging.yml
 
 ### 5.2.1. 로깅 설정
@@ -464,11 +501,18 @@ Issuer 서버는 운영에 필요한 데이터를 데이터베이스에 저장�
     - 로그 레벨을 설정합니다.
     - 레벨을 debug 설정함으로써, 지정된 패키지에 대해 DEBUG 레벨 이상(INFO, WARN, ERROR, FATAL)의 모든 로그 메시지를 볼 수 있습니다.
 
+* `logging.file.name`: 
+    - 로그 파일 경로를 설정합니다.
+    - 예시: `./logs/server.log`
+
 전체 예시:
 ```yaml
 logging:
   level:
     org.omnione: debug
+
+  file:
+    name: ./logs/server.log
 ```
 
 ## 5.3. application-database.yml
@@ -536,6 +580,14 @@ logging:
     - 월렛 접근에 사용되는 비밀번호입니다. 월렛 파일의 접근시 사용되는 비밀번호입니다. 높은 보안이 요구되는 정보입니다.
     - 예시: `your_secure_wallet_password`
 
+* `zkp-wallet.file-path`:  
+    - ZKP Credential 발급에 사용하는 ZKP 월렛 파일의 경로를 지정합니다. *반드시 절대경로로 입력해야합니다*
+    - 예시: `/path/to/your/issuer.zkp.wallet`
+
+* `zkp-wallet.password`:  
+    - ZKP 월렛 파일 접근에 사용되는 비밀번호입니다. 높은 보안이 요구되는 정보입니다.
+    - 예시: `your_secure_zkp_wallet_password`
+
 ## 5.5. application-blockchain.yml
 ## 5.5.1. Blockchain 설정
  * `blockchain.file-path`:
@@ -589,24 +641,32 @@ logging:
 
 | Property | 설명 |
 |----------|------|
-| `issuer.base-url` | Issuer Metadata와 Credential Offer URI에 사용하는 공개 URL |
-| `issuer.data-dir` | Metadata 및 관련 Data File의 기준 Directory |
-| `issuer.metadata-file-path` | `data-dir` 기준 Issuer Metadata JSON 경로 |
-| `issuer.wallet-file-name` | `wallet.file-path`에서 가져오는 Issuer Wallet 경로 |
-| `issuer.sdk.config-source` | Credential Configuration 원본. 현재 개발 설정은 `DB` 사용 |
-| `issuer.status-list.bootstrap.ttl-seconds` | Status List 초기화 Data의 Cache 유지 시간(초) |
-| `oid4vc.auth.issuer-url` | Authorization Server Issuer URL |
-| `clients.auth-server.url` | Authorization Server Base URL |
-| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint |
+| `issuer.server-ip` | Wallet이 접근할 수 있는 Issuer 서버의 IP 주소 또는 Host 이름. `issuer.base-url` 구성에 사용 (미설정 시 `127.0.0.1`) |
+| `issuer.server-port` | `issuer.base-url` 구성에 사용하는 Issuer 서버 Port (미설정 시 `8091`) |
+| `issuer.base-url` | Issuer 서버의 공개 URL (기본값: `http://${issuer.server-ip}:${issuer.server-port}`). Credential Offer URI, OID4VCI List Provider 등록, 아래 Authorization Server URL에 사용 |
+| `issuer.data-dir` | Metadata 및 관련 Data File의 기준 Directory (기본값: `.`) |
+| `issuer.metadata-file-path` | Issuer Metadata 초기 JSON 파일 (기본값: `metadata/issuer_meta.json`, 실행 Directory 기준). `server_config` 테이블에 `OID4VCI_METADATA` 항목이 없으면 이 파일을 읽어 DB에 저장하며, Admin Console에서 수정한 Metadata는 이 파일에도 반영됨 |
+| `issuer.wallet-file-name` | Issuer Wallet 경로. `wallet.file-path` 값을 참조 |
+| `issuer.sdk.config-source` | Credential Configuration 원본. 기본 설정은 `DB`(`credential_config` 테이블) 사용 |
+| `issuer.status-list.endpoint-enabled` | (선택) OID4VCI SDK가 제공하는 Status List Endpoint `GET /status-lists/{listId}` 활성화 여부 (기본값: `true`) |
+| `issuer.status-list.bootstrap.ttl-seconds` | 기본 설정 파일에 정의(`1800`)되어 있으나 현재 서버 및 SDK 코드에서는 읽지 않음. Status List Token TTL은 List별로 `t_oid4vc_status_list.ttl_seconds`(기본값: `300`)에 저장 |
+| `oid4vc.auth.issuer-url` | Authorization Server Issuer URL (기본값: `${issuer.base-url}`) |
+| `oid4vc.auth.clients.issuer-server.url` | Authorization Server Client 설정에서 사용하는 Issuer 서버 URL (기본값: `${issuer.base-url}`) |
+| `clients.auth-server.url` | Authorization Server Base URL (기본값: `${issuer.base-url}`) |
+| `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint (기본값: `${clients.auth-server.url}/oauth2/jwks`) |
+
+> - 저장소에 포함된 `application-issuer.yml`의 `issuer.server-ip`는 개발용 IP 주소로 설정되어 있습니다. 운영 환경에서 Wallet이 접근할 수 있는 주소로 변경하십시오.
+> - Docker 이미지에는 `metadata` Directory가 포함되지 않습니다. Docker로 구동할 때는 해당 Directory를 Mount(예: `{metadata_directory}:/app/metadata`)하거나 Admin Console에서 Issuer Metadata를 등록하십시오.
 
 ## 5.8. application-lss.yml
 
-`lss` Profile은 사용자 주도 OID4VCI 발급에서 사용하는 List Service
-Server를 설정합니다.
+`lss` Profile은 블록체인 연동을 Ledger Service Server(LSS) 연동으로 대체합니다. `lss` Profile이 활성화되면 Issuer 서버는 블록체인 대신 LSS API(`{lss.url}/lss/api/v1`)를 통해 DID Document를 조회하고, VC Meta, VC Schema, ZKP Credential Schema/Definition을 등록 및 조회합니다. `dev` Profile과 함께 활성화합니다(예: `--spring.profiles.active=dev,lss`).
 
 | Property | 설명 |
 |----------|------|
-| `lss.url` | List Service Server Base URL (Local 기본 Port: `8098`) |
+| `lss.url` | Ledger Service Server Base URL (기본값: `http://127.0.0.1:8098`) |
+
+> 모든 LSS 요청에는 `X-API-Key` Header가 포함됩니다. 이 값은 `server_config` 테이블의 `API_KEY_LSS` 항목(초기값: `enter_lss_api_key_here`)에서 읽으며, Admin Console의 Server Configuration 메뉴에서 변경할 수 있습니다. 항목이 없거나 값이 비어 있으면 요청이 `SSRVISS01101` 오류로 실패합니다.
 
 # 6. 프로파일 설정 및 사용
 
@@ -667,7 +727,7 @@ Issuer 서버는 다양한 환경에서 실행될 수 있도록 `sample`와 `dev
 
 ```bash
 cd {source_directory}
-docker build -t did-issuer-server -f did-issuer-server/Dockerfile .
+docker build -t did-issuer-server -f Dockerfile .
 ```
 
 <br/>

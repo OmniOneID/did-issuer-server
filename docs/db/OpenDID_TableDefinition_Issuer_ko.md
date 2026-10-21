@@ -2,8 +2,8 @@
 Open DID Issuer Database Table Definition
 ==
 
-- Date: 2026-06-19
-- Version: v2.0.0
+- Date: 2026-10-21
+- Version: v2.0.1
 
 Contents
 --
@@ -34,6 +34,24 @@ Contents
     - [2.20 ZKP\_SCHEMA\_ATTRIBUTE](#220-zkp_schema_attribute)
     - [2.21 DID\_DOCUMENT](#221-did_document)
     - [2.22 ADMIN](#222-admin)
+  - [3. OID4VCI 및 Server 설정 테이블](#3-oid4vci-및-server-설정-테이블)
+    - [3.1 SERVER\_CONFIG](#31-server_config)
+    - [3.2 ADMIN\_PASSWORD\_POLICY](#32-admin_password_policy)
+    - [3.3 CREDENTIAL\_CONFIG](#33-credential_config)
+    - [3.4 T\_OID4VC\_OFFER](#34-t_oid4vc_offer)
+    - [3.5 T\_OID4VC\_CNONCE](#35-t_oid4vc_cnonce)
+    - [3.6 T\_OID4VC\_PRE\_AUTH\_CODE](#36-t_oid4vc_pre_auth_code)
+    - [3.7 T\_OID4VC\_SESSION\_MAP](#37-t_oid4vc_session_map)
+    - [3.8 T\_OID4VC\_DEFERRED\_TRANSACTION](#38-t_oid4vc_deferred_transaction)
+    - [3.9 T\_OID4VC\_CLIENT](#39-t_oid4vc_client)
+    - [3.10 T\_OID4VC\_USER\_CREDENTIAL\_MAP](#310-t_oid4vc_user_credential_map)
+    - [3.11 T\_OID4VC\_NOTIFICATION](#311-t_oid4vc_notification)
+    - [3.12 T\_OID4VC\_USER\_CLAIMS](#312-t_oid4vc_user_claims)
+    - [3.13 T\_OID4VC\_WEBVIEW\_ISSUANCE\_SESSION](#313-t_oid4vc_webview_issuance_session)
+    - [3.14 T\_OID4VC\_STATUS\_LIST](#314-t_oid4vc_status_list)
+    - [3.15 T\_OID4VC\_CREDENTIAL\_ISSUANCE](#315-t_oid4vc_credential_issuance)
+    - [3.16 T\_OID4VC\_CREDENTIAL\_STATUS\_HISTORY](#316-t_oid4vc_credential_status_history)
+    - [3.17 T\_OID4VC\_STATUS\_LIST\_BOOTSTRAP\_LOCK](#317-t_oid4vc_status_list_bootstrap_lock)
 
 ## 1. Overview
 
@@ -58,7 +76,7 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |     | expired_at       | TIMESTAMP   |      | YES     | N/A    | expiration date         |
 |     | created_at       | TIMESTAMP   |      | NO      | NOW()  | created date            |
 |     | updated_at       | TIMESTAMP   |      | YES     | N/A    | updated date            |
-| FK  | issue_profile_id | BIGINT      |      | NO      | N/A    | Linked issue profile ID |
+| FK  | issue_profile_id | BIGINT      |      | YES     | N/A    | Linked issue profile ID |
 
 ### 2.2 SUB_TRANSACTION
 
@@ -71,7 +89,6 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |     | created_at       | TIMESTAMP |        | NO       | NOW()   | created date      |
 |     | updated_at       | TIMESTAMP |        | YES      | N/A     | updated date      |
 | FK  | transaction_id   | BIGINT    |        | NO       | N/A     | transaction key   |
-| FK  | issue_profile_id | BIGINT    |        | NO       | N/A     | issue profile key |
 
 ### 2.3 CERTIFICATE_VC
 
@@ -85,14 +102,16 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 ### 2.4 USER
 
 | 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
-| --- | ----------- | --------- | ------ | -------- | ------- | ------------ |
-| PK  | id          | BIGINT    |        | NO       | N/A     | id           |
-|     | pii         | VARCHAR   | 100    | YES      | N/A     | pii          |
-|     | data        | TEXT      |        | NO       | N/A     | user data    |
-|     | did         | VARCHAR   | 200    | YES      | N/A     | did          |
-|     | created_at  | TIMESTAMP |        | NO       | NOW()   | created date |
-|     | updated_at  | TIMESTAMP |        | YES      | N/A     | updated date |
-|     | schema_id   | VARCHAR   | 100    | NO       | N/A     | schema id    |
+| --- | ------------ | --------- | ------ | -------- | ------- | ------------- |
+| PK  | id           | BIGINT    |        | NO       | N/A     | id            |
+|     | pii          | VARCHAR   | 100    | YES      | N/A     | pii           |
+|     | data         | TEXT      |        | NO       | N/A     | user data     |
+|     | did          | VARCHAR   | 200    | YES      | N/A     | did           |
+|     | created_at   | TIMESTAMP |        | NO       | NOW()   | created date  |
+|     | updated_at   | TIMESTAMP |        | YES      | N/A     | updated date  |
+| FK  | vc_schema_id | BIGINT    |        | NO       | 1       | VC schema key |
+
+- Unique 제약조건: `user_did_vc_schema_id_key` (`did`, `vc_schema_id`)
 
 ### 2.5 VC_OFFER
 
@@ -114,8 +133,9 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |------|----------------|-----------|--------|----------|---------|------------------------|
 | PK   | id             | BIGINT    |        | NO       | N/A     | id                     |
 |      | profile_id     | VARCHAR   | 40     | NO       | N/A     | profile id             |
-|      | did            | VARCHAR   | 200    | NO       | N/A     | holder DID             |
+|      | did            | VARCHAR   | 200    | YES      | N/A     | holder DID             |
 |      | nonce          | VARCHAR   | 100    | NO       | N/A     | Issuer Nonce           |
+|      | zkp_nonce      | VARCHAR   | 100    | YES      | N/A     | ZKP Issuer Nonce       |
 |      | created_at     | TIMESTAMP |        | NO       | NOW()   | created date           |
 |      | updated_at     | TIMESTAMP |        | YES      | N/A     | updated date           |
 | FK   | transaction_id | BIGINT    |        | NO       | N/A     | transaction key        |
@@ -136,8 +156,8 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |     | created_at    | TIMESTAMP |        | NO       | NOW()   | created date                    |
 |     | updated_at    | TIMESTAMP |        | YES      | N/A     | updated date                    |
 |     | vc_type       | VARCHAR   | 50     | NO       | VC      | Type of VC, e.g., 'VC' or 'ZKP' |
-|     | vc_schema_id  | VARCHAR   | 100    | NO       | N/A     | Associated VC schema ID         |
-|     | definition_id | VARCHAR   | 100    | YES      | N/A     | ZKP Credential definition ID    |
+|     | vc_schema_id  | VARCHAR   | 100    | NO       | ''      | Associated VC schema ID         |
+|     | status        | VARCHAR   | 20     | NO       | ACTIVE  | VC status                       |
 | FK  | user_id       | BIGINT    |        | NO       | N/A     | User key                        |
 
 ### 2.8 E2E
@@ -172,7 +192,7 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 | 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
 |------|--------------|-----------|--------|----------|---------|------------------------|
 | PK   | id           | BIGINT    |        | NO       | N/A     | id                     |
-|      | schema_id    | VARCHAR   | 100    | NO       | N/A     | schema id              |
+|      | vc_schema_id | VARCHAR   | 100    | NO       | N/A     | schema id              |
 |      | title        | VARCHAR   | 100    | NO       | N/A     | schema title           |
 |      | description  | VARCHAR   | 200    | YES      | N/A     | schema description     |
 |      | language     | VARCHAR   | 10     | YES      | N/A     | schema language        |
@@ -203,36 +223,41 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 ### 2.13 ISSUE_PROFILE
 
 | 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
-| ------ | ------------- | --------- | ------ | -------- | --------- | ------------------------------- |
-| PK     | id            | BIGINT    |        | NO       | N/A       | id                              |
-| PK, FK | vc_schema_id  | BIGINT    |        | NO       | N/A       | VC schema key                   |
-|        | vc_plan_id    | VARCHAR   | 20     | NO       | N/A       | VC plan id                      |
-|        | title         | VARCHAR   | 100    | NO       | N/A       | title                           |
-|        | description   | VARCHAR   | 200    | YES      | N/A       | description                     |
-|        | endpoints     | VARCHAR   | 200    | NO       | N/A       | issue API endpoint list         |
-|        | cipher        | VARCHAR   | 64     | NO       | N/A       | cipher algorithm                |
-|        | curve         | VARCHAR   | 64     | NO       | N/A       | curve type                      |
-|        | padding       | VARCHAR   | 64     | NO       | N/A       | padding method                  |
-|        | initiate_type | VARCHAR   | 20     | NO       | user init | initiate type                   |
-|        | language      | VARCHAR   | 10     | NO       | N/A       | language code                   |
-|        | tags          | VARCHAR   | 200    | YES      | N/A       | Tags used for profile grouping  |
-|        | zkp_enabled   | BOOLEAN   |        | NO       | false     | Whether ZKP issuance is enabled |
-|        | definition_id | VARCHAR   | 100    | YES      | N/A       | ZKP Credential definition ID    |
-|        | created_at    | TIMESTAMP |        | NO       | NOW()     | Creation timestamp              |
-|        | updated_at    | TIMESTAMP |        | YES      | N/A       | Last update timestamp           |
+| ------ | ------------------ | --------- | ------ | -------- | --------- | ------------------------------------------------------ |
+| PK     | id                 | BIGINT    |        | NO       | N/A       | id                                                     |
+| FK     | vc_schema_id       | BIGINT    |        | NO       | N/A       | VC schema key                                          |
+|        | vc_plan_id         | VARCHAR   | 20     | NO       | N/A       | VC plan id                                             |
+|        | title              | VARCHAR   | 100    | NO       | N/A       | title                                                  |
+|        | description        | VARCHAR   | 200    | NO       | N/A       | description                                            |
+|        | endpoints          | VARCHAR   | 2000   | NO       | N/A       | issue API endpoint list                                |
+|        | cipher             | VARCHAR   | 64     | NO       | N/A       | cipher algorithm                                       |
+|        | curve              | VARCHAR   | 64     | NO       | N/A       | curve type                                             |
+|        | padding            | VARCHAR   | 64     | NO       | N/A       | padding method                                         |
+|        | initiate_type      | VARCHAR   | 20     | YES      | N/A       | initiate type (`USER_INIT`, `ISSUER_INIT`)             |
+|        | language           | VARCHAR   | 10     | NO       | N/A       | language code                                          |
+|        | tags               | VARCHAR   | 200    | NO       | N/A       | Tags used for profile grouping                         |
+|        | zkp_enabled        | BOOLEAN   |        | NO       | false     | Whether ZKP issuance is enabled                        |
+|        | definition_id      | VARCHAR   | 100    | YES      | N/A       | ZKP Credential definition ID                           |
+|        | issuance_mode      | VARCHAR   | 20     | NO       | DIRECT    | VC issuance mode (`DIRECT`, `PROXY`)                   |
+|        | user_query_type    | VARCHAR   | 10     | NO       | DB        | User data query method (`DB`, `API`, `TEST`)           |
+|        | user_query_url     | VARCHAR   | 2000   | YES      | N/A       | User data query API URL (`API` method)                 |
+|        | user_query_headers | TEXT      |        | YES      | N/A       | User data query API request headers (`API` method)     |
+|        | created_at         | TIMESTAMP |        | NO       | NOW()     | Creation timestamp                                     |
+|        | updated_at         | TIMESTAMP |        | YES      | N/A       | Last update timestamp                                  |
 
 ### 2.14 ISSUER
 
 | 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
-|------|------------------|-----------|--------|----------|---------|------------------------------|
-| PK   | id               | BIGINT    |        | NO       | N/A     | id                           |
-|      | did              | VARCHAR   | 200    | NO       | N/A     | issuer DID                   |
-|      | name             | VARCHAR   | 200    | NO       | N/A     | issuer name                  |
-|      | status           | VARCHAR   | 50     | NO       | N/A     | issuer status                |
-|      | server_url       | VARCHAR   | 2000   | YES      | N/A     | issuer server URL            |
-|      | certificate_url  | VARCHAR   | 2000   | YES      | N/A     | issuer certificate VC URL    |
-|      | created_at       | TIMESTAMP |        | NO       | NOW()   | created date                 |
-|      | updated_at       | TIMESTAMP |        | YES      | N/A     | updated date                 |
+|------|---------------------------|-----------|--------|----------|---------|------------------------------------------|
+| PK   | id                        | BIGINT    |        | NO       | N/A     | id                                       |
+|      | did                       | VARCHAR   | 200    | YES      | N/A     | issuer DID                               |
+|      | name                      | VARCHAR   | 200    | NO       | N/A     | issuer name                              |
+|      | status                    | VARCHAR   | 50     | NO       | N/A     | issuer status                            |
+|      | server_url                | VARCHAR   | 2000   | YES      | N/A     | issuer server URL                        |
+|      | certificate_url           | VARCHAR   | 2000   | YES      | N/A     | issuer certificate VC URL                |
+|      | published_certificate_url | VARCHAR   | 2000   | YES      | N/A     | certificate VC URL returned by TA enrollment |
+|      | created_at                | TIMESTAMP |        | NO       | NOW()   | created date                             |
+|      | updated_at                | TIMESTAMP |        | YES      | N/A     | updated date                             |
 
 ### 2.15 ZKP_SCHEMA
 
@@ -286,7 +311,7 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 |      | tas_url         | VARCHAR   | 2000   | YES      | N/A     | TA Server base URL              |
 |      | assert_key_id   | VARCHAR   | 30     | YES      | N/A     | assertion key ID                |
 |      | revoke_auth_type| VARCHAR   | 30     | YES      | N/A     | revoke authorization type       |
-|      | created_at      | TIMESTAMP |        | NO       | N/A     | created date                    |
+|      | created_at      | TIMESTAMP |        | NO       | NOW()   | created date                    |
 |      | updated_at      | TIMESTAMP |        | YES      | N/A     | updated date                    |
 
 ### 2.19 ZKP_NAMESPACE
@@ -329,41 +354,311 @@ Issuer 서버 데이터베이스의 테이블 간 관계를 시각적으로 보�
 ### 2.22 ADMIN
 
 | 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
-|------|------------------------|-----------|--------|----------|---------|-----------------------------------|
-| PK   | id                     | BIGINT    |        | NO       | N/A     | id                                |
-|      | login_id               | VARCHAR   | 50     | NO       | N/A     | admin login ID                    |
-|      | login_password         | VARCHAR   | 64     | NO       | N/A     | hashed login password             |
-|      | name                   | VARCHAR   | 200    | YES      | N/A     | admin name                        |
-|      | email                  | VARCHAR   | 100    | YES      | N/A     | email address                     |
-|      | email_verified         | BOOLEAN   |        | YES      | false   | whether email is verified         |
-|      | require_password_reset | BOOLEAN   |        | NO       | true    | require password change on login  |
-|      | role                   | VARCHAR   | 50     | YES      | N/A     | admin role                        |
-|      | created_by             | VARCHAR   | 50     | NO       | N/A     | creator login ID or system user   |
-|      | created_at             | TIMESTAMP |        | NO       | NOW()   | created date                      |
-|      | updated_at             | TIMESTAMP |        | YES      | N/A     | updated date                      |
+|------|--------------------------|--------------------------|--------|----------|---------|------------------------------------------------------------------|
+| PK   | id                       | BIGINT                   |        | NO       | N/A     | id                                                               |
+|      | login_id                 | VARCHAR                  | 50     | NO       | N/A     | admin login ID                                                   |
+|      | login_password           | VARCHAR                  | 64     | NO       | N/A     | hashed login password                                            |
+|      | name                     | VARCHAR                  | 200    | YES      | N/A     | admin name                                                       |
+|      | email_verified           | BOOLEAN                  |        | NO       | false   | whether email is verified                                        |
+|      | require_password_reset   | BOOLEAN                  |        | NO       | true    | require password change on login                                 |
+|      | role                     | VARCHAR                  | 50     | NO       | N/A     | admin role                                                       |
+|      | created_by               | VARCHAR                  | 50     | NO       | N/A     | creator login ID or system user                                  |
+|      | last_password_changed_at | TIMESTAMP WITH TIME ZONE |        | YES      | N/A     | last password change date                                        |
+|      | password_reset_reason    | VARCHAR                  | 20     | YES      | N/A     | password reset reason (`FIRST_LOGIN`, `EXPIRED`, `ADMIN_FORCED`) |
+|      | created_at               | TIMESTAMP                |        | NO       | NOW()   | created date                                                     |
+|      | updated_at               | TIMESTAMP                |        | YES      | N/A     | updated date                                                     |
 
 ## 3. OID4VCI 및 Server 설정 테이블
 
-현재 Schema에는 다음 테이블도 포함된다. 별도 표기가 없는 `BaseEntity` 상속 Entity에는 `created_at`, `updated_at` Timestamp가 포함된다.
+이 절은 Runtime Server 설정, Admin Password 정책, OID4VCI 발급을 위해 추가된 테이블을 정의한다(Liquibase Changeset `set.3`~`set.8`).
 
-| 테이블 | 주요 Column | 용도 |
-|--------|-------------|------|
-| `credential_config` | `id`, `format`, `identifiers`, `metadata_json`, `enabled` | Credential Configuration Registry |
-| `server_config` | `id`, `config_key`, `config_value`, `description` | Runtime Server 설정 |
-| `admin_password_policy` | `id`, `min_length`, `require_uppercase`, `require_number`, `require_special`, `password_expiry_days` | Admin Password 정책 |
-| `t_oid4vc_client` | `id`, `client_id`, `client_secret`, `redirect_uri`, `client_name` | OAuth/OID4VC Client 등록 |
-| `t_oid4vc_cnonce` | `id`, `cnonce`, `expires_at` | Proof Nonce 저장 |
-| `t_oid4vc_deferred_transaction` | `id`, `transaction_id`, `request_json`, `expires_at` | 지연 발급 요청 저장 |
-| `t_oid4vc_notification` | `id`, `notification_id`, `transaction_id`, `event_type`, `event_description` | Wallet Notification 저장 |
-| `t_oid4vc_offer` | `id`, `offer_id`, `pre_auth_code`, `user_pin`, `status`, `expires_at` | Credential Offer 상태 |
-| `t_oid4vc_pre_auth_code` | `id`, `code`, `user_id`, `user_pin`, `scopes`, `consumed`, `expires_at` | Pre-Authorized Code 상태 |
-| `t_oid4vc_session_map` | `id`, `session_key`, `session_type`, `user_id`, `expires_at` | 발급 Session Mapping |
-| `t_oid4vc_user_claims` | `id`, `user_id`, `credential_type`, `claims` | User Claims JSON 저장 |
-| `t_oid4vc_user_credential_map` | `id`, `user_id`, `config_id`, `credential_id` | 사용자-Credential Mapping |
-| `t_oid4vc_webview_issuance_session` | `id`, `session_token`, `csrf_token`, `user_id`, `credential_configuration_id`, `credential_type`, `status`, `expires_at`, `credential_offer_uri` | 사용자 주도 Webview 발급 Session |
-| `t_oid4vc_status_list` | `id`, `list_uri`, `format`, `bits`, `capacity`, `next_index`, `signing_key_id`, `ttl_seconds`, `list_version`, `enabled` | Status List Metadata 및 Index 할당 상태 |
-| `t_oid4vc_credential_issuance` | `id`, `issuance_id`, `user_id`, `config_id`, `format`, `status_list_id`, `status_list_index`, `credential_status`, `issuance_state` | 발급 Credential Lifecycle 및 할당된 Status List Index |
-| `t_oid4vc_credential_status_history` | `id`, `credential_issuance_id`, `previous_status`, `new_status`, `reason`, `changed_by`, `changed_at` | Credential 상태 변경 감사 이력 |
-| `t_oid4vc_status_list_bootstrap_lock` | `lock_id` | Status List 초기화 시 사용하는 단일 Lock |
+### 3.1 SERVER_CONFIG
+
+Key/Value 형태의 Runtime Server 설정
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|--------------|-----------|--------|----------|---------|---------------------------|
+| PK   | id           | BIGINT    |        | NO       | N/A     | id                        |
+|      | config_key   | VARCHAR   | 100    | NO       | N/A     | configuration key         |
+|      | config_value | TEXT      |        | NO       | N/A     | configuration value       |
+|      | description  | VARCHAR   | 200    | YES      | N/A     | configuration description |
+|      | created_at   | TIMESTAMP |        | NO       | NOW()   | created date              |
+|      | updated_at   | TIMESTAMP |        | YES      | N/A     | updated date              |
+
+- Unique 제약조건: `config_key`
+- 초기 데이터: `API_KEY_LSS` (Ledger Service Server 호출 시 `X-API-Key` Header로 전송하는 API Key)
+- 실행 중 저장되는 Key: `OID4VCI_METADATA`, `OID4VCI_AUTH_PROPERTIES`, `OID4VCI_LIST_PROVIDER_REGISTRATION`
+
+### 3.2 ADMIN_PASSWORD_POLICY
+
+Admin Password 정책
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|----------------------|--------------------------|--------|----------|---------|------------------------------------|
+| PK   | id                   | BIGINT                   |        | NO       | N/A     | id                                 |
+|      | min_length           | SMALLINT                 |        | NO       | N/A     | minimum password length            |
+|      | require_uppercase    | BOOLEAN                  |        | NO       | N/A     | whether an uppercase letter is required |
+|      | require_number       | BOOLEAN                  |        | NO       | N/A     | whether a number is required       |
+|      | require_special      | BOOLEAN                  |        | NO       | N/A     | whether a special character is required |
+|      | password_expiry_days | SMALLINT                 |        | NO       | N/A     | password expiration period (days)  |
+|      | created_at           | TIMESTAMP WITH TIME ZONE |        | NO       | N/A     | created date                       |
+|      | updated_at           | TIMESTAMP WITH TIME ZONE |        | YES      | N/A     | updated date                       |
+
+- 초기 데이터: 1건 (`min_length` 8, 문자 조건 없음, `password_expiry_days` 365)
+
+### 3.3 CREDENTIAL_CONFIG
+
+OID4VCI Credential Configuration Registry
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|---------------|-----------|--------|----------|-------------------|-----------------------------------------------------|
+| PK   | id            | VARCHAR   | 100    | NO       | N/A               | credential configuration ID                         |
+|      | format        | VARCHAR   | 50     | NO       | N/A               | credential format (e.g., `dc+sd-jwt`, `mso_mdoc`)   |
+|      | doctype       | VARCHAR   | 100    | YES      | N/A               | mDoc docType (not mapped by the JPA entity)         |
+|      | identifiers   | VARCHAR   | 200    | YES      | N/A               | credential identifiers (JSON array)                 |
+|      | metadata_json | TEXT      |        | YES      | N/A               | credential configuration metadata JSON              |
+|      | enabled       | BOOLEAN   |        | YES      | true              | whether the configuration is enabled                |
+|      | created_at    | TIMESTAMP |        | YES      | CURRENT_TIMESTAMP | created date                                        |
+|      | updated_at    | TIMESTAMP |        | YES      | CURRENT_TIMESTAMP | updated date                                        |
+
+### 3.4 T_OID4VC_OFFER
+
+Credential Offer 상태
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|---------------|-----------|--------|----------|-------------------|------------------------------------|
+| PK   | id            | BIGINT    |        | NO       | N/A               | id                                 |
+|      | offer_id      | VARCHAR   | 64     | NO       | N/A               | Credential Offer ID                |
+|      | pre_auth_code | VARCHAR   | 128    | YES      | N/A               | pre-authorized code                |
+|      | user_pin      | VARCHAR   | 256    | YES      | N/A               | transaction code (user PIN)        |
+|      | status        | VARCHAR   | 20     | NO       | N/A               | offer status (e.g., `CREATED`)     |
+|      | expires_at    | TIMESTAMP |        | YES      | N/A               | expiration date                    |
+|      | created_at    | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                       |
+|      | updated_at    | TIMESTAMP |        | YES      | N/A               | updated date                       |
+
+- Unique 제약조건: `offer_id`
+
+### 3.5 T_OID4VC_CNONCE
+
+Proof Nonce(`c_nonce`) 저장
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-------------|-----------|--------|----------|-------------------|----------------------------------------------------------|
+| PK   | id          | BIGINT    |        | NO       | N/A               | id                                                       |
+|      | cnonce      | VARCHAR   | 128    | NO       | N/A               | c_nonce value                                            |
+|      | expires_at  | TIMESTAMP |        | YES      | N/A               | expiration date (10 minutes after creation)              |
+|      | consumed_at | TIMESTAMP |        | YES      | N/A               | consumed date; a nonce with a value cannot be reused     |
+|      | created_at  | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                             |
+|      | updated_at  | TIMESTAMP |        | YES      | N/A               | updated date                                             |
+
+- Unique 제약조건: `cnonce`
+
+### 3.6 T_OID4VC_PRE_AUTH_CODE
+
+Pre-Authorized Code 상태
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-------------|-----------|--------|----------|-------------------|-----------------------------------|
+| PK   | id          | BIGINT    |        | NO       | N/A               | id                                |
+|      | code        | VARCHAR   | 128    | NO       | N/A               | pre-authorized code               |
+|      | user_id     | VARCHAR   | 128    | YES      | N/A               | user ID                           |
+|      | user_pin    | VARCHAR   | 256    | YES      | N/A               | transaction code (user PIN)       |
+|      | scopes      | TEXT      |        | YES      | N/A               | granted scopes                    |
+|      | consumed    | BOOLEAN   |        | YES      | false             | whether the code has been used    |
+|      | expires_at  | TIMESTAMP |        | NO       | N/A               | expiration date                   |
+|      | created_at  | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                      |
+|      | updated_at  | TIMESTAMP |        | YES      | N/A               | updated date                      |
+
+- Unique 제약조건: `code`
+
+### 3.7 T_OID4VC_SESSION_MAP
+
+발급 Session Mapping
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|--------------|-----------|--------|----------|-------------------|-----------------------------------------------------|
+| PK   | id           | BIGINT    |        | NO       | N/A               | id                                                  |
+|      | session_key  | VARCHAR   | 128    | NO       | N/A               | session key (issuer state or pre-authorized code)   |
+|      | session_type | VARCHAR   | 30     | NO       | N/A               | session type (`ISSUER_STATE`, `PRE_AUTH_CODE_MAP`)  |
+|      | user_id      | VARCHAR   | 64     | NO       | N/A               | user ID                                             |
+|      | expires_at   | TIMESTAMP |        | YES      | N/A               | expiration date                                     |
+|      | created_at   | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                        |
+|      | updated_at   | TIMESTAMP |        | YES      | N/A               | updated date                                        |
+
+- Unique 제약조건: `session_key`
+
+### 3.8 T_OID4VC_DEFERRED_TRANSACTION
+
+지연 발급 요청 저장
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|----------------|-----------|--------|----------|-------------------|------------------------------|
+| PK   | id             | BIGINT    |        | NO       | N/A               | id                           |
+|      | transaction_id | VARCHAR   | 128    | NO       | N/A               | deferred transaction ID      |
+|      | request_json   | TEXT      |        | NO       | N/A               | credential request JSON      |
+|      | expires_at     | TIMESTAMP |        | YES      | N/A               | expiration date              |
+|      | created_at     | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                 |
+|      | updated_at     | TIMESTAMP |        | YES      | N/A               | updated date                 |
+
+- Unique 제약조건: `transaction_id`
+
+### 3.9 T_OID4VC_CLIENT
+
+OAuth/OID4VC Client 등록
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|---------------|-----------|--------|----------|-------------------|---------------------|
+| PK   | id            | BIGINT    |        | NO       | N/A               | id                  |
+|      | client_id     | VARCHAR   | 64     | NO       | N/A               | client ID           |
+|      | client_secret | VARCHAR   | 256    | YES      | N/A               | client secret       |
+|      | redirect_uri  | VARCHAR   | 512    | YES      | N/A               | redirect URI        |
+|      | client_name   | VARCHAR   | 100    | YES      | N/A               | client name         |
+|      | created_at    | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date        |
+|      | updated_at    | TIMESTAMP |        | YES      | N/A               | updated date        |
+
+- Unique 제약조건: `client_id`
+
+### 3.10 T_OID4VC_USER_CREDENTIAL_MAP
+
+사용자-Credential Mapping
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|---------------|-----------|--------|----------|-------------------|------------------------------|
+| PK   | id            | BIGINT    |        | NO       | N/A               | id                           |
+|      | user_id       | VARCHAR   | 64     | NO       | N/A               | user ID                      |
+|      | config_id     | VARCHAR   | 128    | NO       | N/A               | credential configuration ID  |
+|      | credential_id | VARCHAR   | 128    | NO       | N/A               | credential ID                |
+|      | created_at    | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                 |
+|      | updated_at    | TIMESTAMP |        | YES      | N/A               | updated date                 |
+
+### 3.11 T_OID4VC_NOTIFICATION
+
+Wallet Notification 저장
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-------------------|-----------|--------|----------|-------------------|-------------------------|
+| PK   | id                | BIGINT    |        | NO       | N/A               | id                      |
+|      | notification_id   | VARCHAR   | 128    | NO       | N/A               | notification ID         |
+|      | transaction_id    | VARCHAR   | 128    | NO       | N/A               | transaction ID          |
+|      | event_type        | VARCHAR   | 50     | YES      | N/A               | notification event      |
+|      | event_description | VARCHAR   | 256    | YES      | N/A               | event description       |
+|      | created_at        | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date            |
+|      | updated_at        | TIMESTAMP |        | YES      | N/A               | updated date            |
+
+- Unique 제약조건: `notification_id`
+
+### 3.12 T_OID4VC_USER_CLAIMS
+
+User Claims JSON 저장
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-----------------|-----------|--------|----------|-------------------|------------------------|
+| PK   | id              | BIGINT    |        | NO       | N/A               | id                     |
+|      | user_id         | VARCHAR   | 128    | NO       | N/A               | user ID                |
+|      | credential_type | VARCHAR   | 128    | NO       | N/A               | credential type        |
+|      | claims          | TEXT      |        | YES      | N/A               | claims JSON            |
+|      | created_at      | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date           |
+|      | updated_at      | TIMESTAMP |        | YES      | N/A               | updated date           |
+
+- Unique 제약조건: `uk_user_claims_id_type` (`user_id`, `credential_type`)
+
+### 3.13 T_OID4VC_WEBVIEW_ISSUANCE_SESSION
+
+사용자 주도 Webview 발급 Session
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-----------------------------|-----------|--------|----------|-------------------|----------------------------------------------------------------------------------------------------|
+| PK   | id                          | BIGINT    |        | NO       | N/A               | id                                                                                                 |
+|      | session_token               | VARCHAR   | 64     | NO       | N/A               | session token                                                                                      |
+|      | csrf_token                  | VARCHAR   | 64     | NO       | N/A               | CSRF token                                                                                         |
+|      | user_id                     | VARCHAR   | 128    | NO       | N/A               | user ID                                                                                            |
+|      | credential_configuration_id | VARCHAR   | 100    | NO       | N/A               | credential configuration ID                                                                        |
+|      | credential_type             | VARCHAR   | 128    | NO       | N/A               | credential type                                                                                    |
+|      | status                      | VARCHAR   | 24     | NO       | N/A               | session status (`INPUT_REQUIRED`, `CLAIMS_SAVED`, `OFFER_CREATED`, `FAILED`, `CANCELED`, `EXPIRED`) |
+|      | expires_at                  | TIMESTAMP |        | NO       | N/A               | expiration date                                                                                    |
+|      | credential_offer_uri        | TEXT      |        | YES      | N/A               | generated Credential Offer URI                                                                     |
+|      | created_at                  | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                                                                       |
+|      | updated_at                  | TIMESTAMP |        | YES      | N/A               | updated date                                                                                       |
+
+- Unique 제약조건: `session_token`
+
+### 3.14 T_OID4VC_STATUS_LIST
+
+Status List Metadata 및 Index 할당 상태
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|----------------|-----------|--------|----------|-------------------|----------------------------------------------------------|
+| PK   | id             | BIGINT    |        | NO       | N/A               | id                                                       |
+|      | list_uri       | VARCHAR   | 512    | NO       | N/A               | Status List URI                                          |
+|      | format         | VARCHAR   | 64     | NO       | N/A               | credential format                                        |
+|      | bits           | INTEGER   |        | NO       | 2                 | bits per status entry                                    |
+|      | capacity       | BIGINT    |        | NO       | 100000            | maximum number of entries                                |
+|      | next_index     | BIGINT    |        | NO       | 0                 | next index to allocate                                   |
+|      | signing_key_id | VARCHAR   | 256    | NO       | N/A               | Status List signing key ID (`assert` for auto-created lists) |
+|      | ttl_seconds    | BIGINT    |        | NO       | 300               | Status List token TTL (seconds)                          |
+|      | list_version   | BIGINT    |        | NO       | 0                 | Status List version                                      |
+|      | enabled        | BOOLEAN   |        | NO       | true              | whether the list is enabled                              |
+|      | created_at     | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                             |
+|      | updated_at     | TIMESTAMP |        | YES      | N/A               | updated date                                             |
+
+- Unique 제약조건: `list_uri`
+- Index: `idx_oid4vc_status_list_format_enabled` (`format`, `enabled`)
+
+### 3.15 T_OID4VC_CREDENTIAL_ISSUANCE
+
+발급 Credential Lifecycle 및 할당된 Status List Index
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-------------------|-----------|--------|----------|-------------------|----------------------------------------------------------------|
+| PK   | id                | BIGINT    |        | NO       | N/A               | id                                                             |
+|      | issuance_id       | VARCHAR   | 36     | NO       | N/A               | issuance ID (UUID)                                             |
+|      | user_id           | VARCHAR   | 128    | NO       | N/A               | user ID                                                        |
+|      | subject_did       | VARCHAR   | 512    | YES      | N/A               | Holder DID bound through the proof key; used for revocation    |
+|      | config_id         | VARCHAR   | 128    | NO       | N/A               | credential configuration ID                                    |
+|      | format            | VARCHAR   | 64     | NO       | N/A               | credential format                                              |
+|      | status_list_index | BIGINT    |        | NO       | N/A               | allocated Status List index                                    |
+|      | credential_status | VARCHAR   | 20     | NO       | VALID             | credential status (`VALID`, `INVALID`, `SUSPENDED`)            |
+|      | issuance_state    | VARCHAR   | 20     | NO       | ALLOCATED         | issuance state (`ALLOCATED`, `ISSUED`, `FAILED`)               |
+|      | issued_at         | TIMESTAMP |        | YES      | N/A               | issued date                                                    |
+|      | expires_at        | TIMESTAMP |        | YES      | N/A               | expiration date                                                |
+|      | status_changed_at | TIMESTAMP |        | YES      | N/A               | last status change date                                        |
+|      | token_hash        | VARCHAR   | 64     | YES      | N/A               | SHA-256 hash (hex) of the issued credential                    |
+|      | failed_at         | TIMESTAMP |        | YES      | N/A               | issuance failure date                                          |
+|      | failure_code      | VARCHAR   | 64     | YES      | N/A               | issuance failure code                                          |
+|      | failure_message   | VARCHAR   | 512    | YES      | N/A               | issuance failure message                                       |
+|      | created_at        | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                                   |
+|      | updated_at        | TIMESTAMP |        | YES      | N/A               | updated date                                                   |
+| FK   | status_list_id    | BIGINT    |        | NO       | N/A               | Status List key (`t_oid4vc_status_list.id`)                    |
+
+- Unique 제약조건: `uk_oid4vc_issuance_id` (`issuance_id`), `uk_oid4vc_status_list_index` (`status_list_id`, `status_list_index`)
+- Foreign Key: `fk_oid4vc_issuance_status_list` (`status_list_id` -> `t_oid4vc_status_list.id`)
+- Index: `idx_oid4vc_issuance_user_id` (`user_id`), `idx_oid4vc_issuance_expiry` (`expires_at`), `idx_oid4vc_issuance_subject_did` (`subject_did`)
+
+### 3.16 T_OID4VC_CREDENTIAL_STATUS_HISTORY
+
+Credential 상태 변경 감사 이력
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|------------------------|-----------|--------|----------|-------------------|----------------------------------------------------|
+| PK   | id                     | BIGINT    |        | NO       | N/A               | id                                                 |
+|      | previous_status        | VARCHAR   | 20     | YES      | N/A               | status before the change                           |
+|      | new_status             | VARCHAR   | 20     | NO       | N/A               | status after the change                            |
+|      | reason                 | VARCHAR   | 512    | YES      | N/A               | change reason                                      |
+|      | changed_by             | VARCHAR   | 128    | NO       | N/A               | actor that changed the status (e.g., `admin-console`) |
+|      | changed_at             | TIMESTAMP |        | NO       | N/A               | changed date                                       |
+|      | created_at             | TIMESTAMP |        | NO       | CURRENT_TIMESTAMP | created date                                       |
+|      | updated_at             | TIMESTAMP |        | YES      | N/A               | updated date                                       |
+| FK   | credential_issuance_id | BIGINT    |        | NO       | N/A               | credential issuance key (`t_oid4vc_credential_issuance.id`) |
+
+- Foreign Key: `fk_oid4vc_status_history_issuance` (`credential_issuance_id` -> `t_oid4vc_credential_issuance.id`)
+- Index: `idx_oid4vc_status_history_issuance_changed` (`credential_issuance_id`, `changed_at`)
+
+### 3.17 T_OID4VC_STATUS_LIST_BOOTSTRAP_LOCK
+
+Status List 초기화 시 사용하는 단일 Lock
+
+| 키  | 컬럼명           | 데이터 타입 | 길이 | 널 허용 | 기본값 | 설명                    |
+|------|-------------|-----------|--------|----------|---------|------------------------------------------|
+| PK   | lock_id     | INTEGER   |        | NO       | N/A     | lock ID (a single row with value `1`)    |
 
 Column 제약조건은 Liquibase Changeset과 JPA Entity에 정의된다. 실제 배포 Database Schema의 기준은 Liquibase이다.

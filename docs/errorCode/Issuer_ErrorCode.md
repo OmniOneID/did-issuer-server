@@ -18,13 +18,14 @@ puppeteer:
 Issuer Server Error
 ==
 
-- Date: 2026-06-19
-- Version: v2.0.0
+- Date: 2026-10-21
+- Version: v2.0.1
 
 | Version          | Date       | Changes                  |
 | ---------------- | ---------- | ------------------------ |
 | v1.0.0  | 2024-08-20 | Initial version          |
 | v2.0.0 | 2025-05-30 | add ErrorCode |
+| v2.0.1 | 2026-10-21 | Add OID4VCI, LSS, KYC and OID4VCI SDK error codes; align codes and messages with the `ErrorCode` enum |
 
 <div style="page-break-after: always;"></div>
 
@@ -49,6 +50,10 @@ Issuer Server Error
     - [1.9. ZKP(104xx)](#19-zkp104xx)
     - [1.10. Admin / Config(008xx)](#110-admin--config008xx)
     - [1.11. TAS(900xx)](#111-tas900xx)
+    - [1.12. LSS(010xx, 011xx)](#112-lss010xx-011xx)
+    - [1.13. KYC(155xx)](#113-kyc155xx)
+  - [2. OID4VCI SDK](#2-oid4vci-sdk)
+    - [2.1. OID4VCI SDK(SSDKOVC)](#21-oid4vci-sdkssdkovc)
 
 # Model
 ## Error Response
@@ -106,10 +111,12 @@ public class ErrorResponse {
 
 | Error Code   | Error Message                                | Description      | Action Required                        |
 |--------------|----------------------------------------------|------------------|----------------------------------------|
-| SSRVISS00100 | Failed to find DID Document.                 | -                | Verify the DID and ensure it exists.   |
+| SSRVISS000100 | Failed to find DID Document.                | -                | Verify the DID and ensure it exists.   |
 | SSRVISS00101 | Invalid DID Document version.                | -                | Check the DID Document version.        |
 | SSRVISS00102 | Invalid DID Document                     | -           | Check the DID format.      |
 | SSRVISS00103 | Failed to retrieve DID Document.         | -           | Try fetching DID again.    |
+
+> `DID_DOC_FIND_FAILURE` is defined with the code value `000100` in the `ErrorCode` enum, so the returned code is `SSRVISS000100`.
 
 
 <br>
@@ -123,13 +130,13 @@ public class ErrorResponse {
 | SSRVISS00202 | The vcPlanId is not valid.                   | -                | Check the vcPlanId for correctness.     |
 | SSRVISS00203 | The profile id is not valid.                 | -                | Validate the profile ID and retry.      |
 | SSRVISS00204 | The profile issuer nonce is not valid.       | -                | Ensure the issuer nonce is correct.     |
-| SSRVISS00205 | Failed to Issue VC.                          | -                | Review issuance process and retry.      |
+| SSRVISS00205 | Failed to Issue VC                           | -                | Review issuance process and retry.      |
 | SSRVISS00206 | The VC does not exist.                       | -                | Confirm the VC existence and try again. |
 | SSRVISS00207 | VC ID does not match.                        | -                | Verify the VC ID and correct it.        |
 | SSRVISS00208 | Failed to parse Request VC.                  | -                | Check the request format and retry.     |
 | SSRVISS00209 | This VC is Revoked.                          | -                | Use a valid, non-revoked VC.            |
 | SSRVISS00210 | The issuer nonce is not valid.               | -                | Ensure the nonce matches the issuer.    |
-| SSRVISS00211 | VC Schema name is not valid.                 | -                | Verify and correct the schema name.     |
+| SSRVISS00211 | VC Schema name is not valid                  | -                | Verify and correct the schema name.     |
 | SSRVISS00212 | Failed to generate VC            | -           | Check the generation process and try again.  |
 | SSRVISS00213 | Failed to parse VC Schema        | -           | Validate the schema format and retry parsing.|
 | SSRVISS00214 | VC Schema not found for given ID.          | -           | Verify VC schema ID.         |
@@ -141,7 +148,7 @@ public class ErrorResponse {
 | Error Code   | Error Message                                | Description      | Action Required                            |
 |--------------|----------------------------------------------|------------------|--------------------------------------------|
 | SSRVISS00300 | The Holder does not exist.                   | -                | Verify holder information and retry.       |
-| SSRVISS00301 | The User does not exist.                     | -                | Confirm user details or create a new user. |
+| SSRVISS00301 | The User dose not exist.                     | -                | Confirm user details or create a new user. |
 | SSRVISS00302 | The Holder is not valid.                     | -                | Verify the Holder details and try again.   |
 
 <br>
@@ -177,6 +184,7 @@ public class ErrorResponse {
 | SSRVISS00425 | Failed to create wallet: wallet already exists.| -           | Use a different wallet ID.               |
 | SSRVISS00426 | Invalid proof purpose.                         | -           | Verify proof purpose parameter.          |
 | SSRVISS00427 | Failed to generate keys: key already exists.   | -           | Avoid duplicate key creation.            |
+| SSRVISS00428 | Public key not found.                          | -           | Check that the key exists in the Issuer wallet. |
 
 
 ### 1.6. Issuer(005xx)
@@ -184,6 +192,7 @@ public class ErrorResponse {
 | Error Code   | Error Message                                           | Description | Action Required                          |
 |--------------|---------------------------------------------------------|-------------|------------------------------------------|
 | SSRVISS00501 | Certificate VC data not found.                          | -           | Verify certificate data availability.    |
+| SSRVISS00502 | User Query API mode is not currently supported.         | -           | Set the Issue Profile user query type to `DB` or `TEST`. |
 
 <br>
 
@@ -198,6 +207,7 @@ public class ErrorResponse {
 | SSRVISS00604 | Failed to register VC meta on the blockchain.         | -           | Confirm the VC meta details and retry registration.    |
 | SSRVISS00605 | Failed to retrieve VC meta on the blockchain.         | -           | Check the retrieval parameters and try again.          |
 | SSRVISS00606 | Failed to update VC status on the blockchain.         | -           | Verify the status update request and reattempt.        |
+| SSRVISS00607 | Failed to register VC schema on the blockchain.       | -           | Check blockchain status and retry VC schema registration. |
 
 <br>
 
@@ -226,8 +236,10 @@ public class ErrorResponse {
 | SSRVISS10405 | Failed to Create Credential Offer.                   | -           | Check credential offer creation steps.     |
 | SSRVISS10406 | Failed to Create Attribute Value.                    | -           | Review ZKP attribute logic.                |
 | SSRVISS10407 | Failed to Create Signature correctness proof.        | -           | Validate ZKP signature process.            |
-| SSRVISS10408 | Failed to Create Credential Signature.               | -           | Retry credential signature creation.       |
-| SSRVISS10409 | Failed to Issued Credential.                         | -           | Review and retry issuance logic.           |
+| SSRVISS10407 | Failed to Create Credential Signature.               | -           | Retry credential signature creation.       |
+| SSRVISS10407 | Failed to Issued Credential.                         | -           | Review and retry issuance logic.           |
+
+> In the current `ErrorCode` enum, `FAILED_TO_SIGNATURE_CORRECTNESS_PROOF`, `FAILED_TO_CREDENTIAL_SIGNATURE`, and `FAILED_TO_ISSUE_CREDENTIAL` share the code `SSRVISS10407`. Use the error message to distinguish them.
 
 <br>
 
@@ -246,7 +258,7 @@ public class ErrorResponse {
 | SSRVISS00808 | Failed to register Issuer DID Document: document is already registered. | - | Skip re-registration.                      |
 | SSRVISS00809 | Failed to generate DID document.                             | -           | Check DID document generation logic.       |
 | SSRVISS00810 | Failed to register Issuer DID Document.                      | -           | Retry DID registration.                    |
-| SSRVISS00811 | Failed to find Issuer DID Document: no registration request made. | -       | Submit DID registration request.           |
+| SSRVISS00811 | Failed to find Issuer DID Document: o registration request has been made. | - | Submit DID registration request.           |
 | SSRVISS00812 | Failed to process certificate VC: invalid JSON format.       | -           | Fix certificate VC JSON format.            |
 | SSRVISS00813 | Failed to process the 'request-certificate-vc' API request.  | -           | Check API request payload.                 |
 | SSRVISS00814 | Failed to load key element.                                  | -           | Check key storage and retry.               |
@@ -268,6 +280,10 @@ public class ErrorResponse {
 | SSRVISS00830 | Failed to register ZKP Credential Definition. (Blockchain or List Provider) | -           | Verify external systems and credentials.                 |
 | SSRVISS00831 | ZKP Credential Definition not found for the given ID.                       | -           | Check the definition ID and confirm registration status. |
 | SSRVISS00832 | ZKP Credential schema is already in use.                | -           | Ensure the schema is not already registered or used. |
+| SSRVISS00833 | Failed to register VC Schema. (Blockchain or List Provider)                 | -           | Check external system status and registration logic.     |
+| SSRVISS00834 | Cannot update namespace: it is referenced by a VC schema.                   | -           | Remove references before updating.                       |
+| SSRVISS00835 | Failed to request OID4VCI Issuer registration from List Provider.           | -           | Check `list.url` and List Provider connectivity, then retry. |
+| SSRVISS00836 | OID4VCI Credential Issuer is already registered with List Provider.         | -           | Skip re-registration or check the existing registration. |
 
 <br>
 
@@ -275,25 +291,47 @@ public class ErrorResponse {
 
 | Error Code   | Error Message                                                       | Description | Action Required                            |
 |--------------|---------------------------------------------------------------------|-------------|--------------------------------------------|
-| SSRVISS90000 | Failed to process response: received unknown data from the Tas.     | -           | Check TAS response format and content.     |
+| SSRVISS000900 | Failed to process response: received unknown data from the Tas.    | -           | Check TAS response format and content.     |
 
-### 1.12. Supplemental Codes
+> `TAS_UNKNOWN_RESPONSE` is defined with the code value `000900` in the `ErrorCode` enum, so the returned code is `SSRVISS000900`. Earlier revisions of this document listed it as `SSRVISS90000`.
 
-The following codes are present in the current `ErrorCode` enum and were missing from earlier revisions.
+<br>
 
-| Error Code | Error Message |
-|------------|---------------|
-| `SSRVISS000100` | Failed to find DID Document. |
-| `SSRVISS00301` | The User dose not exist. |
-| `SSRVISS00428` | Public key not found. |
-| `SSRVISS00502` | User Query API mode is not currently supported. |
-| `SSRVISS00607` | Failed to register VC schema on the blockchain. |
-| `SSRVISS00811` | Failed to find Issuer DID Document: o registration request has been made. |
-| `SSRVISS00833` | Failed to register VC Schema. (Blockchain or List Provider) |
-| `SSRVISS00834` | Cannot update namespace: it is referenced by a VC schema. |
-| `SSRVISS01000` | Failed to find VC Meta. |
-| `SSRVISS01101` | Server configuration key not found. |
-| `SSRVISS000900` | Failed to process response: received unknown data from the Tas. |
-| `SSRVISS15505` | Failed to communicate with KYC server: unknown error occurred. |
+### 1.12. LSS(010xx, 011xx)
 
-> The enum currently assigns `SSRVISS10407` to three constants. Consumers must treat the wire code as non-unique until distinct values are assigned. The earlier `SSRVISS90000` entry is retained for compatibility, but the current enum produces `SSRVISS000900`.
+| Error Code   | Error Message                                | Description | Action Required                                                        |
+|--------------|----------------------------------------------|-------------|------------------------------------------------------------------------|
+| SSRVISS01000 | Failed to find VC Meta.                      | -           | Verify the VC ID and Ledger Service Server connectivity.               |
+| SSRVISS01101 | Server configuration key not found.          | -           | Check that the key (e.g., `API_KEY_LSS`) exists in the `server_config` table and has a value. |
+
+<br>
+
+### 1.13. KYC(155xx)
+
+| Error Code   | Error Message                                                  | Description | Action Required                                   |
+|--------------|----------------------------------------------------------------|-------------|---------------------------------------------------|
+| SSRVISS15505 | Failed to communicate with KYC server: unknown error occurred. | -           | Verify `kyc.url` and KYC server connectivity.     |
+
+<br>
+
+## 2. OID4VCI SDK
+
+### 2.1. OID4VCI SDK(SSDKOVC)
+
+OID4VCI issuance and Status List operations raise `OID4VCIException` from the OID4VCI SDK (`OID4VCIErrorCode`). These codes start with `SSDKOVC` instead of `SSRVISS`. The following codes are raised or returned directly by the Issuer server.
+
+| Error Code   | Error Message                         | Description | Action Required                                                   |
+|--------------|---------------------------------------|-------------|-------------------------------------------------------------------|
+| SSDKOVC01003 | Failed to generate credential offer   | -           | Check the credential configuration and retry offer generation.    |
+| SSDKOVC03000 | Invalid proof of possession           | -           | Check the Holder DID, the proof `kid`, and the proof signature.   |
+| SSDKOVC07000 | Status List not found                 | -           | Verify the Status List ID.                                        |
+| SSDKOVC07001 | No active Status List is available    | -           | Enable a Status List for the credential format.                   |
+| SSDKOVC07002 | Credential issuance not found         | -           | Verify the issuance ID.                                           |
+| SSDKOVC07003 | Invalid credential status transition  | -           | Check the current credential status before changing it.           |
+| SSDKOVC07004 | Invalid Status List configuration     | -           | Check the Status List settings (format, bits, signing key).       |
+| SSDKOVC07005 | Status List operation conflict        | -           | Use a Status List URI that does not already exist.                |
+| SSDKOVC99000 | Invalid parameter                     | -           | Check the request parameters.                                     |
+| SSDKOVC99001 | Parameter cannot be null              | -           | Provide all required parameters.                                  |
+| SSDKOVC99999 | Unexpected error occurred             | -           | Investigate server logs and retry later.                          |
+
+> In the OID4VCI credential revocation flow, `SSDKOVC04001` (Failed to verify JWS) is returned as `SSRVISS00413`, and other revocation token verification failures are returned as `SSRVISS00302`.
