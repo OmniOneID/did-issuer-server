@@ -479,13 +479,15 @@ OID4VCI 발급 과정에서 사용하는 공통 및 Platform별 Client 설정을
 
 | 번호 | 항목 | 설명 |
 | ---- | ---- | ---- |
-| 1 | **Registration Status** | List Provider가 반환한 등록 요청의 처리 상태(`PENDING`, `ACTIVE`, `REJECTED`, `REVOKED`)를 표시합니다. 등록 요청 전에는 표시되지 않습니다. |
+| 1 | **Registration Status** | 등록 요청 시 List Provider가 반환한 상태(`REQUESTED`)를 표시합니다. 등록 요청 전에는 표시되지 않습니다. |
 | 2 | **List Provider URL** | 등록 요청을 전송할 List Provider의 URL입니다. (읽기 전용) |
 | 3 | **Credential Issuer** | Issuer DID 정보에서 불러온 Credential Issuer 식별자입니다. (읽기 전용) |
 | 4 | **Credential Issuer Metadata URI** | List Provider가 Issuer Metadata를 조회할 수 있는 URI입니다. HTTP(S) 형식이어야 합니다. |
 | 5 | **User Initiation URI** | 사용자가 Webview 발급 절차를 시작할 때 사용하는 URI입니다. HTTP(S) 형식이어야 합니다. |
-| 6 | **REFRESH 버튼** | List Provider 등록 정보와 현재 상태를 다시 조회합니다. |
+| 6 | **REFRESH 버튼** | Issuer에 저장된 등록 정보를 다시 조회합니다. |
 | 7 | **REQUEST REGISTRATION 버튼** | 확인 다이얼로그를 거쳐 입력한 정보로 List Provider에 등록을 요청합니다. 요청 후에는 입력값과 버튼이 비활성화됩니다. |
+
+> **참고:** 등록 요청은 List Provider(TAS) 관리자가 승인(`ACTIVE`)하거나 반려(`REJECTED`)하며, 승인 후에는 `SUSPENDED`, `REVOKED`로 바뀔 수 있습니다. 이 화면은 요청 시점의 상태만 저장하므로 이후 TAS에서 바뀐 상태는 표시되지 않습니다. 현재 상태는 TAS Admin Console에서 확인하세요.
 
 ---
 

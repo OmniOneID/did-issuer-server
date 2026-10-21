@@ -1594,7 +1594,7 @@ window.__SPECS.push({
         "List Provider URL과 Credential Issuer(Issuer DID에서 조회)는 읽기 전용입니다.",
         "Credential Issuer Metadata URI와 User Initiation URI는 HTTP(S) 형식을 검증합니다.",
         "요청 전 확인 Dialog를 띄우고, 요청 후에는 입력과 요청 버튼을 비활성화합니다.",
-        "등록 상태(PENDING / ACTIVE / REJECTED / REVOKED)를 배지로 표시합니다."
+        "등록 요청 시 List Provider가 반환한 상태(REQUESTED)를 배지로 표시합니다. 이후 TAS에서 바뀐 상태(ACTIVE / REJECTED / SUSPENDED / REVOKED)는 자동으로 반영되지 않습니다."
       ],
       "entry": ["사이드바 'OID4VCI > List Provider' 클릭"],
       "api": { "method": "GET / POST", "endpoint": "/issuer/admin/v1/oid4vci/list-provider-registration" },

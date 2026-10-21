@@ -481,13 +481,15 @@ This screen registers Issuer information with the List Provider for user-initiat
 
 | Number | Item | Description |
 | ------ | ---- | ----------- |
-| 1 | **Registration Status** | Displays the registration request status returned by the List Provider (`PENDING`, `ACTIVE`, `REJECTED`, `REVOKED`). It is not shown before a request is made. |
+| 1 | **Registration Status** | Displays the status returned by the List Provider when the registration was requested (`REQUESTED`). It is not shown before a request is made. |
 | 2 | **List Provider URL** | URL of the List Provider to which the registration request is sent. (Read-only) |
 | 3 | **Credential Issuer** | Credential Issuer identifier loaded from the Issuer DID information. (Read-only) |
 | 4 | **Credential Issuer Metadata URI** | URI from which the List Provider can retrieve the Issuer Metadata. Must be an HTTP(S) URL. |
 | 5 | **User Initiation URI** | URI used by a user to start the webview issuance flow. Must be an HTTP(S) URL. |
-| 6 | **REFRESH Button** | Reloads the List Provider registration information and current status. |
+| 6 | **REFRESH Button** | Reloads the registration information stored in the Issuer. |
 | 7 | **REQUEST REGISTRATION Button** | After a confirmation dialog, requests registration with the List Provider using the entered information. The inputs and button are disabled after the request. |
+
+> **Note:** The List Provider (tas) administrator approves (`ACTIVE`) or rejects (`REJECTED`) the request, and an approved registration can later become `SUSPENDED` or `REVOKED`. This screen stores only the status at request time, so later changes made in the tas are not shown. Check the current status in the tas Admin Console.
 
 ---
 
