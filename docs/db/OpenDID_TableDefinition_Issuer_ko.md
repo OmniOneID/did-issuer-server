@@ -3,7 +3,7 @@ Open DID Issuer Database Table Definition
 ==
 
 - Date: 2026-10-21
-- Version: v2.0.1
+- Version: v3.0.0
 
 Contents
 --

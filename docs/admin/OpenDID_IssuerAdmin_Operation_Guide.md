@@ -19,7 +19,7 @@ OpenDID IssuerAdmin Operation Guide
 ==
 
 - Date: 2026-10-21
-- Version: v2.0.1
+- Version: v3.0.0
 
 Revision History
 ==
@@ -29,7 +29,7 @@ Revision History
 | v1.0.1 | 2025-04-25 | Added `3.1. Issuer Registration` chapter <br> Modified `3.5. Issued VC Management` chapter |
 | v2.0.0 | 2025-05-29 |  Added `3.4. ZKP Management` chapter |
 | v2.0.0 | 2026-06-19 | Added OID4VCI, Server Configuration, and Password Policy sections |
-| v2.0.1 | 2026-10-21 | Reorganized Chapter 3 to match the new side menu (OID4VCI / OpenDID / Issued Credentials) <br> Added `3.7.1. OID4VCI Credentials` (issuance history and status change) <br> Documented Issuance Mode and User Query Method of Issuance Profiles <br> Added the Credential Revocation Endpoint to Issuer Metadata <br> Documented the first-login ID and password change and refreshed all screenshots |
+| v3.0.0 | 2026-10-21 | Reorganized Chapter 3 to match the new side menu (OID4VCI / OpenDID / Issued Credentials) <br> Added `3.7.1. OID4VCI Credentials` (issuance history and status change) <br> Documented Issuance Mode and User Query Method of Issuance Profiles <br> Added the Credential Revocation Endpoint to Issuer Metadata <br> Documented the first-login ID and password change and refreshed all screenshots |
 
 Table of Contents
 ==

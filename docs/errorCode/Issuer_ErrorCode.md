@@ -19,13 +19,13 @@ Issuer Server Error
 ==
 
 - Date: 2026-10-21
-- Version: v2.0.1
+- Version: v3.0.0
 
 | Version          | Date       | Changes                  |
 | ---------------- | ---------- | ------------------------ |
 | v1.0.0  | 2024-08-20 | Initial version          |
 | v2.0.0 | 2025-05-30 | add ErrorCode |
-| v2.0.1 | 2026-10-21 | Add OID4VCI, LSS, KYC and OID4VCI SDK error codes; align codes and messages with the `ErrorCode` enum |
+| v3.0.0 | 2026-10-21 | Add OID4VCI, LSS, KYC and OID4VCI SDK error codes; align codes and messages with the `ErrorCode` enum |
 
 <div style="page-break-after: always;"></div>
 

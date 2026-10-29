@@ -19,7 +19,7 @@ OpenDID IssuerAdmin Operation Guide
 ==
 
 - Date: 2026-10-21
-- Version: v2.0.1
+- Version: v3.0.0
 
 개정 이력
 ==
@@ -29,7 +29,7 @@ OpenDID IssuerAdmin Operation Guide
 | v1.0.1 | 2025-04-25 | `3.1. Issuer Registration` 장 추가 <br> `3.5. Issued VC Management` 장 수정 |
 | v2.0.0 | 2025-05-29 |  `3.4. ZKP Management` 장 추가 |
 | v2.0.0 | 2026-06-19 | OID4VCI, Server Configuration, Password Policy 절 추가 |
-| v2.0.1 | 2026-10-21 | 사이드 메뉴 개편(OID4VCI / OpenDID / Issued Credentials)에 맞춰 3장 재구성 <br> `3.7.1. OID4VCI Credentials`(발급 이력 조회·상태 변경) 추가 <br> Issuance Profile의 Issuance Mode, User Query Method 설명 추가 <br> Issuer Metadata의 Credential Revocation Endpoint 추가 <br> 최초 로그인 시 ID·비밀번호 변경 절차 반영 및 전체 화면 이미지 갱신 |
+| v3.0.0 | 2026-10-21 | 사이드 메뉴 개편(OID4VCI / OpenDID / Issued Credentials)에 맞춰 3장 재구성 <br> `3.7.1. OID4VCI Credentials`(발급 이력 조회·상태 변경) 추가 <br> Issuance Profile의 Issuance Mode, User Query Method 설명 추가 <br> Issuer Metadata의 Credential Revocation Endpoint 추가 <br> 최초 로그인 시 ID·비밀번호 변경 절차 반영 및 전체 화면 이미지 갱신 |
 
 목차
 ==

@@ -19,13 +19,13 @@ Issuer Server 에러
 ==
 
 - Date: 2026-10-21
-- Version: v2.0.1
+- Version: v3.0.0
 
 | 버전   | 일자       | 변경 내용       |
 | ------ | ---------- | --------------- |
 | v1.0.0 | 2024-08-20 | 최초 버전 |
 | v2.0.0 | 2025-05-30 | 에러코드 추가 |
-| v2.0.1 | 2026-10-21 | OID4VCI, LSS, KYC 및 OID4VCI SDK 에러코드 추가, `ErrorCode` Enum 기준으로 코드와 메시지 정정 |
+| v3.0.0 | 2026-10-21 | OID4VCI, LSS, KYC 및 OID4VCI SDK 에러코드 추가, `ErrorCode` Enum 기준으로 코드와 메시지 정정 |
 
 <div style="page-break-after: always;"></div>
 
