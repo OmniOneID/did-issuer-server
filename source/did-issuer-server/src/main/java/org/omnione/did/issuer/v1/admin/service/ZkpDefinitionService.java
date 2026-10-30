@@ -15,22 +15,22 @@
  */
 package org.omnione.did.issuer.v1.admin.service;
 
+import org.omnione.did.issuer.v1.admin.dto.zkp.definition.VerifyCredentialDefinitionAliasUniqueResDto;
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
+import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.domain.ZkpSchema;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.definition.VerifyCredentialDefinitionAliasUniqueResDto;
-import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
 import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionSaveDto;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
 import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
-import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.omnione.did.issuer.v1.common.service.StorageService;
 import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
 import org.omnione.did.zkp.core.manager.ZkpCredentialMetadataManager;

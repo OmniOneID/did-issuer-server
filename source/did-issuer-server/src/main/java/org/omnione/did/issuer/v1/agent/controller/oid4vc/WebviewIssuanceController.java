@@ -9,6 +9,9 @@
  */
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import org.omnione.did.issuer.v1.agent.dto.oid4vc.WebviewIssuancePage;
@@ -30,6 +33,7 @@ public class WebviewIssuanceController {
     private final WebviewIssuanceService service;
 
     @GetMapping("/start")
+    @ArticleLog(name="[OID4VCI] Start webview issuance", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.CREATE)
     public String start(
             @RequestParam("did") String did,
             @RequestParam("userName") String userName,
@@ -48,6 +52,7 @@ public class WebviewIssuanceController {
     }
 
     @GetMapping("/sessions/{sessionToken}")
+    @ArticleLog(name="[OID4VCI] Open webview issuance session", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.NONE)
     public String page(@PathVariable String sessionToken, Model model, HttpServletResponse response) {
         securityHeaders(response);
         try {
@@ -61,6 +66,7 @@ public class WebviewIssuanceController {
     }
 
     @PostMapping("/sessions/{sessionToken}/confirm")
+    @ArticleLog(name="[OID4VCI] Confirm webview issuance", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.ISSUE_VC)
     public Object confirm(
             @PathVariable String sessionToken,
             @RequestParam("_form_token") String formToken,
@@ -87,6 +93,7 @@ public class WebviewIssuanceController {
     }
 
     @PostMapping("/sessions/{sessionToken}/cancel")
+    @ArticleLog(name="[OID4VCI] Cancel webview issuance", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.UPDATE_STATUS)
     public String cancel(
             @PathVariable String sessionToken,
             @RequestParam("_form_token") String formToken,

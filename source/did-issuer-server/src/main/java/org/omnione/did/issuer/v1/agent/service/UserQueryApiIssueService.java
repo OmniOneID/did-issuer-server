@@ -1,121 +1,164 @@
-/*
- * Copyright 2025 OmniOne.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.omnione.did.issuer.v1.agent.service;
 
-// @TODO: External API integration method not yet decided.
-//        Implement when API user query is officially supported.
-
-import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.datamodel.data.Holder;
+import org.omnione.did.issuer.v1.agent.service.sample.SampleData;
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.sdk.issuer.protocol.vc.IssueVcProtocol;
+import org.omnione.did.sdk.issuer.model.dto.UserInfoDto;
+import org.omnione.did.issuer.v1.agent.service.provider.SpringIssueDataProvider;
+import org.omnione.did.sdk.issuer.model.data.Holder;
 import org.omnione.did.base.db.domain.User;
-import org.omnione.did.base.db.domain.VcProfile;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.property.KycProperty;
-import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.sdk.issuer.model.domain.SdkIssueProfile;
+import org.omnione.did.sdk.issuer.model.domain.SdkUser;
+import org.omnione.did.sdk.issuer.model.domain.SdkVcProfile;
+
+import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.common.util.DateTimeUtil;
 import org.omnione.did.issuer.v1.agent.service.query.*;
-import org.omnione.did.issuer.v1.common.service.StorageService;
-import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Map;
+
 /**
- * Stub service for API-mode user query. All methods throw USER_QUERY_API_NOT_SUPPORTED
- * until external API integration is officially decided and implemented.
+ * This service provides methods for issuing a Verifiable Credential (VC) for a
+ * national ID.
  */
+import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
+
 @Slf4j
 @Service
 @Transactional
 @Profile("!sample")
-public class UserQueryApiIssueService extends IssueServiceBase {
+public class UserQueryApiIssueService extends AbstractPersistentIssueVcService {
+    private final UserQueryService userQueryService;
 
-    public UserQueryApiIssueService(VcProfileQueryService vcProfileQueryService,
-                                    VcOfferQueryService vcOfferQueryService,
+    public UserQueryApiIssueService(IssueVcProtocol issueVcProtocol,
+                                    SpringIssueDataProvider issuerDataProvider,
                                     TransactionService transactionService,
-                                    E2EQueryService e2EQueryService,
-                                    VcQueryService vcQueryService,
-                                    StorageService storageService,
-                                    FileWalletService walletService,
-                                    IssueProfileQueryService issueProfileQueryService,
-                                    VcSchemaService vcSchemaService,
-                                    VcSchemaQueryService vcSchemaQueryService,
-                                    IssuerInfoQueryService issuerInfoQueryService,
-                                    ZkpWalletService zkpWalletService,
-                                    ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService,
-                                    ZkpSchemaQueryService zkpSchemaQueryService,
-                                    KycProperty kycProperty) {
-        super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService,
-                vcQueryService, storageService, walletService, issueProfileQueryService,
-                vcSchemaService, vcSchemaQueryService, issuerInfoQueryService, zkpWalletService,
-                zkpCredentialDefinitionQueryService, zkpSchemaQueryService, kycProperty);
+                                    UserQueryService userQueryService,
+                                    StorageService storageService) {
+        super(issueVcProtocol, issuerDataProvider, transactionService, storageService);
+        this.userQueryService = userQueryService;
     }
 
     @Override
-    public OfferIssueVcResDto requestOffer(OfferIssueVcReqDto request) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
+    protected UserInfoDto findUserByVcProfileAndVcSchemaId(SdkVcProfile vcProfile, SdkIssueProfile issueProfile) {
+
+        User user = userQueryService.findByIdAndVcSchemaId(vcProfile.getUserId(), issueProfile.getVcSchemaId());
+
+        UserInfoDto resultUser = UserInfoDto.builder()
+                .id(user.getId())
+                .vcSchemaId(user.getVcSchemaId())
+                .pii(user.getPii())
+                .did(user.getDid())
+                .build();
+
+        String sampleData = getSampleData(issueProfile.getVcPlanId(), user.getPii());
+
+        // BasicInfoRequest request = BasicInfoRequest.builder()
+        // .apiKey(safeExtractFirstHeaderValue(issueProfile))
+        // .url(issueProfile.getUserQueryUrl())
+        // .studentId(user.getPii())
+        // .build();
+        //
+        // try (MiddlewareClient client = new MiddlewareClient()) {
+        // DetailInfoResponse response = client.getDetailInfo(request);
+        //
+        // if (!response.isResult()) {
+        // String msg = (response.getMessage() != null)
+        // ? response.getMessage()
+        // : ErrorCode.USER_QUERY_FAILED.getMessage();
+        // throw new OpenDidException(ErrorCode.USER_QUERY_FAILED, msg);
+        // }
+        //
+        // Map<String, Object> data = response.getData();
+        // resultUser.setData(JsonUtil.serializeToJson(data));
+        //
+        // resultUser.setValidFrom(parseZonedDateTime(data.get("cr.ac.student_id.emision_date")));
+        // resultUser.setValidUntil(parseZonedDateTimeUntil(data.get("cr.ac.student_id.expiration_date")));
+        // } catch (OpenDidException e) {
+        // throw e;
+        // } catch (Exception e) {
+        // throw new OpenDidException(ErrorCode.EXTERNAL_SERVER_INTEGRATION_ERROR,
+        // e.getMessage());
+        // }
+
+        resultUser.setData(sampleData);
+        return resultUser;
+    }
+
+    private ZonedDateTime parseZonedDateTime(Object value) {
+        if (value == null) {
+            return ZonedDateTime.now();
+        }
+        try {
+            return ZonedDateTime.parse(value.toString());
+        } catch (DateTimeParseException e) {
+            throw new OpenDidException(ErrorCode.INVALID_DATE_FORMAT, "Invalid date format: " + value);
+        }
+    }
+
+    private ZonedDateTime parseZonedDateTimeUntil(Object value) {
+        if (value == null) {
+            return DateTimeUtil.addYearsToCurrentTime(2);
+        }
+        try {
+            return ZonedDateTime.parse(value.toString());
+        } catch (DateTimeParseException e) {
+            throw new OpenDidException(ErrorCode.INVALID_DATE_FORMAT, "Invalid date format: " + value);
+        }
+    }
+
+    private String safeExtractFirstHeaderValue(SdkIssueProfile issueProfile) {
+        if (issueProfile.getUserQueryHeaders() == null || issueProfile.getUserQueryHeaders().isEmpty()) {
+            return null;
+        }
+        final var first = issueProfile.getUserQueryHeaders().getFirst();
+        return (first != null) ? first.getValue() : null;
     }
 
     @Override
-    public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
+    protected SdkUser findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId) {
+        // User Query Type API
+        // Store user info for managing VC status
+        User user = userQueryService.findByPiiAndVcSchemaId(holder.getPii(), vcSchemaId).orElseGet(
+                () -> userQueryService.save(User.builder()
+                        .vcSchemaId(vcSchemaId)
+                        .pii(holder.getPii())
+                        .did(holder.getDid())
+                        .vcSchemaId(vcSchemaId)
+                        .build()));
+        user.setDid(holder.getDid());
+        if (user.getDid() == null) {
+            user.setDid(holder.getDid());
+        }
+        return toSdkUser(user);
     }
 
-    @Override
-    public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
+    private SdkUser toSdkUser(User user) {
+        if (user == null) {
+            return null;
+        }
+        return SdkUser.builder()
+                .id(user.getId())
+                .pii(user.getPii())
+                .did(user.getDid())
+                .vcSchemaId(user.getVcSchemaId())
+                .data(user.getData())
+                .build();
     }
 
-    @Override
-    public IssueVcResDto issueVc(IssueVcReqDto request) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
 
-    @Override
-    public CompleteVcResDto completeVc(CompleteVcReqDto request) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
-
-    @Override
-    public IssueVcResultResDto issueVcResult(String offerId) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
-
-    @Override
-    protected User findUserByVcProfile(VcProfile vcProfile) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
-
-    @Override
-    protected User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
-
-    @Override
-    protected User findUserByHolder(Holder holder) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
-    }
-
-    @Override
-    protected User findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId) {
-        throw new OpenDidException(ErrorCode.USER_QUERY_API_NOT_SUPPORTED);
+    private String getSampleData(String vcPlanId, String pii) {
+        SampleData sampleData = new SampleData();
+        if (!sampleData.getSampleDataByPii(pii).containsKey(vcPlanId)) {
+            throw new OpenDidException(ErrorCode.VC_SCHEMA_NOT_FOUND);
+        }
+        return sampleData.getSampleDataByPii(pii).get(vcPlanId);
     }
 }

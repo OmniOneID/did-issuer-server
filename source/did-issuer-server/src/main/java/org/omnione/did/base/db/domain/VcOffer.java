@@ -16,9 +16,9 @@
 
 package org.omnione.did.base.db.domain;
 
+import org.omnione.did.sdk.issuer.model.common.enums.OfferType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.omnione.did.base.datamodel.enums.OfferType;
 
 import java.io.Serializable;
 import java.time.Instant;

@@ -15,6 +15,8 @@
  */
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.constants.UrlConstant.Admin;
@@ -51,11 +53,15 @@ public class ZkpCredentialDefinitionController {
     }
 
     @PostMapping
+    @ArticleLog(name = "[ZKP Credential Definition] Create ZKP Credential Definition", description = "create ZKP Credential Definition.",
+            targetType = "ZKP_CREDENTIAL_DEFINITION", targetId = "#request.schemaId", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> createZkpCredentialDefinition(@RequestBody ZkpCredentialDefinitionSaveDto request) {
         return ResponseEntity.ok(zkpDefinitionService.createZkpCredentialDefinition(request));
     }
 
     @PostMapping(Admin.RE_REGISTER)
+    @ArticleLog(name = "[ZKP Credential Definition] Re-Register ZKP Credential Definition", description = "Re-Register ZKP Credential Definition.",
+            targetType = "ZKP_CREDENTIAL_DEFINITION", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> reRegisterZkpCredentialDefinition() {
         return ResponseEntity.ok(zkpDefinitionService.reRegisterZkpCredentialDefinition());
     }

@@ -16,6 +16,9 @@
 
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.oid4vc.oid4vci.config.IssuerSdkProperties;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
@@ -40,6 +43,7 @@ public class UserClaimsController {
     private final IssuerSdkProperties issuerSdkProperties;
 
     @GetMapping("/claims-page")
+    @ArticleLog(name="[OID4VCI] Open claims page", apiType=ApiType.AGENT, targetType="OID4VCI_CLAIMS", actionType=ActionType.NONE)
     public String claimsPage(Model model) {
         // Pass the full map of configurations to the frontend (configId -> {format, identifiers})
         model.addAttribute("credentialConfigs", issuerSdkProperties.getCredentialConfigurations());
@@ -79,6 +83,7 @@ public class UserClaimsController {
 
     @PostMapping("/api/claims/save")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Save claims", apiType=ApiType.AGENT, targetType="OID4VCI_CLAIMS", actionType=ActionType.UPDATE)
     public ResponseEntity<Map<String, String>> saveClaims(@RequestBody ClaimsRequest request) {
         userClaimsStore.saveClaims(request.getUserId(), request.getCredentialType(),
                 ClaimValueFilter.removeEmptyValues(request.getClaims()));
@@ -87,6 +92,7 @@ public class UserClaimsController {
 
     @GetMapping("/api/claims/list")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] List claims", apiType=ApiType.AGENT, targetType="OID4VCI_CLAIMS", actionType=ActionType.NONE)
     public ResponseEntity<Map<String, Map<String, Object>>> listAllClaims() {
         return ResponseEntity.ok()
                 .header("X-Content-Type-Options", "nosniff")
@@ -95,6 +101,7 @@ public class UserClaimsController {
 
     @GetMapping("/api/claims/get")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Get claims", apiType=ApiType.AGENT, targetType="OID4VCI_CLAIMS", actionType=ActionType.NONE)
     public ResponseEntity<Map<String, Object>> getClaims(@RequestParam String userId, @RequestParam String credentialType) {
         Map<String, Object> claims = userClaimsStore.getClaims(userId, credentialType);
         return ResponseEntity.ok()

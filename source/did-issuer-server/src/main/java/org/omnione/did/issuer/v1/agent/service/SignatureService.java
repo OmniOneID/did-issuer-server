@@ -16,20 +16,20 @@
 
 package org.omnione.did.issuer.v1.agent.service;
 
+import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.datamodel.data.DidAuth;
-import org.omnione.did.base.datamodel.data.EcdhReqData;
+import org.omnione.did.sdk.issuer.model.data.DidAuth;
+import org.omnione.did.sdk.issuer.model.data.EcdhReqData;
 import org.omnione.did.base.datamodel.enums.ProofPurpose;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.BaseCoreDidUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.did.BaseCoreDidUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.Proof;
 import org.omnione.did.data.model.did.VerificationMethod;
-import org.omnione.did.issuer.v1.agent.service.query.IssuerInfoQueryService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

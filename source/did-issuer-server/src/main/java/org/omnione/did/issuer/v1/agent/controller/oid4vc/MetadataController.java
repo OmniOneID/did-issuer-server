@@ -16,6 +16,9 @@
 
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,12 +69,14 @@ public class MetadataController {
     }
 
     @GetMapping("/metadata-page")
+    @ArticleLog(name="[OID4VCI] Open metadata page", apiType=ApiType.AGENT, targetType="OID4VCI_METADATA", actionType=ActionType.NONE)
     public String metadataPage() {
         return "metadata-editor";
     }
 
     @GetMapping("/api/metadata/files")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] List metadata files", apiType=ApiType.AGENT, targetType="OID4VCI_METADATA", actionType=ActionType.NONE)
     public List<String> getMetadataFiles() {
         Path dir = getMetadataDirectory();
         if (!Files.exists(dir) || !Files.isDirectory(dir)) {
@@ -93,6 +98,7 @@ public class MetadataController {
 
     @GetMapping("/api/metadata/file")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Read metadata file", apiType=ApiType.AGENT, targetType="OID4VCI_METADATA", actionType=ActionType.NONE)
     public ResponseEntity<Object> getFileContent(@RequestParam String filename) {
         if (filename == null || filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
             throw new IllegalArgumentException("Invalid filename");
@@ -122,6 +128,7 @@ public class MetadataController {
 
     @PostMapping("/api/metadata/save")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Save metadata file", apiType=ApiType.AGENT, targetType="OID4VCI_METADATA", actionType=ActionType.UPDATE)
     public ResponseEntity<?> saveFileContent(@RequestBody Map<String, String> payload) {
         String filename = payload.get("filename");
         String content = payload.get("content");

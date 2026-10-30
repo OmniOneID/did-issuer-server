@@ -16,6 +16,9 @@
 
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import com.google.zxing.WriterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +45,14 @@ public class IssuanceGatewayController {
     private final IssuanceGatewayService issuanceGatewayService;
 
     @GetMapping("/oid4vci/test")
+    @ArticleLog(name="[OID4VCI] Open issuance test page", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.NONE)
     public String issue(Model model) {
         return "issue-credential";
     }
 
     @PostMapping("/qr-data/generate-qr")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Generate credential offer QR", apiType=ApiType.AGENT, targetType="OID4VCI_OFFER", actionType=ActionType.CREATE)
     public ResponseEntity<Map<String, Object>> generateQrData(@RequestBody Map<String, String> data) {
         String userId = data.get("userId");
         String grantType = data.get("grantType");
@@ -79,6 +84,7 @@ public class IssuanceGatewayController {
 
     @ResponseBody
     @GetMapping("/get-credential-identifier")
+    @ArticleLog(name="[OID4VCI] Get credential identifier", apiType=ApiType.AGENT, targetType="OID4VCI_CREDENTIAL", actionType=ActionType.NONE)
     public List<String> getCredentialIdentifier(
             @RequestParam("credentialConfigurationId") String credentialConfigurationId) {
         List<String> response = issuanceGatewayService.getCredentialIdentifier(credentialConfigurationId);

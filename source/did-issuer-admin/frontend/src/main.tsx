@@ -43,6 +43,8 @@ import CredentialDefinitionRegistrationPage from './pages/zkp-management/credent
 import CredentialDefinitionDetailPage from './pages/zkp-management/credential-definition-management/CredentialDefinitionDetailPage';
 import ServerConfigurationPage from './pages/server-configuration/ServerConfigurationPage';
 import PasswordPolicyManagementPage from './pages/admins/password-policy/PasswordPolicyManagementPage';
+import ApiLogManagementPage from './pages/log/ApiLogManagementPage';
+import AuditApiLogManagementPage from './pages/log/AuditApiLogManagementPage';
 import Oid4vciMetadataPage from './pages/oid4vci-management/Oid4vciMetadataPage';
 import CredentialConfigPage from './pages/oid4vci-management/CredentialConfigPage';
 import CredentialConfigDetailPage from './pages/oid4vci-management/CredentialConfigDetailPage';
@@ -245,6 +247,14 @@ const router = createBrowserRouter([
           {
             path: 'admins/password-policy',
             Component: PasswordPolicyManagementPage,
+          },
+          {
+            path: '/logs/api',
+            Component: ApiLogManagementPage,
+          },
+          {
+            path: '/logs/audit',
+            Component: AuditApiLogManagementPage,
           },
           {
             path: 'admins',

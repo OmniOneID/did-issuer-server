@@ -15,6 +15,8 @@
  */
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.db.domain.ZkpSchema;
@@ -48,11 +50,15 @@ public class ZkpSchemaController {
     }
 
     @PostMapping
+    @ArticleLog(name = "[ZKP Schema] Create ZKP Schema", description = "Create ZKP Schema.",
+            targetType = "ZKP_SCHEMA", targetId = "#request.schemaId", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> createZkpSchema(@RequestBody ZkpSchemaInfoDto request) {
         return ResponseEntity.ok(zkpSchemaService.createZkpSchema(request));
     }
 
     @PostMapping(UrlConstant.Admin.RE_REGISTER)
+    @ArticleLog(name = "[ZKP Schema] Re-register ZKP Schema", description = "Re-register ZKP Schema.",
+            targetType = "ZKP_SCHEMA", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> reRegisterZkpCredentialSchema() {
         return ResponseEntity.ok(zkpSchemaService.reRegisterZkpCredentialSchema());
     }

@@ -187,6 +187,16 @@ git clone https://github.com/OmniOneID/did-issuer-server.git
 cd did-issuer-server
 ```
 
+서버는 `source/did-issuer-server/libs/`의 빌드된 Issuer SDK JAR을 사용합니다. SDK를 갱신할 때는 `did-issuer-sdk-server`를 별도로 빌드한 뒤 JAR을 복사합니다.
+
+```bash
+cd ../did-issuer-sdk-server/source/did-issuer-sdk
+./gradlew clean build
+cp build/libs/did-issuer-sdk-1.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
+```
+
+`did-common-sdk-server-2.0.0.jar`을 포함한 OpenDID 의존 JAR도 서버의 `libs/`에 유지합니다.
+
 > **참고 링크**
 > - [Git Clone 가이드](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 

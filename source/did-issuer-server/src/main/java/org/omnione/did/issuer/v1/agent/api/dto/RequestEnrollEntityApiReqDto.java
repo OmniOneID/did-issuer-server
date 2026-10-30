@@ -17,7 +17,7 @@
 package org.omnione.did.issuer.v1.agent.api.dto;
 
 import lombok.*;
-import org.omnione.did.base.datamodel.data.DidAuth;
+import org.omnione.did.sdk.issuer.model.data.DidAuth;
 
 /**
  * Request Enroll Entity API Request DTO
@@ -32,4 +32,5 @@ public class RequestEnrollEntityApiReqDto {
     private String id;
     private String txId;
     private DidAuth didAuth;
+    private String dn;
 }

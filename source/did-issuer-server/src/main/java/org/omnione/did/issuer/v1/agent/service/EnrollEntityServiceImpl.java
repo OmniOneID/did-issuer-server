@@ -23,13 +23,13 @@ import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.base.datamodel.data.AccEcdh;
-import org.omnione.did.base.datamodel.data.Candidate;
-import org.omnione.did.base.datamodel.data.DidAuth;
-import org.omnione.did.base.datamodel.data.EcdhReqData;
+import org.omnione.did.sdk.issuer.model.data.AccEcdh;
+import org.omnione.did.sdk.issuer.model.data.Candidate;
+import org.omnione.did.sdk.issuer.model.data.DidAuth;
+import org.omnione.did.sdk.issuer.model.data.EcdhReqData;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
-import org.omnione.did.base.db.constant.IssuerStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import org.omnione.did.base.db.domain.CertificateVc;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.ErrorCode;
@@ -218,7 +218,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
     private EcdhReqData generateReqData(EcKeyPair publicKey, EccCurveType curveType, String clientNonce, DidDocument issuerDidDocument) {
         try {
             Candidate candidate = Candidate.builder()
-                    .ciphers(Arrays.asList(SymmetricCipherType.values()))
+                    .ciphers(Arrays.asList(org.omnione.did.sdk.issuer.model.common.enums.SymmetricCipherType.values()))
                     .build();
             // TODO : SetIssuer
             String verificationMethod = "did:omn:issuer?versionId=1#keyagree";
@@ -228,7 +228,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             EcdhReqData reqData = EcdhReqData.builder()
                     .client("did:omn:issuer")
                     .clientNonce(clientNonce)
-                    .curve(curveType)
+                    .curve(org.omnione.did.sdk.issuer.model.common.enums.EccCurveType.valueOf(curveType.name()))
                     .publicKey(publicKey.getBase58CompreessPubKey())
                     .candidate(candidate)
                     .proof(proof)
@@ -305,7 +305,10 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         byte[] compressedPublicKey = BaseMultibaseUtil.decode(accEcdh.getPublicKey());
         byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(compressedPublicKey, privateKey.getEncoded(), EccCurveType.SECP_256_R1);
         byte[] mergeNonce = BaseCryptoUtil.mergeNonce(clientNonce, accEcdh.getServerNonce());
-        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, mergeNonce, accEcdh.getCipher());
+        SymmetricCipherType cipherType = SymmetricCipherType.valueOf(accEcdh.getCipher().name());
+        org.omnione.did.base.datamodel.enums.SymmetricPaddingType paddingType =
+                org.omnione.did.base.datamodel.enums.SymmetricPaddingType.valueOf(accEcdh.getPadding().name());
+        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, mergeNonce, cipherType);
 
         byte[] iv = BaseMultibaseUtil.decode(enrollEntityResponse.getIv());
 
@@ -313,8 +316,8 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                 enrollEntityResponse.getEncVc(),
                 mergeSharedSecretAndNonce,
                 iv,
-                accEcdh.getCipher(),
-                accEcdh.getPadding()
+                cipherType,
+                paddingType
         );
 
         String jsonVc = new String(decrypt);

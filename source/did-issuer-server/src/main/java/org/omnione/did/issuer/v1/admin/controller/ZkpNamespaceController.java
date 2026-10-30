@@ -15,6 +15,8 @@
  */
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.constants.UrlConstant.Admin;
@@ -54,6 +56,8 @@ public class ZkpNamespaceController {
     }
 
     @PostMapping
+    @ArticleLog(name = "[ZKP Namespace] Create ZKP Namespace", description = "Register ZKP Namespace.",
+            targetType = "ZKP_NAMESPACE", targetId = "#request.namespace.namespaceId", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> createZkpNamespace(@RequestBody ZkpNamespaceInfoDto request) {
         return ResponseEntity.ok(zkpNamespaceService.createZkpNamespace(request));
     }
@@ -65,11 +69,15 @@ public class ZkpNamespaceController {
 
     @PatchMapping
     @ResponseBody
+    @ArticleLog(name = "[ZKP Namespace] Update ZKP Namepsace", description = "Update ZKP Namespace.",
+            targetType = "ZKP_NAMESPACE", targetId = "#request.namespace.namespaceId", actionType = ActionType.UPDATE)
     public ResponseEntity<EmptyResDto> updateZkpNamespace(@RequestBody ZkpNamespaceUpdateDto request) {
         return ResponseEntity.ok(zkpNamespaceService.updateZkpNamespace(request));
     }
 
     @DeleteMapping
+    @ArticleLog(name = "[ZKP Namespace] Delete ZKP Namespace", description = "Delete ZKP namespace.",
+            targetType = "ZKP_NAMESPACE", targetId = "#id", actionType = ActionType.DELETE)
     public ResponseEntity<EmptyResDto> deleteZkpNamespace(@RequestParam(name = "id") Long id) {
         zkpNamespaceService.deleteZkpNamespaceById(id);
         return ResponseEntity.ok(new EmptyResDto());

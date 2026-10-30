@@ -17,9 +17,9 @@
 package org.omnione.did.issuer.v1.service;
 
 import org.junit.jupiter.api.*;
-import org.omnione.did.base.datamodel.data.AccE2e;
-import org.omnione.did.base.datamodel.data.Holder;
-import org.omnione.did.base.datamodel.data.zkp.CredentialInfo;
+import org.omnione.did.sdk.issuer.model.data.AccE2e;
+import org.omnione.did.sdk.issuer.model.data.Holder;
+import org.omnione.did.sdk.issuer.model.data.zkp.CredentialInfo;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
@@ -28,7 +28,7 @@ import org.omnione.did.base.util.BaseMultibaseUtil;
 import org.omnione.did.base.util.RandomUtil;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
 import org.omnione.did.data.model.profile.ReqE2e;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.sdk.issuer.model.dto.*;
 import org.omnione.did.issuer.v1.agent.helper.IssueServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

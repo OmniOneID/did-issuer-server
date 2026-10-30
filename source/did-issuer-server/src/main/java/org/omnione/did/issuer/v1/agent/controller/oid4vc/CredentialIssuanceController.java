@@ -16,6 +16,9 @@
 
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.oid4vc.oid4vci.dto.credential.CredentialRequest;
@@ -51,6 +54,7 @@ public class CredentialIssuanceController {
         this.credentialRevocationService = credentialRevocationService;
     }
 
+    @ArticleLog(name="[OID4VCI] Get credential offer", apiType=ApiType.AGENT, targetType="OID4VCI_OFFER", actionType=ActionType.NONE)
     public CredentialOfferResponse getCredentialOffer(@PathVariable("request_id") String requestId,
                                                       @PathVariable("configuration_id") String configurationId) throws OID4VCIException {
         CredentialOfferRequest request = new CredentialOfferRequest();
@@ -65,6 +69,7 @@ public class CredentialIssuanceController {
         return response;
     }
 
+    @ArticleLog(name="[OID4VCI] Issue credential", apiType=ApiType.AGENT, targetType="OID4VCI_CREDENTIAL", actionType=ActionType.ISSUE_VC)
     public ResponseEntity<Object> issueCredential(@RequestBody CredentialRequest request,
             @AuthenticationPrincipal Jwt accessToken) throws OID4VCIException {
         if (log.isDebugEnabled()) {
@@ -81,26 +86,31 @@ public class CredentialIssuanceController {
         }
     }
 
+    @ArticleLog(name="[OID4VCI] Get deferred credential", apiType=ApiType.AGENT, targetType="OID4VCI_CREDENTIAL", actionType=ActionType.NONE)
     public Object getDeferredCredential(@RequestBody DeferredCredentialRequest request,
             @AuthenticationPrincipal Jwt accessToken) throws OID4VCIException {
         return credentialService.getDeferredCredential(request.getTransactionId(), accessToken);
     }
 
+    @ArticleLog(name="[OID4VCI] Create nonce", apiType=ApiType.AGENT, targetType="OID4VCI_NONCE", actionType=ActionType.CREATE)
     public NonceResponse handleNonce() {
         return credentialService.handleNonce();
     }
 
+    @ArticleLog(name="[OID4VCI] Revoke credential", apiType=ApiType.AGENT, targetType="OID4VCI_CREDENTIAL", actionType=ActionType.REVOKE_VC)
     public CredentialRevocationResponse revokeCredential(
             @RequestBody CredentialRevocationRequest request) {
         return credentialRevocationService.revoke(request);
     }
 
+    @ArticleLog(name="[OID4VCI] Receive notification", apiType=ApiType.AGENT, targetType="OID4VCI_NOTIFICATION", actionType=ActionType.NONE)
     public void handleNotification(@RequestBody NotificationRequest request) {
         credentialService.handleNotification(request);
     }
 
     @GetMapping("/credential-offer/test")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Get test credential offer", apiType=ApiType.AGENT, targetType="OID4VCI_OFFER", actionType=ActionType.NONE)
     public TestCredentialOfferResponse getCredentialOfferForTest() throws OID4VCIException {
         log.info("createCredentialOfferForTest request");
         TestCredentialOfferResponse testResponse = credentialService.createTestCredentialOffer("test", "mdoc");

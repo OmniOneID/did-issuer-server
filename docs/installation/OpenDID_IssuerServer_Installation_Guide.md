@@ -186,6 +186,16 @@ git clone https://github.com/OmniOneID/did-issuer-server.git
 cd did-issuer-server
 ```
 
+The server builds from the prebuilt Issuer SDK JAR in `source/did-issuer-server/libs/`. To update the SDK, build `did-issuer-sdk-server` separately and copy its JAR into the server repository:
+
+```bash
+cd ../did-issuer-sdk-server/source/did-issuer-sdk
+./gradlew clean build
+cp build/libs/did-issuer-sdk-1.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
+```
+
+Keep the OpenDID dependency JARs, including `did-common-sdk-server-2.0.0.jar`, in the server's `libs/` directory.
+
 > **Reference Links**
 > - [Git Clone Guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 

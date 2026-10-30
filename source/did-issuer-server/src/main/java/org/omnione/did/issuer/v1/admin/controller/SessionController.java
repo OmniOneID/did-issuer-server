@@ -20,6 +20,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
+import org.omnione.did.base.annotation.ArticleLog;
+import org.omnione.did.base.constants.ActionType;
 import org.omnione.did.issuer.v1.admin.dto.admin.AdminDto;
 import org.omnione.did.issuer.v1.admin.dto.admin.RequestAdminLoginReqDto;
 import org.omnione.did.issuer.v1.admin.service.SessionService;
@@ -48,6 +50,8 @@ public class SessionController {
      */
     @PostMapping(value = "/login")
     @ResponseBody
+    @ArticleLog(name = "[Admin] Login", description = "Login", targetType = "ADMIN",
+            targetId = "#requestAdminLoginReqDto.loginId", actionType = ActionType.LOGIN)
     public AdminDto requestAdminLogin(@Valid @RequestBody RequestAdminLoginReqDto requestAdminLoginReqDto) {
         return sessionService.requestAdminLogin(requestAdminLoginReqDto);
     }

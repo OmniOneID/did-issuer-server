@@ -6,6 +6,8 @@
  */
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.dto.PageResponse;
@@ -33,6 +35,7 @@ public class Oid4vciIssuedCredentialAdminController {
     private final Oid4vciIssuedCredentialService service;
 
     @GetMapping
+    @ArticleLog(name="[OID4VCI] Search issued credentials", targetType="OID4VCI_CREDENTIAL", actionType=ActionType.NONE)
     public PageResponse<Oid4vciIssuedCredentialDto> search(
             @RequestParam(required = false) String searchKey,
             @RequestParam(required = false) String searchValue,
@@ -42,11 +45,13 @@ public class Oid4vciIssuedCredentialAdminController {
     }
 
     @GetMapping(UrlConstant.Admin.PATH_VARIABLE_ID)
+    @ArticleLog(name="[OID4VCI] Read issued credential", targetType="OID4VCI_CREDENTIAL", actionType=ActionType.NONE, targetId="#id")
     public ResponseEntity<Oid4vciIssuedCredentialDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @PatchMapping(UrlConstant.Admin.PATH_VARIABLE_ID + "/status")
+    @ArticleLog(name="[OID4VCI] Change issued credential status", targetType="OID4VCI_CREDENTIAL", actionType=ActionType.UPDATE_STATUS, targetId="#id")
     public ResponseEntity<Oid4vciIssuedCredentialDto> changeStatus(
             @PathVariable Long id,
             @RequestBody ChangeOid4vciCredentialStatusReqDto request) {

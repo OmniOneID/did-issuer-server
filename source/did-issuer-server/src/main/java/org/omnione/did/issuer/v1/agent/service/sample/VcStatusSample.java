@@ -16,10 +16,10 @@
 
 package org.omnione.did.issuer.v1.agent.service.sample;
 
-import org.omnione.did.base.datamodel.enums.VerifyAuthType;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
-import org.omnione.did.issuer.v1.agent.service.VcStatusService;
+import org.omnione.did.sdk.issuer.model.enums.VerifyAuthType;
 
+import org.omnione.did.sdk.issuer.model.dto.*;
+import org.omnione.did.issuer.v1.agent.service.VcStatusService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 

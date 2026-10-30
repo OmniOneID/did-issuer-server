@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.data.model.schema.SchemaClaims;
@@ -48,6 +50,8 @@ public class NamespaceAdminController {
      * @return the response containing created namespace information
      */
     @PostMapping
+    @ArticleLog(name = "[Namespace] Create Namespace", description = "Creates a new namespace using the provided schema claims.",
+            targetType = "NAMESPACE", targetId = "#request.namespace.id", actionType = ActionType.CREATE)
     public ResponseEntity<CreateNamespaceResDto> createNamespaceResDto(@RequestBody SchemaClaims request) {
         return ResponseEntity.ok(namespaceService.createNamespaceReqDto(request));
     }
@@ -60,6 +64,8 @@ public class NamespaceAdminController {
      */
     @PatchMapping
     @ResponseBody
+    @ArticleLog(name = "[Namespace] Update Namespace", description = "Updates an existing namespace.",
+            targetType = "NAMESPACE", targetId = "#request.id", actionType = ActionType.UPDATE)
     public ResponseEntity<NamespaceDto> updateNamespace(@RequestBody UpdateNamespaceReqDto request) {
         return ResponseEntity.ok(namespaceService.updateNamespace(request));
     }
@@ -71,6 +77,8 @@ public class NamespaceAdminController {
      * @return an empty response on success
      */
     @DeleteMapping
+    @ArticleLog(name = "[Namespace] Delete Namespace", description = "Delete a Namespace.",
+            targetType = "NAMESPACE", targetId = "#id", actionType = ActionType.DELETE)
     public ResponseEntity<EmptyResDto> deleteNamespace(@RequestParam(name = "id") Long id) {
         namespaceService.deleteNamespaceById(id);
         return ResponseEntity.ok(new EmptyResDto());

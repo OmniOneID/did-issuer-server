@@ -16,7 +16,12 @@
 
 package org.omnione.did.base.config;
 
+import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.aop.ApiLogInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * This class represents the configuration for a web application. It is annotated with
@@ -24,5 +29,13 @@ import org.springframework.context.annotation.Configuration;
  * opportunities for the Spring Framework.
  */
 @Configuration
-public class WebConfig {
+@EnableAsync
+@RequiredArgsConstructor
+public class WebConfig implements WebMvcConfigurer {
+    private final ApiLogInterceptor apiLogInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(apiLogInterceptor);
+    }
 }

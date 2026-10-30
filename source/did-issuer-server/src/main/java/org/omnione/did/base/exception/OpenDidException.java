@@ -38,6 +38,11 @@ public class OpenDidException extends RuntimeException{
         this.errorCode = errorCode;
     }
 
+    public OpenDidException(ErrorCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
     /**
      * Constructs a new OpenDidException with the specified error response.
      *

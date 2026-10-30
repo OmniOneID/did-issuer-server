@@ -16,12 +16,15 @@
 
 package org.omnione.did.base.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.omnione.did.base.constants.LogAttrs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
+import org.omnione.did.sdk.issuer.exception.IssuerSdkException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +47,16 @@ public class GlobalControllerAdvice {
 
     private static final String UNKNOWN_ERROR_CODE = "9999";
 
+    private void mark(HttpServletRequest request, String code, Exception exception) {
+        request.setAttribute(LogAttrs.ERROR_CODE, code);
+        request.setAttribute(LogAttrs.ERROR_CLASS, exception.getClass().getName());
+        request.setAttribute(LogAttrs.ERROR_MSG, exception.getMessage());
+    }
+
     @ExceptionHandler(OpenDidException.class)
-    public ResponseEntity<ErrorResponse> handleTasException(OpenDidException ex) {
+    public ResponseEntity<ErrorResponse> handleTasException(OpenDidException ex, HttpServletRequest request) {
+        mark(request, ex.getErrorResponse() != null
+                ? ex.getErrorResponse().getCode() : ex.getErrorCode().getCode(), ex);
 
         if (ex.getErrorResponse() != null) {
             ex.printStackTrace();
@@ -58,8 +69,17 @@ public class GlobalControllerAdvice {
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(httpStatus));
     }
 
+    @ExceptionHandler(IssuerSdkException.class)
+    public ResponseEntity<ErrorResponse> handleIssuerSdkException(IssuerSdkException ex, HttpServletRequest request) {
+        mark(request, ex.getCode(), ex);
+        log.error("Issuer SDK error", ex);
+        return new ResponseEntity<>(new ErrorResponse(ex.getCode(), ex.getMessage()),
+                HttpStatus.valueOf(ex.getErrorCode().getHttpStatus()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        mark(request, "REQUEST_VALIDATION_ERROR", ex);
 
         String errorMessages = ex.getBindingResult()
                 .getFieldErrors()
@@ -73,7 +93,8 @@ public class GlobalControllerAdvice {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        mark(request, ErrorCode.REQUEST_BODY_UNREADABLE.getCode(), ex);
 
         log.error("Error", ex);
         ErrorResponse errorResponse = new ErrorResponse(ErrorCode.REQUEST_BODY_UNREADABLE);
@@ -81,7 +102,8 @@ public class GlobalControllerAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(Exception ex, HttpServletRequest request) {
+        mark(request, "INTERNAL_ERROR", ex);
 
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         ErrorResponse errorResponse = new ErrorResponse(String.valueOf(httpStatus.value()), ex.getMessage());

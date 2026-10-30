@@ -431,24 +431,42 @@ OID4VCI로 발급할 Credential의 Configuration을 조회하고 등록·수정�
 
 #### ▸ Credential Configuration 등록
 
-<img src="./images/3-3-2-2.oid4vci-credential-config-registration.png" width="700"/>
+<img src="./images/3-3-2-2.oid4vci-credential-config-registration.jpg" width="700" alt="Credential Configuration 등록 화면 상단"/>
+
+<img src="./images/3-3-2-2b.oid4vci-credential-config-registration-metadata.jpg" width="700" alt="Credential Metadata 및 Claims 입력 화면"/>
+
+> 화면의 `ExamplePID`와 Claim 값은 입력 방법을 보여 주기 위한 예시이며 등록되지 않았습니다.
 
 | 항목 | 설명 |
 | ---- | ---- |
-| **Configuration ID** | Configuration의 고유 식별자입니다. 등록 시에만 입력할 수 있습니다. |
-| **Format** | `mso_mdoc-did` 또는 `dc+sd-jwt-did` 중 선택합니다. 기본값은 `mso_mdoc-did`입니다. |
-| **Identifiers (SDK)** | SDK가 Credential을 식별할 때 사용하는 Identifier입니다. `ADD` 버튼으로 여러 개를 등록할 수 있습니다. |
-| **Metadata JSON** | Issuer Metadata의 `credential_configurations_supported`에 공개할 JSON 객체입니다. |
+| **Configuration ID** | Configuration의 고유 식별자입니다. 등록 시에만 입력할 수 있습니다. 예: `StudentID` |
+| **Format** | `mso_mdoc-did` 또는 `dc+sd-jwt-did`를 선택합니다. 기본값은 `mso_mdoc-did`입니다. 선택한 형식에 맞춰 공개 Metadata의 `format`이 설정됩니다. |
+| **Identifiers (SDK)** | SDK가 Credential을 식별할 때 사용하는 값입니다. `ADD`로 여러 개를 입력하며, 저장하려면 하나 이상 필요합니다. 예: `mDocPID`, `StudentId` |
+| **Document type (doctype) / Credential type (vct)** | 선택한 Format에 따라 표시되는 필수 항목입니다. 실제 발급할 Credential의 유형을 정확히 입력합니다. 예: `eu.europa.ec.eudi.pid.1`, `urn:eudi:pid:1` |
+| **Display name** | Wallet에 표시할 Credential 이름입니다. 예: `PID (MSO Mdoc)` |
+| **Scope (optional)** | 해당 Credential을 scope로 요청할 때 사용하는 값입니다. 사용하지 않으면 비워 둡니다. |
+| **Cryptographic binding methods** | `jwk`, `cose_key`를 여러 개 선택할 수 있습니다. 목록에 없는 방식은 **Other — add a method**를 선택하고 값을 입력한 뒤 `ADD`를 누릅니다. |
+| **Claims** | `ADD CLAIM`으로 Claim을 추가합니다. `Path`는 실제 Claim 경로이며 중첩 경로는 `/`로 구분합니다. `Label`은 표시 이름, `Required`는 항상 포함할 Claim 여부, `Value type`은 값 형식입니다. 휴지통 버튼으로 Claim을 제거할 수 있습니다. |
+| **Advanced: Metadata JSON** | 펼치면 생성된 JSON과 폼에 없는 추가 필드를 직접 편집할 수 있습니다. 폼에서 값을 수정해도 다른 JSON 필드는 유지됩니다. |
 
 - `REGISTER` 버튼으로 저장하고, `CANCEL` 버튼으로 목록으로 돌아갑니다.
-- Metadata JSON은 JSON 객체 형식이어야 하며, 배열이나 문자열 등은 저장할 수 없습니다.
+- 저장할 때 JSON 객체 형식, 선택한 Format과 JSON의 `format` 일치 여부, `doctype` 또는 `vct`, Claims 경로를 확인합니다. 입력 오류가 있으면 저장하지 않고 오류를 표시합니다.
+
+바인딩 방식 선택 및 기타 방식 추가 화면:
+
+<img src="./images/3-3-2-4.oid4vci-binding-methods.jpg" width="700" alt="Cryptographic binding methods 선택 메뉴"/>
+
+<img src="./images/3-3-2-5.oid4vci-binding-method-other.jpg" width="700" alt="기타 바인딩 방식 직접 입력"/>
 
 #### ▸ Credential Configuration 상세 / 수정
 
-<img src="./images/3-3-2-3.oid4vci-credential-config-detail.png" width="700"/>
+<img src="./images/3-3-2-3.oid4vci-credential-config-detail.jpg" width="700" alt="Credential Configuration 상세 화면 상단"/>
+
+<img src="./images/3-3-2-3b.oid4vci-credential-config-detail-claims.jpg" width="700" alt="Credential Configuration 상세 화면의 Claims 및 저장 버튼"/>
 
 - 목록에서 ID를 클릭하거나 행을 선택한 뒤 `UPDATE` 버튼을 클릭하면 상세 화면으로 이동합니다.
-- Configuration ID는 수정할 수 없으며, Format, Identifiers, Metadata JSON을 수정한 뒤 `SAVE` 버튼으로 저장합니다.
+- Configuration ID는 수정할 수 없습니다. Format, Identifiers, Credential Metadata와 Claims를 수정한 뒤 `SAVE` 버튼으로 저장합니다.
+- 추가 Metadata 필드를 수정해야 하면 **Advanced: Metadata JSON**을 펼칩니다. `CANCEL`은 저장하지 않고 목록으로 돌아갑니다.
 
 > **참고:** Credential Configuration은 Credential Configuration 저장소에만 저장되고, 공개 Issuer Metadata의 `credential_configurations_supported`는 조회 시 저장된 Configuration으로 구성됩니다. 따라서 Configuration을 등록·수정·삭제할 때 Issuer Metadata를 별도로 수정할 필요가 없습니다.
 

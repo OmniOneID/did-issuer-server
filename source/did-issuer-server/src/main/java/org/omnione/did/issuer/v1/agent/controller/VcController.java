@@ -16,9 +16,12 @@
 
 package org.omnione.did.issuer.v1.agent.controller;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.sdk.issuer.model.dto.*;
 import org.omnione.did.issuer.v1.agent.service.VcStatusService;
 
 import org.omnione.did.issuer.v1.agent.service.query.VcSchemaService;
@@ -44,6 +47,7 @@ public class VcController {
      * @return the inspection result for the given VC
      */
     @PostMapping(UrlConstant.Issuer.INSPECT_PROPOSE_REVOKE)
+    @ArticleLog(name = "[Revoke VC] Inspect Propose Revoke", apiType = ApiType.AGENT, targetType = "REVOKE_VC", actionType = ActionType.REVOKE_VC)
     public InspectProposeRevokeResDto inspectProposeRevoke(@RequestBody InspectProposeRevokeReqDto request) {
 
         return vcStatusService.inspectProposeRevoke(request);
@@ -55,6 +59,7 @@ public class VcController {
      * @return the result of revoking the given VC
      */
     @PostMapping(UrlConstant.Issuer.REVOKE_VC)
+    @ArticleLog(name = "[Revoke VC] Revoke VC", apiType = ApiType.AGENT, targetType = "REVOKE_VC", actionType = ActionType.REVOKE_VC)
     public RevokeVcResDto revokeVc(@RequestBody RevokeVcReqDto request) {
 
         return vcStatusService.revokeVc(request);
@@ -67,6 +72,7 @@ public class VcController {
      * @return the result of completing the revocation for the given VC
      */
     @PostMapping(UrlConstant.Issuer.COMPLETE_REVOKE)
+    @ArticleLog(name = "[Revoke VC] Complete Revoke", apiType = ApiType.AGENT, targetType = "REVOKE_VC", actionType = ActionType.REVOKE_VC)
     public CompleteRevokeResDto completeRevoke(@RequestBody CompleteRevokeReqDto request) {
 
         return vcStatusService.completeRevoke(request);
@@ -79,6 +85,7 @@ public class VcController {
      * @return the result of updating the status for the given VC
      */
     @PostMapping(UrlConstant.Issuer.STATUS)
+    @ArticleLog(name = "[VC] Update Status", apiType = ApiType.AGENT, targetType = "VC", actionType = ActionType.UPDATE_STATUS)
     public UpdateVcStatusResDto updateVcStatus(@RequestBody UpdateVcStatusReqDto request) {
 
         return vcStatusService.updateVcStatus(request);

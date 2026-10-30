@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
@@ -47,6 +49,8 @@ public class IssueProfileAdminController {
      * @return an empty response on success
      */
     @PostMapping
+    @ArticleLog(name = "[Issue Profile] Create Issue Profile", description = "Create Issue Profile",
+        targetType = "ISSUE PROFILE", targetId = "#request.vcPlanId", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> createIssueProfile(@RequestBody CreateIssueProfileReqDto request) {
         issueProfileService.createIssueProfile(request);
         return ResponseEntity.ok(EmptyResDto.builder().build());
@@ -59,6 +63,8 @@ public class IssueProfileAdminController {
      * @return an empty response on success
      */
     @PatchMapping
+    @ArticleLog(name = "[Issue Profile] Update Issue Profile", description = "Update Issue Profile",
+            targetType = "ISSUE PROFILE", targetId = "#request.vcPlanId", actionType = ActionType.UPDATE)
     public ResponseEntity<EmptyResDto> updateIssueProfile(@RequestBody CreateIssueProfileReqDto request) {
         issueProfileService.updateIssueProfile(request);
         return ResponseEntity.ok(EmptyResDto.builder().build());
@@ -71,6 +77,8 @@ public class IssueProfileAdminController {
      * @return an empty response on success
      */
     @DeleteMapping
+    @ArticleLog(name = "[Issue Profile] Delete Issue Profile", description = "Delete Issue Profile",
+            targetType = "ISSUE PROFILE", targetId = "#id", actionType = ActionType.DELETE)
     public ResponseEntity<EmptyResDto> deleteIssueProfile(@RequestParam(name = "id") Long id) {
         issueProfileService.deleteIssueProfileById(id);
         return ResponseEntity.ok(EmptyResDto.builder().build());

@@ -16,30 +16,23 @@
 
 package org.omnione.did.issuer.v1.agent.helper;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-import org.omnione.did.base.datamodel.enums.UserQueryType;
-import org.omnione.did.base.db.domain.IssueProfile;
-import org.omnione.did.base.db.domain.Transaction;
 import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
 
 import org.omnione.did.issuer.v1.agent.service.IssueInitIssueService;
-import org.omnione.did.issuer.v1.agent.service.IssueService;
-import org.omnione.did.issuer.v1.agent.service.IssueServiceBase;
 import org.omnione.did.issuer.v1.agent.service.TestIssueService;
 import org.omnione.did.issuer.v1.agent.service.UserInitIssueService;
 import org.omnione.did.issuer.v1.agent.service.UserQueryApiIssueService;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
+import org.omnione.did.issuer.v1.agent.service.IssueService;
+import org.omnione.did.base.datamodel.enums.UserQueryType;
+import org.omnione.did.base.db.domain.IssueProfile;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.db.domain.Transaction;
+import org.omnione.did.sdk.issuer.model.dto.*;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-/**
- * The IssueServiceHelper class provides methods for issuing VCs.
- * It is designed to facilitate the issuance of VCs.
- *
- */
 @Profile("!sample")
 @Slf4j
 @RequiredArgsConstructor
@@ -52,47 +45,22 @@ public class IssueServiceHelper implements IssueService {
     private final UserQueryApiIssueService userQueryApiIssueService;
     private final TestIssueService testIssueService;
 
-    /**
-     * Request an offer for the given VC.
-     *
-     * @param request the VC to request an offer for
-     * @return the offer for the given VC
-     */
     @Override
     public OfferIssueVcResDto requestOffer(OfferIssueVcReqDto request) {
 
         return issueInitIssueService.requestOffer(request);
     }
 
-    /**
-     *
-     * Inspects the issue proposal for a Verifiable Credential.
-     *
-     * @param request the VC to inspect the issue proposal for
-     * @return the inspection result for the given VC
-     */
     @Override
     public InspectIssueProposeResDto inspectIssuePropose(InspectIssueProposeReqDto request) {
         return issueInitIssueService.inspectIssuePropose(request);
     }
 
-    /**
-     * Generates an issue profile for a Verifiable Credential.
-     *
-     * @param request the VC to generate an issue profile for
-     * @return the issue profile for the given VC
-     */
     @Override
     public GenerateIssueProfileResDto generateIssueProfile(GenerateIssueProfileReqDto request) {
         return getIssueServiceByTransaction(request.getTxId()).generateIssueProfile(request);
     }
 
-    /**
-     * Request an offer for the given VC.
-     *
-     * @param request the VC to request an offer for
-     * @return the offer for the given VC
-     */
     @Override
     public IssueVcResDto issueVc(IssueVcReqDto request) {
         return getIssueServiceByTransaction(request.getTxId()).issueVc(request);
@@ -100,9 +68,9 @@ public class IssueServiceHelper implements IssueService {
 
     @Override
     public GenerateIssueProfileResDto generateIssueProfileFromProxy(GenerateIssueProfileReqDto request,
-                                                                    String userId) {
+            String accessToken) {
 
-        return getIssueServiceByTransaction(request.getTxId()).generateIssueProfileFromProxy(request, userId);
+        return getIssueServiceByTransaction(request.getTxId()).generateIssueProfileFromProxy(request, accessToken);
     }
 
     @Override
@@ -110,39 +78,19 @@ public class IssueServiceHelper implements IssueService {
         return getIssueServiceByTransaction(request.getTxId()).issueVcFromProxy(request);
     }
 
-
-    /**
-     * completeVc for the given VC.
-     *
-     * @param request the VC to request an offer for
-     * @return the offer for the given VC
-     */
     @Override
     public CompleteVcResDto completeVc(CompleteVcReqDto request) {
         return getIssueServiceByTransaction(request.getTxId()).completeVc(request);
     }
 
-    /**
-     * issueVcResult for the given offerId
-     *
-     * @param offerId offerId to issue VC
-     * @return Issued VC result for the given offerId
-     */
     @Override
     public IssueVcResultResDto issueVcResult(String offerId) {
         return issueInitIssueService.issueVcResult(offerId);
     }
 
-    /**
-     *  Method for retrieving the VC Plan ID using the Transaction ID,
-     *  and then fetching an implementation of the IssueService interface based on that VC Plan ID
-     *
-     * @param txId transactionId to IssuerService
-     * @return IssuerService to use for the given transactionId
-     */
-    private IssueServiceBase getIssueServiceByTransaction(String txId) {
-        Transaction transaction = transactionService.findByTxId(txId);
-        IssueProfile profile = issueProfileQueryService.findById(transaction.getIssueProfileId());
+    private IssueService getIssueServiceByTransaction(String txId) {
+        final Transaction tx = transactionService.findByTxId(txId);
+        final IssueProfile profile = issueProfileQueryService.findById(tx.getIssueProfileId()); // 예외 발생 가정
 
         if (UserQueryType.API.equals(profile.getUserQueryType())) {
             return userQueryApiIssueService;

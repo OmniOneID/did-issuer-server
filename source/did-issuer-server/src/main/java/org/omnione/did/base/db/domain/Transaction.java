@@ -16,11 +16,10 @@
 
 package org.omnione.did.base.db.domain;
 
+import org.omnione.did.sdk.issuer.model.common.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.omnione.did.base.datamodel.enums.InitiateType;
-import org.omnione.did.base.db.constant.TransactionStatus;
-import org.omnione.did.base.db.constant.TransactionType;
+import org.omnione.did.sdk.issuer.model.common.enums.TransactionStatus;
 
 import java.io.Serializable;
 import java.time.Instant;

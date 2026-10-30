@@ -16,9 +16,9 @@
 
 package org.omnione.did.base.db.domain;
 
+import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.omnione.did.base.db.constant.IssuerStatus;
 
 import java.io.Serializable;
 
@@ -55,6 +55,6 @@ public class IssuerInfo extends BaseEntity implements Serializable {
     @Column(name = "certificate_url")
     private String certificateUrl;
 
-    @Column(name = "published_certificate_url", length = 2000)
+    @Column(name = "published_certificate_url")
     private String publishedCertificateUrl;
 }

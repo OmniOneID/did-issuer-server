@@ -16,15 +16,16 @@
 
 package org.omnione.did.issuer.v1.agent.controller;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import jakarta.validation.Valid;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.base.datamodel.data.zkp.ZkpLadgerRequestData;
-import org.omnione.did.issuer.v1.agent.dto.vc.*;
+import org.omnione.did.sdk.issuer.model.dto.*;
 import org.omnione.did.issuer.v1.agent.service.IssueService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.zkp.exception.ZkpException;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -47,6 +48,7 @@ public class IssueController {
      * @return the offer for the given VC
      */
     @PostMapping(UrlConstant.Issuer.REQUEST_OFFER)
+    @ArticleLog(name = "[Issue VC] Request Offer", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public OfferIssueVcResDto requestOfferQr(@Valid @RequestBody OfferIssueVcReqDto request) {
         return issueServiceHelper.requestOffer(request);
     }
@@ -58,6 +60,7 @@ public class IssueController {
      * @return the inspection result for the given VC
      */
     @PostMapping(UrlConstant.Issuer.INSPECT_PROPOSE_ISSUE)
+    @ArticleLog(name = "[Issue VC] Inspect Propose Issue", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public InspectIssueProposeResDto inspectIssuePropose(@RequestBody InspectIssueProposeReqDto request) {
         return issueServiceHelper.inspectIssuePropose(request);
     }
@@ -69,6 +72,7 @@ public class IssueController {
      * @return the issue profile for the given VC
      */
     @PostMapping(UrlConstant.Issuer.GENERATE_ISSUE_PROFILE)
+    @ArticleLog(name = "[Issue VC] Generate Issue Profile", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public GenerateIssueProfileResDto generateIssueProfile(@RequestBody GenerateIssueProfileReqDto request) {
         return issueServiceHelper.generateIssueProfile(request);
     }
@@ -80,12 +84,14 @@ public class IssueController {
      * @return the result of issuing the given VC
      */
     @PostMapping(UrlConstant.Issuer.ISSUE_VC)
+    @ArticleLog(name = "[Issue VC] Issue VC", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public IssueVcResDto issueVc(@RequestBody IssueVcReqDto request) {
         return issueServiceHelper.issueVc(request);
     }
 
 
     @PostMapping(UrlConstant.Issuer.GENERATE_ISSUE_PROFILE_PROXY)
+    @ArticleLog(name = "[Issue VC] Generate Issue Profile Proxy", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public GenerateIssueProfileResDto generateIssueProfileProxy(@RequestBody GenerateIssueProfileReqDto request) {
         ;
         return issueServiceHelper.generateIssueProfileFromProxy(request, request.getUserId());
@@ -98,6 +104,7 @@ public class IssueController {
      * @return the result of issuing the given VC
      */
     @PostMapping(UrlConstant.Issuer.ISSUE_VC_PROXY)
+    @ArticleLog(name = "[Issue VC] Issue VC Proxy", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public IssueVcResDto issueVcProxy(@RequestBody IssueVcReqDto request) {
         return issueServiceHelper.issueVcFromProxy(request);
     }
@@ -108,6 +115,7 @@ public class IssueController {
      * @return the result of completing the given VC
      */
     @PostMapping(UrlConstant.Issuer.COMPLETE_VC)
+    @ArticleLog(name = "[Issue VC] Request Offer", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public CompleteVcResDto completeVc(@RequestBody CompleteVcReqDto request) {
         return issueServiceHelper.completeVc(request);
     }
@@ -119,6 +127,7 @@ public class IssueController {
      * @return the result of issuing the VC
      */
     @GetMapping(UrlConstant.Issuer.ISSUE_VC + UrlConstant.Issuer.RESULT)
+    @ArticleLog(name = "[Issue VC] Issue VC Result", apiType = ApiType.AGENT, targetType = "ISSUE_VC", actionType = ActionType.ISSUE_VC)
     public IssueVcResultResDto issueVcResult(@RequestParam("offerId") String offerId) {
         return issueServiceHelper.issueVcResult(offerId);
     }

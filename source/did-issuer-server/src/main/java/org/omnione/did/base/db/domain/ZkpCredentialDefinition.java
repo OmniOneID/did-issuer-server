@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpCredentialDefinitionStatus;
 import org.omnione.did.zkp.datamodel.enums.CredentialType;
 
 import java.io.Serializable;

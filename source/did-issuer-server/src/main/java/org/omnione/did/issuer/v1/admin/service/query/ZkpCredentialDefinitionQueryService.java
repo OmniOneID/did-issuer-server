@@ -15,15 +15,15 @@
  */
 package org.omnione.did.issuer.v1.admin.service.query;
 
+import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaRepository;
 import org.omnione.did.base.db.repository.projection.SchemaNameProjection;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.issuer.v1.admin.dto.zkp.definition.ZkpCredentialDefinitionDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

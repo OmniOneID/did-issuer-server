@@ -4,6 +4,8 @@ Issuer Server
 Issuer 서버 Repository에 오신 것을 환영합니다. <br>
 이 Repository는 Issuer 서버의 소스 코드, 문서, 관련 리소스를 포함하고 있습니다.
 
+Issuer SDK 소스는 별도 `did-issuer-sdk-server` 폴더에 있습니다. SDK를 별도로 빌드하고 JAR을 `source/did-issuer-server/libs/`에 복사해 서버에서 사용합니다.
+
 ## S/W 사양
 | 구분              | 내용                                 |
 |-------------------|--------------------------------------|

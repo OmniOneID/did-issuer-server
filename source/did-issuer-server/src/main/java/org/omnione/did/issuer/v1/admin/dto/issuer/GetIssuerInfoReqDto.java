@@ -17,16 +17,16 @@
 package org.omnione.did.issuer.v1.admin.dto.issuer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.omnione.did.issuer.v1.agent.helper.PublishCertificateHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.omnione.did.base.db.constant.IssuerStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.data.model.did.DidDocument;
-import org.omnione.did.issuer.v1.agent.helper.PublishCertificateHelper;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -63,7 +63,7 @@ public class GetIssuerInfoReqDto {
                         .name(t.getName())
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
-                        .certificateUrl(PublishCertificateHelper.getCertificateVcURL(issuerInfo))
+                        .certificateUrl(PublishCertificateHelper.buildCertificateVcUrl(issuerInfo))
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))
                         .build())
@@ -78,7 +78,7 @@ public class GetIssuerInfoReqDto {
                         .name(t.getName())
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
-                        .certificateUrl(PublishCertificateHelper.getCertificateVcURL(issuerInfo))
+                        .certificateUrl(PublishCertificateHelper.buildCertificateVcUrl(issuerInfo))
                         .didDocument(didDocument)
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))
@@ -94,8 +94,8 @@ public class GetIssuerInfoReqDto {
                         .name(t.getName())
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
-                        .certificateUrl(PublishCertificateHelper.getCertificateVcURL(issuerInfo))
                         .certificateVc(certificateVc)
+                        .certificateUrl(PublishCertificateHelper.buildCertificateVcUrl(issuerInfo))
                         .didDocument(didDocument)
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))

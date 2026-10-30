@@ -15,14 +15,14 @@
  */
 package org.omnione.did.issuer.v1.admin.dto.zkp.schema;
 
+import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.omnione.did.base.db.constant.ZkpSchemaStatus;
-import org.omnione.did.issuer.v1.admin.dto.zkp.namespace.ZkpAttributeSaveDto;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpSchemaStatus;
 
 import java.util.List;
 

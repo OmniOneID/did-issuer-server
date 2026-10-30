@@ -15,6 +15,8 @@
  */
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +54,8 @@ public class AdminPasswordPolicyManagementController {
      * @return the saved password policy DTO
      */
     @PostMapping(value = "/admin-password-policy")
+    @ArticleLog(name = "[Admin Manage] Register Admin Password Policy", description = "Register Admin Password Policy",
+            targetType = "ADMIN", actionType = ActionType.UPDATE)
     public AdminPasswordPolicyDto registerAdminPasswordPolicy(@Valid @RequestBody RegisterAdminPasswordPolicyReqDto req) {
         return adminPasswordPolicyManagementService.registerAdminPasswordPolicy(req);
     }

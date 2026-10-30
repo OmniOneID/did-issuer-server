@@ -1,101 +1,81 @@
-/*
- * Copyright 2024 - 2025 OmniOne.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.omnione.did.issuer.v1.agent.service;
 
+import org.omnione.did.issuer.v1.common.service.StorageService;
+import org.omnione.did.sdk.issuer.protocol.vc.IssueVcProtocol;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.base.datamodel.data.Holder;
+import org.omnione.did.sdk.issuer.model.data.Holder;
+import org.omnione.did.sdk.issuer.model.dto.UserInfoDto;
 import org.omnione.did.base.db.domain.User;
-import org.omnione.did.base.db.domain.VcProfile;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.property.KycProperty;
-import org.omnione.did.issuer.v1.admin.service.query.IssueProfileQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.VcSchemaQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.ZkpCredentialDefinitionQueryService;
-import org.omnione.did.issuer.v1.admin.service.query.ZkpSchemaQueryService;
-import org.omnione.did.issuer.v1.agent.service.query.*;
-
-import org.omnione.did.issuer.v1.common.service.StorageService;
-import org.omnione.did.issuer.v1.common.service.ZkpWalletService;
+import org.omnione.did.issuer.v1.agent.service.provider.SpringIssueDataProvider;
+import org.omnione.did.issuer.v1.agent.service.query.UserQueryService;
+import org.omnione.did.sdk.issuer.model.domain.SdkIssueProfile;
+import org.omnione.did.sdk.issuer.model.domain.SdkUser;
+import org.omnione.did.sdk.issuer.model.domain.SdkVcProfile;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This service provides methods for issuing a Verifiable Credential (VC) for MDL(Mobile Driver License).
+ * This service provides methods for issuing a Verifiable Credential (VC) for
+ * Issuer initiate
  */
+import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
+
 @Slf4j
 @Service
 @Transactional
 @Profile("!sample")
-public class IssueInitIssueService extends IssueServiceBase {
+public class IssueInitIssueService extends AbstractPersistentIssueVcService {
     private final UserQueryService userQueryService;
 
-
-    public IssueInitIssueService(VcProfileQueryService vcProfileQueryService, VcOfferQueryService vcOfferQueryService,
-                                 TransactionService transactionService, E2EQueryService e2EQueryService,
-                                 VcQueryService vcQueryService, StorageService storageService,
-                                 FileWalletService walletService, UserQueryService userQueryService, VcSchemaService vcSchemaService,
-                                 VcSchemaQueryService vcSchemaQueryService, IssueProfileQueryService issueProfileQueryService,
-                                 IssuerInfoQueryService issuerInfoQueryService, ZkpWalletService zkpWalletService,
-                                 ZkpCredentialDefinitionQueryService zkpCredentialDefinitionQueryService,
-                                 ZkpSchemaQueryService zkpSchemaQueryService, KycProperty kycProperty) {
-        super(vcProfileQueryService, vcOfferQueryService, transactionService, e2EQueryService, vcQueryService
-                , storageService, walletService, issueProfileQueryService, vcSchemaService
-                , vcSchemaQueryService, issuerInfoQueryService, zkpWalletService, zkpCredentialDefinitionQueryService,
-                zkpSchemaQueryService, kycProperty);
+    public IssueInitIssueService(
+            IssueVcProtocol issueVcProtocol,
+            SpringIssueDataProvider issuerDataProvider,
+            TransactionService transactionService,
+            UserQueryService userQueryService,
+            StorageService storageService) {
+        super(issueVcProtocol, issuerDataProvider, transactionService, storageService);
         this.userQueryService = userQueryService;
     }
 
-    /**
-     * Finds a user by a VC profile.
-     *
-     * @param vcProfile The VC profile.
-     * @return The user.
-     * @throws OpenDidException if the Holder is not found.
-     */
     @Override
-    protected User findUserByVcProfile(VcProfile vcProfile) {
-        return userQueryService.findById(vcProfile.getUserId());
+    protected UserInfoDto findUserByVcProfileAndVcSchemaId(SdkVcProfile vcProfile, SdkIssueProfile issueProfile) {
+        User user = userQueryService.findByIdAndVcSchemaId(vcProfile.getUserId(), issueProfile.getVcSchemaId());
+        return UserInfoDto.builder()
+                .id(user.getId())
+                .pii(user.getPii())
+                .did(user.getDid())
+                .vcSchemaId(user.getVcSchemaId())
+                .data(user.getData())
+                .validFrom(org.omnione.did.common.util.DateTimeUtil.getCurrentUTCTime())
+                .validUntil(org.omnione.did.common.util.DateTimeUtil.addYearsToCurrentTime(2))
+                .build();
     }
 
     @Override
-    protected User findUserByVcProfileAndVcSchemaId(VcProfile vcProfile, Long vcSchemaId) {
-        return userQueryService.findByIdAndVcSchemaId(vcProfile.getUserId(), vcSchemaId);
+    protected SdkUser findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId) {
+        SdkUser user = toSdkUser(userQueryService.findByPiiAndVcSchemaId(holder.getPii(), vcSchemaId)
+                .orElseThrow(() -> new OpenDidException(ErrorCode.HOLDER_NOT_FOUND)));
+        // The SDK persists user.did in the VC profile. For regular issuance,
+        // use the DID supplied by the holder, as the pre-SDK flow did.
+        if (holder.getDid() != null && !holder.getDid().isBlank()) {
+            user.setDid(holder.getDid());
+        }
+        return user;
     }
 
-
-    /**
-     * Finds a user by a Holder.
-     *
-     * @param holder The Holder.
-     * @return The user.
-     * @throws OpenDidException if the Holder is not found.
-     */
-    @Override
-    protected User findUserByHolder(Holder holder) {
-
-        return userQueryService.findByPii(holder.getPii())
-                .orElseThrow(() -> new OpenDidException(ErrorCode.HOLDER_NOT_FOUND));
-    }
-
-    @Override
-    protected User findUserByHolderAndVcSchemaId(Holder holder, Long vcSchemaId) {
-        return userQueryService.findByPiiAndVcSchemaId(holder.getPii(), vcSchemaId)
-                .orElseThrow(() -> new OpenDidException(ErrorCode.HOLDER_NOT_FOUND));
+    private SdkUser toSdkUser(User user) {
+        if (user == null) {
+            return null;
+        }
+        return SdkUser.builder()
+                .id(user.getId())
+                .pii(user.getPii())
+                .did(user.getDid())
+                .vcSchemaId(user.getVcSchemaId())
+                .data(user.getData())
+                .build();
     }
 }

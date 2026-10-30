@@ -15,11 +15,10 @@
  */
 package org.omnione.did.base.db.repository;
 
-import jakarta.transaction.Transactional;
-import org.omnione.did.base.db.constant.ZkpSchemaStatus;
-import org.omnione.did.base.db.domain.ZkpNamespace;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
 import org.omnione.did.base.db.repository.projection.SchemaNameProjection;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -45,4 +44,5 @@ public interface ZkpSchemaRepository extends JpaRepository<ZkpSchema, Long>, Que
     Optional<ZkpSchema> findBySchemaId(String schemaId);
 
     List<ZkpSchema> findAllByStatusNot(ZkpSchemaStatus status);
+    List<ZkpSchema> findByName(String name);
 }

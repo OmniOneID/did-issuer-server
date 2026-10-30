@@ -433,24 +433,42 @@ This screen displays, registers, updates, and deletes credential configurations 
 
 #### ▸ Credential Configuration Registration
 
-<img src="./images/3-3-2-2.oid4vci-credential-config-registration.png" width="700"/>
+<img src="./images/3-3-2-2.oid4vci-credential-config-registration.jpg" width="700" alt="Credential configuration registration, upper section"/>
+
+<img src="./images/3-3-2-2b.oid4vci-credential-config-registration-metadata.jpg" width="700" alt="Credential metadata and claims fields"/>
+
+> `ExamplePID` and the claim values in these screenshots illustrate form entry; they were not registered.
 
 | Item | Description |
 | ---- | ----------- |
-| **Configuration ID** | Unique identifier of the configuration. It can be entered only when registering. |
-| **Format** | Select `mso_mdoc-did` or `dc+sd-jwt-did`. The default is `mso_mdoc-did`. |
-| **Identifiers (SDK)** | Identifiers used by the SDK to identify the credential. Use the `ADD` button to register more than one. |
-| **Metadata JSON** | JSON object published in `credential_configurations_supported` of the Issuer Metadata. |
+| **Configuration ID** | Unique identifier of the configuration. It can be entered only when registering. Example: `StudentID`. |
+| **Format** | Select `mso_mdoc-did` or `dc+sd-jwt-did`. The default is `mso_mdoc-did`. The published metadata `format` follows this selection. |
+| **Identifiers (SDK)** | Values the SDK uses to identify the credential. Use `ADD` to enter multiple values; at least one is needed to save. Examples: `mDocPID`, `StudentId`. |
+| **Document type (doctype) / Credential type (vct)** | Required field shown according to the selected format. Enter the exact type of the credential to be issued. Examples: `eu.europa.ec.eudi.pid.1`, `urn:eudi:pid:1`. |
+| **Display name** | Credential name shown to wallet users. Example: `PID (MSO Mdoc)`. |
+| **Scope (optional)** | Scope used to request this credential. Leave it blank when scope is not used. |
+| **Cryptographic binding methods** | Select one or more of `jwk` and `cose_key`. For another method, select **Other — add a method**, enter its value, and click `ADD`. |
+| **Claims** | Use `ADD CLAIM` to add a claim. `Path` is the actual claim path; separate nested segments with `/`. `Label` is the display name, `Required` marks a claim always included, and `Value type` describes its value. Use the trash button to remove a claim. |
+| **Advanced: Metadata JSON** | Expand to edit the generated JSON and additional fields not shown in the form. Form edits preserve the other JSON fields. |
 
 - Click `REGISTER` to save, or `CANCEL` to return to the list.
-- Metadata JSON must be a JSON object; arrays, strings, and other values cannot be saved.
+- Before saving, the form checks that the metadata is a JSON object, its `format` matches the selected format, the required `doctype` or `vct` is present, and claim paths are valid. It displays an error and does not save invalid input.
+
+Binding method selection and adding another method:
+
+<img src="./images/3-3-2-4.oid4vci-binding-methods.jpg" width="700" alt="Cryptographic binding methods selection menu"/>
+
+<img src="./images/3-3-2-5.oid4vci-binding-method-other.jpg" width="700" alt="Entering another cryptographic binding method"/>
 
 #### ▸ Credential Configuration Detail / Update
 
-<img src="./images/3-3-2-3.oid4vci-credential-config-detail.png" width="700"/>
+<img src="./images/3-3-2-3.oid4vci-credential-config-detail.jpg" width="700" alt="Credential configuration detail, upper section"/>
+
+<img src="./images/3-3-2-3b.oid4vci-credential-config-detail-claims.jpg" width="700" alt="Claims and save controls in the credential configuration detail"/>
 
 - Click an ID in the list, or select a row and click `UPDATE`, to open the detail screen.
-- The Configuration ID cannot be changed. Edit the Format, Identifiers, and Metadata JSON, then click `SAVE`.
+- The Configuration ID cannot be changed. Edit the Format, Identifiers, Credential Metadata, and Claims, then click `SAVE`.
+- Expand **Advanced: Metadata JSON** to edit additional metadata fields. `CANCEL` returns to the list without saving.
 
 > **Note:** Credential configurations are saved only to the credential configuration store. `credential_configurations_supported` in the public Issuer Metadata is built from the stored configurations when it is read, so you do not need to edit the Issuer Metadata when registering, updating, or deleting a configuration.
 

@@ -17,16 +17,16 @@
 package org.omnione.did.issuer.v1.agent.service.query;
 
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.constant.SubTransactionStatus;
-import org.omnione.did.base.db.constant.SubTransactionType;
-import org.omnione.did.base.db.constant.TransactionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.SubTransactionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.SubTransactionType;
+import org.omnione.did.sdk.issuer.model.common.enums.TransactionStatus;
 import org.omnione.did.base.db.domain.SubTransaction;
 import org.omnione.did.base.db.domain.Transaction;
 import org.omnione.did.base.db.repository.SubTransactionRepository;
 import org.omnione.did.base.db.repository.TransactionRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.ValidationUtil;
+import org.omnione.did.sdk.issuer.util.ValidationUtil;
 import org.springframework.stereotype.Service;
 
 /**

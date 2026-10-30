@@ -15,10 +15,10 @@
  */
 package org.omnione.did.base.db.repository;
 
-import jakarta.transaction.Transactional;
-import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.db.repository.projection.SchemaIdProjection;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

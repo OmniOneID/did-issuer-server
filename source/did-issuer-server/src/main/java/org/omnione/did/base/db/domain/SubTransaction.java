@@ -18,8 +18,8 @@ package org.omnione.did.base.db.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.omnione.did.base.db.constant.SubTransactionStatus;
-import org.omnione.did.base.db.constant.SubTransactionType;
+import org.omnione.did.sdk.issuer.model.common.enums.SubTransactionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.SubTransactionType;
 
 import java.io.Serializable;
 

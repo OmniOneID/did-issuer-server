@@ -17,7 +17,7 @@ package org.omnione.did.issuer.v1.admin.dto.zkp.definition;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.omnione.did.base.db.constant.ZkpCredentialDefinitionStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpCredentialDefinitionStatus;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.zkp.datamodel.enums.CredentialType;
 

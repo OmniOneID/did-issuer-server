@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
-import org.omnione.did.base.db.constant.IssuerStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import org.omnione.did.base.db.domain.CertificateVc;
 import org.omnione.did.base.db.domain.EntityDidDocument;
 import org.omnione.did.base.db.domain.IssuerInfo;

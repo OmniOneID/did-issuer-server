@@ -49,6 +49,7 @@ public class UrlConstant {
         public static final String LIST = "/list";
         public static final String ISSUER = "/issuer";
         public static final String ADMIN = "/admins";
+        public static final String LOG = "/logs";
 
         public static final String USER = "/users";
 

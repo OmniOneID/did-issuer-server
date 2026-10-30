@@ -18,13 +18,13 @@ package org.omnione.did.issuer.v1.admin.dto.issuer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.omnione.did.issuer.v1.agent.helper.PublishCertificateHelper;
 import lombok.*;
-import org.omnione.did.base.db.constant.IssuerStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.data.model.did.DidDocument;
-import org.omnione.did.issuer.v1.agent.helper.PublishCertificateHelper;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -65,7 +65,7 @@ public class IssuerInfoResDto {
                         .name(t.getName())
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
-                        .certificateUrl(PublishCertificateHelper.getCertificateVcURL(issuerInfo))
+                        .certificateUrl(PublishCertificateHelper.buildCertificateVcUrl(issuerInfo))
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))
                         .build())
@@ -80,7 +80,7 @@ public class IssuerInfoResDto {
                         .name(t.getName())
                         .status(t.getStatus())
                         .serverUrl(t.getServerUrl())
-                        .certificateUrl(PublishCertificateHelper.getCertificateVcURL(issuerInfo))
+                        .certificateUrl(PublishCertificateHelper.buildCertificateVcUrl(issuerInfo))
                         .didDocument(parseDidDocToMap(didDocument.toJson()))
                         .createdAt(formatInstant(t.getCreatedAt()))
                         .updatedAt(formatInstant(t.getUpdatedAt()))

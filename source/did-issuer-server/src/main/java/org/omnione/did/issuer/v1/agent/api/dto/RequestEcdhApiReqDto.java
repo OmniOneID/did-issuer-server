@@ -17,7 +17,7 @@
 package org.omnione.did.issuer.v1.agent.api.dto;
 
 import lombok.*;
-import org.omnione.did.base.datamodel.data.EcdhReqData;
+import org.omnione.did.sdk.issuer.model.data.EcdhReqData;
 
 /**
  * Request ECDH API Request DTO

@@ -16,6 +16,9 @@
 
 package org.omnione.did.issuer.v1.agent.controller.oid4vc;
 
+import org.omnione.did.base.constants.ApiType;
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,12 +55,14 @@ public class StatusListDemoController {
     private final CredentialManagementService credentialManagementService;
 
     @GetMapping
+    @ArticleLog(name="[OID4VCI] Open status list page", apiType=ApiType.AGENT, targetType="OID4VCI_STATUS_LIST", actionType=ActionType.NONE)
     public String page() {
         return "status-list-demo";
     }
 
     @GetMapping("/api/credentials")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] List status list credentials", apiType=ApiType.AGENT, targetType="OID4VCI_STATUS_LIST", actionType=ActionType.NONE)
     public List<CredentialIssuanceView> findIssuedCredentials(
             @RequestParam(required = false) String userId) {
         return credentialManagementService.findAllIssued(userId);
@@ -65,6 +70,7 @@ public class StatusListDemoController {
 
     @PatchMapping("/api/credentials/{issuanceId}/status")
     @ResponseBody
+    @ArticleLog(name="[OID4VCI] Change status list credential status", apiType=ApiType.AGENT, targetType="OID4VCI_STATUS_LIST", actionType=ActionType.UPDATE_STATUS)
     public CredentialIssuanceView changeStatus(
             @PathVariable String issuanceId,
             @RequestBody ChangeStatusRequest request) throws OID4VCIException {

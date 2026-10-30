@@ -9,7 +9,7 @@ spring:
     password: omn
   jpa:
     open-in-view: true
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
       ddl-auto: none
       naming:

@@ -4,6 +4,8 @@ Issuer Server
 Welcome to the Issuer Server Repository. <br>
 This repository contains the source code, documentation, and related resources for the Issuer Server.
 
+The Issuer SDK source lives in `did-issuer-sdk-server`. Build it separately and copy its JAR to `source/did-issuer-server/libs/` when updating the SDK. The server builds against that JAR.
+
 ## S/W Specifications
 | Category           | Details                                         |
 |--------------------|-------------------------------------------------|

@@ -15,8 +15,9 @@
  */
 package org.omnione.did.issuer.v1.admin.service.query;
 
+import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.db.constant.ZkpSchemaStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
 import org.omnione.did.base.db.domain.ZkpSchemaAttribute;
 import org.omnione.did.base.db.repository.ZkpCredentialDefinitionRepository;
@@ -25,7 +26,6 @@ import org.omnione.did.base.db.repository.ZkpSchemaRepository;
 import org.omnione.did.base.db.repository.projection.SchemaIdProjection;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.issuer.v1.admin.dto.zkp.schema.ZkpSchemaDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

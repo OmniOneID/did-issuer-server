@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
@@ -60,6 +62,8 @@ public class IssuerAdminController {
      * @return an empty response on success
      */
     @RequestMapping(value = "/certificate-vc", method = RequestMethod.POST)
+    @ArticleLog(name = "[Issuer Admin] Issue Certificate VC By TA", description = "Issue a certificate VC By TA.",
+            targetType = "ISSUER")
     public EmptyResDto createCertificateVc(@RequestBody SendCertificateVcReqDto sendCertificateVcReqDto) {
         return issuerManagementService.createCertificateVc(sendCertificateVcReqDto);
     }
@@ -71,6 +75,8 @@ public class IssuerAdminController {
      * @return an empty response on success
      */
     @RequestMapping(value = "/entity-info", method = RequestMethod.POST)
+    @ArticleLog(name = "[Issuer Admin] Update Entity Info", description = "Updates the entity information related to the issuer.",
+            targetType = "ISSUER", targetId = "#sendEntityInfoReqDto.did")
     public EmptyResDto updateEntityInfo(@RequestBody SendEntityInfoReqDto sendEntityInfoReqDto) {
         return issuerManagementService.updateEntityInfo(sendEntityInfoReqDto);
     }
@@ -82,6 +88,8 @@ public class IssuerAdminController {
      * @return the registered issuer information
      */
     @RequestMapping(value = UrlConstant.Admin.ISSUER + "/register-issuer-info", method = RequestMethod.POST)
+    @ArticleLog(name = "[Issuer Admin] Register Issuer Info", description = "Registers issuer information including credential authority data.",
+            targetType = "ISSUER", actionType = ActionType.CREATE)
     public IssuerInfoResDto registerIssuerInfo(@RequestBody RegisterIssuerInfoReqDto registerCaInfoReqDto) {
         return issuerManagementService.registerIssuerInfo(registerCaInfoReqDto);
     }
@@ -92,6 +100,8 @@ public class IssuerAdminController {
      * @return the generated DID document data
      */
     @RequestMapping(value = UrlConstant.Admin.ISSUER + "/generate-did-auto", method = RequestMethod.POST)
+    @ArticleLog(name = "[Issuer Admin] Generate Issuer DID Doc", description = "Automatically generates a DID document for the issuer.",
+            targetType = "ISSUER", actionType = ActionType.CREATE)
     public Map<String, Object> generateIssuerDidDocumentAuto() {
         return issuerManagementService.registerIssuerDidDocumentAuto();
     }
@@ -103,6 +113,8 @@ public class IssuerAdminController {
      * @return an empty response on success
      */
     @RequestMapping(value = UrlConstant.Admin.ISSUER + "/register-did", method = RequestMethod.POST)
+    @ArticleLog(name = "[Issuer Admin] Register DID", description = "Sends a request to register a new DID.",
+            targetType = "ISSUER", actionType = ActionType.CREATE)
     public EmptyResDto requestRegisterDid(@RequestBody RequestRegisterDidReqDto requestRegisterDidReqDto) {
         return issuerManagementService.requestRegisterDid(requestRegisterDidReqDto);
     }
@@ -123,6 +135,8 @@ public class IssuerAdminController {
      * @return a map containing the result of the enrollment request
      */
     @PostMapping(value = UrlConstant.Admin.ISSUER + "/request-enroll-entity")
+    @ArticleLog(name = "[Issuer Admin] Request Enroll Entity", description = "Requests the enrollment of the issuer entity.",
+            targetType = "ISSUER", actionType = ActionType.CREATE)
     public Map<String, Object> requestEnrollEntity() {
         return issuerManagementService.enrollEntity();
     }

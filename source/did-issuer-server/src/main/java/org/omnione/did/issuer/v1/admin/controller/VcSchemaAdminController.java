@@ -16,6 +16,8 @@
 
 package org.omnione.did.issuer.v1.admin.controller;
 
+import org.omnione.did.base.constants.ActionType;
+import org.omnione.did.base.annotation.ArticleLog;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.issuer.v1.admin.api.dto.EmptyResDto;
@@ -48,6 +50,8 @@ public class VcSchemaAdminController {
      * @return an empty response on success
      */
     @PostMapping
+    @ArticleLog(name = "[VC Schema] Create VC Schema", description = "Creates a new VC schema.",
+            targetType = "VC_SCHEMA", targetId = "#request.vcSchemaId", actionType = ActionType.CREATE)
     public ResponseEntity<EmptyResDto> createVcSchema(@RequestBody VcSchemaReqDto request) {
         vcSchemaManagerService.createVcSchema(request);
         return ResponseEntity.ok(EmptyResDto.builder().build());
@@ -60,6 +64,8 @@ public class VcSchemaAdminController {
      * @return the updated VC schema
      */
     @PatchMapping
+    @ArticleLog(name = "[VC Schema] Update VC Schema", description = "Updates an existing VC schema.",
+            targetType = "VC_SCHEMA", targetId = "#request.vcSchemaId", actionType = ActionType.UPDATE)
     public ResponseEntity<VcSchemaDto> updateVcSchema(@RequestBody VcSchemaReqDto request) {
         return ResponseEntity.ok(vcSchemaManagerService.updateVcSchema(request));
     }
@@ -70,6 +76,8 @@ public class VcSchemaAdminController {
      * @param id the ID of the VC schema to delete
      */
     @DeleteMapping
+    @ArticleLog(name = "[VC Schema] Delete VC Schema", description = "Delete a VC schema.",
+            targetType = "VC_SCHEMA", targetId = "#id", actionType = ActionType.DELETE)
     public void deleteVcSchema(@RequestParam("id") Long id) {
         vcSchemaManagerService.deleteVcSchemaById(id);
     }

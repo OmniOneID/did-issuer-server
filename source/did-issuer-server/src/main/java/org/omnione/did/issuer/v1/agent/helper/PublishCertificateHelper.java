@@ -1,28 +1,35 @@
-/*
- * Copyright 2025 OmniOne.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.omnione.did.issuer.v1.agent.helper;
 
-import org.omnione.did.base.db.domain.IssuerInfo;
+import org.omnione.did.sdk.issuer.model.domain.SdkIssuerInfo;
 
-public class PublishCertificateHelper {
+import org.omnione.did.sdk.issuer.provider.CertificateVcProvider;
 
-    public static String getCertificateVcURL(IssuerInfo issuerInfo) {
-        return issuerInfo.getPublishedCertificateUrl() != null
-                ? issuerInfo.getPublishedCertificateUrl()
+public class PublishCertificateHelper implements CertificateVcProvider {
+
+    /**
+     * Retrieves the Verifiable Credential (VC) URL for the Issuer certificate.
+     * If the published certificate URL is available, it returns that; otherwise, it
+     * returns the certificate URL.
+     *
+     * @param issuerInfo The IssuerInfo object containing the URLs.
+     * @return The appropriate VC URL for the Issuer certificate.
+     */
+    public static String buildCertificateVcUrl(SdkIssuerInfo issuerInfo) {
+        return issuerInfo.getPublishedCertificateUrl() != null ? issuerInfo.getPublishedCertificateUrl()
                 : issuerInfo.getCertificateUrl();
+    }
+
+    public static String buildCertificateVcUrl(org.omnione.did.base.db.domain.IssuerInfo issuerInfo) {
+        return issuerInfo.getPublishedCertificateUrl() != null ? issuerInfo.getPublishedCertificateUrl()
+                : issuerInfo.getCertificateUrl();
+    }
+
+    public static String getCertificateVcURL(org.omnione.did.base.db.domain.IssuerInfo issuerInfo) {
+        return buildCertificateVcUrl(issuerInfo);
+    }
+
+    @Override
+    public String getCertificateVcURL(SdkIssuerInfo issuerInfo) {
+        return PublishCertificateHelper.buildCertificateVcUrl(issuerInfo);
     }
 }

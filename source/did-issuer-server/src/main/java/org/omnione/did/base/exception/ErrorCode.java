@@ -77,6 +77,7 @@ public enum ErrorCode {
     HOLDER_NOT_FOUND("00300", "The Holder does not exist.", 400),
     USER_NOT_FOUND("00301", "The User dose not exist.", 400),
     HOLDER_INVALID("00302", "The Holder is not valid.", 400),
+    INVALID_DATE_FORMAT("00303", "Invalid date format.", 400),
 
     // 400~ 499 = SDK(enc, dec, ...)
     CRYPTO_ENCODING_FAILED("00400", "Failed to encoding data.", 500),

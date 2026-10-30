@@ -1,6 +1,17 @@
 logging:
   level:
-    org.omnione: debug
+    org.omnione: ${LOG_LEVEL_APP:INFO}
+    org.omnione.did.base.aop.ControllerLogAspects: ${LOG_LEVEL_CONTROLLER_AOP:INFO}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
+    org.hibernate.orm.jdbc.bind: ${LOG_LEVEL_HIBERNATE_BIND:WARN}
 
   file:
     name: ./logs/server.log
+
+  logback:
+    rollingpolicy:
+      file-name-pattern: ./logs/server.%d{yyyy-MM-dd}.%i.log.gz
+      max-file-size: 20MB
+      max-history: 7
+      total-size-cap: 200MB
+      clean-history-on-start: true

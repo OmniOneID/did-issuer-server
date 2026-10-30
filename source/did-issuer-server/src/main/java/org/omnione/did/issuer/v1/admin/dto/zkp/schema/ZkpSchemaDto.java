@@ -17,7 +17,7 @@ package org.omnione.did.issuer.v1.admin.dto.zkp.schema;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.omnione.did.base.db.constant.ZkpSchemaStatus;
+import org.omnione.did.sdk.issuer.model.common.enums.ZkpSchemaStatus;
 import org.omnione.did.base.db.domain.ZkpSchema;
 
 import java.time.Instant;
