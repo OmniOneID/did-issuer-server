@@ -9,6 +9,7 @@ COPY did-issuer-server/settings.gradle .
 COPY did-issuer-server/libs libs
 COPY did-issuer-admin /did-issuer-admin
 COPY did-issuer-server/src src
+COPY did-issuer-server/metadata metadata
 
 RUN chmod +x ./gradlew
 

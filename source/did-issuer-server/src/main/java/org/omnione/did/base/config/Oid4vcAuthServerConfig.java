@@ -17,7 +17,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
@@ -27,7 +26,6 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Configuration for the OID4VC Authorization Server.
@@ -65,62 +63,72 @@ public class Oid4vcAuthServerConfig {
     }
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
+    public RefreshableRegisteredClientRepository registeredClientRepository() {
         try {
-            Oid4vcProperty properties = configService.getProperties();
-            Oid4vcProperty.Clients configClients = properties.getClients();
-
-            List<RegisteredClient> registeredClients = new ArrayList<>();
-
-            if (configClients != null) {
-                // issuer-server client
-                String clientId = resolveClientId(configClients);
-
-                RegisteredClient issuerClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId(clientId)
-                        .clientSecret(configClients.getClientSecret() != null ? configClients.getClientSecret() : "{noop}secret")
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                        .authorizationGrantType(new AuthorizationGrantType(PRE_AUTHORIZED_CODE_GRANT_TYPE))
-                        .redirectUri(configClients.getRedirectUrl() != null ? configClients.getRedirectUrl() : properties.getIssuerUrl() + "/auth/callback")
-                        .scope("openid")
-                        .build();
-
-                registeredClients.add(issuerClient);
-                log.info("Registered client loaded from DB: {}", clientId);
-            } else {
-                log.warn("No client configuration found in DB, using default 'issuer-server' client.");
-                RegisteredClient devClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId(DEFAULT_CLIENT_ID)
-                        .clientSecret("{noop}secret")
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                        .authorizationGrantType(new AuthorizationGrantType(PRE_AUTHORIZED_CODE_GRANT_TYPE))
-                        .redirectUri("http://localhost:8091/auth/callback")
-                        .scope("openid")
-                        .build();
-                registeredClients.add(devClient);
-            }
-
-            return new InMemoryRegisteredClientRepository(registeredClients);
+            RefreshableRegisteredClientRepository repository =
+                    new RefreshableRegisteredClientRepository(configService, this::buildRegisteredClients);
+            repository.refresh(configService.getProperties());
+            return repository;
         } catch (Exception e) {
-            log.error("Failed to load RegisteredClientRepository from DB, returning default repository: {}", e.getMessage());
-            RegisteredClient fallbackClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                    .clientId(DEFAULT_CLIENT_ID)
-                    .clientSecret("{noop}secret")
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .authorizationGrantType(new AuthorizationGrantType(PRE_AUTHORIZED_CODE_GRANT_TYPE))
-                    .redirectUri("http://localhost:8091/auth/callback")
-                    .scope("openid")
-                    .build();
-            return new InMemoryRegisteredClientRepository(List.of(fallbackClient));
+            throw new IllegalStateException("Failed to load OID4VCI registered clients", e);
+        }
+    }
+
+    private List<RegisteredClient> buildRegisteredClients(Oid4vcProperty properties) {
+        if (properties == null || properties.getClients() == null) {
+            throw new IllegalArgumentException("OID4VCI client properties are missing");
+        }
+        Oid4vcProperty.Clients clients = properties.getClients();
+        RegisteredClient.Builder main = RegisteredClient.withId("oid4vci-main")
+                .clientId(resolveClientId(clients))
+                .clientSecret(clients.getClientSecret())
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(new AuthorizationGrantType(PRE_AUTHORIZED_CODE_GRANT_TYPE));
+        addValues(clients.getRedirectUris(), main::redirectUri);
+        if (hasText(clients.getRedirectUrl())) {
+            main.redirectUri(clients.getRedirectUrl());
+        }
+        addValues(clients.getScopes(), main::scope);
+        if (clients.getScopes() == null || clients.getScopes().isEmpty()) {
+            main.scope("openid");
+        }
+
+        List<RegisteredClient> registeredClients = new ArrayList<>();
+        registeredClients.add(main.build());
+        addPlatformClient(registeredClients, "android", clients.getAndroid());
+        addPlatformClient(registeredClients, "android-openid", clients.getAndroidOpenid());
+        addPlatformClient(registeredClients, "ios", clients.getIos());
+        addPlatformClient(registeredClients, "ios-openid", clients.getIosOpenid());
+        return registeredClients;
+    }
+
+    private void addPlatformClient(List<RegisteredClient> registeredClients, String key,
+                                   Oid4vcProperty.ClientPlatform platform) {
+        if (platform == null || !hasText(platform.getClientId())) {
+            return;
+        }
+        RegisteredClient.Builder client = RegisteredClient.withId("oid4vci-" + key)
+                .clientId(platform.getClientId())
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .clientAuthenticationMethod(new ClientAuthenticationMethod(
+                        "urn:ietf:params:oauth:client-assertion-type:jwt-client-attestation"))
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(new AuthorizationGrantType(PRE_AUTHORIZED_CODE_GRANT_TYPE));
+        addValues(platform.getRedirectUris(), client::redirectUri);
+        addValues(platform.getScopes(), client::scope);
+        if (platform.getScopes() == null || platform.getScopes().isEmpty()) {
+            client.scope("openid");
+        }
+        registeredClients.add(client.build());
+    }
+
+    private void addValues(List<String> values, java.util.function.Consumer<String> add) {
+        if (values != null) {
+            values.stream().filter(this::hasText).forEach(add);
         }
     }
 

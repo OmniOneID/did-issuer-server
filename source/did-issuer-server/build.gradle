@@ -113,6 +113,31 @@ tasks.named('test') {
     }
 }
 
+tasks.register('oid4vciConfigTest', Test) {
+    group = 'verification'
+    description = 'Checks OID4VCI issuer metadata initialization and configuration.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.Oid4vciConfigServiceTest'
+    }
+}
+
+tasks.register('issuerEndpointConfigTest', Test) {
+    group = 'verification'
+    description = 'Checks registration of fixed OID4VCI issuer routes.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.base.config.IssuerEndpointConfigTest'
+        includeTestsMatching 'org.omnione.did.base.config.Oid4vcAuthServerConfigTest'
+    }
+}
+
 tasks.register('sdkRoutingTest', Test) {
     group = 'verification'
     description = 'Checks SDK issuance routing, including the existing TEST mode.'

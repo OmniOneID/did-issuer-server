@@ -1,7 +1,7 @@
 issuer:
-  server-ip: 10.48.17.128
+  server-ip: ${ISSUER_SERVER_IP:127.0.0.1}
   server-port: 8091
-  base-url: http://${issuer.server-ip:127.0.0.1}:${issuer.server-port:8091}
+  base-url: ${ISSUER_BASE_URL:http://${issuer.server-ip}:${issuer.server-port}}
   sdk:
     config-source: DB
   data-dir: .

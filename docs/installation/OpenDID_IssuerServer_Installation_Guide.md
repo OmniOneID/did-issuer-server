@@ -662,8 +662,9 @@ The `issuer` profile configures OID4VCI issuance and is included in the `dev` pr
 | `clients.auth-server.url` | Authorization Server base URL (default: `${issuer.base-url}`) |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens (default: `${clients.auth-server.url}/oauth2/jwks`) |
 
-> - The committed `application-issuer.yml` sets `issuer.server-ip` to a development IP address. Change it to an address that Wallets can reach in your environment.
-> - The Docker image does not include the `metadata` directory. When running with Docker, mount it (for example, `{metadata_directory}:/app/metadata`) or register the Issuer Metadata in the Admin Console.
+> - Set the public URL with `ISSUER_BASE_URL` (for example, `https://issuer.example.com`). Otherwise it is composed from `ISSUER_SERVER_IP` (default `127.0.0.1`) and `issuer.server-port`. On new DB initialization, `${issuer.base-url}` in `issuer_meta.json` resolves to this URL.
+> - On a new DB, if no separate `oid4vci.auth-config-path` file exists, OID4VCI Property is initialized with default client IDs, app redirect URIs, and basic scopes. Server URLs are stored as `${issuer.base-url}` references so later address changes use the current setting. A random Client Secret is generated once and stored in the DB. Existing DB values are preserved.
+> - The Docker image includes the initial `metadata` directory. To use a separate metadata file, mount `{metadata_directory}:/app/metadata`.
 
 ## 5.8. application-lss.yml
 

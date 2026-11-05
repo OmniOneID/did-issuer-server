@@ -18,14 +18,12 @@ package org.omnione.did.base.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
+import org.omnione.did.base.constants.Oid4vciEndpointPaths;
 import org.omnione.did.issuer.v1.agent.controller.oid4vc.CredentialIssuanceController;
 import org.omnione.did.oid4vc.oid4vci.dto.credential.CredentialRequest;
 import org.omnione.did.oid4vc.oid4vci.dto.credential.DeferredCredentialRequest;
-import org.omnione.did.oid4vc.oid4vci.dto.metadata.IssuerMetadataResponse;
 import org.omnione.did.oid4vc.oid4vci.dto.notification.NotificationRequest;
 import org.omnione.did.oid4vc.oid4vci.dto.revocation.CredentialRevocationRequest;
-import org.omnione.did.oid4vc.oid4vci.service.CredentialService;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -35,7 +33,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 
 @Slf4j
 @Configuration
@@ -43,46 +40,25 @@ import java.net.URI;
 public class IssuerEndpointConfig {
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
-    private final CredentialService credentialService;
-    private final Oid4vciConfigService oid4vciConfigService;
     private final CredentialIssuanceController credentialIssuanceController;
 
     @EventListener(ApplicationReadyEvent.class)
     public void registerIssuerEndpoints() {
-        log.info("Starting issuer endpoint registration from metadata...");
-        try {
-            IssuerMetadataResponse metadata = oid4vciConfigService.getIssuerMetadata();
-
-            registerEndpoint(metadata.getCredentialOfferEndpoint(), RequestMethod.GET, "getCredentialOffer", String.class, String.class);
-            registerEndpoint(metadata.getCredentialEndpoint(), RequestMethod.POST, "issueCredential", CredentialRequest.class, Jwt.class);
-            registerEndpoint(metadata.getNonceEndpoint(), RequestMethod.POST, "handleNonce");
-            registerEndpoint(Oid4vciConfigService.CREDENTIAL_REVOCATION_PATH, RequestMethod.POST,
-                    "revokeCredential", CredentialRevocationRequest.class);
-            registerEndpoint(metadata.getDeferredCredentialEndpoint(), RequestMethod.POST, "getDeferredCredential", DeferredCredentialRequest.class, Jwt.class);
-            registerEndpoint(metadata.getNotificationEndpoint(), RequestMethod.POST, "handleNotification", NotificationRequest.class);
-
-            log.info("Issuer endpoint registration completed.");
-        } catch (NullPointerException e) {
-            log.error("Failed to register issuer endpoints", e);
-        }
+        log.info("Registering fixed OID4VCI issuer endpoints...");
+        registerEndpoint(Oid4vciEndpointPaths.CREDENTIAL_OFFER + "/{request_id}/{configuration_id}", RequestMethod.GET,
+                "getCredentialOffer", String.class, String.class);
+        registerEndpoint(Oid4vciEndpointPaths.CREDENTIAL, RequestMethod.POST, "issueCredential", CredentialRequest.class, Jwt.class);
+        registerEndpoint(Oid4vciEndpointPaths.NONCE, RequestMethod.POST, "handleNonce");
+        registerEndpoint(Oid4vciEndpointPaths.CREDENTIAL_REVOCATION, RequestMethod.POST,
+                "revokeCredential", CredentialRevocationRequest.class);
+        registerEndpoint(Oid4vciEndpointPaths.DEFERRED_CREDENTIAL, RequestMethod.POST,
+                "getDeferredCredential", DeferredCredentialRequest.class, Jwt.class);
+        registerEndpoint(Oid4vciEndpointPaths.NOTIFICATION, RequestMethod.POST, "handleNotification", NotificationRequest.class);
+        log.info("Issuer endpoint registration completed.");
     }
 
-    private void registerEndpoint(String fullUrl, RequestMethod httpMethod, String methodName, Class<?>... parameterTypes) {
-        if (fullUrl == null || fullUrl.isBlank()) {
-            log.warn("Endpoint URL for method {} is missing in metadata. Skipping registration.", methodName);
-            return;
-        }
-
+    private void registerEndpoint(String path, RequestMethod httpMethod, String methodName, Class<?>... parameterTypes) {
         try {
-            String path = URI.create(fullUrl).getPath();
-            if (path == null || path.isBlank()) {
-                path = "/";
-            }
-
-            if ("getCredentialOffer".equals(methodName) && !path.contains("{")) {
-                path = path.endsWith("/") ? path + "{request_id}/{configuration_id}" : path + "/{request_id}/{configuration_id}";
-            }
-
             Method method = CredentialIssuanceController.class.getMethod(methodName, parameterTypes);
             
             RequestMappingInfo mappingInfo = RequestMappingInfo
@@ -96,9 +72,9 @@ public class IssuerEndpointConfig {
         } catch (NoSuchMethodException | SecurityException e) {
             log.error("Method {} not found or accessible in CredentialIssuanceController", methodName, e);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.error("Invalid configuration or mapping conflict for endpoint {} -> {}", fullUrl, methodName, e);
+            log.error("Invalid configuration or mapping conflict for endpoint {} -> {}", path, methodName, e);
         } catch (RuntimeException e) {
-            log.error("Unexpected runtime error registering endpoint {} -> {}", fullUrl, methodName, e);
+            log.error("Unexpected runtime error registering endpoint {} -> {}", path, methodName, e);
         }
     }
 }

@@ -665,8 +665,9 @@ logging:
 | `clients.auth-server.url` | Authorization Server Base URL (기본값: `${issuer.base-url}`) |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint (기본값: `${clients.auth-server.url}/oauth2/jwks`) |
 
-> - 저장소에 포함된 `application-issuer.yml`의 `issuer.server-ip`는 개발용 IP 주소로 설정되어 있습니다. 운영 환경에서 Wallet이 접근할 수 있는 주소로 변경하십시오.
-> - Docker 이미지에는 `metadata` Directory가 포함되지 않습니다. Docker로 구동할 때는 해당 Directory를 Mount(예: `{metadata_directory}:/app/metadata`)하거나 Admin Console에서 Issuer Metadata를 등록하십시오.
+> - 공개 주소는 `ISSUER_BASE_URL` 환경 변수로 설정하십시오 (예: `https://issuer.example.com`). 미설정 시 `ISSUER_SERVER_IP`와 `issuer.server-port`로 구성하며, IP의 기본값은 `127.0.0.1`입니다. 새 DB 초기화 시 `issuer_meta.json`의 `${issuer.base-url}`도 이 값으로 치환됩니다.
+> - 새 DB의 OID4VCI Property는 별도 `oid4vci.auth-config-path` 파일이 없으면 기본 Client ID, 앱 Redirect URI, 기본 scope로 생성됩니다. 서버 URL은 DB에 `${issuer.base-url}` 참조로 저장해 주소 변경 시 현재 설정값을 사용합니다. Client Secret은 최초 구동 시 무작위로 생성하여 DB에 저장합니다. 기존 DB 값은 유지됩니다.
+> - Docker 이미지에는 초기 `metadata` Directory가 포함됩니다. 별도 Metadata 파일을 사용하려면 `{metadata_directory}:/app/metadata`로 Mount하십시오.
 
 ## 5.8. application-lss.yml
 

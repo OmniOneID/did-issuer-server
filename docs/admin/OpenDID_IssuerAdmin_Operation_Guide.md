@@ -489,6 +489,8 @@ This screen manages the common and platform-specific client settings used during
 | 5 | **Android OpenID Client** | Configures the Client ID, Redirect URIs, and scopes used by the Android OpenID client. |
 | 6 | **iOS OpenID Client** | Configures the Client ID, Redirect URIs, and scopes used by the iOS OpenID client. |
 
+Saved Client IDs, secrets, redirect URIs, and scopes are applied to authentication clients after the DB commit without a server restart. Authorization flows already in progress may still use the previous settings.
+
 ---
 
 ### 3.3.4. List Provider

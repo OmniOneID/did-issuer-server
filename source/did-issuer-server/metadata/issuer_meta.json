@@ -1,14 +1,14 @@
 {
-  "credential_issuer": "http://10.48.17.128:8091",
+  "credential_issuer": "${issuer.base-url}",
   "authorization_server": [
-    "http://10.48.17.128:8091"
+    "${issuer.base-url}"
   ],
-  "credential_offer_endpoint": "http://10.48.17.128:8091/credential-offer",
-  "credential_endpoint": "http://10.48.17.128:8091/credential",
-  "nonce_endpoint": "http://10.48.17.128:8091/nonce",
-  "credential_revocation_endpoint": "http://10.48.17.128:8091/credential-lifecycle/revoke",
-  "deferred_credential_endpoint": "http://10.48.17.128:8091/deferred_credential",
-  "notification_endpoint": "http://10.48.17.128:8091/notification",
+  "credential_offer_endpoint": "${issuer.base-url}/credential-offer",
+  "credential_endpoint": "${issuer.base-url}/credential",
+  "nonce_endpoint": "${issuer.base-url}/nonce",
+  "credential_revocation_endpoint": "${issuer.base-url}/credential-lifecycle/revoke",
+  "deferred_credential_endpoint": "${issuer.base-url}/deferred_credential",
+  "notification_endpoint": "${issuer.base-url}/notification",
   "credential_request_encryption": {
     "enc_values_supported": [
       "A128GCM",

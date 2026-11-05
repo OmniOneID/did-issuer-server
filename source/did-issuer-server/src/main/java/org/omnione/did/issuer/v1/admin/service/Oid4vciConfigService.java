@@ -1,10 +1,13 @@
 package org.omnione.did.issuer.v1.admin.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.FieldNamingPolicy;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.ConfigType;
+import org.omnione.did.base.constants.Oid4vciEndpointPaths;
 import org.omnione.did.base.datamodel.data.oid4vci.IssuerMetadata;
 import org.omnione.did.base.datamodel.data.oid4vci.Oid4vcProperty;
 import org.omnione.did.base.datamodel.data.oid4vci.SdkCredentialConfig;
@@ -21,6 +24,7 @@ import org.omnione.did.oid4vc.oid4vci.dto.metadata.IssuerMetadataResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -28,6 +32,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,11 +45,14 @@ import java.util.stream.Collectors;
 @Service
 public class Oid4vciConfigService {
 
-    public static final String CREDENTIAL_REVOCATION_PATH = "/credential-lifecycle/revoke";
+    public static final String CREDENTIAL_REVOCATION_PATH = Oid4vciEndpointPaths.CREDENTIAL_REVOCATION;
 
     private final ServerConfigRepository serverConfigRepository;
     private final CredentialConfigRepository credentialConfigRepository;
     private final Gson gson;
+    private final Gson fileMetadataGson = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .create();
 
     @Autowired(required = false)
     private IssuerSdkProperties issuerSdkProperties;
@@ -50,6 +62,12 @@ public class Oid4vciConfigService {
 
     @Autowired
     private Environment env;
+
+    @Autowired(required = false)
+    private ApplicationEventPublisher eventPublisher;
+
+    public record PropertiesUpdatedEvent() {
+    }
 
     private final java.util.concurrent.locks.Lock fileWriteLock = new java.util.concurrent.locks.ReentrantLock();
 
@@ -100,7 +118,7 @@ public class Oid4vciConfigService {
     }
 
     private String resolvePlaceholder(String text) {
-        return text != null ? env.resolvePlaceholders(text) : null;
+        return text != null && env != null ? env.resolvePlaceholders(text) : text;
     }
 
     private List<String> resolvePlaceholders(List<String> list) {
@@ -109,20 +127,20 @@ public class Oid4vciConfigService {
     }
 
     private void syncClientPlatform(Oid4vcProperty.ClientPlatform source, Oid4vcAuthServerProperties.ClientDetail target) {
-        if (source.getClientId() != null && !StringUtils.hasText(target.getClientId())) {
+        if (source.getClientId() != null) {
             target.setClientId(resolvePlaceholder(source.getClientId()));
         }
-        if (source.getRedirectUris() != null && (target.getRedirectUris() == null || target.getRedirectUris().isEmpty())) {
+        if (source.getRedirectUris() != null) {
             target.setRedirectUris(resolvePlaceholders(source.getRedirectUris()));
         }
-        if (source.getScopes() != null && (target.getScopes() == null || target.getScopes().isEmpty())) {
+        if (source.getScopes() != null) {
             target.setScopes(source.getScopes());
         }
     }
 
     private void syncAuthProperties(Oid4vcProperty dbProps) {
         if (authServerProperties != null && dbProps != null) {
-            if (dbProps.getIssuerUrl() != null && !StringUtils.hasText(authServerProperties.getIssuerUrl())) {
+            if (dbProps.getIssuerUrl() != null) {
                 authServerProperties.setIssuerUrl(resolvePlaceholder(dbProps.getIssuerUrl()));
             }
             if (dbProps.getClients() != null) {
@@ -133,19 +151,19 @@ public class Oid4vciConfigService {
                 }
                 
                 Oid4vcProperty.Clients dbClients = dbProps.getClients();
-                if (dbClients.getClientId() != null && !StringUtils.hasText(sdkClients.getClientId())) {
+                if (dbClients.getClientId() != null) {
                     sdkClients.setClientId(resolvePlaceholder(dbClients.getClientId()));
                 }
-                if (dbClients.getClientSecret() != null && !StringUtils.hasText(sdkClients.getClientSecret())) {
+                if (dbClients.getClientSecret() != null) {
                     sdkClients.setClientSecret(resolvePlaceholder(dbClients.getClientSecret()));
                 }
-                if (dbClients.getRedirectUrl() != null && !StringUtils.hasText(sdkClients.getRedirectUrl())) {
+                if (dbClients.getRedirectUrl() != null) {
                     sdkClients.setRedirectUrl(resolvePlaceholder(dbClients.getRedirectUrl()));
                 }
-                if (dbClients.getRedirectUris() != null && (sdkClients.getRedirectUris() == null || sdkClients.getRedirectUris().isEmpty())) {
+                if (dbClients.getRedirectUris() != null) {
                     sdkClients.setRedirectUris(resolvePlaceholders(dbClients.getRedirectUris()));
                 }
-                if (dbClients.getScopes() != null && (sdkClients.getScopes() == null || sdkClients.getScopes().isEmpty())) {
+                if (dbClients.getScopes() != null) {
                     sdkClients.setScopes(dbClients.getScopes());
                 }
                 
@@ -181,7 +199,7 @@ public class Oid4vciConfigService {
                     if (sdkClients.getIssuerServer() == null) {
                         sdkClients.setIssuerServer(new Oid4vcAuthServerProperties.Clients.IssuerServer());
                     }
-                    if (dbClients.getIssuerServer().getUrl() != null && !StringUtils.hasText(sdkClients.getIssuerServer().getUrl())) {
+                    if (dbClients.getIssuerServer().getUrl() != null) {
                         sdkClients.getIssuerServer().setUrl(resolvePlaceholder(dbClients.getIssuerServer().getUrl()));
                     }
                 }
@@ -201,47 +219,67 @@ public class Oid4vciConfigService {
     public IssuerMetadata getMetadata() {
         String key = ConfigType.OID4VCI_METADATA.name();
         Optional<ServerConfig> config = serverConfigRepository.findByConfigKey(key);
-        try {
-            if (config.isPresent()) {
-                return applyFixedCredentialRevocationEndpoint(
-                        new Gson().fromJson(config.get().getConfigValue(), IssuerMetadata.class));
-            } else {
-                IssuerMetadata metadata = applyFixedCredentialRevocationEndpoint(
-                        JsonUtil.deserializeFromJson(metadataPath, IssuerMetadata.class));
-                saveToDb(key, metadata, "OID4VCI Issuer Metadata");
-                return metadata;
+        if (config.isPresent()) {
+            IssuerMetadata metadata = gson.fromJson(config.get().getConfigValue(), IssuerMetadata.class);
+            if (metadata == null) {
+                throw new IllegalStateException("OID4VCI issuer metadata in DB is empty");
             }
-        } catch (Exception e) {
-            log.warn("Failed to load metadata from file {}, returning empty metadata", metadataPath);
-            return new IssuerMetadata();
+            return applyFixedIssuerEndpoints(metadata);
         }
+        IssuerMetadata metadata = loadMetadataFromFile();
+        try {
+            saveToDb(key, metadata, "OID4VCI Issuer Metadata");
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to save OID4VCI issuer metadata to DB", e);
+        }
+        return metadata;
     }
     public IssuerMetadataResponse getIssuerMetadata() {
-        String key = ConfigType.OID4VCI_METADATA.name();
-        Optional<ServerConfig> config = serverConfigRepository.findByConfigKey(key);
+        IssuerMetadata metadata = getMetadata();
+        IssuerMetadataResponse response = gson.fromJson(gson.toJson(metadata), IssuerMetadataResponse.class);
+        response.setAuthorizationServers(metadata.getAuthorizationServer());
+        return response;
+    }
+
+    private IssuerMetadata loadMetadataFromFile() {
         try {
-            if (config.isPresent()) {
-                return applyFixedCredentialRevocationEndpoint(
-                        new Gson().fromJson(config.get().getConfigValue(), IssuerMetadataResponse.class));
-            } else {
-                IssuerMetadataResponse metadata = applyFixedCredentialRevocationEndpoint(
-                        JsonUtil.deserializeFromJson(metadataPath, IssuerMetadataResponse.class));
-                saveToDb(key, metadata, "OID4VCI Issuer Metadata");
-                return metadata;
+            String json = Files.readString(Paths.get(metadataPath), StandardCharsets.UTF_8);
+            if (env != null) {
+                json = env.resolveRequiredPlaceholders(json);
             }
-        } catch (Exception e) {
-            log.warn("Failed to load metadata from file {}, returning empty metadata", metadataPath);
-            return new IssuerMetadataResponse();
+            IssuerMetadata metadata = fileMetadataGson.fromJson(json, IssuerMetadata.class);
+            if (metadata == null || !StringUtils.hasText(metadata.getCredentialIssuer())
+                    || metadata.getCredentialRequestEncryption() == null
+                    || metadata.getCredentialResponseEncryption() == null) {
+                throw new IllegalStateException("Issuer metadata file is missing required fields: " + metadataPath);
+            }
+            return applyFixedIssuerEndpoints(metadata);
+        } catch (IOException | com.google.gson.JsonParseException e) {
+            throw new IllegalStateException("Failed to load issuer metadata file: " + metadataPath, e);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void updateMetadata(IssuerMetadata metadata) throws IOException {
-        applyFixedCredentialRevocationEndpoint(metadata);
+        validateCredentialIssuerBaseUrl(metadata.getCredentialIssuer());
+        applyFixedIssuerEndpoints(metadata);
         metadata.setCredentialConfigurationsSupported(loadCredentialConfigurationsFromDb());
         saveToDb(ConfigType.OID4VCI_METADATA.name(), metadata, "OID4VCI Issuer Metadata");
 
         syncMetadataToFileAfterCommit(metadata);
+    }
+
+    private void validateCredentialIssuerBaseUrl(String baseUrl) {
+        try {
+            URI uri = URI.create(baseUrl);
+            if (!List.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null
+                    || (StringUtils.hasText(uri.getPath()) && !"/".equals(uri.getPath()))
+                    || uri.getQuery() != null || uri.getFragment() != null) {
+                throw new IllegalArgumentException("Credential Issuer must be a server base URL without a path");
+            }
+        } catch (NullPointerException | IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Credential Issuer must be a server base URL without a path", exception);
+        }
     }
 
     private void syncMetadataToFileAfterCommit(IssuerMetadata metadata) {
@@ -347,26 +385,16 @@ public class Oid4vciConfigService {
                 .build();
     }
 
-    private IssuerMetadata applyFixedCredentialRevocationEndpoint(IssuerMetadata metadata) {
-        metadata.setCredentialRevocationEndpoint(buildCredentialRevocationEndpoint(metadata.getCredentialIssuer()));
+    private IssuerMetadata applyFixedIssuerEndpoints(IssuerMetadata metadata) {
+        String baseUrl = StringUtils.hasText(metadata.getCredentialIssuer())
+                ? metadata.getCredentialIssuer().trim().replaceAll("/+$", "") : "";
+        metadata.setCredentialOfferEndpoint(baseUrl + Oid4vciEndpointPaths.CREDENTIAL_OFFER);
+        metadata.setCredentialEndpoint(baseUrl + Oid4vciEndpointPaths.CREDENTIAL);
+        metadata.setNonceEndpoint(baseUrl + Oid4vciEndpointPaths.NONCE);
+        metadata.setCredentialRevocationEndpoint(baseUrl + CREDENTIAL_REVOCATION_PATH);
+        metadata.setDeferredCredentialEndpoint(baseUrl + Oid4vciEndpointPaths.DEFERRED_CREDENTIAL);
+        metadata.setNotificationEndpoint(baseUrl + Oid4vciEndpointPaths.NOTIFICATION);
         return metadata;
-    }
-
-    private IssuerMetadataResponse applyFixedCredentialRevocationEndpoint(IssuerMetadataResponse metadata) {
-        metadata.setCredentialRevocationEndpoint(buildCredentialRevocationEndpoint(metadata.getCredentialIssuer()));
-        return metadata;
-    }
-
-    private String buildCredentialRevocationEndpoint(String credentialIssuer) {
-        if (!StringUtils.hasText(credentialIssuer)) {
-            return CREDENTIAL_REVOCATION_PATH;
-        }
-
-        String baseUrl = credentialIssuer.trim();
-        while (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-        return baseUrl + CREDENTIAL_REVOCATION_PATH;
     }
 
     public Map<String, SdkCredentialConfig> getSdkCredentialConfigs() throws IOException {
@@ -438,11 +466,11 @@ public class Oid4vciConfigService {
         try {
             IssuerMetadata metadata = serverConfigRepository.findByConfigKey(key)
                     .map(config -> gson.fromJson(config.getConfigValue(), IssuerMetadata.class))
-                    .orElseGet(() -> JsonUtil.deserializeFromJson(metadataPath, IssuerMetadata.class));
+                    .orElseGet(this::loadMetadataFromFile);
             if (metadata == null) {
                 throw new IllegalStateException("Issuer metadata is empty.");
             }
-            return applyFixedCredentialRevocationEndpoint(metadata);
+            return applyFixedIssuerEndpoints(metadata);
         } catch (Exception exception) {
             throw new IllegalStateException(
                     "Credential configurations were not saved because issuer metadata could not be loaded.",
@@ -499,22 +527,144 @@ public class Oid4vciConfigService {
         String key = ConfigType.OID4VCI_AUTH_PROPERTIES.name();
         Optional<ServerConfig> config = serverConfigRepository.findByConfigKey(key);
         if (config.isPresent()) {
-            return new Gson().fromJson(config.get().getConfigValue(), Oid4vcProperty.class);
-        } else {
-            try {
-                Oid4vcProperty properties = loadPropertiesFromFile();
-                saveToDb(key, properties, "OID4VCI Auth Properties");
-                return properties;
-            } catch (Exception e) {
-                log.warn("Failed to load properties from file {}, returning empty properties", authConfigPath);
-                return new Oid4vcProperty();
+            return resolvePropertyPlaceholders(gson.fromJson(config.get().getConfigValue(), Oid4vcProperty.class));
+        }
+        Oid4vcProperty properties = Files.isRegularFile(Paths.get(authConfigPath))
+                ? loadPropertiesFromFile() : buildDefaultProperties();
+        saveToDb(key, properties, "OID4VCI Auth Properties");
+        return resolvePropertyPlaceholders(properties);
+    }
+
+    private Oid4vcProperty buildDefaultProperties() {
+        env.getRequiredProperty("issuer.base-url");
+        String clientSecret = env.getProperty("oid4vc.auth.clients.client-secret");
+        if (!StringUtils.hasText(clientSecret)) {
+            byte[] bytes = new byte[32];
+            new SecureRandom().nextBytes(bytes);
+            clientSecret = "{noop}" + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        }
+
+        return Oid4vcProperty.builder()
+                .issuerUrl("${oid4vc.auth.issuer-url:${issuer.base-url}}")
+                .clients(Oid4vcProperty.Clients.builder()
+                        .clientId("oid4vci-client")
+                        .clientSecret(clientSecret)
+                        .redirectUrl("${issuer.base-url}/auth/callback")
+                        .redirectUris(List.of("${issuer.base-url}/auth/callback"))
+                        .scopes(List.of("openid", "profile", "email"))
+                        .android(defaultClientPlatform("oid4vci-android", "org.omnione.did.sdk.oid4vc://callback"))
+                        .androidOpenid(defaultClientPlatform("oid4vci-android-opendid", "org.omnione.did.sdk.oid4vc://callback"))
+                        .ios(defaultClientPlatform("oid4vci-ios", "oid4vc-app://callback"))
+                        .iosOpenid(defaultClientPlatform("oid4vci-ios-opendid", "oid4vc-app://callback"))
+                        .issuerServer(Oid4vcProperty.IssuerServer.builder().url("${issuer.base-url}").build())
+                        .build())
+                .build();
+    }
+
+    private Oid4vcProperty resolvePropertyPlaceholders(Oid4vcProperty properties) {
+        if (properties == null) {
+            return null;
+        }
+        properties.setIssuerUrl(resolvePlaceholder(properties.getIssuerUrl()));
+        Oid4vcProperty.Clients clients = properties.getClients();
+        if (clients != null) {
+            clients.setRedirectUrl(resolvePlaceholder(clients.getRedirectUrl()));
+            clients.setRedirectUris(resolvePlaceholders(clients.getRedirectUris()));
+            if (clients.getIssuerServer() != null) {
+                clients.getIssuerServer().setUrl(resolvePlaceholder(clients.getIssuerServer().getUrl()));
             }
         }
+        return properties;
+    }
+
+    private String preserveDefaultUrlTemplate(String value, String template) {
+        return Objects.equals(value, resolvePlaceholder(template)) ? template : value;
+    }
+
+    private Oid4vcProperty.ClientPlatform defaultClientPlatform(String clientId, String redirectUri) {
+        return Oid4vcProperty.ClientPlatform.builder()
+                .clientId(clientId)
+                .redirectUris(List.of(redirectUri))
+                .scopes(List.of("openid"))
+                .build();
     }
 
     @Transactional
     public void updateProperties(Oid4vcProperty properties) throws IOException {
+        validatePropertiesForRuntime(properties);
+        if (properties.getClients() != null) {
+            Oid4vcProperty.Clients clients = properties.getClients();
+            clients.setRedirectUrl(preserveDefaultUrlTemplate(
+                    clients.getRedirectUrl(), "${issuer.base-url}/auth/callback"));
+            if (clients.getRedirectUris() != null) {
+                clients.setRedirectUris(clients.getRedirectUris().stream()
+                        .map(uri -> preserveDefaultUrlTemplate(uri, "${issuer.base-url}/auth/callback"))
+                        .collect(Collectors.toList()));
+            }
+            if (clients.getIssuerServer() != null) {
+                clients.getIssuerServer().setUrl(preserveDefaultUrlTemplate(
+                        clients.getIssuerServer().getUrl(), "${issuer.base-url}"));
+            }
+        }
+        properties.setIssuerUrl(preserveDefaultUrlTemplate(
+                properties.getIssuerUrl(), "${oid4vc.auth.issuer-url:${issuer.base-url}}"));
         saveToDb(ConfigType.OID4VCI_AUTH_PROPERTIES.name(), properties, "OID4VCI Auth Properties");
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    refreshRuntimeProperties();
+                }
+            });
+        } else {
+            refreshRuntimeProperties();
+        }
+    }
+
+    private void validatePropertiesForRuntime(Oid4vcProperty properties) {
+        if (properties == null || properties.getClients() == null) {
+            throw new IllegalArgumentException("OID4VCI client settings are required");
+        }
+        Oid4vcProperty.Clients clients = properties.getClients();
+        if (!StringUtils.hasText(clients.getClientId()) || !StringUtils.hasText(clients.getClientSecret())) {
+            throw new IllegalArgumentException("Main client ID and secret are required");
+        }
+        if (!StringUtils.hasText(clients.getRedirectUrl())
+                && (clients.getRedirectUris() == null || clients.getRedirectUris().stream().noneMatch(StringUtils::hasText))) {
+            throw new IllegalArgumentException("Main client redirect URL is required");
+        }
+        Set<String> clientIds = new HashSet<>();
+        clientIds.add(clients.getClientId());
+        for (Oid4vcProperty.ClientPlatform platform : List.of(
+                clients.getAndroid() == null ? new Oid4vcProperty.ClientPlatform() : clients.getAndroid(),
+                clients.getAndroidOpenid() == null ? new Oid4vcProperty.ClientPlatform() : clients.getAndroidOpenid(),
+                clients.getIos() == null ? new Oid4vcProperty.ClientPlatform() : clients.getIos(),
+                clients.getIosOpenid() == null ? new Oid4vcProperty.ClientPlatform() : clients.getIosOpenid())) {
+            if (StringUtils.hasText(platform.getClientId())) {
+                if (!clientIds.add(platform.getClientId())) {
+                    throw new IllegalArgumentException("OID4VCI client IDs must be unique");
+                }
+                if (platform.getRedirectUris() == null
+                        || platform.getRedirectUris().stream().noneMatch(StringUtils::hasText)) {
+                    throw new IllegalArgumentException("Redirect URI is required for client: " + platform.getClientId());
+                }
+            }
+        }
+    }
+
+    private void refreshRuntimeProperties() {
+        if (eventPublisher == null && authServerProperties == null) {
+            return;
+        }
+        try {
+            Oid4vcProperty current = getProperties();
+            syncAuthProperties(current);
+            if (eventPublisher != null) {
+                eventPublisher.publishEvent(new PropertiesUpdatedEvent());
+            }
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to refresh OID4VCI properties after saving", exception);
+        }
     }
 
     private void saveToDb(String key, Object value, String description) throws IOException {

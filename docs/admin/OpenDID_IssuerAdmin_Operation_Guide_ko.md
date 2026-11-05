@@ -487,6 +487,8 @@ OID4VCI 발급 과정에서 사용하는 공통 및 Platform별 Client 설정을
 | 5 | **Android OpenID Client** | Android OpenID 방식에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
 | 6 | **iOS OpenID Client** | iOS OpenID 방식에서 사용할 Client ID, Redirect URI 및 Scope를 설정합니다. |
 
+저장한 Client ID, Secret, Redirect URI 및 Scope는 DB Commit 후 인증 Client 설정에 반영됩니다. 서버 재구동은 필요하지 않습니다. 이미 시작된 인증 흐름은 이전 설정을 사용하고 있을 수 있습니다.
+
 ---
 
 ### 3.3.4. List Provider
