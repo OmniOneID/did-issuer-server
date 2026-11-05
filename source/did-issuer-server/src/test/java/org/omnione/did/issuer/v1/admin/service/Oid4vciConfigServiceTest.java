@@ -203,6 +203,61 @@ class Oid4vciConfigServiceTest {
     }
 
     @Test
+    void reportsMissingIssuerUrlConfigurationBeforeSecurityFilterCreation() {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment());
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name())
+                .configValue("{\"issuerUrl\":\"${issuer.base-url}\"}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name()))
+                .thenReturn(Optional.of(config));
+
+        assertThatIllegalStateException().isThrownBy(service::getProperties)
+                .withMessageContaining("Configure oid4vc.auth.issuer-url or issuer.base-url");
+    }
+
+    @Test
+    void usesProfileIssuerUrlWhenStoredIssuerUrlIsBlankAtStartup() throws Exception {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("oid4vc.auth.issuer-url", "https://auth.example.com"));
+        Oid4vcAuthServerProperties authProperties = new Oid4vcAuthServerProperties();
+        ReflectionTestUtils.setField(service, "authServerProperties", authProperties);
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name())
+                .configValue("{\"issuerUrl\":\"\",\"clients\":{\"clientId\":\"existing-client\"}}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name()))
+                .thenReturn(Optional.of(config));
+
+        service.initSdkProperties();
+
+        assertThat(authProperties.getIssuerUrl()).isEqualTo("https://auth.example.com");
+        assertThat(authProperties.getClients().getClientId()).isEqualTo("existing-client");
+        verify(serverConfigRepository, never()).save(any());
+    }
+
+    @Test
+    void savesDefaultIssuerUrlTemplateWhenAdminSubmitsBlankIssuerUrl() throws Exception {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("issuer.base-url", "https://issuer.example.com"));
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name()))
+                .thenReturn(Optional.empty());
+        Oid4vcProperty properties = Oid4vcProperty.builder()
+                .issuerUrl("")
+                .clients(Oid4vcProperty.Clients.builder()
+                        .clientId("existing-client")
+                        .clientSecret("{noop}test-secret")
+                        .redirectUrl("https://issuer.example.com/auth/callback")
+                        .build())
+                .build();
+
+        service.updateProperties(properties);
+
+        verify(serverConfigRepository).save(argThat(config ->
+                config.getConfigValue().contains("${oid4vc.auth.issuer-url:${issuer.base-url}}")));
+    }
+
+    @Test
     void refreshesRuntimePropertiesOnlyAfterDatabaseCommit() throws Exception {
         ReflectionTestUtils.setField(service, "env", new MockEnvironment()
                 .withProperty("issuer.base-url", "https://issuer.example.com"));

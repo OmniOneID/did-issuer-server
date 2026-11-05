@@ -565,7 +565,7 @@ public class Oid4vciConfigService {
         if (properties == null) {
             return null;
         }
-        properties.setIssuerUrl(resolvePlaceholder(properties.getIssuerUrl()));
+        properties.setIssuerUrl(resolveIssuerUrl(properties.getIssuerUrl()));
         Oid4vcProperty.Clients clients = properties.getClients();
         if (clients != null) {
             clients.setRedirectUrl(resolvePlaceholder(clients.getRedirectUrl()));
@@ -575,6 +575,30 @@ public class Oid4vciConfigService {
             }
         }
         return properties;
+    }
+
+    private String resolveIssuerUrl(String configuredUrl) {
+        try {
+            String issuerUrl = configuredUrl;
+            if (!StringUtils.hasText(issuerUrl) && env != null) {
+                issuerUrl = env.getProperty("oid4vc.auth.issuer-url");
+                if (!StringUtils.hasText(issuerUrl)) {
+                    issuerUrl = env.getProperty("issuer.base-url");
+                }
+            }
+            if (env != null && issuerUrl != null) {
+                issuerUrl = env.resolveRequiredPlaceholders(issuerUrl);
+            }
+            URI uri = URI.create(issuerUrl);
+            if (!List.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null) {
+                throw new IllegalArgumentException("Issuer URL must be an absolute HTTP URL");
+            }
+            return issuerUrl;
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException(
+                    "OID4VCI issuer URL is invalid. Configure oid4vc.auth.issuer-url or issuer.base-url.",
+                    exception);
+        }
     }
 
     private String preserveDefaultUrlTemplate(String value, String template) {
@@ -592,6 +616,9 @@ public class Oid4vciConfigService {
     @Transactional
     public void updateProperties(Oid4vcProperty properties) throws IOException {
         validatePropertiesForRuntime(properties);
+        if (!StringUtils.hasText(properties.getIssuerUrl())) {
+            properties.setIssuerUrl("${oid4vc.auth.issuer-url:${issuer.base-url}}");
+        }
         if (properties.getClients() != null) {
             Oid4vcProperty.Clients clients = properties.getClients();
             clients.setRedirectUrl(preserveDefaultUrlTemplate(

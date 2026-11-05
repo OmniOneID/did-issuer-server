@@ -2,6 +2,7 @@ package org.omnione.did.issuer.v1.agent.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.issuer.v1.agent.service.provider.SpringVcStatusDataProvider;
+import org.omnione.did.issuer.v1.agent.service.provider.SpringStorageProvider;
 import org.omnione.did.issuer.v1.agent.service.query.TransactionService;
 import org.omnione.did.sdk.issuer.exception.IssuerSdkErrorCode;
 import org.omnione.did.sdk.issuer.exception.IssuerSdkException;
@@ -24,13 +25,16 @@ public abstract class AbstractPersistentVcStatusService implements VcStatusServi
     protected final VcStatusProtocol vcStatusProtocol;
     protected final TransactionService transactionService;
     protected final SpringVcStatusDataProvider springVcStatusDataProvider;
+    protected final SpringStorageProvider storageProvider;
 
     public AbstractPersistentVcStatusService(VcStatusProtocol vcStatusProtocol,
                                              SpringVcStatusDataProvider vcStatusDataProvider,
-                                             TransactionService transactionService) {
+                                             TransactionService transactionService,
+                                             SpringStorageProvider storageProvider) {
         this.vcStatusProtocol = vcStatusProtocol;
         this.transactionService = transactionService;
         this.springVcStatusDataProvider = vcStatusDataProvider;
+        this.storageProvider = storageProvider;
     }
 
     @Override
@@ -88,6 +92,11 @@ public abstract class AbstractPersistentVcStatusService implements VcStatusServi
 
             // Execute logic in SDK
             RevokeVcResDto response = vcStatusProtocol.revokeVc(request, transaction);
+
+            // The SDK updates the Issuer database; publish the status to the VC metadata store too.
+            String vcId = request.getRequest().getVcId();
+            storageProvider.updateVcStatus(vcId, org.omnione.did.data.model.enums.vc.VcStatus.REVOKED);
+            log.info("Updated VC metadata status to REVOKED for vcId={}, txId={}", vcId, request.getTxId());
 
             transactionService.insertSubTransaction(SubTransaction.builder()
                     .transactionId(transaction.getId())

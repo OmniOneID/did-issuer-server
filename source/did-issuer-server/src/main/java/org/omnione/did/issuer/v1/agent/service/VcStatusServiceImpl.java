@@ -17,6 +17,7 @@
 package org.omnione.did.issuer.v1.agent.service;
 
 import org.omnione.did.issuer.v1.agent.service.provider.SpringVcStatusDataProvider;
+import org.omnione.did.issuer.v1.agent.service.provider.SpringStorageProvider;
 import org.omnione.did.sdk.issuer.protocol.vc.VcStatusProtocol;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,8 @@ public class VcStatusServiceImpl extends AbstractPersistentVcStatusService {
     public VcStatusServiceImpl(
             VcStatusProtocol vcStatusProtocol,
             SpringVcStatusDataProvider vcStatusDataProvider,
-            TransactionService transactionService) {
-        super(vcStatusProtocol, vcStatusDataProvider, transactionService);
+            TransactionService transactionService,
+            SpringStorageProvider storageProvider) {
+        super(vcStatusProtocol, vcStatusDataProvider, transactionService, storageProvider);
     }
 }
