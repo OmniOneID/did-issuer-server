@@ -2,11 +2,12 @@ package org.omnione.did.issuer.v1.admin.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.db.domain.User;
 import org.omnione.did.base.db.domain.VcSchema;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.BaseDigestUtil;
+import org.omnione.did.common.util.digest.BaseDigestUtil;
 import org.omnione.did.common.util.HexUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.issuer.v1.admin.dto.user.CreateUserInfoFromDemoReqDto;
@@ -59,7 +60,7 @@ public class UserManagementService {
                 .firstname(request.getFirstName())
                 .lastname(request.getLastName())
                 .build());
-        byte[] hashedDataBytes = BaseDigestUtil.generateHash(pii.getBytes(StandardCharsets.UTF_8));
+        byte[] hashedDataBytes = CommonSdkCalls.call(ErrorCode.HASH_GENERATION_FAILED, () -> BaseDigestUtil.generateHash(pii.getBytes(StandardCharsets.UTF_8)));
         String hexStringPii = HexUtil.toHexString(hashedDataBytes);
 
         User user = findExistingUserOrNew(did, hexStringPii, request.getVcSchemaId());

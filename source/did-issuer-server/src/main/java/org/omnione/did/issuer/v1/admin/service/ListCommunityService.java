@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.constants.VcIssuanceMode;
 import org.omnione.did.base.datamodel.data.Option;
@@ -15,7 +16,7 @@ import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.common.exception.HttpClientException;
 import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
@@ -68,7 +69,7 @@ public class ListCommunityService {
      */
     public void registerVcSchema(Long vcSchemaId) {
         VcSchema vcSchema = vcSchemaService.getVcSchemaById(vcSchemaId);
-        String vcSchemaEncode = BaseMultibaseUtil.encode(vcSchema.toJson().getBytes(StandardCharsets.UTF_8));
+        String vcSchemaEncode = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(vcSchema.toJson().getBytes(StandardCharsets.UTF_8)));
         RegisterVcSchemaReqDto request = RegisterVcSchemaReqDto.builder()
                 .vcSchema(vcSchemaEncode)
                 .issuerDid(issuerInfoQueryService.getIssuerInfo().getDid())
@@ -143,8 +144,8 @@ public class ListCommunityService {
             vcPlan.setCredentialDefinition(credentialDefinition);
         }
 
-        String vcPlanEncode = BaseMultibaseUtil.encode(
-                JsonUtil.serializeToJson(vcPlan).getBytes(StandardCharsets.UTF_8));
+        String vcPlanEncode = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(
+                JsonUtil.serializeToJson(vcPlan).getBytes(StandardCharsets.UTF_8)));
 
         RegisterVcPlanReqDto request = RegisterVcPlanReqDto.builder()
                 .vcPlan(vcPlanEncode)
@@ -206,7 +207,7 @@ public class ListCommunityService {
      */
     public void registerCredentialSchema(org.omnione.did.zkp.datamodel.schema.CredentialSchema credentialSchema) {
 
-        String credentialSchemaJson = BaseMultibaseUtil.encode(credentialSchema.toJson().getBytes(StandardCharsets.UTF_8));
+        String credentialSchemaJson = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(credentialSchema.toJson().getBytes(StandardCharsets.UTF_8)));
         RegisterCredentialSchemaReqDto request = RegisterCredentialSchemaReqDto.builder()
                 .credentialSchema(credentialSchemaJson)
                 .issuerDid(issuerInfoQueryService.getIssuerInfo().getDid())
@@ -228,7 +229,7 @@ public class ListCommunityService {
      * @throws OpenDidException if the request to TAS fails
      */
     public void registerCredentialDefinition(CredentialDefinition credentialDefinition) {
-        String credentialDefinitionJson = BaseMultibaseUtil.encode(credentialDefinition.toJson().getBytes(StandardCharsets.UTF_8));
+        String credentialDefinitionJson = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(credentialDefinition.toJson().getBytes(StandardCharsets.UTF_8)));
         RegisterCredentialDefinitionReqDto request = RegisterCredentialDefinitionReqDto.builder()
                 .credentialDefinition(credentialDefinitionJson)
                 .issuerDid(issuerInfoQueryService.getIssuerInfo().getDid())

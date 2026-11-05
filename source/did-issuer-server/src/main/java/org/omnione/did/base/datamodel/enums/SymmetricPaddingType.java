@@ -56,4 +56,13 @@ public enum SymmetricPaddingType {
             case PKCS5 -> org.omnione.did.crypto.enums.SymmetricPaddingType.PKCS5;
         };
     }
+
+    public org.omnione.did.common.datamodel.enums.crypto.SymmetricPaddingType toCommonSdkSymmetricPaddingType() {
+        return switch (this) {
+            case NOPAD ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricPaddingType.NOPAD;
+            case PKCS5 ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricPaddingType.PKCS5;
+        };
+    }
 }

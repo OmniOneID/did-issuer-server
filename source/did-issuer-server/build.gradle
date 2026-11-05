@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'org.omnione.did'
-version = '2.0.0'
+version = '3.0.0'
 
 java {
     sourceCompatibility = '21'
@@ -81,10 +81,7 @@ dependencies {
     implementation 'org.apache.commons:commons-pool2:2.12.0'
     implementation('org.hyperledger.fabric:fabric-gateway-java:2.2.9')
     testRuntimeOnly 'com.h2database:h2'
-    // Both common JARs define IdGenerator; prefer the API used by Issuer SDK.
-    implementation files('libs/did-common-sdk-server-2.0.0.jar')
-    implementation fileTree(dir: 'libs', includes: ['did-*.jar', 'opendid-*.jar'],
-            excludes: ['did-common-sdk-server-2.0.0.jar'])
+    implementation fileTree(dir: 'libs', includes: ['did-*.jar', 'opendid-*.jar'])
 
     implementation 'com.google.code.gson:gson'
 

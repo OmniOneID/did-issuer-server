@@ -6,12 +6,13 @@
 package org.omnione.did.issuer.v1.agent.service.oid4vc;
 
 import lombok.RequiredArgsConstructor;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.db.domain.IssuanceState;
 import org.omnione.did.base.db.domain.Oid4vcCredentialIssuanceEntity;
 import org.omnione.did.base.db.repository.Oid4vcCredentialIssuanceRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.VerificationMethod;
 import org.omnione.did.issuer.v1.agent.service.oid4vc.status.CredentialManagementService;
@@ -129,7 +130,7 @@ public class CredentialRevocationService {
         }
 
         try {
-            byte[] compressed = BaseMultibaseUtil.decode(method.getPublicKeyMultibase());
+            byte[] compressed = CommonSdkCalls.call(ErrorCode.CRYPTO_DECODING_FAILED, () -> BaseMultibaseUtil.decode(method.getPublicKeyMultibase()));
             return KeyUtil.getPublicKeyObject(KeyUtil.unCompressPublicKey(compressed));
         } catch (Exception exception) {
             throw new OpenDidException(ErrorCode.SIGNATURE_VERIFICATION_FAILED);

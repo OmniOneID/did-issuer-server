@@ -37,7 +37,7 @@ Libraries used in this project are organized into two main categories:
 
 1. **Open DID Libraries**: These libraries are developed by the Open DID project and are available in the [libs folder](libs). They include:
 
-    - `did-sdk-common-2.0.0.jar`
+    - `did-common-sdk-server-3.0.0.jar`
     - `did-blockchain-sdk-server-2.0.0.jar`
     - `did-core-sdk-server-2.0.0.jar`
     - `did-crypto-sdk-server-2.0.0.jar`

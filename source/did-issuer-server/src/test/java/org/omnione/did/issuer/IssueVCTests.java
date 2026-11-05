@@ -26,9 +26,9 @@ import org.omnione.did.base.datamodel.data.Holder;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
-import org.omnione.did.base.util.BaseCryptoUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
-import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.crypto.BaseCryptoUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
+import org.omnione.did.common.util.IdGenerator;
 import org.omnione.did.issuer.v1.admin.service.IssueProfileService;
 import org.omnione.did.issuer.v1.admin.service.ListCommunityService;
 import org.omnione.did.issuer.v1.admin.service.VcSchemaManagerService;
@@ -94,7 +94,7 @@ class IssueVCTests {
     @DisplayName("2. Inspect Issue Propose")
     void testInspectIssuePropose() throws Exception {
         InspectIssueProposeReqDto reqDto = new InspectIssueProposeReqDto();
-        reqDto.setId(RandomUtil.generateMessageId());
+        reqDto.setId(IdGenerator.generateMessageId());
         reqDto.setIssuer("did:omn:issuer");
         reqDto.setVcPlanId("vcplanid000000000001");
         reqDto.setOfferId("99999999-9999-9999-9999-999999999999");
@@ -222,10 +222,10 @@ class IssueVCTests {
         byte[] privateKey = BaseMultibaseUtil.decode("mMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgNdy+e2T694f0QbSd/gdLvmdgUjti+RR6wQY4F+kMYfCgCgYIKoZIzj0DAQehRANCAAT7qjXANGpEQoAuWp7+n00BbLUMp6tlmYGIP/RIdEJAMt3uDVWWb54UkVN5RsN4PZ7mnM5ZL9fgEgZTf2nXNpaK");
         byte[] compressPublicKey = BaseMultibaseUtil.decode("mA+1jfCC06BtbLwUkkAAsiU46i4GWz17SWnaME4yx7g2c");
 
-        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(compressPublicKey, privateKey, EccCurveType.SECP_256_R1);
-        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode("mbRz+NJ7fEZEyFiAGIcfktQ"), SymmetricCipherType.AES_256_CBC);
+        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(compressPublicKey, privateKey, EccCurveType.SECP_256_R1.toCommonSdkEccCurveType());
+        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode("mbRz+NJ7fEZEyFiAGIcfktQ"), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType());
 
-        byte[] encrypt = BaseCryptoUtil.decrypt(encData, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC, SymmetricPaddingType.PKCS5);
+        byte[] encrypt = BaseCryptoUtil.decrypt(encData, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType(), SymmetricPaddingType.PKCS5.toCommonSdkSymmetricPaddingType());
         return new String(encrypt, StandardCharsets.UTF_8);
     }
 }

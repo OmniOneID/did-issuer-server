@@ -17,10 +17,11 @@
 package org.omnione.did.issuer.v1.agent.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.property.WalletProperty;
-import org.omnione.did.base.util.BaseWalletUtil;
+import org.omnione.did.common.util.wallet.BaseWalletUtil;
 import org.omnione.did.wallet.exception.WalletException;
 import org.omnione.did.wallet.key.WalletManagerInterface;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class FileWalletService {
 
     public FileWalletService(WalletProperty walletProperty) {
         this.walletProperty = walletProperty;
-        this.walletManager = BaseWalletUtil.getFileWalletManager();
+        this.walletManager = CommonSdkCalls.call(ErrorCode.FAILED_TO_GET_FILE_WALLET_MANAGER, () -> BaseWalletUtil.getFileWalletManager());
     }
 
     /**
@@ -107,7 +108,7 @@ public class FileWalletService {
                 connectToWallet();
             }
 
-            byte[] signature = BaseWalletUtil.generateCompactSignatureByHash(walletManager, keyId, hash);
+            byte[] signature = walletManager.generateCompactSignatureFromHash(keyId, hash);
             log.info("Compact signature generated for keyId: {}", keyId);
             return signature;
         } catch (OpenDidException e) {
@@ -130,11 +131,11 @@ public class FileWalletService {
     }
 
     public WalletManagerInterface initializeWalletWithKeys() {
-        WalletManagerInterface walletManager = BaseWalletUtil.initializeWalletWithKeys(
+        WalletManagerInterface walletManager = CommonSdkCalls.call(ErrorCode.WALLET_CONNECT_FAILURE, () -> BaseWalletUtil.initializeWalletWithKeys(
                 walletProperty.getFilePath(),
                 walletProperty.getPassword(),
                 "auth", "assert", "keyagree", "invoke"
-        );
+        ));
 
         return walletManager;
     }

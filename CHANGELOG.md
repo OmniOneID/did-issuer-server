@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [Unreleased] (v3.0.0)
+
+### 🔧 Changes
+- Replaced local utility classes with did-common-sdk-server 3.0.0
 
 ### 🐛 Bug Fixes
 - Upgraded Node.js to 22.23.4 for the admin console build

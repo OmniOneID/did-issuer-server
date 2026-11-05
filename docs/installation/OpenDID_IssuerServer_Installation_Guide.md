@@ -194,7 +194,7 @@ cd ../did-issuer-sdk-server/source/did-issuer-sdk
 cp build/libs/did-issuer-sdk-1.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
 ```
 
-Keep the OpenDID dependency JARs, including `did-common-sdk-server-2.0.0.jar`, in the server's `libs/` directory.
+Keep the OpenDID dependency JARs, including `did-common-sdk-server-3.0.0.jar`, in the server's `libs/` directory.
 
 > **Reference Links**
 > - [Git Clone Guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
@@ -230,7 +230,7 @@ did-issuer-server
    └── did-issuer-server
        ├── gradle
        ├── libs
-           └── did-sdk-common-2.0.0.jar
+           └── did-common-sdk-server-3.0.0.jar
            └── did-blockchain-sdk-server-2.0.0.jar
            └── did-core-sdk-server-2.0.0.jar
            └── did-crypto-sdk-server-2.0.0.jar
@@ -401,7 +401,7 @@ This section provides guidance on running the Open DID server using console comm
      cd build/libs
      ls
    ```
-- This command creates a `did-issuer-server-2.0.0.jar` file.
+- This command creates a `did-issuer-server-3.0.0.jar` file.
 
 <br/>
 
@@ -409,7 +409,7 @@ This section provides guidance on running the Open DID server using console comm
 Run the server using the built JAR file:
 
 ```bash
-java -jar did-issuer-server-2.0.0.jar
+java -jar did-issuer-server-3.0.0.jar
 ```
 
 > **Caution**

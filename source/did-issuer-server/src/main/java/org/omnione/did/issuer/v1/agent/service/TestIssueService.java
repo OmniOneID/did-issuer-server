@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.db.domain.*;
 import org.omnione.did.base.db.repository.ZkpAttributeRepository;
 import org.omnione.did.base.db.repository.ZkpSchemaAttributeRepository;
-import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.IdGenerator;
 import org.omnione.did.common.util.DateTimeUtil;
 import org.omnione.did.data.model.enums.vc.ClaimFormat;
 import org.omnione.did.data.model.enums.vc.ClaimType;
@@ -88,7 +88,7 @@ public class TestIssueService extends AbstractPersistentIssueVcService {
             user = userQueryService.findByDidAndVcSchemaId(holder.getDid(), vcSchemaId).orElse(null);
         }
         if (user == null) {
-            String pii = holder.getPii() != null ? holder.getPii() : "test-pii-" + RandomUtil.generateUUID();
+            String pii = holder.getPii() != null ? holder.getPii() : "test-pii-" + IdGenerator.generateUUID();
             user = userQueryService.findByPiiAndVcSchemaId(pii, vcSchemaId).orElse(null);
             if (user == null) {
                 user = User.builder().pii(pii).did(holder.getDid()).vcSchemaId(vcSchemaId).build();

@@ -19,7 +19,7 @@ import org.omnione.did.base.db.domain.Oid4vcCredentialIssuanceEntity;
 import org.omnione.did.base.db.repository.Oid4vcCredentialIssuanceRepository;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.crypto.enums.MultiBaseType;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.VerificationMethod;

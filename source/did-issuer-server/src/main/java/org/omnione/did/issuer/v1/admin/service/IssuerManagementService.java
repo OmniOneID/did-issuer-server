@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.sdk.issuer.model.common.enums.IssuerStatus;
 import org.omnione.did.base.db.domain.CertificateVc;
@@ -28,8 +29,8 @@ import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
-import org.omnione.did.base.util.BaseCoreDidUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.did.BaseCoreDidUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.common.exception.HttpClientException;
 import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
@@ -125,7 +126,7 @@ public class IssuerManagementService {
      * @return an empty response
      */
     public EmptyResDto createCertificateVc(SendCertificateVcReqDto sendCertificateVcReqDto) {
-        byte[] decodedVc = BaseMultibaseUtil.decode(sendCertificateVcReqDto.getCertificateVc());
+        byte[] decodedVc = CommonSdkCalls.call(ErrorCode.CRYPTO_DECODING_FAILED, () -> BaseMultibaseUtil.decode(sendCertificateVcReqDto.getCertificateVc()));
         log.debug("Decoded VC: {}", new String(decodedVc));
 
         certificateVcQueryService.save(CertificateVc.builder()
@@ -280,13 +281,13 @@ public class IssuerManagementService {
         String did = "did:omn:issuer";
 
         Map<String, List<ProofPurpose>> purposes = BaseCoreDidUtil.createDefaultProofPurposes();
-        List<DidKeyInfo> keyInfos = BaseCoreDidUtil.getDidKeyInfosFromWallet(walletManager, did, purposes);
+        List<DidKeyInfo> keyInfos = CommonSdkCalls.call(ErrorCode.FAILED_TO_LOAD_KEY_ELEMENT, () -> BaseCoreDidUtil.getDidKeyInfosFromWallet(walletManager, did, purposes));
 
         DidManager didManager = new DidManager();
-        DidDocument unsignedDoc = BaseCoreDidUtil.createDidDocument(didManager, did, did, keyInfos);
+        DidDocument unsignedDoc = CommonSdkCalls.call(ErrorCode.FAILED_TO_GENERATE_DID_DOCUMENT, () -> BaseCoreDidUtil.createDidDocument(didManager, did, did, keyInfos));
 
         List<String> signingKeys = BaseCoreDidUtil.getSigningKeyIds(purposes);
-        DidDocument signedDoc = BaseCoreDidUtil.signAndAddProof(didManager, walletManager, signingKeys);
+        DidDocument signedDoc = CommonSdkCalls.call(ErrorCode.SIGNATURE_GENERATION_FAILED, () -> BaseCoreDidUtil.signAndAddProof(didManager, walletManager, signingKeys));
 
         return signedDoc;
     }
@@ -357,7 +358,7 @@ public class IssuerManagementService {
     private EmptyResDto sendRegisterDid(IssuerInfo issuerInfo, RequestRegisterDidReqDto requestRegisterDidReqDto) {
         String url = TAS_URL + UrlConstant.Tas.ADMIN_V1 + UrlConstant.Tas.REGISTER_DID_PUBLIC;
 
-        String encodedDidDocument = BaseMultibaseUtil.encode(requestRegisterDidReqDto.getDidDocument().getBytes());
+        String encodedDidDocument = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(requestRegisterDidReqDto.getDidDocument().getBytes()));
         RegisterDidToTaReqDto registerDidToTaReqDto = RegisterDidToTaReqDto.builder()
                 .didDoc(encodedDidDocument)
                 .name(issuerInfo.getName())

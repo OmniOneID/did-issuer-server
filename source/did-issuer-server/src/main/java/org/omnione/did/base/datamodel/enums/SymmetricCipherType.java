@@ -68,4 +68,17 @@ public enum SymmetricCipherType {
                 throw new OpenDidException(ErrorCode.CRYPTO_SYMMETRIC_CIPHER_TYPE_INVALID);
         }
     }
+
+    public org.omnione.did.common.datamodel.enums.crypto.SymmetricCipherType toCommonSdkSymmetricCipherType() {
+        return switch (this) {
+            case AES_128_CBC ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricCipherType.AES_128_CBC;
+            case AES_128_ECB ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricCipherType.AES_128_ECB;
+            case AES_256_CBC ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricCipherType.AES_256_CBC;
+            case AES_256_ECB ->
+                    org.omnione.did.common.datamodel.enums.crypto.SymmetricCipherType.AES_256_ECB;
+        };
+    }
 }

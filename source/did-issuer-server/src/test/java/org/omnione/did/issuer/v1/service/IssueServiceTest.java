@@ -23,9 +23,9 @@ import org.omnione.did.sdk.issuer.model.data.zkp.CredentialInfo;
 import org.omnione.did.base.datamodel.enums.EccCurveType;
 import org.omnione.did.base.datamodel.enums.SymmetricCipherType;
 import org.omnione.did.base.datamodel.enums.SymmetricPaddingType;
-import org.omnione.did.base.util.BaseCryptoUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
-import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.crypto.BaseCryptoUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
+import org.omnione.did.common.util.IdGenerator;
 import org.omnione.did.crypto.keypair.KeyPairInterface;
 import org.omnione.did.data.model.profile.ReqE2e;
 import org.omnione.did.sdk.issuer.model.dto.*;
@@ -74,7 +74,7 @@ class IssueServiceTest {
         System.out.println("INSPECT_ISSUE_PROPOSE");
         InspectIssueProposeReqDto request = new InspectIssueProposeReqDto();
         request.setVcPlanId("vcplanid000000000001");
-        request.setId(RandomUtil.generateMessageId());
+        request.setId(IdGenerator.generateMessageId());
         request.setIssuer("did:omn:issuer");
         request.setOfferId(offerId);
         System.out.println("request = " + request);
@@ -123,7 +123,7 @@ class IssueServiceTest {
         request.setTxId(txId);
 
         byte[] encoded = ((ECPublicKey) keyPair.getPublicKey()).getEncoded();
-        byte[] bytes = BaseCryptoUtil.compressPublicKey(encoded, EccCurveType.SECP_256_R1);
+        byte[] bytes = BaseCryptoUtil.compressPublicKey(encoded, EccCurveType.SECP_256_R1.toCommonSdkEccCurveType());
 
 
         request.setAccE2e(AccE2e.builder()
@@ -146,7 +146,7 @@ class IssueServiceTest {
     @Order(5)
     void completeIssue() {
         CompleteVcReqDto request = new CompleteVcReqDto();
-        request.setId(RandomUtil.generateMessageId());
+        request.setId(IdGenerator.generateMessageId());
         request.setVcId(vcId);
         request.setTxId(txId);
         CompleteVcResDto response = issueService.completeVc(request);
@@ -155,13 +155,13 @@ class IssueServiceTest {
     }
 
     public String encReqVc(String reqVc) {
-        keyPair = BaseCryptoUtil.generateKeyPair(EccCurveType.SECP_256_R1);
+        keyPair = BaseCryptoUtil.generateKeyPair(EccCurveType.SECP_256_R1.toCommonSdkEccCurveType());
         ECPrivateKey ecPriKey = (ECPrivateKey) keyPair.getPrivateKey();
         System.out.println("BaseMultibaseUtil.encode(ecPriKey.getEncoded()) = " + BaseMultibaseUtil.encode(ecPriKey.getEncoded()));
-        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1);
-        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode(reqE2e.getNonce()), SymmetricCipherType.AES_256_CBC);
+        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1.toCommonSdkEccCurveType());
+        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode(reqE2e.getNonce()), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType());
 
-        byte[] encrypt = BaseCryptoUtil.encrypt(reqVc, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode("u9Mytc_E57cDAaAIIuCqfhw"), SymmetricCipherType.AES_256_CBC, SymmetricPaddingType.PKCS5);
+        byte[] encrypt = BaseCryptoUtil.encrypt(reqVc.getBytes(StandardCharsets.UTF_8), mergeSharedSecretAndNonce, BaseMultibaseUtil.decode("u9Mytc_E57cDAaAIIuCqfhw"), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType(), SymmetricPaddingType.PKCS5.toCommonSdkSymmetricPaddingType());
         return BaseMultibaseUtil.encode(encrypt);
 
     }
@@ -169,10 +169,10 @@ class IssueServiceTest {
     public CredentialInfo decIssueVc(String endVc, String iv) {
         ECPrivateKey ecPriKey = (ECPrivateKey) keyPair.getPrivateKey();
         System.out.println("BaseMultibaseUtil.encode(ecPriKey.getEncoded()) = " + BaseMultibaseUtil.encode(ecPriKey.getEncoded()));
-        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1);
-        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode(reqE2e.getNonce()), SymmetricCipherType.AES_256_CBC);
+        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(BaseMultibaseUtil.decode(reqE2e.getPublicKey()), ecPriKey.getEncoded(), EccCurveType.SECP_256_R1.toCommonSdkEccCurveType());
+        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, BaseMultibaseUtil.decode(reqE2e.getNonce()), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType());
 
-        byte[] decrypt = BaseCryptoUtil.decrypt(endVc, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC, SymmetricPaddingType.PKCS5);
+        byte[] decrypt = BaseCryptoUtil.decrypt(endVc, mergeSharedSecretAndNonce, BaseMultibaseUtil.decode(iv), SymmetricCipherType.AES_256_CBC.toCommonSdkSymmetricCipherType(), SymmetricPaddingType.PKCS5.toCommonSdkSymmetricPaddingType());
         String s = new String(decrypt, StandardCharsets.UTF_8);
 
         CredentialInfo credentialInfo = new CredentialInfo();

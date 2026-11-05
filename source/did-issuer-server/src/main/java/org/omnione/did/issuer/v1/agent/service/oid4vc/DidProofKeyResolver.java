@@ -8,7 +8,9 @@ package org.omnione.did.issuer.v1.agent.service.oid4vc;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import lombok.RequiredArgsConstructor;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.base.exception.ErrorCode;
+import org.omnione.did.base.util.CommonSdkCalls;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.VerificationMethod;
 import org.omnione.did.issuer.v1.common.service.StorageService;
@@ -69,7 +71,7 @@ public class DidProofKeyResolver implements ProofKeyResolver {
         }
 
         try {
-            byte[] compressed = BaseMultibaseUtil.decode(method.getPublicKeyMultibase());
+            byte[] compressed = CommonSdkCalls.call(ErrorCode.CRYPTO_DECODING_FAILED, () -> BaseMultibaseUtil.decode(method.getPublicKeyMultibase()));
             PublicKey publicKey = KeyUtil.getPublicKeyObject(KeyUtil.unCompressPublicKey(compressed));
             if (!(publicKey instanceof ECPublicKey ecPublicKey)) {
                 throw invalidProof("The DID authentication key is not an EC public key.");

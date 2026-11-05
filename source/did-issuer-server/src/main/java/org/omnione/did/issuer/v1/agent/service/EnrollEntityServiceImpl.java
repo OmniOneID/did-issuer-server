@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.common.util.DateTimeUtil;
+import org.omnione.did.base.util.CommonSdkCalls;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.sdk.issuer.model.data.AccEcdh;
 import org.omnione.did.sdk.issuer.model.data.Candidate;
@@ -35,9 +37,9 @@ import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.exception.ErrorCode;
 import org.omnione.did.base.exception.OpenDidException;
 import org.omnione.did.base.response.ErrorResponse;
-import org.omnione.did.base.util.BaseCryptoUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
-import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.crypto.BaseCryptoUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
+import org.omnione.did.common.util.IdGenerator;
 import org.omnione.did.common.exception.HttpClientException;
 import org.omnione.did.common.util.HttpClientUtil;
 import org.omnione.did.common.util.JsonUtil;
@@ -111,9 +113,9 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             log.debug("\t--> 2. request ECDH");
             EccCurveType eccCurveType = EccCurveType.SECP_256_R1;
             log.debug("\t\t--> generate Tmp Keypair");
-            EcKeyPair ecKeyPair = (EcKeyPair) BaseCryptoUtil.generateKeyPair(eccCurveType);
+            EcKeyPair ecKeyPair = (EcKeyPair) CommonSdkCalls.call(ErrorCode.CRYPTO_KEY_PAIR_GENERATION_FAILED, () -> BaseCryptoUtil.generateKeyPair(eccCurveType.toCommonSdkEccCurveType()));
             log.debug("\t\t--> generate ReqEcdh");
-            String clientNonce = BaseMultibaseUtil.encode(BaseCryptoUtil.generateNonce(16));
+            String clientNonce = CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(CommonSdkCalls.call(ErrorCode.CRYPTO_NONCE_GENERATION_FAILED, () -> BaseCryptoUtil.generateNonce(16))));
             EcdhReqData reqData = generateReqData(ecKeyPair, eccCurveType, clientNonce, issuerDidDocument);
             log.debug("\t\t--> request ECDH");
             RequestEcdhApiResDto ecdhResponse = requestEcdh(txId, reqData);
@@ -166,7 +168,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     private ProposeEnrollEntityApiResDto proposeEnrollEntity() {
         ProposeEnrollEntityApiReqDto request = ProposeEnrollEntityApiReqDto.builder()
-                .id(RandomUtil.generateMessageId())
+                .id(IdGenerator.generateMessageId())
                 .build();
 
         String url = TAS_URL + UrlConstant.Tas.V1 + UrlConstant.Tas.PROPOSE_ENROLL_ENTITY;
@@ -189,7 +191,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     private RequestEcdhApiResDto requestEcdh(String txId, EcdhReqData reqEcdh) {
         RequestEcdhApiReqDto request = RequestEcdhApiReqDto.builder()
-                .id(RandomUtil.generateMessageId())
+                .id(IdGenerator.generateMessageId())
                 .txId(txId)
                 .reqEcdh(reqEcdh)
                 .build();
@@ -222,7 +224,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
                     .build();
             // TODO : SetIssuer
             String verificationMethod = "did:omn:issuer?versionId=1#keyagree";
-            Proof proof = BaseCryptoUtil.generateProof(ProofType.SECP256R1_SIGNATURE_2018,
+            Proof proof = generateProof(ProofType.SECP256R1_SIGNATURE_2018,
                     ProofPurpose.KEY_AGREEMENT, signatureService.getVerificationMethod(issuerDidDocument, org.omnione.did.base.datamodel.enums.ProofPurpose.KEY_AGREEMENT));
 
             EcdhReqData reqData = EcdhReqData.builder()
@@ -252,7 +254,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     private RequestEnrollEntityApiResDto requestEnrollEntity(String txId, DidAuth didAuth) {
         RequestEnrollEntityApiReqDto request = RequestEnrollEntityApiReqDto.builder()
-                .id(RandomUtil.generateMessageId())
+                .id(IdGenerator.generateMessageId())
                 .txId(txId)
                 .didAuth(didAuth)
                 .build();
@@ -279,7 +281,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
 
         String verificationMethod = "did:omn:issuer?versionId=1#auth";
 
-        Proof proof = BaseCryptoUtil.generateProof(ProofType.SECP256R1_SIGNATURE_2018,
+        Proof proof = generateProof(ProofType.SECP256R1_SIGNATURE_2018,
                 ProofPurpose.AUTHENTICATION, signatureService.getVerificationMethod(issuerDidDocument, org.omnione.did.base.datamodel.enums.ProofPurpose.AUTHENTICATION));
 
         DidAuth didAuth = DidAuth.builder()
@@ -302,23 +304,23 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      * @return the decrypted Verifiable Credential
      */
     private VerifiableCredential decryptVc(ECPrivateKey privateKey, AccEcdh accEcdh, RequestEnrollEntityApiResDto enrollEntityResponse, String clientNonce) {
-        byte[] compressedPublicKey = BaseMultibaseUtil.decode(accEcdh.getPublicKey());
-        byte[] sharedSecret = BaseCryptoUtil.generateSharedSecret(compressedPublicKey, privateKey.getEncoded(), EccCurveType.SECP_256_R1);
-        byte[] mergeNonce = BaseCryptoUtil.mergeNonce(clientNonce, accEcdh.getServerNonce());
+        byte[] compressedPublicKey = CommonSdkCalls.call(ErrorCode.CRYPTO_DECODING_FAILED, () -> BaseMultibaseUtil.decode(accEcdh.getPublicKey()));
+        byte[] sharedSecret = CommonSdkCalls.call(ErrorCode.CRYPTO_SESSION_KEY_GENERATION_FAILED, () -> BaseCryptoUtil.generateSharedSecret(compressedPublicKey, privateKey.getEncoded(), EccCurveType.SECP_256_R1.toCommonSdkEccCurveType()));
+        byte[] mergeNonce = CommonSdkCalls.call(ErrorCode.CRYPTO_NONCE_MERGE_FAILED, () -> BaseCryptoUtil.mergeNonce(clientNonce, accEcdh.getServerNonce()));
         SymmetricCipherType cipherType = SymmetricCipherType.valueOf(accEcdh.getCipher().name());
         org.omnione.did.base.datamodel.enums.SymmetricPaddingType paddingType =
                 org.omnione.did.base.datamodel.enums.SymmetricPaddingType.valueOf(accEcdh.getPadding().name());
-        byte[] mergeSharedSecretAndNonce = BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, mergeNonce, cipherType);
+        byte[] mergeSharedSecretAndNonce = CommonSdkCalls.call(ErrorCode.CRYPTO_NONCE_AND_SHARED_SECRET_MERGE_FAILED, () -> BaseCryptoUtil.mergeSharedSecretAndNonce(sharedSecret, mergeNonce, cipherType.toCommonSdkSymmetricCipherType()));
 
-        byte[] iv = BaseMultibaseUtil.decode(enrollEntityResponse.getIv());
+        byte[] iv = CommonSdkCalls.call(ErrorCode.CRYPTO_DECODING_FAILED, () -> BaseMultibaseUtil.decode(enrollEntityResponse.getIv()));
 
-        byte[] decrypt = BaseCryptoUtil.decrypt(
+        byte[] decrypt = CommonSdkCalls.call(ErrorCode.CRYPTO_DECRYPTION_FAILED, () -> BaseCryptoUtil.decrypt(
                 enrollEntityResponse.getEncVc(),
                 mergeSharedSecretAndNonce,
                 iv,
-                cipherType,
-                paddingType
-        );
+                cipherType.toCommonSdkSymmetricCipherType(),
+                paddingType.toCommonSdkSymmetricPaddingType()
+        ));
 
         String jsonVc = new String(decrypt);
         VerifiableCredential vc = new VerifiableCredential();
@@ -337,7 +339,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
      */
     private ConfirmEnrollEntityApiResDto confirmEnrollEntity(String txId, String vcId) {
         ConfirmEnrollEntityApiReqDto request = ConfirmEnrollEntityApiReqDto.builder()
-                .id(RandomUtil.generateMessageId())
+                .id(IdGenerator.generateMessageId())
                 .txId(txId)
                 .vcId(vcId)
                 .build();
@@ -365,7 +367,7 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
         String serializeSource = JsonUtil.serializeAndSort(source);
         byte[] signature = walletService.generateCompactSignature(keyId, serializeSource);
 
-        return BaseMultibaseUtil.encode(signature);
+        return CommonSdkCalls.call(ErrorCode.CRYPTO_ENCODING_FAILED, () -> BaseMultibaseUtil.encode(signature));
     }
 
     /**
@@ -384,5 +386,15 @@ public class EnrollEntityServiceImpl implements EnrollEntityService {
             log.error("Failed to parse external error response: {}", resBody, e);
             throw new OpenDidException(ErrorCode.TAS_UNKNOWN_RESPONSE);
         }
+    }
+
+    private Proof generateProof(ProofType proofType, ProofPurpose proofPurpose, String verificationMethod) {
+        Proof proof = new Proof();
+        proof.setType(proofType.getRawValue());
+        proof.setProofPurpose(proofPurpose.getRawValue());
+        proof.setCreated(DateTimeUtil.getCurrentUTCTimeString());
+        proof.setVerificationMethod(verificationMethod);
+
+        return proof;
     }
 }

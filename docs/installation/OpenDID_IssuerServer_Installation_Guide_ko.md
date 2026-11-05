@@ -195,7 +195,7 @@ cd ../did-issuer-sdk-server/source/did-issuer-sdk
 cp build/libs/did-issuer-sdk-1.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
 ```
 
-`did-common-sdk-server-2.0.0.jar`을 포함한 OpenDID 의존 JAR도 서버의 `libs/`에 유지합니다.
+`did-common-sdk-server-3.0.0.jar`을 포함한 OpenDID 의존 JAR도 서버의 `libs/`에 유지합니다.
 
 > **참고 링크**
 > - [Git Clone 가이드](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
@@ -231,7 +231,7 @@ did-issuer-server
     └── did-issuer-server
         ├── gradle
         ├── libs
-            └── did-sdk-common-2.0.0.jar
+            └── did-common-sdk-server-3.0.0.jar
             └── did-blockchain-sdk-server-2.0.0.jar
             └── did-core-sdk-server-2.0.0.jar
             └── did-crypto-sdk-server-2.0.0.jar
@@ -402,7 +402,7 @@ npm run dev
       cd build/libs
       ls
     ```
-- 이 명령어는 `did-issuer-server-2.0.0.jar` 파일을 생성합니다.
+- 이 명령어는 `did-issuer-server-3.0.0.jar` 파일을 생성합니다.
 
 <br/>
 
@@ -410,7 +410,7 @@ npm run dev
 빌드된 JAR 파일을 사용하여 서버를 구동합니다:
 
 ```bash
-java -jar did-issuer-server-2.0.0.jar
+java -jar did-issuer-server-3.0.0.jar
 ```
 
 > **주의**

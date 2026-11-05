@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import org.omnione.did.common.vo.HeaderEntry;
+import org.omnione.did.sdk.issuer.model.domain.HeaderEntry;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.sdk.issuer.model.enums.InitiateType;
 import org.omnione.did.sdk.issuer.model.enums.UserQueryType;

@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.omnione.did.sdk.issuer.model.data.ReqRevokeVc;
-import org.omnione.did.base.util.BaseDigestUtil;
-import org.omnione.did.base.util.BaseMultibaseUtil;
-import org.omnione.did.base.util.RandomUtil;
+import org.omnione.did.common.util.digest.BaseDigestUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
+import org.omnione.did.common.util.IdGenerator;
 import org.omnione.did.common.util.DateTimeUtil;
 import org.omnione.did.common.util.JsonUtil;
 import org.omnione.did.data.model.did.Proof;
@@ -65,7 +65,7 @@ public class VcStatusServiceTest {
     @Test
     public void inspectProposeRevoke() throws JsonProcessingException {
         InspectProposeRevokeReqDto request = InspectProposeRevokeReqDto.builder()
-                .id(RandomUtil.generateMessageId())
+                .id(IdGenerator.generateMessageId())
                 .vcId("9dd017e5-a8cd-40bf-b67e-a18518e01cb7")
                 .build();
         InspectProposeRevokeResDto response = vcStatusService.inspectProposeRevoke(request);

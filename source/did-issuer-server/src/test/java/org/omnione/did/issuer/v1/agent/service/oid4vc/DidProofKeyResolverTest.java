@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.omnione.did.base.util.BaseMultibaseUtil;
+import org.omnione.did.common.util.multibase.BaseMultibaseUtil;
 import org.omnione.did.crypto.enums.MultiBaseType;
 import org.omnione.did.data.model.did.DidDocument;
 import org.omnione.did.data.model.did.VerificationMethod;
