@@ -150,6 +150,18 @@ tasks.register('sdkRoutingTest', Test) {
     }
 }
 
+tasks.register('testIssueServiceTest', Test) {
+    group = 'verification'
+    description = 'Checks TEST issuance user lookup and holder DID propagation.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.agent.service.TestIssueServiceTest'
+    }
+}
+
 tasks.register('credentialNonceRevocationFlowTest', Test) {
     group = 'verification'
     description = 'Runs the c_nonce issuance and signed credential revocation flow test.'

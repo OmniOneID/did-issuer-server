@@ -94,6 +94,9 @@ public class TestIssueService extends AbstractPersistentIssueVcService {
                 user = User.builder().pii(pii).did(holder.getDid()).vcSchemaId(vcSchemaId).build();
             }
         }
+        if (holder.getDid() != null && !holder.getDid().isBlank()) {
+            user.setDid(holder.getDid());
+        }
         user = updateUserData(user, dummyData);
         return SdkUser.builder().id(user.getId()).pii(user.getPii()).did(user.getDid())
                 .vcSchemaId(user.getVcSchemaId()).data(user.getData()).build();
