@@ -93,11 +93,8 @@ public class UserManagementService {
     }
 
     private User findExistingUserOrNew(String did, String pii, Long vcSchemaId) {
-        if (did != null && !did.isEmpty()) {
-            User user = userQueryService.findByDidAndVcSchemaIdOrNew(did, vcSchemaId);
-            if (user.getId() != null || pii == null || pii.isEmpty()) {
-                return user;
-            }
+        if (did != null) {
+            return userQueryService.findByDidAndVcSchemaIdOrNew(did, vcSchemaId);
         }
         return userQueryService.findByPiiAndVcSchemaIdOrNew(pii, vcSchemaId);
     }

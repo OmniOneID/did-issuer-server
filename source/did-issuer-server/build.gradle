@@ -125,6 +125,18 @@ tasks.register('oid4vciConfigTest', Test) {
     }
 }
 
+tasks.register('userManagementServiceTest', Test) {
+    group = 'verification'
+    description = 'Checks that DID based user records are not merged through PII.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.UserManagementServiceTest'
+    }
+}
+
 tasks.register('issuerEndpointConfigTest', Test) {
     group = 'verification'
     description = 'Checks registration of fixed OID4VCI issuer routes.'
