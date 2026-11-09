@@ -1,0 +1,20 @@
+{
+  "credential_issuer": "${issuer.base-url}",
+  "authorization_server": ["${issuer.base-url}"],
+  "credential_offer_endpoint": "${issuer.base-url}/credential-offer",
+  "credential_endpoint": "${issuer.base-url}/credential",
+  "nonce_endpoint": "${issuer.base-url}/nonce",
+  "credential_revocation_endpoint": "${issuer.base-url}/credential-lifecycle/revoke",
+  "deferred_credential_endpoint": "${issuer.base-url}/deferred_credential",
+  "notification_endpoint": "${issuer.base-url}/notification",
+  "credential_request_encryption": {
+    "enc_values_supported": ["A128GCM", "A256GCM"],
+    "encryption_required": false
+  },
+  "credential_response_encryption": {
+    "alg_values_supported": ["RSA1_5", "RSA-OAEP"],
+    "enc_values_supported": ["A128GCM", "A256GCM"],
+    "encryption_required": false
+  },
+  "credential_configurations_supported": {}
+}

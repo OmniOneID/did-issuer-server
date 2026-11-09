@@ -12,8 +12,10 @@ import org.omnione.did.base.datamodel.data.oid4vci.IssuerMetadata;
 import org.omnione.did.base.datamodel.data.oid4vci.Oid4vcProperty;
 import org.omnione.did.base.datamodel.data.oid4vci.SdkCredentialConfig;
 import org.omnione.did.base.db.domain.CredentialConfig;
+import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.db.domain.ServerConfig;
 import org.omnione.did.base.db.repository.CredentialConfigRepository;
+import org.omnione.did.base.db.repository.IssuerInfoRepository;
 import org.omnione.did.base.db.repository.ServerConfigRepository;
 import org.omnione.did.oid4vc.authorization.authorization.config.Oid4vcAuthServerProperties;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -39,6 +41,8 @@ class Oid4vciConfigServiceTest {
     private ServerConfigRepository serverConfigRepository;
     @Mock
     private CredentialConfigRepository credentialConfigRepository;
+    @Mock
+    private IssuerInfoRepository issuerInfoRepository;
 
     private Oid4vciConfigService service;
 
@@ -106,6 +110,110 @@ class Oid4vciConfigServiceTest {
         verify(serverConfigRepository, atLeastOnce()).save(argThat(config ->
                 config.getConfigValue().contains("\"credentialIssuer\":\"https://issuer.example.com\"")
                         && config.getConfigValue().contains("\"credentialEndpoint\":\"https://issuer.example.com/credential\"")));
+    }
+
+    @Test
+    void initializesNewDatabaseFromPackagedDefaultsWhenWorkingDirectoryHasNoMetadataFile() {
+        ReflectionTestUtils.setField(service, "metadataPath", tempDir.resolve("missing/issuer_meta.json").toString());
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("issuer.base-url", "https://issuer.example.com"));
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_METADATA.name()))
+                .thenReturn(Optional.empty());
+
+        IssuerMetadata metadata = service.getMetadata();
+
+        assertThat(metadata.getCredentialIssuer()).isEqualTo("https://issuer.example.com");
+        assertThat(metadata.getAuthorizationServer()).containsExactly("https://issuer.example.com");
+        assertThat(metadata.getCredentialEndpoint()).isEqualTo("https://issuer.example.com/credential");
+        assertThat(metadata.getCredentialRevocationEndpoint())
+                .isEqualTo("https://issuer.example.com/credential-lifecycle/revoke");
+        assertThat(metadata.getCredentialRequestEncryption().getEncValuesSupported())
+                .containsExactly("A128GCM", "A256GCM");
+        assertThat(metadata.getCredentialResponseEncryption().getAlgValuesSupported())
+                .containsExactly("RSA1_5", "RSA-OAEP");
+        assertThat(metadata.getCredentialConfigurationsSupported()).isEmpty();
+        verify(serverConfigRepository).save(argThat(config ->
+                config.getConfigValue().contains("https://issuer.example.com")
+                        && !config.getConfigValue().contains("${issuer.base-url}")));
+    }
+
+    @Test
+    void replacesDefaultLocalhostMetadataWithRegisteredIssuerDomain() {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("issuer.base-url", "http://127.0.0.1:8091"));
+        ReflectionTestUtils.setField(service, "issuerInfoRepository", issuerInfoRepository);
+        when(issuerInfoRepository.findTop1ByOrderByIdAsc()).thenReturn(Optional.of(
+                IssuerInfo.builder().serverUrl("https://issuer.example.com:8091/issuer").build()));
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_METADATA.name())
+                .configValue("{\"credentialIssuer\":\"http://127.0.0.1:8091\","
+                        + "\"authorizationServer\":[\"http://127.0.0.1:8091\"]}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_METADATA.name()))
+                .thenReturn(Optional.of(config));
+
+        IssuerMetadata metadata = service.getMetadata();
+
+        assertThat(metadata.getCredentialIssuer()).isEqualTo("https://issuer.example.com:8091");
+        assertThat(metadata.getAuthorizationServer()).containsExactly("https://issuer.example.com:8091");
+        assertThat(metadata.getCredentialEndpoint()).isEqualTo("https://issuer.example.com:8091/credential");
+        verify(serverConfigRepository).save(argThat(saved ->
+                saved.getConfigValue().contains("https://issuer.example.com:8091")));
+    }
+
+    @Test
+    void resolvesDefaultAuthorizationIssuerFromRegisteredIssuerDomain() throws Exception {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("issuer.base-url", "http://127.0.0.1:8091")
+                .withProperty("oid4vc.auth.issuer-url", "http://127.0.0.1:8091"));
+        ReflectionTestUtils.setField(service, "issuerInfoRepository", issuerInfoRepository);
+        when(issuerInfoRepository.findTop1ByOrderByIdAsc()).thenReturn(Optional.of(
+                IssuerInfo.builder().serverUrl("https://issuer.example.com/issuer").build()));
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name())
+                .configValue("{\"issuerUrl\":\"${oid4vc.auth.issuer-url:${issuer.base-url}}\"}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_AUTH_PROPERTIES.name()))
+                .thenReturn(Optional.of(config));
+
+        Oid4vcProperty properties = service.getProperties();
+
+        assertThat(properties.getIssuerUrl()).isEqualTo("https://issuer.example.com");
+        verify(serverConfigRepository, never()).save(any());
+    }
+
+    @Test
+    void keepsManuallyConfiguredIssuerDomainWhenRegistrationChanges() {
+        ReflectionTestUtils.setField(service, "env", new MockEnvironment()
+                .withProperty("issuer.base-url", "http://127.0.0.1:8091"));
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_METADATA.name())
+                .configValue("{\"credentialIssuer\":\"https://custom.example.com\","
+                        + "\"authorizationServer\":[\"https://auth.example.com\"]}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_METADATA.name()))
+                .thenReturn(Optional.of(config));
+
+        service.syncRegisteredIssuerUrl("https://old.example.com/issuer", "https://new.example.com/issuer");
+
+        verify(serverConfigRepository, never()).save(any());
+    }
+
+    @Test
+    void updatesDefaultMetadataWhenRegisteredIssuerDomainChanges() {
+        ServerConfig config = ServerConfig.builder()
+                .configKey(ConfigType.OID4VCI_METADATA.name())
+                .configValue("{\"credentialIssuer\":\"https://old.example.com\","
+                        + "\"authorizationServer\":[\"https://old.example.com\"]}")
+                .build();
+        when(serverConfigRepository.findByConfigKey(ConfigType.OID4VCI_METADATA.name()))
+                .thenReturn(Optional.of(config));
+
+        service.syncRegisteredIssuerUrl("https://old.example.com/issuer", "https://new.example.com/issuer");
+
+        verify(serverConfigRepository).save(argThat(saved ->
+                saved.getConfigValue().contains("\"credentialIssuer\":\"https://new.example.com\"")
+                        && saved.getConfigValue().contains("https://new.example.com/credential")));
     }
 
     @Test

@@ -652,7 +652,7 @@ The `issuer` profile configures OID4VCI issuance and is included in the `dev` pr
 | `issuer.server-port` | Issuer server port used to compose `issuer.base-url` (fallback: `8091`) |
 | `issuer.base-url` | Public URL of the Issuer server (default: `http://${issuer.server-ip}:${issuer.server-port}`). Used in Credential Offer URIs, OID4VCI List Provider registration, and the Authorization Server URLs below |
 | `issuer.data-dir` | Base directory for metadata and related data files (default: `.`) |
-| `issuer.metadata-file-path` | Initial Issuer Metadata JSON file (default: `metadata/issuer_meta.json`, relative to the working directory). If the `server_config` table has no `OID4VCI_METADATA` entry, the file is loaded and stored in the DB. Metadata updated in the Admin Console is written back to this file |
+| `issuer.metadata-file-path` | Initial Issuer Metadata JSON file (default: `metadata/issuer_meta.json`, relative to the working directory). If the `server_config` table has no `OID4VCI_METADATA` entry, this file is loaded and stored in the DB. If the file is absent, packaged defaults are used. Metadata updated in the Admin Console is written back to the configured file |
 | `issuer.wallet-file-name` | Issuer wallet path; references `wallet.file-path` |
 | `issuer.sdk.config-source` | Credential Configuration source; the default configuration uses `DB` (`credential_config` table) |
 | `issuer.status-list.endpoint-enabled` | (Optional) Enables the Status List endpoint `GET /status-lists/{listId}` provided by the OID4VCI SDK (default: `true`) |
@@ -662,7 +662,7 @@ The `issuer` profile configures OID4VCI issuance and is included in the `dev` pr
 | `clients.auth-server.url` | Authorization Server base URL (default: `${issuer.base-url}`) |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | JWKS endpoint used to validate access tokens (default: `${clients.auth-server.url}/oauth2/jwks`) |
 
-> - Set the public URL with `ISSUER_BASE_URL` (for example, `https://issuer.example.com`). Otherwise it is composed from `ISSUER_SERVER_IP` (default `127.0.0.1`) and `issuer.server-port`. On new DB initialization, `${issuer.base-url}` in `issuer_meta.json` resolves to this URL.
+> - Set the public URL with `ISSUER_BASE_URL` (for example, `https://issuer.example.com`). Otherwise it is composed from `ISSUER_SERVER_IP` (default `127.0.0.1`) and `issuer.server-port`. When an Issuer URL is registered, default OID4VCI metadata uses its server origin (without `/issuer`). Manually configured metadata URLs are preserved.
 > - On a new DB, if no separate `oid4vci.auth-config-path` file exists, OID4VCI Property is initialized with default client IDs, app redirect URIs, and basic scopes. Server URLs are stored as `${issuer.base-url}` references so later address changes use the current setting. A random Client Secret is generated once and stored in the DB. Existing DB values are preserved.
 > - The Docker image includes the initial `metadata` directory. To use a separate metadata file, mount `{metadata_directory}:/app/metadata`.
 

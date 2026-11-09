@@ -13,8 +13,10 @@ import org.omnione.did.base.datamodel.data.oid4vci.Oid4vcProperty;
 import org.omnione.did.base.datamodel.data.oid4vci.SdkCredentialConfig;
 import org.omnione.did.base.datamodel.data.oid4vci.dto.Oid4vciMetadataResponse;
 import org.omnione.did.base.db.domain.CredentialConfig;
+import org.omnione.did.base.db.domain.IssuerInfo;
 import org.omnione.did.base.db.domain.ServerConfig;
 import org.omnione.did.base.db.repository.CredentialConfigRepository;
+import org.omnione.did.base.db.repository.IssuerInfoRepository;
 import org.omnione.did.base.db.repository.ServerConfigRepository;
 import org.omnione.did.base.util.SerializationUtils;
 import org.omnione.did.common.util.JsonUtil;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -65,6 +68,9 @@ public class Oid4vciConfigService {
 
     @Autowired(required = false)
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired(required = false)
+    private IssuerInfoRepository issuerInfoRepository;
 
     public record PropertiesUpdatedEvent() {
     }
@@ -224,15 +230,89 @@ public class Oid4vciConfigService {
             if (metadata == null) {
                 throw new IllegalStateException("OID4VCI issuer metadata in DB is empty");
             }
-            return applyFixedIssuerEndpoints(metadata);
+            applyFixedIssuerEndpoints(metadata);
+            if (applyRegisteredIssuerBase(metadata, configuredIssuerBaseUrl(), registeredIssuerBaseUrl())) {
+                saveIssuerMetadata(metadata);
+            }
+            return metadata;
         }
         IssuerMetadata metadata = loadMetadataFromFile();
-        try {
-            saveToDb(key, metadata, "OID4VCI Issuer Metadata");
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to save OID4VCI issuer metadata to DB", e);
-        }
+        applyRegisteredIssuerBase(metadata, configuredIssuerBaseUrl(), registeredIssuerBaseUrl());
+        saveIssuerMetadata(metadata);
         return metadata;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void syncRegisteredIssuerUrl(String previousServerUrl, String currentServerUrl) {
+        String currentBase = issuerBaseUrlFromRegistration(currentServerUrl);
+        if (currentBase == null) {
+            return;
+        }
+        IssuerMetadata metadata = getMetadata();
+        String previousBase = issuerBaseUrlFromRegistration(previousServerUrl);
+        if (applyRegisteredIssuerBase(metadata, previousBase, currentBase)
+                || applyRegisteredIssuerBase(metadata, configuredIssuerBaseUrl(), currentBase)) {
+            saveIssuerMetadata(metadata);
+        }
+    }
+
+    private boolean applyRegisteredIssuerBase(IssuerMetadata metadata, String previousBase, String currentBase) {
+        if (!StringUtils.hasText(previousBase) || !StringUtils.hasText(currentBase)
+                || Objects.equals(previousBase, currentBase)
+                || !Objects.equals(metadata.getCredentialIssuer(), previousBase)) {
+            return false;
+        }
+        if (metadata.getAuthorizationServer() == null || metadata.getAuthorizationServer().isEmpty()
+                || (metadata.getAuthorizationServer().size() == 1
+                && Objects.equals(metadata.getAuthorizationServer().get(0), previousBase))) {
+            metadata.setAuthorizationServer(List.of(currentBase));
+        }
+        metadata.setCredentialIssuer(currentBase);
+        applyFixedIssuerEndpoints(metadata);
+        return true;
+    }
+
+    private String configuredIssuerBaseUrl() {
+        return env == null ? null : env.getProperty("issuer.base-url");
+    }
+
+    private String registeredIssuerBaseUrl() {
+        if (issuerInfoRepository == null) {
+            return null;
+        }
+        return issuerInfoRepository.findTop1ByOrderByIdAsc()
+                .map(IssuerInfo::getServerUrl)
+                .map(this::issuerBaseUrlFromRegistration)
+                .orElse(null);
+    }
+
+    private String issuerBaseUrlFromRegistration(String serverUrl) {
+        if (!StringUtils.hasText(serverUrl)) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(serverUrl);
+            String path = uri.getPath();
+            if (!List.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null
+                    || uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null
+                    || !(path == null || path.isEmpty() || "/".equals(path)
+                    || "/issuer".equals(path) || "/issuer/".equals(path))) {
+                log.warn("Issuer registration URL cannot be used as an OID4VCI base URL: {}", serverUrl);
+                return null;
+            }
+            return new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), null, null, null).toString();
+        } catch (Exception exception) {
+            log.warn("Invalid Issuer registration URL for OID4VCI metadata: {}", serverUrl);
+            return null;
+        }
+    }
+
+    private void saveIssuerMetadata(IssuerMetadata metadata) {
+        try {
+            saveToDb(ConfigType.OID4VCI_METADATA.name(), metadata, "OID4VCI Issuer Metadata");
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to save OID4VCI issuer metadata to DB", exception);
+        }
     }
     public IssuerMetadataResponse getIssuerMetadata() {
         IssuerMetadata metadata = getMetadata();
@@ -243,7 +323,15 @@ public class Oid4vciConfigService {
 
     private IssuerMetadata loadMetadataFromFile() {
         try {
-            String json = Files.readString(Paths.get(metadataPath), StandardCharsets.UTF_8);
+            String json;
+            if (StringUtils.hasText(metadataPath) && Files.isRegularFile(Paths.get(metadataPath))) {
+                json = Files.readString(Paths.get(metadataPath), StandardCharsets.UTF_8);
+            } else {
+                log.info("Issuer metadata file is unavailable at {}; using packaged defaults", metadataPath);
+                try (var input = new ClassPathResource("metadata/issuer_meta_default.json").getInputStream()) {
+                    json = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            }
             if (env != null) {
                 json = env.resolveRequiredPlaceholders(json);
             }
@@ -589,6 +677,14 @@ public class Oid4vciConfigService {
             if (env != null && issuerUrl != null) {
                 issuerUrl = env.resolveRequiredPlaceholders(issuerUrl);
             }
+            String configuredDefault = env == null ? null
+                    : env.getProperty("oid4vc.auth.issuer-url", env.getProperty("issuer.base-url"));
+            String registeredBase = registeredIssuerBaseUrl();
+            if (StringUtils.hasText(registeredBase)
+                    && (!StringUtils.hasText(configuredUrl)
+                    || Objects.equals(issuerUrl, configuredDefault))) {
+                issuerUrl = registeredBase;
+            }
             URI uri = URI.create(issuerUrl);
             if (!List.of("http", "https").contains(uri.getScheme()) || uri.getHost() == null) {
                 throw new IllegalArgumentException("Issuer URL must be an absolute HTTP URL");
@@ -633,8 +729,10 @@ public class Oid4vciConfigService {
                         clients.getIssuerServer().getUrl(), "${issuer.base-url}"));
             }
         }
-        properties.setIssuerUrl(preserveDefaultUrlTemplate(
-                properties.getIssuerUrl(), "${oid4vc.auth.issuer-url:${issuer.base-url}}"));
+        String issuerUrlTemplate = "${oid4vc.auth.issuer-url:${issuer.base-url}}";
+        properties.setIssuerUrl(Objects.equals(properties.getIssuerUrl(), resolveIssuerUrl(issuerUrlTemplate))
+                ? issuerUrlTemplate
+                : preserveDefaultUrlTemplate(properties.getIssuerUrl(), issuerUrlTemplate));
         saveToDb(ConfigType.OID4VCI_AUTH_PROPERTIES.name(), properties, "OID4VCI Auth Properties");
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

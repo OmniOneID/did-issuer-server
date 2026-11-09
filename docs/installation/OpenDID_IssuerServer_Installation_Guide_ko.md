@@ -655,7 +655,7 @@ logging:
 | `issuer.server-port` | `issuer.base-url` 구성에 사용하는 Issuer 서버 Port (미설정 시 `8091`) |
 | `issuer.base-url` | Issuer 서버의 공개 URL (기본값: `http://${issuer.server-ip}:${issuer.server-port}`). Credential Offer URI, OID4VCI List Provider 등록, 아래 Authorization Server URL에 사용 |
 | `issuer.data-dir` | Metadata 및 관련 Data File의 기준 Directory (기본값: `.`) |
-| `issuer.metadata-file-path` | Issuer Metadata 초기 JSON 파일 (기본값: `metadata/issuer_meta.json`, 실행 Directory 기준). `server_config` 테이블에 `OID4VCI_METADATA` 항목이 없으면 이 파일을 읽어 DB에 저장하며, Admin Console에서 수정한 Metadata는 이 파일에도 반영됨 |
+| `issuer.metadata-file-path` | Issuer Metadata 초기 JSON 파일 (기본값: `metadata/issuer_meta.json`, 실행 Directory 기준). `server_config` 테이블에 `OID4VCI_METADATA` 항목이 없으면 이 파일을 읽어 DB에 저장하며, 파일이 없으면 서버에 포함된 기본값을 사용함. Admin Console에서 수정한 Metadata는 설정된 파일에도 반영됨 |
 | `issuer.wallet-file-name` | Issuer Wallet 경로. `wallet.file-path` 값을 참조 |
 | `issuer.sdk.config-source` | Credential Configuration 원본. 기본 설정은 `DB`(`credential_config` 테이블) 사용 |
 | `issuer.status-list.endpoint-enabled` | (선택) OID4VCI SDK가 제공하는 Status List Endpoint `GET /status-lists/{listId}` 활성화 여부 (기본값: `true`) |
@@ -665,7 +665,7 @@ logging:
 | `clients.auth-server.url` | Authorization Server Base URL (기본값: `${issuer.base-url}`) |
 | `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` | Access Token 검증에 사용하는 JWKS Endpoint (기본값: `${clients.auth-server.url}/oauth2/jwks`) |
 
-> - 공개 주소는 `ISSUER_BASE_URL` 환경 변수로 설정하십시오 (예: `https://issuer.example.com`). 미설정 시 `ISSUER_SERVER_IP`와 `issuer.server-port`로 구성하며, IP의 기본값은 `127.0.0.1`입니다. 새 DB 초기화 시 `issuer_meta.json`의 `${issuer.base-url}`도 이 값으로 치환됩니다.
+> - 공개 주소는 `ISSUER_BASE_URL` 환경 변수로 설정하십시오 (예: `https://issuer.example.com`). 미설정 시 `ISSUER_SERVER_IP`와 `issuer.server-port`로 구성하며, IP의 기본값은 `127.0.0.1`입니다. Issuer URL을 등록하면 OID4VCI 기본 메타데이터에는 `/issuer`를 제외한 서버 주소가 사용됩니다. 관리자 화면에서 직접 설정한 주소는 유지됩니다.
 > - 새 DB의 OID4VCI Property는 별도 `oid4vci.auth-config-path` 파일이 없으면 기본 Client ID, 앱 Redirect URI, 기본 scope로 생성됩니다. 서버 URL은 DB에 `${issuer.base-url}` 참조로 저장해 주소 변경 시 현재 설정값을 사용합니다. Client Secret은 최초 구동 시 무작위로 생성하여 DB에 저장합니다. 기존 DB 값은 유지됩니다.
 > - Docker 이미지에는 초기 `metadata` Directory가 포함됩니다. 별도 Metadata 파일을 사용하려면 `{metadata_directory}:/app/metadata`로 Mount하십시오.
 

@@ -77,6 +77,7 @@ public class IssuerManagementService {
     private final JsonParseService jsonParseService;
     private final DidDocumentQueryService didDocumentQueryService;
     private final EnrollEntityService enrollEntityService;
+    private final Oid4vciConfigService oid4vciConfigService;
 
     @Value(value = "${tas.url}")
     private String TAS_URL;
@@ -84,7 +85,8 @@ public class IssuerManagementService {
     public IssuerManagementService(IssuerInfoQueryService issuerInfoQueryService, StorageService storageService,
                                    CertificateVcQueryService certificateVcQueryService, FileWalletService fileWalletService,
                                    JsonParseService jsonParseService, DidDocumentQueryService didDocumentQueryService,
-                                   EnrollEntityService enrollEntityService, ApplicationConfigQueryService applicationConfigQueryService) {
+                                   EnrollEntityService enrollEntityService, ApplicationConfigQueryService applicationConfigQueryService,
+                                   Oid4vciConfigService oid4vciConfigService) {
         this.issuerInfoQueryService = issuerInfoQueryService;
         this.storageService = storageService;
         this.certificateVcQueryService = certificateVcQueryService;
@@ -92,6 +94,7 @@ public class IssuerManagementService {
         this.jsonParseService = jsonParseService;
         this.didDocumentQueryService = didDocumentQueryService;
         this.enrollEntityService = enrollEntityService;
+        this.oid4vciConfigService = oid4vciConfigService;
 //        this.TAS_URL = applicationConfigQueryService.getApplicationConfig().getTasUrl() + UrlConstant.Tas.ADMIN_V1;
     }
 
@@ -144,6 +147,7 @@ public class IssuerManagementService {
      */
     public EmptyResDto updateEntityInfo(SendEntityInfoReqDto sendEntityInfoReqDto) {
         IssuerInfo existedIssuer = issuerInfoQueryService.getIssuerInfoOrNull();
+        String previousServerUrl = existedIssuer == null ? null : existedIssuer.getServerUrl();
 
         if (existedIssuer == null) {
             issuerInfoQueryService.save(IssuerInfo.builder()
@@ -162,6 +166,8 @@ public class IssuerManagementService {
             issuerInfoQueryService.save(existedIssuer);
         }
 
+        oid4vciConfigService.syncRegisteredIssuerUrl(previousServerUrl, sendEntityInfoReqDto.getServerUrl());
+
         return new EmptyResDto();
     }
 
@@ -176,6 +182,7 @@ public class IssuerManagementService {
 
         IssuerInfo issuerInfo = issuerInfoQueryService.findIssuerOrNull();
         log.debug("\t--> Found Issuer: {}", issuerInfo);
+        String previousServerUrl = issuerInfo == null ? null : issuerInfo.getServerUrl();
 
         if (issuerInfo == null) {
             log.debug("\t--> Issuer is not registered yet. Proceeding with new registration.");
@@ -186,6 +193,7 @@ public class IssuerManagementService {
                     .status(IssuerStatus.DID_DOCUMENT_REQUIRED)
                     .build();
             issuerInfoQueryService.save(issuerInfo);
+            oid4vciConfigService.syncRegisteredIssuerUrl(previousServerUrl, registerIssuerInfoReqDto.getServerUrl());
 
             log.debug("=== Finished registerIssuerInfo ===");
             return buildIssuerInfoResponse(issuerInfo);
@@ -201,6 +209,7 @@ public class IssuerManagementService {
         issuerInfo.setServerUrl(registerIssuerInfoReqDto.getServerUrl());
         issuerInfo.setCertificateUrl(registerIssuerInfoReqDto.getServerUrl() + "/api/v1/certificate-vc");
         issuerInfoQueryService.save(issuerInfo);
+        oid4vciConfigService.syncRegisteredIssuerUrl(previousServerUrl, registerIssuerInfoReqDto.getServerUrl());
 
         log.debug("=== Finished registerIssuerInfo ===");
 
