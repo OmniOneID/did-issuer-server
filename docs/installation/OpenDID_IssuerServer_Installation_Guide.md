@@ -191,7 +191,7 @@ The server builds from the prebuilt Issuer SDK JAR in `source/did-issuer-server/
 ```bash
 cd ../did-issuer-sdk-server/source/did-issuer-sdk
 ./gradlew clean build
-cp build/libs/did-issuer-sdk-1.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
+cp build/libs/did-issuer-sdk-3.0.0.jar ../../../did-issuer-server/source/did-issuer-server/libs/
 ```
 
 Keep the OpenDID dependency JARs, including `did-common-sdk-server-3.0.0.jar`, in the server's `libs/` directory.
