@@ -3,7 +3,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, Typography, useTheme, FormControl, InputLabel, styled
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -44,6 +44,13 @@ interface ErrorState {
   errorItemsMessage?: string;
 }
 
+const validateNamespaceId = (namespaceId: string): string | undefined => {
+  if (!namespaceId.trim()) return "Please enter a Namespace ID.";
+  if (namespaceId.length < 8 || namespaceId.length > 64) {
+    return "Namespace ID must be between 8 and 64 characters.";
+  }
+};
+
 const ZkpNamespaceRegistrationPage = () => {
   const theme = useTheme();
   const dialogs = useDialogs();
@@ -61,10 +68,12 @@ const ZkpNamespaceRegistrationPage = () => {
   const [isNamespaceIdIsValid, setIsNamespaceIdValid] = useState(false);
   const [namespaceIdCheckMessage, setNamespaceIdCheckMessage] = useState<string>('');
   const [namespaceIdCheckStatus, setNamespaceIdCheckStatus] = useState<'success' | 'error' | ''>('');
+  const namespaceIdCheckRequest = useRef(0);
 
   const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
     if (field === "namespaceId") {
+      namespaceIdCheckRequest.current += 1;
       setIsNamespaceIdValid(false);
       setErrors((prev) => ({ ...prev, namespaceId: undefined }));
       setNamespaceIdCheckMessage('');
@@ -110,11 +119,8 @@ const ZkpNamespaceRegistrationPage = () => {
   const validate = () => {
     const tempErrors: ErrorState = {};
 
-    if (!formData.namespaceId.trim()) {
-      tempErrors.namespaceId = "Please enter a Namespace ID.";
-    } else if (formData.namespaceId.length < 8 || formData.namespaceId.length > 64) {
-      tempErrors.namespaceId = "Namespace ID must be between 8 and 64 characters.";
-    } else if (!isNamespaceIdIsValid) {
+    tempErrors.namespaceId = validateNamespaceId(formData.namespaceId);
+    if (!tempErrors.namespaceId && !isNamespaceIdIsValid) {
       tempErrors.namespaceId = "Namespace ID is not available.";
     }
 
@@ -244,19 +250,25 @@ const ZkpNamespaceRegistrationPage = () => {
       items: [],
     });
     setIsNamespaceIdValid(false);
+    namespaceIdCheckRequest.current += 1;
     setNamespaceIdCheckMessage('');
     setNamespaceIdCheckStatus('');
   };
 
   const handleCheckDuplicateNamespaceId = () => {
-    if (!formData.namespaceId.trim()) {
-      setNamespaceIdCheckMessage('Please enter a namespace ID first.');
+    const requestId = ++namespaceIdCheckRequest.current;
+    const validationError = validateNamespaceId(formData.namespaceId);
+    if (validationError) {
+      setIsNamespaceIdValid(false);
+      setErrors((prev) => ({ ...prev, namespaceId: validationError }));
+      setNamespaceIdCheckMessage('');
       setNamespaceIdCheckStatus('error');
       return;
     }
 
     verifyNamespaceIdUnique(formData.namespaceId) 
     .then((response) => {
+        if (requestId !== namespaceIdCheckRequest.current) return;
         if (response.data.isUnique === false) {
             setErrors((prev) => ({ ...prev, namespaceId: 'Namespace ID already exists.' }));
             setIsNamespaceIdValid(false);
@@ -270,6 +282,7 @@ const ZkpNamespaceRegistrationPage = () => {
         }
     })
     .catch((error) => {
+        if (requestId !== namespaceIdCheckRequest.current) return;
         setIsNamespaceIdValid(false);
         setNamespaceIdCheckMessage('Failed to check namespace ID availability. Please try again.');
         setNamespaceIdCheckStatus('error');
@@ -325,7 +338,8 @@ const ZkpNamespaceRegistrationPage = () => {
               sx={{
                 width: '60%',
                 '& .MuiFormHelperText-root': {
-                  color: namespaceIdCheckStatus === 'success' ? 'green' :
+                  color: errors.namespaceId ? theme.palette.error.main :
+                         namespaceIdCheckStatus === 'success' ? 'green' :
                          namespaceIdCheckStatus === 'error' ? 'red' : 'inherit',
                   fontWeight: namespaceIdCheckStatus ? 500 : 'inherit'
                 }
