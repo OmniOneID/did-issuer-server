@@ -79,12 +79,14 @@ public class ControllerLogAspects {
         Object[] filteredArgs = filterArgs(joinPoint.getArgs());
         debugControllerLog("{0}.{1} - Start", new Object[]{className, methodName});
         debugControllerLog("{0}.{1} - requestData : {2}",
-                new Object[]{className, methodName, convertToJsonString(filteredArgs)});
+                new Object[]{className, methodName,
+                        "SessionController".equals(className) ? "[REDACTED]" : convertToJsonString(filteredArgs)});
 
         Object result = joinPoint.proceed();
 
         debugControllerLog("{0}.{1} - responseData: {2}",
-                new Object[]{className, methodName, convertToJsonString(result)});
+                new Object[]{className, methodName,
+                        "SessionController".equals(className) ? "[REDACTED]" : convertToJsonString(result)});
         debugControllerLog("{0}.{1} - finish", new Object[]{className, methodName});
         return result;
     }

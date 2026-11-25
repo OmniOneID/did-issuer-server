@@ -23,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.omnione.did.issuer.v1.admin.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
@@ -86,13 +88,16 @@ public class SessionController {
     public void logout(@RequestBody RefreshReq req, jakarta.servlet.http.HttpServletRequest request) {
         try {
             var token = jwtService.parse(req.refreshToken());
-            if (!jwtService.isRefreshToken(token) || !jwtService.isCurrentSession(token)) {
+            if (!jwtService.isRefreshToken(token)) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
             }
             Long adminId = Long.valueOf(token.getPayload().getSubject());
-            request.setAttribute("targetId", adminId.toString());
-            request.setAttribute("requesterId", adminId.toString());
-            jwtService.revokeAllSessions(adminId);
+            String loginId = sessionService.requestAdminLoginById(adminId).getLoginId();
+            request.setAttribute("targetId", loginId);
+            request.setAttribute("requesterId", loginId);
+            if (jwtService.isCurrentSession(token)) {
+                jwtService.revokeAllSessions(adminId);
+            }
         } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token", e);
         }
@@ -106,6 +111,16 @@ public class SessionController {
         private final String accessToken;
         private final String refreshToken;
     }
-    public record RefreshReq(String refreshToken) {}
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RefreshReq {
+        private String refreshToken;
+
+        public String refreshToken() {
+            return refreshToken;
+        }
+    }
     public record TokenRes(String accessToken) {}
 }

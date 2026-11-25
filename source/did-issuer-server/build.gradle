@@ -127,6 +127,7 @@ tasks.register('adminPasswordTest', Test) {
         includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.query.AdminQueryServicePasswordTest'
         includeTestsMatching 'org.omnione.did.base.property.JwtPropertyTest'
         includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.JwtServiceLogoutTest'
+        includeTestsMatching 'org.omnione.did.issuer.v1.admin.controller.SessionControllerLogoutTest'
     }
 }
 
