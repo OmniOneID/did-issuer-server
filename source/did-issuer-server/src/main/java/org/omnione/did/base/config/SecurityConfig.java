@@ -106,6 +106,8 @@ public class SecurityConfig {
                                                          .AuthorizationManagerRequestMatcherRegistry configurer) {
         allowedUrlsConfigurer(configurer);
         configurer.requestMatchers(org.springframework.http.HttpMethod.POST,
+                        "/issuer/admin/v1/certificate-vc").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST,
                         "/issuer/admin/v1/login", "/issuer/admin/v1/refresh-token", "/issuer/admin/v1/logout",
                         "/issuer/admin/v1/password-reset/send-otp", "/issuer/admin/v1/password-reset/verify-otp").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST,
