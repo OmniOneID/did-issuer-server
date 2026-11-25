@@ -16,8 +16,14 @@
 
 package org.omnione.did.issuer.v1.admin.controller;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.omnione.did.issuer.v1.admin.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.base.constants.UrlConstant;
 import org.omnione.did.base.annotation.ArticleLog;
@@ -41,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SessionController {
 
     private final SessionService sessionService;
+    private final JwtService jwtService;
 
     /**
      * Handles admin login requests.
@@ -52,7 +59,53 @@ public class SessionController {
     @ResponseBody
     @ArticleLog(name = "[Admin] Login", description = "Login", targetType = "ADMIN",
             targetId = "#requestAdminLoginReqDto.loginId", actionType = ActionType.LOGIN)
-    public AdminDto requestAdminLogin(@Valid @RequestBody RequestAdminLoginReqDto requestAdminLoginReqDto) {
-        return sessionService.requestAdminLogin(requestAdminLoginReqDto);
+    public LoginRes requestAdminLogin(@Valid @RequestBody RequestAdminLoginReqDto requestAdminLoginReqDto) {
+        AdminDto admin = sessionService.requestAdminLogin(requestAdminLoginReqDto);
+        return new LoginRes(admin, jwtService.createAccessToken(admin),
+                jwtService.createRefreshToken(admin.getId()));
     }
+
+    @PostMapping("/refresh-token")
+    public TokenRes refresh(@RequestBody RefreshReq req) {
+        try {
+            var token = jwtService.parse(req.refreshToken());
+            if (!jwtService.isRefreshToken(token) || !jwtService.isCurrentSession(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+            }
+            Long adminId = Long.valueOf(token.getPayload().getSubject());
+            AdminDto admin = sessionService.requestAdminLoginById(adminId);
+            return new TokenRes(jwtService.createAccessToken(admin));
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token", e);
+        }
+    }
+
+    @PostMapping("/logout")
+    @ArticleLog(name = "[Admin] Logout", description = "Revoke administrator sessions",
+            targetType = "ADMIN", actionType = ActionType.LOGOUT)
+    public void logout(@RequestBody RefreshReq req, jakarta.servlet.http.HttpServletRequest request) {
+        try {
+            var token = jwtService.parse(req.refreshToken());
+            if (!jwtService.isRefreshToken(token) || !jwtService.isCurrentSession(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+            }
+            Long adminId = Long.valueOf(token.getPayload().getSubject());
+            request.setAttribute("targetId", adminId.toString());
+            request.setAttribute("requesterId", adminId.toString());
+            jwtService.revokeAllSessions(adminId);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token", e);
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class LoginRes {
+        @JsonUnwrapped
+        private final AdminDto admin;
+        private final String accessToken;
+        private final String refreshToken;
+    }
+    public record RefreshReq(String refreshToken) {}
+    public record TokenRes(String accessToken) {}
 }

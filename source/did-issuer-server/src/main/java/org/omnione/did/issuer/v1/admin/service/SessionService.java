@@ -53,6 +53,10 @@ public class SessionService {
      * @param requestAdminLoginReqDto DTO containing login credentials
      * @return authenticated admin as AdminDto
      */
+    public AdminDto requestAdminLoginById(Long id) {
+        return AdminDto.fromAdmin(adminQueryService.findById(id));
+    }
+
     public AdminDto requestAdminLogin(RequestAdminLoginReqDto requestAdminLoginReqDto) {
         Admin admin = adminQueryService.findByLoginIdAndLoginPassword(
                 requestAdminLoginReqDto.getLoginId(),

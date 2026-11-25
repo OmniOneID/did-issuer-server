@@ -52,4 +52,6 @@
   <include file="./set.8/add-oid4vc-revocation-columns.xml" relativeToChangelogFile="true"/>
   <include file="./set.9/create-table_api_log.xml" relativeToChangelogFile="true"/>
 
+  <include file="./set.9/expand_admin_login_password.xml" relativeToChangelogFile="true"/>
+  <include file="./set.9/add-column_admin_session_version.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

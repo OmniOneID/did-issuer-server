@@ -86,6 +86,9 @@ dependencies {
     implementation 'com.google.code.gson:gson'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
     // OID4VCI
     implementation 'com.google.zxing:core:3.5.1'
@@ -110,6 +113,20 @@ tasks.named('test') {
     useJUnitPlatform {
         exclude("org/**/service/*.class")
         exclude("org/**/*.class")
+    }
+}
+
+tasks.register('adminPasswordTest', Test) {
+    group = 'verification'
+    description = 'Checks migration of legacy admin passwords to bcrypt.'
+    dependsOn tasks.named('testClasses')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.query.AdminQueryServicePasswordTest'
+        includeTestsMatching 'org.omnione.did.base.property.JwtPropertyTest'
+        includeTestsMatching 'org.omnione.did.issuer.v1.admin.service.JwtServiceLogoutTest'
     }
 }
 
