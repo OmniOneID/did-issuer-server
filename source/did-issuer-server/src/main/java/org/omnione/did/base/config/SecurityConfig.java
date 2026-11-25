@@ -88,6 +88,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(
+                        (req, res, error) -> res.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED)))
                 .authorizeHttpRequests(this::authorizeHttpRequestsCustomizer)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
@@ -103,7 +105,11 @@ public class SecurityConfig {
     private void authorizeHttpRequestsCustomizer(AuthorizeHttpRequestsConfigurer<HttpSecurity>
                                                          .AuthorizationManagerRequestMatcherRegistry configurer) {
         allowedUrlsConfigurer(configurer);
-        configurer.anyRequest().permitAll();
+        configurer.requestMatchers(org.springframework.http.HttpMethod.POST,
+                        "/issuer/admin/v1/login", "/issuer/admin/v1/refresh-token", "/issuer/admin/v1/logout",
+                        "/issuer/admin/v1/password-reset/send-otp", "/issuer/admin/v1/password-reset/verify-otp").permitAll()
+                .requestMatchers("/issuer/admin/v1/**").hasAnyRole("NORMAL", "ROOT")
+                .anyRequest().permitAll();
     }
 
     private void allowedUrlsConfigurer(AuthorizeHttpRequestsConfigurer<HttpSecurity>
@@ -122,10 +128,6 @@ public class SecurityConfig {
 
         encoders.put("bcrypt", new BCryptPasswordEncoder(12));
 
-        DelegatingPasswordEncoder passwordEncoder = new DelegatingPasswordEncoder(idForEncode, encoders);
-        @SuppressWarnings("deprecation")
-        PasswordEncoder noOpPasswordEncoder = org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
-        passwordEncoder.setDefaultPasswordEncoderForMatches(noOpPasswordEncoder);
-        return passwordEncoder;
+        return new DelegatingPasswordEncoder(idForEncode, encoders);
     }
 }
