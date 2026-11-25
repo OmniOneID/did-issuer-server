@@ -94,7 +94,7 @@ public class AdminManagementService {
      * Registers a new admin account after validating uniqueness of login ID.
      *
      * @param registerAdminReqDto DTO with registration information
-     * @return an empty response on success
+     * @return the deleted admin's login ID for the audit log
      */
     public EmptyResDto registerAdmin(RegisterAdminReqDto registerAdminReqDto) {
         Admin existingAdmin = adminQueryService.findByLoginIdOrNull(registerAdminReqDto.getLoginId());
@@ -139,10 +139,10 @@ public class AdminManagementService {
      * @param id the ID of the admin to delete
      * @return an empty response on success
      */
-    public EmptyResDto deleteAdmin(Long id) {
-        adminQueryService.findById(id);
+    public String deleteAdmin(Long id) {
+        Admin admin = adminQueryService.findById(id);
         adminRepository.deleteById(id);
-        return new EmptyResDto();
+        return admin.getLoginId();
     }
 
     /**
