@@ -379,7 +379,7 @@ public class IssuerManagementService {
             String request = JsonUtil.serializeToJson(registerDidToTaReqDto);
             return HttpClientUtil.postData(url, request, EmptyResDto.class);
         } catch (HttpClientException e) {
-            log.error("HttpClientException occurred while sending register-did-public request: {}", e.getResponseBody(), e);
+            log.error("TA register-did request failed with HTTP {}", e.getStatusCode(), e);
             ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
             throw new OpenDidException(errorResponse);
         } catch (Exception e) {
@@ -395,14 +395,18 @@ public class IssuerManagementService {
      *
      * @param resBody The JSON string representing the external error response
      * @return An ErrorResponse object parsed from the input string
-     * @throws OpenDidException with ErrorCode.ISSUER_UNKNOWN_RESPONSE if parsing fails
+     * @throws OpenDidException with ErrorCode.TAS_UNKNOWN_RESPONSE if parsing fails
      */
     private ErrorResponse convertExternalErrorResponse(String resBody) {
+        if (resBody == null || !resBody.stripLeading().startsWith("{")) {
+            log.warn("TA returned a non-JSON error response");
+            throw new OpenDidException(ErrorCode.TAS_UNKNOWN_RESPONSE);
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(resBody, ErrorResponse.class);
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse external error response: {}", resBody, e);
+            log.warn("Failed to parse TA error response", e);
             throw new OpenDidException(ErrorCode.TAS_UNKNOWN_RESPONSE);
         }
     }
@@ -460,7 +464,7 @@ public class IssuerManagementService {
         try {
             return HttpClientUtil.getData(url, RequestEntityStatusResDto.class);
         } catch (HttpClientException e) {
-            log.error("HttpClientException occurred while sending request-status request: {}", e.getResponseBody(), e);
+            log.error("TA request-status request failed with HTTP {}", e.getStatusCode(), e);
             ErrorResponse errorResponse = convertExternalErrorResponse(e.getResponseBody());
             throw new OpenDidException(errorResponse);
         } catch (Exception e) {
