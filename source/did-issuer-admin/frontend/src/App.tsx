@@ -13,6 +13,8 @@ import customTheme from './theme';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 import { formatErrorMessage } from './utils/error-handler';
 import { SessionProvider } from './context/SessionProvider';
+import { logoutAdmin } from './utils/logout';
+import { tokenStore } from './utils/authTokens';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -27,12 +29,22 @@ function AppContent() {
     navigate('/sign-in');
   }, [navigate]);
 
-  const signOut = useCallback(() => {
-    setSession(null); // 🔄 context에서 관리
+  const signOut = useCallback(async () => {
+    if (tokenStore.isPendingLogout()) {
+      sessionStorage.removeItem('session');
+      window.location.replace('/sign-in');
+      return;
+    }
+    await logoutAdmin('/issuer/admin/v1');
+    setSession(null);
     navigate('/sign-in');
   }, [navigate, setSession]);
 
   useEffect(() => {
+    if (!session) {
+      setIsLoading(false);
+      return;
+    }
     const fetchIssuerInfo = () => {
       setIsLoading(false);
 
@@ -60,13 +72,22 @@ function AppContent() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, []);
+  }, [session, navigate]);
 
   useEffect(() => {
     if (serverStatus !== null) {
       setNavigation(getNavigationByStatus(serverStatus));
     }
   }, [serverStatus]);
+
+  const displaySession = useMemo(() => session ? {
+    ...session,
+    user: {
+      ...session.user,
+      name: session.user?.name || session.user?.id || 'Admin',
+      email: session.user?.email || session.user?.id || undefined,
+    },
+  } : null, [session]);
 
   if (isLoading) {
     return <LoadingOverlay />;
@@ -76,7 +97,7 @@ function AppContent() {
     <DialogsProvider>
       <ReactRouterAppProvider
         navigation={navigation}
-        session={session}
+        session={displaySession}
         authentication={{ signIn, signOut }}
         theme={customTheme}
       >

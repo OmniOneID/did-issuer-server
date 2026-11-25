@@ -1,77 +1,64 @@
-// SessionProvider.tsx
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ExtendedSession, SessionContextValue } from './SessionContext';
 import { SessionContext } from './SessionContext';
-
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30분
+import { useIdleLogout } from '../hooks/useIdleLogout';
+import { tokenStore } from '../utils/authTokens';
+import { restoreSessionFromToken } from '../utils/authSync';
+import LoadingOverlay from '../components/loading/LoadingOverlay';
+import { ADMIN_LOGOUT_EVENT, logoutAdmin } from '../utils/logout';
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSessionState] = useState<ExtendedSession | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [session, setSessionState] = useState<ExtendedSession | null>(() => {
+    const storedSession = sessionStorage.getItem('session') ?? localStorage.getItem('session');
+    return storedSession && tokenStore.getRefresh() ? JSON.parse(storedSession) : null;
+  });
+  const [isRestoring, setIsRestoring] = useState(() => !session && !!tokenStore.getRefresh());
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    if (tokenStore.isPendingLogout()) {
+      sessionStorage.removeItem('session');
+      setSessionState(null);
+      window.location.replace('/sign-in');
+      return;
+    }
+    await logoutAdmin('/issuer/admin/v1');
     setSessionState(null);
-    localStorage.removeItem('session');
-    sessionStorage.removeItem('session');
     alert('세션이 만료되었습니다. 다시 로그인해 주세요.');
-    window.location.href = '/'; // or use navigate('/login')
+    window.location.replace('/sign-in');
   }, []);
 
-  const resetTimeout = useCallback(() => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      logout();
-    }, SESSION_TIMEOUT);
-  }, [logout]);
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === ADMIN_LOGOUT_EVENT && event.newValue) {
+        tokenStore.markRemoteLogout(event.newValue);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const setSession = useCallback((newSession: ExtendedSession | null) => {
     setSessionState(newSession);
     if (newSession) {
       sessionStorage.setItem('session', JSON.stringify(newSession));
-      localStorage.removeItem('session');
-      resetTimeout();
+      localStorage.setItem('session', JSON.stringify(newSession));
     } else {
       sessionStorage.removeItem('session');
       localStorage.removeItem('session');
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    }
-  }, [resetTimeout]);
-
-  // 사용자 활동 감지 → 타임아웃 초기화
-  useEffect(() => {
-    if (!session) return;
-
-    const onActivity = () => resetTimeout();
-    window.addEventListener('mousemove', onActivity);
-    window.addEventListener('keydown', onActivity);
-    window.addEventListener('click', onActivity);
-
-    resetTimeout(); // 최초 로그인 시도
-
-    return () => {
-      window.removeEventListener('mousemove', onActivity);
-      window.removeEventListener('keydown', onActivity);
-      window.removeEventListener('click', onActivity);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [session, resetTimeout]);
-
-  // 초기 세션 복구
-  useEffect(() => {
-    const storedSession = sessionStorage.getItem('session');
-    if (storedSession) {
-      setSessionState(JSON.parse(storedSession));
+      tokenStore.clear();
     }
   }, []);
 
-  const contextValue: SessionContextValue = {
-    session,
-    setSession,
-  };
+  useEffect(() => {
+    if (session || !tokenStore.getRefresh()) return;
+    void restoreSessionFromToken('/issuer/admin/v1')
+      .then((restored) => { if (restored) setSession(restored); })
+      .finally(() => setIsRestoring(false));
+  }, []);
 
-  return (
-    <SessionContext.Provider value={contextValue}>
-      {children}
-    </SessionContext.Provider>
-  );
+  useIdleLogout(session !== null, logout);
+
+  const contextValue: SessionContextValue = { session, setSession };
+  if (isRestoring) return <LoadingOverlay />;
+  return <SessionContext.Provider value={contextValue}>{children}</SessionContext.Provider>;
 };
