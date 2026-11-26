@@ -40,8 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
                 String role = claims.get("role", String.class);
+                String loginId = claims.get("loginId", String.class);
+                if (loginId == null || loginId.isBlank()) {
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
                 var authentication = new UsernamePasswordAuthenticationToken(
-                        claims.getSubject(), null,
+                        loginId, null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | IllegalArgumentException e) {
