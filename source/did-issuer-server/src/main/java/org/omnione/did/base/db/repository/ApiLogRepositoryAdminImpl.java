@@ -103,8 +103,8 @@ public class ApiLogRepositoryAdminImpl implements ApiLogRepositoryAdmin {
                 case "uri" -> predicate.and(qApiLog.uri.contains(searchValue));
                 case "result" -> predicate.and(qApiLog.result.eq(searchValue));
                 case "apiName" -> predicate.and(qApiLog.apiName.eq(searchValue));
-                case "targetType" -> predicate.and(qApiLog.targetType.eq(searchValue));
-                case "requesterId" -> predicate.and(qApiLog.requesterId.eq(searchValue));
+                case "targetType" -> predicate.and(qApiLog.targetType.contains(searchValue));
+                case "requesterId" -> predicate.and(qApiLog.requesterId.contains(searchValue));
                 default -> predicate.and(Expressions.FALSE);
             };
         }

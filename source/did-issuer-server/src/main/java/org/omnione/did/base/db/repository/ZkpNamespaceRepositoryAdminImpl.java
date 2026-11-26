@@ -70,10 +70,10 @@ public class ZkpNamespaceRepositoryAdminImpl implements ZkpNamespaceRepositoryAd
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "namespaceId":
-                    predicate = predicate.and(zkpNamespace.namespaceId.eq(searchValue));
+                    predicate = predicate.and(zkpNamespace.namespaceId.contains(searchValue));
                     break;
                 case "name":
-                    predicate = predicate.and(zkpNamespace.name.eq(searchValue));
+                    predicate = predicate.and(zkpNamespace.name.contains(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);

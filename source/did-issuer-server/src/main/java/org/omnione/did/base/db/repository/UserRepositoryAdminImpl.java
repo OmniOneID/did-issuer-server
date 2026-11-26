@@ -4,11 +4,12 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.QUser;
+import org.omnione.did.base.db.domain.QVcSchema;
 import org.omnione.did.base.db.domain.User;
-import org.omnione.did.base.db.domain.VcSchema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserRepositoryAdminImpl implements UserRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
-    private final VcSchemaRepository vcSchemaRepository;
 
     @Override
     public Page<User> searchUser(String searchKey, String searchValue, Pageable pageable) {
@@ -54,14 +54,13 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin {
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             predicate = switch (searchKey) {
-                case "did" -> predicate.and(qUser.did.eq(searchValue));
+                case "did" -> predicate.and(qUser.did.contains(searchValue));
                 case "vcSchemaId" -> {
-                    Optional<VcSchema> vcSchema = vcSchemaRepository.findByVcSchemaId(searchValue);
-                    if (vcSchema.isPresent()) {
-                        yield predicate.and(qUser.vcSchemaId.eq(vcSchema.get().getId()));
-                    } else {
-                        yield predicate.and(Expressions.FALSE);
-                    }
+                    QVcSchema vcSchema = QVcSchema.vcSchema;
+                    yield predicate.and(qUser.vcSchemaId.in(
+                            JPAExpressions.select(vcSchema.id)
+                                    .from(vcSchema)
+                                    .where(vcSchema.vcSchemaId.contains(searchValue))));
                 }
                 default -> predicate.and(Expressions.FALSE);
             };

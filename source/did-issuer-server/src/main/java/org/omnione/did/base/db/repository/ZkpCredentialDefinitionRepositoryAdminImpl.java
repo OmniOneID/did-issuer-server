@@ -72,7 +72,7 @@ public class ZkpCredentialDefinitionRepositoryAdminImpl implements ZkpCredential
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "definitionId":
-                    predicate = predicate.and(qZkpCredentialDefinition.definitionId.eq(searchValue));
+                    predicate = predicate.and(qZkpCredentialDefinition.definitionId.contains(searchValue));
                     break;
                 case "schemaId":
                     predicate = predicate.and(qZkpCredentialDefinition.schemaId.eq(searchValue));

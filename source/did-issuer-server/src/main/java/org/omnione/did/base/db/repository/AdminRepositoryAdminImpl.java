@@ -66,7 +66,7 @@ public class AdminRepositoryAdminImpl implements AdminRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "loginId":
-                    predicate = predicate.and(qAdmin.loginId.eq(searchValue));
+                    predicate = predicate.and(qAdmin.loginId.contains(searchValue));
                     break;
                 case "role":
                     predicate = predicate.and(qAdmin.role.eq(AdminRole.valueOf(searchValue)));
