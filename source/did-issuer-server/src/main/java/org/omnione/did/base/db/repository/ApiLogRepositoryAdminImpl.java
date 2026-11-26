@@ -100,11 +100,11 @@ public class ApiLogRepositoryAdminImpl implements ApiLogRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             predicate = switch (searchKey) {
                 case "actionType" -> predicate.and(qApiLog.actionType.eq(ActionType.valueOf(searchValue)));
-                case "uri" -> predicate.and(qApiLog.uri.contains(searchValue));
+                case "uri" -> predicate.and(qApiLog.uri.containsIgnoreCase(searchValue));
                 case "result" -> predicate.and(qApiLog.result.eq(searchValue));
                 case "apiName" -> predicate.and(qApiLog.apiName.eq(searchValue));
-                case "targetType" -> predicate.and(qApiLog.targetType.contains(searchValue));
-                case "requesterId" -> predicate.and(qApiLog.requesterId.contains(searchValue));
+                case "targetType" -> predicate.and(qApiLog.targetType.containsIgnoreCase(searchValue));
+                case "requesterId" -> predicate.and(qApiLog.requesterId.containsIgnoreCase(searchValue));
                 default -> predicate.and(Expressions.FALSE);
             };
         }

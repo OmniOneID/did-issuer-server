@@ -19,13 +19,12 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.omnione.did.base.db.domain.QZkpCredentialDefinition;
+import org.omnione.did.base.db.domain.QZkpSchema;
 import org.omnione.did.base.db.domain.ZkpCredentialDefinition;
-import org.omnione.did.base.db.domain.ZkpSchema;
-
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +39,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ZkpCredentialDefinitionRepositoryAdminImpl implements ZkpCredentialDefinitionRepositoryAdmin {
     private final JPAQueryFactory queryFactory;
-    private final ZkpSchemaRepository zkpSchemaRepository;
 
     @Override
     public Page<ZkpCredentialDefinition> searchCredentialDefinitions(String searchKey, String searchValue, Pageable pageable) {
@@ -72,7 +70,7 @@ public class ZkpCredentialDefinitionRepositoryAdminImpl implements ZkpCredential
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "definitionId":
-                    predicate = predicate.and(qZkpCredentialDefinition.definitionId.contains(searchValue));
+                    predicate = predicate.and(qZkpCredentialDefinition.definitionId.containsIgnoreCase(searchValue));
                     break;
                 case "schemaId":
                     predicate = predicate.and(qZkpCredentialDefinition.schemaId.eq(searchValue));
@@ -84,15 +82,11 @@ public class ZkpCredentialDefinitionRepositoryAdminImpl implements ZkpCredential
                     predicate = predicate.and(qZkpCredentialDefinition.tag.eq(searchValue));
                     break;
                 case "schemaName":
-                    List<String> schemaIds = zkpSchemaRepository.findAll().stream()
-                            .filter(s -> s.getName() != null && s.getName().contains(searchValue))
-                            .map(ZkpSchema::getSchemaId)
-                            .collect(Collectors.toList());
-                    if (schemaIds.isEmpty()) {
-                        predicate = predicate.and(Expressions.FALSE);
-                    } else {
-                        predicate = predicate.and(qZkpCredentialDefinition.schemaId.in(schemaIds));
-                    }
+                    QZkpSchema zkpSchema = QZkpSchema.zkpSchema;
+                    predicate = predicate.and(qZkpCredentialDefinition.schemaId.in(
+                            JPAExpressions.select(zkpSchema.schemaId)
+                                    .from(zkpSchema)
+                                    .where(zkpSchema.name.containsIgnoreCase(searchValue))));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);

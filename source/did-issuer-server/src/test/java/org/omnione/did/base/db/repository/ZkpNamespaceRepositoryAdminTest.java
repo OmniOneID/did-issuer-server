@@ -35,7 +35,7 @@ class ZkpNamespaceRepositoryAdminTest {
         repository.save(ZkpNamespace.builder().namespaceId("org.example.identity").name("Identity").build());
         repository.save(ZkpNamespace.builder().namespaceId("org.example.address").name("Address").build());
 
-        Page<ZkpNamespace> result = repository.searchNamespaces("namespaceId", "identity", PageRequest.of(0, 10));
+        Page<ZkpNamespace> result = repository.searchNamespaces("namespaceId", "IDENTITY", PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent()).extracting(ZkpNamespace::getNamespaceId)

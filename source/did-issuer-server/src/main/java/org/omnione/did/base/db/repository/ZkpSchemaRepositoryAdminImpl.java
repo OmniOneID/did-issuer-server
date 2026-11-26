@@ -70,10 +70,10 @@ public class ZkpSchemaRepositoryAdminImpl implements ZkpSchemaRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "schemaId":
-                    predicate = predicate.and(zkpSchema.schemaId.contains(searchValue));
+                    predicate = predicate.and(zkpSchema.schemaId.containsIgnoreCase(searchValue));
                     break;
                 case "name":
-                    predicate = predicate.and(zkpSchema.name.contains(searchValue));
+                    predicate = predicate.and(zkpSchema.name.containsIgnoreCase(searchValue));
                     break;
                 case "tag":
                     predicate = predicate.and(zkpSchema.tag.eq(searchValue));

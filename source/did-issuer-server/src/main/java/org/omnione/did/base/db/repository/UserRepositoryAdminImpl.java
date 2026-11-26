@@ -54,13 +54,13 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin {
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             predicate = switch (searchKey) {
-                case "did" -> predicate.and(qUser.did.contains(searchValue));
+                case "did" -> predicate.and(qUser.did.containsIgnoreCase(searchValue));
                 case "vcSchemaId" -> {
                     QVcSchema vcSchema = QVcSchema.vcSchema;
                     yield predicate.and(qUser.vcSchemaId.in(
                             JPAExpressions.select(vcSchema.id)
                                     .from(vcSchema)
-                                    .where(vcSchema.vcSchemaId.contains(searchValue))));
+                                    .where(vcSchema.vcSchemaId.containsIgnoreCase(searchValue))));
                 }
                 default -> predicate.and(Expressions.FALSE);
             };

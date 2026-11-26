@@ -52,13 +52,13 @@ public class VcRepositoryAdminImpl implements VcRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "did":
-                    predicate = predicate.and(vc.did.contains(searchValue));
+                    predicate = predicate.and(vc.did.containsIgnoreCase(searchValue));
                     break;
                 case "vcId":
-                    predicate = predicate.and(vc.vcId.contains(searchValue));
+                    predicate = predicate.and(vc.vcId.containsIgnoreCase(searchValue));
                     break;
                 case "vcSchemaId":
-                    predicate = predicate.and(vc.vcSchemaId.contains(searchValue));
+                    predicate = predicate.and(vc.vcSchemaId.containsIgnoreCase(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);

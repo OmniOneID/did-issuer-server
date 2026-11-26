@@ -55,10 +55,10 @@ public class VcSchemaRepositoryAdminImpl implements VcSchemaRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "vcSchemaId":
-                    predicate = predicate.and(vcSchema.vcSchemaId.contains(searchValue));
+                    predicate = predicate.and(vcSchema.vcSchemaId.containsIgnoreCase(searchValue));
                     break;
                 case "title":
-                    predicate = predicate.and(vcSchema.title.contains(searchValue));
+                    predicate = predicate.and(vcSchema.title.containsIgnoreCase(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);

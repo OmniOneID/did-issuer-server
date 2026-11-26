@@ -68,10 +68,10 @@ public class NamespaceRepositoryAdminImpl implements NamespaceRepositoryAdmin {
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             switch (searchKey) {
                 case "namespaceId":
-                    predicate = predicate.and(namespace.namespaceId.contains(searchValue));
+                    predicate = predicate.and(namespace.namespaceId.containsIgnoreCase(searchValue));
                     break;
                 case "name":
-                    predicate = predicate.and(namespace.name.contains(searchValue));
+                    predicate = predicate.and(namespace.name.containsIgnoreCase(searchValue));
                     break;
                 default:
                     predicate = predicate.and(Expressions.FALSE);

@@ -54,8 +54,8 @@ public class IssueProfileRepositoryAdminImpl implements IssueProfileRepositoryAd
 
         if (searchKey != null && searchValue != null && !searchValue.isEmpty()) {
             predicate = switch (searchKey) {
-                case "vcPlanId" -> predicate.and(issueProfile.vcPlanId.contains(searchValue));
-                case "title" -> predicate.and(issueProfile.title.contains(searchValue));
+                case "vcPlanId" -> predicate.and(issueProfile.vcPlanId.containsIgnoreCase(searchValue));
+                case "title" -> predicate.and(issueProfile.title.containsIgnoreCase(searchValue));
                 default -> predicate.and(Expressions.FALSE);
             };
         }
