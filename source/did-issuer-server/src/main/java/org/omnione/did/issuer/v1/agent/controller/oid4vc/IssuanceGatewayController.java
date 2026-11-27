@@ -20,11 +20,15 @@ import org.omnione.did.base.constants.ApiType;
 import org.omnione.did.base.constants.ActionType;
 import org.omnione.did.base.annotation.ArticleLog;
 import com.google.zxing.WriterException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIErrorCode;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIException;
 import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
+import org.omnione.did.oid4vc.oid4vci.util.QrMaker;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,6 +36,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
@@ -43,6 +51,8 @@ import java.util.Map;
 public class IssuanceGatewayController {
 
     private final IssuanceGatewayService issuanceGatewayService;
+    private final Oid4vciConfigService oid4vciConfigService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/oid4vci/test")
     @ArticleLog(name="[OID4VCI] Open issuance test page", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.NONE)
@@ -62,9 +72,11 @@ public class IssuanceGatewayController {
 
 
         try {
+            String issuerBaseUrl = normalizeIssuerBaseUrl(oid4vciConfigService.getMetadata().getCredentialIssuer());
             Map<String, Object> response = issuanceGatewayService.generateCredentialOfferUri(userId, grantType, offerType, scheme, credentialConfigurationId);
-            String s = Base64.getEncoder().encodeToString((byte[])response.get("qrImage"));
-            response.put("qrImage", s);
+            String qrData = useIssuerBaseUrl((String) response.get("qrData"), offerType, issuerBaseUrl);
+            response.put("qrData", qrData);
+            response.put("qrImage", Base64.getEncoder().encodeToString(QrMaker.makeQrImage(qrData).getQrImage()));
             return ResponseEntity.ok(response);
         } catch (OID4VCIException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -80,6 +92,38 @@ public class IssuanceGatewayController {
                     .body(Map.of("error", OID4VCIErrorCode.ERR_CODE_GENERAL_UNEXPECTED_ERROR.getCode(),
                             "message", OID4VCIErrorCode.ERR_CODE_GENERAL_UNEXPECTED_ERROR.getMsg()));
         }
+    }
+
+    private String normalizeIssuerBaseUrl(String value) {
+        URI uri = URI.create(value);
+        if (!("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()))
+                || uri.getHost() == null || uri.getRawUserInfo() != null
+                || !(uri.getPath() == null || uri.getPath().isEmpty() || "/".equals(uri.getPath()))
+                || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+            throw new IllegalArgumentException("Credential Issuer must be a server base URL");
+        }
+        return uri.toString().replaceAll("/+$", "");
+    }
+
+    private String useIssuerBaseUrl(String qrData, String offerType, String issuerBaseUrl) throws IOException {
+        String parameter = "value".equals(offerType) ? "credential_offer=" : "credential_offer_uri=";
+        int parameterIndex = qrData.indexOf(parameter);
+        if (parameterIndex < 0) {
+            throw new IllegalStateException("Credential offer QR data is missing " + parameter);
+        }
+        String prefix = qrData.substring(0, parameterIndex + parameter.length());
+        String payload = qrData.substring(parameterIndex + parameter.length());
+        if ("value".equals(offerType)) {
+            ObjectNode offer = (ObjectNode) objectMapper.readTree(URLDecoder.decode(payload, StandardCharsets.UTF_8));
+            offer.put("credential_issuer", issuerBaseUrl);
+            return prefix + URLEncoder.encode(objectMapper.writeValueAsString(offer), StandardCharsets.UTF_8);
+        }
+        URI offerUri = URI.create(payload);
+        String path = offerUri.getRawPath();
+        if (path == null || !path.startsWith("/credential-offer/")) {
+            throw new IllegalStateException("Credential offer URI has an unexpected path");
+        }
+        return prefix + issuerBaseUrl + path;
     }
 
     @ResponseBody
