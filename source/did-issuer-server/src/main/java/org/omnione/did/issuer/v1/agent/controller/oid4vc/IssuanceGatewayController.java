@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIErrorCode;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIException;
 import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
-import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,7 +43,6 @@ import java.util.Map;
 public class IssuanceGatewayController {
 
     private final IssuanceGatewayService issuanceGatewayService;
-    private final Oid4vciConfigService oid4vciConfigService;
 
     @GetMapping("/oid4vci/test")
     @ArticleLog(name="[OID4VCI] Open issuance test page", apiType=ApiType.AGENT, targetType="OID4VCI_ISSUANCE", actionType=ActionType.NONE)
@@ -64,9 +62,7 @@ public class IssuanceGatewayController {
 
 
         try {
-            String issuerBaseUrl = oid4vciConfigService.getMetadata().getCredentialIssuer();
-            Map<String, Object> response = issuanceGatewayService.generateCredentialOfferUri(
-                    userId, grantType, offerType, scheme, credentialConfigurationId, issuerBaseUrl);
+            Map<String, Object> response = issuanceGatewayService.generateCredentialOfferUri(userId, grantType, offerType, scheme, credentialConfigurationId);
             String s = Base64.getEncoder().encodeToString((byte[])response.get("qrImage"));
             response.put("qrImage", s);
             return ResponseEntity.ok(response);

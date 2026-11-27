@@ -11,8 +11,6 @@ import org.omnione.did.base.db.domain.CredentialConfig;
 import org.omnione.did.base.db.domain.Oid4vcWebviewIssuanceSessionEntity;
 import org.omnione.did.base.db.repository.CredentialConfigRepository;
 import org.omnione.did.base.db.repository.Oid4vcWebviewIssuanceSessionRepository;
-import org.omnione.did.base.datamodel.data.oid4vci.IssuerMetadata;
-import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
 import org.omnione.did.issuer.v1.agent.dto.oid4vc.WebviewIssuancePage;
 import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
@@ -32,14 +30,13 @@ class WebviewIssuanceServiceTest {
     @Mock Oid4vcWebviewIssuanceSessionRepository sessionRepository;
     @Mock UserClaimsStore userClaimsStore;
     @Mock IssuanceGatewayService issuanceGatewayService;
-    @Mock Oid4vciConfigService oid4vciConfigService;
 
     WebviewIssuanceService service;
 
     @BeforeEach
     void setUp() {
         service = new WebviewIssuanceService(credentialConfigRepository, sessionRepository,
-                userClaimsStore, issuanceGatewayService, oid4vciConfigService, new ObjectMapper());
+                userClaimsStore, issuanceGatewayService, new ObjectMapper());
     }
 
     @Test
@@ -100,7 +97,6 @@ class WebviewIssuanceServiceTest {
 
     @Test
     void acceptsSamplePortraitLargerThanRegularClaimLimit() throws Exception {
-        stubIssuerMetadata();
         CredentialConfig config = mdocPortraitConfig();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         session.setCredentialConfigurationId("mDocPID");
@@ -110,7 +106,7 @@ class WebviewIssuanceServiceTest {
                 .thenReturn(List.of(config));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
-                "openid-credential-offer://", "mDocPID", false, "http://192.168.3.175:8091"))
+                "openid-credential-offer://", "mDocPID", false))
                 .thenReturn(Map.of("qrData",
                         "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer"));
         String portrait = service.start("user123", "mDocPID", null).claims().get(0).value();
@@ -125,7 +121,6 @@ class WebviewIssuanceServiceTest {
 
     @Test
     void rejectsUnknownClaimAndOverwritesStoredClaimsWithSubmittedClaims() throws Exception {
-        stubIssuerMetadata();
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
@@ -133,7 +128,7 @@ class WebviewIssuanceServiceTest {
                 .thenReturn(List.of(config));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
-                "openid-credential-offer://", "UniversityDegreeCredential", false, "http://192.168.3.175:8091"))
+                "openid-credential-offer://", "UniversityDegreeCredential", false))
                 .thenReturn(Map.of("qrData",
                         "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Fcredential-offers%2Foffer"));
 
@@ -154,7 +149,6 @@ class WebviewIssuanceServiceTest {
 
     @Test
     void excludesOptionalClaimWhenSubmittedEmpty() throws Exception {
-        stubIssuerMetadata();
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
@@ -162,7 +156,7 @@ class WebviewIssuanceServiceTest {
                 .thenReturn(List.of(config));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
-                "openid-credential-offer://", "UniversityDegreeCredential", false, "http://192.168.3.175:8091"))
+                "openid-credential-offer://", "UniversityDegreeCredential", false))
                 .thenReturn(Map.of("qrData",
                         "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer"));
 
@@ -191,7 +185,6 @@ class WebviewIssuanceServiceTest {
 
     @Test
     void allowsHttpCredentialOfferUriForDevelopmentAndTest() throws Exception {
-        stubIssuerMetadata();
         CredentialConfig config = config();
         Oid4vcWebviewIssuanceSessionEntity session = session("INPUT_REQUIRED");
         when(sessionRepository.findBySessionTokenForUpdate("session")).thenReturn(Optional.of(session));
@@ -199,7 +192,7 @@ class WebviewIssuanceServiceTest {
                 .thenReturn(List.of(config));
         when(issuanceGatewayService.generateCredentialOfferUri(
                 "user123", "pre-authorized_code", "reference",
-                "openid-credential-offer://", "UniversityDegreeCredential", false, "http://192.168.3.175:8091"))
+                "openid-credential-offer://", "UniversityDegreeCredential", false))
                 .thenReturn(Map.of("qrData",
                         "openid-credential-offer://?credential_offer_uri=http://10.0.2.2:8091/credential-offer/offer"));
 
@@ -246,11 +239,6 @@ class WebviewIssuanceServiceTest {
 
         assertEquals("CANCELED", session.getStatus());
         verifyNoInteractions(issuanceGatewayService, userClaimsStore);
-    }
-
-    private void stubIssuerMetadata() {
-        when(oid4vciConfigService.getMetadata()).thenReturn(IssuerMetadata.builder()
-                .credentialIssuer("http://192.168.3.175:8091").build());
     }
 
     private CredentialConfig config() {
