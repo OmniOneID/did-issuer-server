@@ -19,6 +19,7 @@ import org.omnione.did.base.db.repository.CredentialConfigRepository;
 import org.omnione.did.base.db.repository.Oid4vcWebviewIssuanceSessionRepository;
 import org.omnione.did.issuer.v1.agent.dto.oid4vc.WebviewClaimField;
 import org.omnione.did.issuer.v1.agent.dto.oid4vc.WebviewIssuancePage;
+import org.omnione.did.issuer.v1.admin.service.Oid4vciConfigService;
 import org.omnione.did.oid4vc.oid4vci.exception.OID4VCIException;
 import org.omnione.did.oid4vc.oid4vci.service.IssuanceGatewayService;
 import org.omnione.did.oid4vc.oid4vci.service.UserClaimsStore;
@@ -53,6 +54,7 @@ public class WebviewIssuanceService {
     private final Oid4vcWebviewIssuanceSessionRepository sessionRepository;
     private final UserClaimsStore userClaimsStore;
     private final IssuanceGatewayService issuanceGatewayService;
+    private final Oid4vciConfigService oid4vciConfigService;
     private final ObjectMapper objectMapper;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -114,7 +116,8 @@ public class WebviewIssuanceService {
         try {
             Map<String, Object> result = issuanceGatewayService.generateCredentialOfferUri(
                     session.getUserId(), "pre-authorized_code", "reference",
-                    "openid-credential-offer://", session.getCredentialConfigurationId(), false);
+                    "openid-credential-offer://", session.getCredentialConfigurationId(), false,
+                    oid4vciConfigService.getMetadata().getCredentialIssuer());
             Object value = result.get("qrData");
             if (!(value instanceof String rawOfferUri)) {
                 throw error(HttpStatus.INTERNAL_SERVER_ERROR, "Credential Offer could not be created.");
