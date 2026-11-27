@@ -107,6 +107,11 @@ public class SecurityConfig {
         allowedUrlsConfigurer(configurer);
         configurer.requestMatchers(org.springframework.http.HttpMethod.POST,
                         "/issuer/admin/v1/certificate-vc").permitAll()
+                // The demo server calls these server-to-server without an admin session.
+                .requestMatchers(org.springframework.http.HttpMethod.POST,
+                        "/issuer/admin/v1/users/demo").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                        "/issuer/admin/v1/issue-profiles/by-vc-schema").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST,
                         "/issuer/admin/v1/login", "/issuer/admin/v1/refresh-token", "/issuer/admin/v1/logout",
                         "/issuer/admin/v1/password-reset/send-otp", "/issuer/admin/v1/password-reset/verify-otp").permitAll()
